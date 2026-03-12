@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f3efe6;
+  --foreground: #1f1a17;
+  --card: #fffdf8;
+  --card-muted: #f6f0e6;
+  --border: #d6c7b5;
+  --muted: #5c5147;
+  --accent: #c65d1a;
+  --accent-strong: #9d4410;
+  --accent-soft: #f1c8ab;
+  --success: #1e6a4a;
+  --danger: #b0302c;
+  --ring: rgba(198, 93, 26, 0.32);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-muted: var(--card-muted);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-sans-family);
+  --font-display: var(--font-display-family);
+  --shadow-card: 0 24px 60px rgba(31, 26, 23, 0.08);
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(241, 200, 171, 0.42), transparent 34%),
+    linear-gradient(180deg, #f7f3ec 0%, #f3efe6 100%);
+  color: var(--foreground);
+  font-family: var(--font-sans-family), sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(198, 93, 26, 0.24);
+}
+
+summary {
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+.container-shell {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 80rem;
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-shell {
+    padding-inline: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-shell {
+    padding-inline: 2rem;
+  }
+}
+
