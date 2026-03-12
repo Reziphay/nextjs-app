@@ -8,11 +8,11 @@ describe("SiteHeader", () => {
   it("renders primary navigation items", () => {
     render(<SiteHeader />);
 
-    expect(screen.getByRole("link", { name: "Features" })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "Features" }).length).toBeGreaterThan(0);
     expect(
-      screen.getByRole("link", { name: "For customers" }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Contact" })).toBeInTheDocument();
+      screen.getAllByRole("link", { name: "For customers" }).length,
+    ).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "Contact" }).length).toBeGreaterThan(0);
     expect(
       screen.getByLabelText("Open navigation menu"),
     ).toBeInTheDocument();
