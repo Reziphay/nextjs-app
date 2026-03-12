@@ -41,14 +41,27 @@ export function SiteHeader() {
 
         <div className="hidden items-center gap-3 md:flex">
           <CtaLink
-            eventName="header_contact_click"
+            analyticsEvent={{
+              name: "navigation_click",
+              properties: {
+                destination: "/contact",
+                label: "Contact",
+                surface: "header",
+              },
+            }}
             href="/contact"
             variant="ghost"
           >
             Contact
           </CtaLink>
           <CtaLink
-            eventName="header_download_click"
+            analyticsEvent={{
+              name: "download_section_interaction",
+              properties: {
+                destination: "/download",
+                surface: "header",
+              },
+            }}
             href="/download"
             variant="default"
           >
@@ -57,7 +70,10 @@ export function SiteHeader() {
         </div>
 
         <details className="relative md:hidden">
-          <summary className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-2xl border border-border bg-white">
+          <summary
+            aria-label="Open navigation menu"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-2xl border border-border bg-white"
+          >
             <Menu className="h-5 w-5" />
           </summary>
           <div className="absolute right-0 top-14 w-72 rounded-[1.75rem] border border-border bg-card p-5 shadow-[var(--shadow-card)]">
@@ -77,10 +93,32 @@ export function SiteHeader() {
               ))}
             </div>
             <div className="mt-4 grid gap-2">
-              <CtaLink href="/download" size="sm">
+              <CtaLink
+                analyticsEvent={{
+                  name: "download_section_interaction",
+                  properties: {
+                    destination: "/download",
+                    surface: "mobile-header",
+                  },
+                }}
+                href="/download"
+                size="sm"
+              >
                 Download app
               </CtaLink>
-              <CtaLink href="/contact" size="sm" variant="outline">
+              <CtaLink
+                analyticsEvent={{
+                  name: "navigation_click",
+                  properties: {
+                    destination: "/contact",
+                    label: "Talk to the team",
+                    surface: "mobile-header",
+                  },
+                }}
+                href="/contact"
+                size="sm"
+                variant="outline"
+              >
                 Talk to the team
               </CtaLink>
             </div>
@@ -90,4 +128,3 @@ export function SiteHeader() {
     </header>
   );
 }
-

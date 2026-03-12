@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { featuredCategories, featuredCities, getCityBySlug } from "@/content/site";
+import { TrackPageEvent } from "@/features/analytics/track-page-event";
 import { createMetadata } from "@/features/seo/metadata";
 
 import { CtaBand } from "@/components/sections/cta-band";
@@ -51,6 +52,15 @@ export default async function CityPage({ params }: PageProps) {
 
   return (
     <>
+      <TrackPageEvent
+        event={{
+          name: "city_page_view",
+          properties: {
+            name: city.name,
+            slug: city.slug,
+          },
+        }}
+      />
       <PageHero
         hero={{
           eyebrow: `City page: ${city.name}`,
@@ -118,4 +128,3 @@ export default async function CityPage({ params }: PageProps) {
     </>
   );
 }
-

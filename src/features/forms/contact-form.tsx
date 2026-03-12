@@ -9,6 +9,7 @@ import {
   contactFormSchema,
   type ContactFormValues,
 } from "@/features/forms/schemas";
+import { HONEYPOT_FIELD_NAME } from "@/features/forms/constants";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +38,7 @@ export function ContactForm({
       fullName: "",
       interest: defaultInterest,
       message: "",
+      [HONEYPOT_FIELD_NAME]: "",
     },
   });
 
@@ -73,9 +75,10 @@ export function ContactForm({
       fullName: "",
       interest: defaultInterest,
       message: "",
+      [HONEYPOT_FIELD_NAME]: "",
     });
 
-    trackEvent("contact_form_submit", {
+    trackEvent("contact_submit", {
       interest: values.interest,
     });
 
@@ -146,6 +149,16 @@ export function ContactForm({
         <p className="text-xs text-danger">{form.formState.errors.message?.message}</p>
       </div>
 
+      <div aria-hidden="true" className="hidden">
+        <label htmlFor="contact-website">Leave this field empty</label>
+        <Input
+          autoComplete="off"
+          id="contact-website"
+          tabIndex={-1}
+          {...form.register(HONEYPOT_FIELD_NAME)}
+        />
+      </div>
+
       {serverMessage ? (
         <div
           className={
@@ -164,4 +177,3 @@ export function ContactForm({
     </form>
   );
 }
-

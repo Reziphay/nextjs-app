@@ -25,12 +25,27 @@ export function CtaBand({
           title={title}
         />
         <div className="flex flex-wrap gap-3">
-          <CtaLink eventName="cta_band_download_click" href="/download">
+          <CtaLink
+            analyticsEvent={{
+              name: "download_section_interaction",
+              properties: {
+                destination: "/download",
+                surface: "cta-band",
+              },
+            }}
+            href="/download"
+          >
             Download flow
           </CtaLink>
           {secondaryAction ?? (
             <CtaLink
-              eventName="cta_band_provider_click"
+              analyticsEvent={{
+                name: "pricing_or_visibility_interest_click",
+                properties: {
+                  destination: "/for-providers",
+                  surface: "cta-band",
+                },
+              }}
               href="/for-providers"
               variant="outline"
             >
@@ -42,4 +57,3 @@ export function CtaBand({
     </div>
   );
 }
-

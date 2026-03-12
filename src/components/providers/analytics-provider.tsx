@@ -10,7 +10,7 @@ export function AnalyticsProvider() {
 
   useEffect(() => {
     trackEvent("page_view", {
-      path: pathname,
+      pathname,
     });
   }, [pathname]);
 

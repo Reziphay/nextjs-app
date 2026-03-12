@@ -11,9 +11,10 @@ export default function MarketingLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
-      <main className="flex-1 pb-10">{children}</main>
+      <main className="flex-1 pb-10" id="main-content">
+        {children}
+      </main>
       <SiteFooter />
     </div>
   );
 }
-

@@ -58,10 +58,15 @@ export default function RootLayout({
   return (
     <html className={`${sora.variable} ${fraunces.variable}`} lang="en">
       <body className="bg-background text-foreground antialiased">
+        <a
+          className="sr-only absolute left-4 top-4 z-50 rounded-full bg-white px-4 py-2 text-sm font-semibold text-foreground focus:not-sr-only"
+          href="#main-content"
+        >
+          Skip to content
+        </a>
         <AnalyticsProvider />
         {children}
       </body>
     </html>
   );
 }
-

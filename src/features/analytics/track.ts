@@ -1,9 +1,12 @@
 "use client";
 
-export type EventProperties = Record<
-  string,
-  boolean | null | number | string | undefined
->;
+import type {
+  AnalyticsEventDescriptor,
+  AnalyticsEventMap,
+  AnalyticsEventName,
+} from "@/features/analytics/events";
+
+export type EventProperties = Record<string, boolean | null | number | string>;
 
 declare global {
   interface Window {
@@ -17,16 +20,27 @@ function sanitize(properties: EventProperties) {
   );
 }
 
-export function trackEvent(name: string, properties: EventProperties = {}) {
+export function buildTrackingPayload<K extends AnalyticsEventName>(
+  name: K,
+  properties: AnalyticsEventMap[K],
+  pathname: string,
+) {
+  return {
+    name,
+    path: pathname,
+    properties: sanitize(properties as EventProperties),
+  };
+}
+
+export function trackEvent<K extends AnalyticsEventName>(
+  name: K,
+  properties: AnalyticsEventMap[K],
+) {
   if (typeof window === "undefined") {
     return;
   }
 
-  const payload = {
-    name,
-    path: window.location.pathname,
-    properties: sanitize(properties),
-  };
+  const payload = buildTrackingPayload(name, properties, window.location.pathname);
 
   if (window.gtag) {
     window.gtag("event", name, payload.properties);
@@ -52,3 +66,9 @@ export function trackEvent(name: string, properties: EventProperties = {}) {
   });
 }
 
+export function trackDescriptor(event: AnalyticsEventDescriptor) {
+  trackEvent(
+    event.name as AnalyticsEventName,
+    event.properties as AnalyticsEventMap[AnalyticsEventName],
+  );
+}

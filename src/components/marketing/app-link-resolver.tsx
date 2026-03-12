@@ -43,8 +43,30 @@ export function AppLinkResolver() {
       </p>
       {fallbackVisible ? (
         <div className="flex flex-wrap gap-3">
-          <CtaLink href="/download">Go to download flow</CtaLink>
-          <CtaLink href="/contact?intent=app-launch" variant="outline">
+          <CtaLink
+            analyticsEvent={{
+              name: "download_section_interaction",
+              properties: {
+                destination: "/download",
+                surface: "app-link-fallback",
+              },
+            }}
+            href="/download"
+          >
+            Go to download flow
+          </CtaLink>
+          <CtaLink
+            analyticsEvent={{
+              name: "navigation_click",
+              properties: {
+                destination: "/contact?intent=app-launch",
+                label: "Ask for launch updates",
+                surface: "app-link-fallback",
+              },
+            }}
+            href="/contact?intent=app-launch"
+            variant="outline"
+          >
             Ask for launch updates
           </CtaLink>
         </div>
@@ -52,4 +74,3 @@ export function AppLinkResolver() {
     </div>
   );
 }
-

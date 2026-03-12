@@ -57,6 +57,15 @@ export default function HomePage() {
             url: siteConfig.url,
             description: siteConfig.description,
           },
+          {
+            "@context": "https://schema.org",
+            "@type": "MobileApplication",
+            applicationCategory: "BusinessApplication",
+            description: siteConfig.description,
+            downloadUrl: [siteConfig.app.iosUrl, siteConfig.app.androidUrl],
+            name: siteConfig.name,
+            operatingSystem: "iOS, Android",
+          },
         ]}
       />
 
@@ -64,11 +73,28 @@ export default function HomePage() {
         hero={homeHero}
         actions={
           <>
-            <CtaLink eventName="home_primary_download_click" href="/download">
+            <CtaLink
+              analyticsEvent={{
+                name: "hero_cta_click",
+                properties: {
+                  ctaLabel: "Download flow",
+                  destination: "/download",
+                  surface: "home-hero",
+                },
+              }}
+              href="/download"
+            >
               Download flow
             </CtaLink>
             <CtaLink
-              eventName="home_provider_route_click"
+              analyticsEvent={{
+                name: "hero_cta_click",
+                properties: {
+                  ctaLabel: "For providers",
+                  destination: "/for-providers",
+                  surface: "home-hero",
+                },
+              }}
               href="/for-providers"
               variant="outline"
             >
@@ -240,7 +266,7 @@ export default function HomePage() {
             title="Answer the highest-risk product questions early."
             description="The fastest way to reduce confusion is to state what Reziphay does, what it does not do, and where the reservation flow actually lives."
           />
-          <FaqAccordion items={faqItems.slice(0, 5)} />
+          <FaqAccordion items={faqItems.slice(0, 5)} surface="home-faq-preview" />
         </div>
       </SectionShell>
 
@@ -265,4 +291,3 @@ export default function HomePage() {
     </>
   );
 }
-

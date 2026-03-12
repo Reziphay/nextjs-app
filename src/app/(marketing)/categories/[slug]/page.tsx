@@ -5,6 +5,7 @@ import {
   featuredCategories,
   getCategoryBySlug,
 } from "@/content/site";
+import { TrackPageEvent } from "@/features/analytics/track-page-event";
 import { createMetadata } from "@/features/seo/metadata";
 
 import { CtaBand } from "@/components/sections/cta-band";
@@ -54,6 +55,15 @@ export default async function CategoryPage({ params }: PageProps) {
 
   return (
     <>
+      <TrackPageEvent
+        event={{
+          name: "category_page_view",
+          properties: {
+            name: category.name,
+            slug: category.slug,
+          },
+        }}
+      />
       <PageHero
         hero={{
           eyebrow: `Category page: ${category.name}`,
@@ -117,4 +127,3 @@ export default async function CategoryPage({ params }: PageProps) {
     </>
   );
 }
-

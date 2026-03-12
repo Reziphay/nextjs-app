@@ -22,8 +22,29 @@ export function SiteFooter() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <CtaLink href="/download">Get app updates</CtaLink>
-            <CtaLink href="/for-providers" variant="outline">
+            <CtaLink
+              analyticsEvent={{
+                name: "download_section_interaction",
+                properties: {
+                  destination: "/download",
+                  surface: "footer",
+                },
+              }}
+              href="/download"
+            >
+              Get app updates
+            </CtaLink>
+            <CtaLink
+              analyticsEvent={{
+                name: "pricing_or_visibility_interest_click",
+                properties: {
+                  destination: "/for-providers",
+                  surface: "footer",
+                },
+              }}
+              href="/for-providers"
+              variant="outline"
+            >
               Provider interest
             </CtaLink>
           </div>
@@ -69,4 +90,3 @@ export function SiteFooter() {
     </footer>
   );
 }
-

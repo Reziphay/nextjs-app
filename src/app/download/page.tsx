@@ -26,8 +26,31 @@ export default function DownloadPage() {
         }}
         actions={
           <>
-            <CtaLink href="/app-link">Open app link route</CtaLink>
-            <CtaLink href="/contact?intent=app-launch" variant="outline">
+            <CtaLink
+              analyticsEvent={{
+                name: "hero_cta_click",
+                properties: {
+                  ctaLabel: "Open app link route",
+                  destination: "/app-link",
+                  surface: "download-hero",
+                },
+              }}
+              href="/app-link"
+            >
+              Open app link route
+            </CtaLink>
+            <CtaLink
+              analyticsEvent={{
+                name: "hero_cta_click",
+                properties: {
+                  ctaLabel: "Ask for launch updates",
+                  destination: "/contact?intent=app-launch",
+                  surface: "download-hero",
+                },
+              }}
+              href="/contact?intent=app-launch"
+              variant="outline"
+            >
               Ask for launch updates
             </CtaLink>
           </>
@@ -54,6 +77,7 @@ export default function DownloadPage() {
           {[
             {
               eyebrow: "iOS",
+              eventName: "app_store_click" as const,
               title: "App Store path",
               copy:
                 "Use the App Store URL when it is available. Otherwise, route to a contact intent that captures launch demand.",
@@ -61,6 +85,7 @@ export default function DownloadPage() {
             },
             {
               eyebrow: "Android",
+              eventName: "play_store_click" as const,
               title: "Google Play path",
               copy:
                 "Use the Play Store URL when it is available. Otherwise, route to a matching launch-update surface.",
@@ -77,7 +102,18 @@ export default function DownloadPage() {
               </h2>
               <p className="mt-3 text-sm leading-6 text-muted">{item.copy}</p>
               <div className="mt-6">
-                <CtaLink href={item.href}>Continue</CtaLink>
+                <CtaLink
+                  analyticsEvent={{
+                    name: item.eventName,
+                    properties: {
+                      href: item.href,
+                      surface: "download-page",
+                    },
+                  }}
+                  href={item.href}
+                >
+                  Continue
+                </CtaLink>
               </div>
             </div>
           ))}
@@ -86,4 +122,3 @@ export default function DownloadPage() {
     </>
   );
 }
-

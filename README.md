@@ -63,4 +63,3 @@ See `.env.example` for:
 - Contact and provider-interest forms validate on both client and server.
 - CTA interactions emit lightweight analytics events to `/api/track`.
 - Store links are environment-driven so launch fallbacks can still capture demand when app-store URLs are not live yet.
-# nextjs-app

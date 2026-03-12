@@ -4,7 +4,8 @@ import Link from "next/link";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import type { VariantProps } from "class-variance-authority";
 
-import { trackEvent, type EventProperties } from "@/features/analytics/track";
+import type { AnalyticsEventDescriptor } from "@/features/analytics/events";
+import { trackDescriptor } from "@/features/analytics/track";
 import { cn } from "@/lib/utils";
 
 import { buttonVariants } from "@/components/ui/button";
@@ -14,15 +15,13 @@ interface CtaLinkProps
     VariantProps<typeof buttonVariants> {
   children: ReactNode;
   className?: string;
-  eventName?: string;
-  eventProperties?: EventProperties;
+  analyticsEvent?: AnalyticsEventDescriptor;
 }
 
 export function CtaLink({
   children,
   className,
-  eventName,
-  eventProperties,
+  analyticsEvent,
   size,
   variant,
   ...props
@@ -31,8 +30,8 @@ export function CtaLink({
     <Link
       className={cn(buttonVariants({ className, size, variant }))}
       onClick={() => {
-        if (eventName) {
-          trackEvent(eventName, eventProperties);
+        if (analyticsEvent) {
+          trackDescriptor(analyticsEvent);
         }
       }}
       {...props}
@@ -41,4 +40,3 @@ export function CtaLink({
     </Link>
   );
 }
-

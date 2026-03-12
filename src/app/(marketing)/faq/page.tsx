@@ -49,7 +49,7 @@ export default function FaqPage() {
       />
 
       <SectionShell>
-        <FaqAccordion items={faqItems} />
+        <FaqAccordion items={faqItems} surface="faq-page" />
       </SectionShell>
 
       <SectionShell>
@@ -61,4 +61,3 @@ export default function FaqPage() {
     </>
   );
 }
-

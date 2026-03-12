@@ -35,8 +35,31 @@ export default function ForCustomersPage() {
         }}
         actions={
           <>
-            <CtaLink href="/download">Get launch updates</CtaLink>
-            <CtaLink href="/faq" variant="outline">
+            <CtaLink
+              analyticsEvent={{
+                name: "hero_cta_click",
+                properties: {
+                  ctaLabel: "Get launch updates",
+                  destination: "/download",
+                  surface: "for-customers-hero",
+                },
+              }}
+              href="/download"
+            >
+              Get launch updates
+            </CtaLink>
+            <CtaLink
+              analyticsEvent={{
+                name: "hero_cta_click",
+                properties: {
+                  ctaLabel: "Read booking FAQ",
+                  destination: "/faq",
+                  surface: "for-customers-hero",
+                },
+              }}
+              href="/faq"
+              variant="outline"
+            >
               Read booking FAQ
             </CtaLink>
           </>
@@ -121,4 +144,3 @@ export default function ForCustomersPage() {
     </>
   );
 }
-

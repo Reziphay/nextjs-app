@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { HONEYPOT_FIELD_NAME } from "@/features/forms/constants";
 import { providerInterestSchema } from "@/features/forms/schemas";
 
 export async function POST(request: Request) {
@@ -21,8 +22,23 @@ export async function POST(request: Request) {
     );
   }
 
+  if (parsed.data[HONEYPOT_FIELD_NAME]?.trim()) {
+    return NextResponse.json({
+      success: true,
+      data: {
+        receivedAt: new Date().toISOString(),
+      },
+      meta: {
+        source: "website.provider-interest",
+        filtered: "honeypot",
+      },
+    });
+  }
+
   if (process.env.NODE_ENV !== "production") {
-    console.info("[website.provider-interest]", parsed.data);
+    const submission = { ...parsed.data };
+    delete submission[HONEYPOT_FIELD_NAME];
+    console.info("[website.provider-interest]", submission);
   }
 
   return NextResponse.json({
@@ -35,4 +51,3 @@ export async function POST(request: Request) {
     },
   });
 }
-

@@ -9,6 +9,7 @@ import {
   providerInterestSchema,
   type ProviderInterestValues,
 } from "@/features/forms/schemas";
+import { HONEYPOT_FIELD_NAME } from "@/features/forms/constants";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ export function ProviderInterestForm() {
       fullName: "",
       phone: "",
       teamSize: "",
+      [HONEYPOT_FIELD_NAME]: "",
     },
   });
 
@@ -149,6 +151,16 @@ export function ProviderInterestForm() {
         </label>
         <Textarea id="provider-details" {...form.register("details")} />
         <p className="text-xs text-danger">{form.formState.errors.details?.message}</p>
+      </div>
+
+      <div aria-hidden="true" className="hidden">
+        <label htmlFor="provider-website">Leave this field empty</label>
+        <Input
+          autoComplete="off"
+          id="provider-website"
+          tabIndex={-1}
+          {...form.register(HONEYPOT_FIELD_NAME)}
+        />
       </div>
 
       {serverMessage ? (

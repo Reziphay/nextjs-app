@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { blogPosts, getBlogPostBySlug } from "@/content/site";
 import { absoluteUrl } from "@/config/site";
+import { TrackPageEvent } from "@/features/analytics/track-page-event";
 import { createMetadata } from "@/features/seo/metadata";
 import { StructuredData } from "@/features/seo/structured-data";
 
@@ -50,6 +51,16 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   return (
     <>
+      <TrackPageEvent
+        event={{
+          name: "blog_article_view",
+          properties: {
+            category: post.category,
+            slug: post.slug,
+            title: post.title,
+          },
+        }}
+      />
       <StructuredData
         data={{
           "@context": "https://schema.org",
@@ -112,4 +123,3 @@ export default async function BlogPostPage({ params }: PageProps) {
     </>
   );
 }
-

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { HONEYPOT_FIELD_NAME } from "@/features/forms/constants";
+
 export const contactFormSchema = z.object({
   fullName: z.string().min(2, "Enter your full name."),
   email: z.string().email("Enter a valid email address."),
@@ -14,6 +16,7 @@ export const contactFormSchema = z.object({
     .string()
     .min(20, "Share enough detail so the team can follow up.")
     .max(1200, "Keep the message under 1200 characters."),
+  [HONEYPOT_FIELD_NAME]: z.string().max(0).optional().or(z.literal("")),
 });
 
 export const providerInterestSchema = z.object({
@@ -28,6 +31,7 @@ export const providerInterestSchema = z.object({
     .string()
     .min(20, "Tell us how you want to use Reziphay.")
     .max(1200, "Keep the details under 1200 characters."),
+  [HONEYPOT_FIELD_NAME]: z.string().max(0).optional().or(z.literal("")),
 });
 
 export const analyticsEventSchema = z.object({
