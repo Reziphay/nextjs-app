@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 
-import { ADMIN_SESSION_COOKIE } from "@/lib/auth/admin-auth";
+import { logoutAdmin } from "@/lib/api/admin-auth";
+import { ADMIN_SESSION_COOKIE, readAdminSession } from "@/lib/auth/admin-auth";
 
 export async function POST() {
+  const session = await readAdminSession();
+  await logoutAdmin(session);
+
   const response = NextResponse.json({
     success: true,
   });

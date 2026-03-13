@@ -6,6 +6,7 @@ import {
   buildAdminLoginRedirect,
   buildAdminPath,
   getAdminRoute,
+  parseAdminSession,
   isValidAdminSession,
   sanitizeNextPath,
 } from "@/lib/auth/admin-auth";
@@ -20,7 +21,7 @@ export function middleware(request: NextRequest) {
   }
 
   const session = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
-  const isAuthenticated = isValidAdminSession(session);
+  const isAuthenticated = isValidAdminSession(parseAdminSession(session));
   const loginPath = buildAdminPath("/login", adminRoute);
 
   if (pathname === loginPath) {

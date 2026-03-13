@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 
-import { ADMIN_SESSION_COOKIE } from "@/lib/auth/admin-auth";
-import { serverEnv } from "@/lib/config/env";
+import { loginAdmin } from "@/lib/api/admin-auth";
+import {
+  ADMIN_SESSION_COOKIE,
+  serializeAdminSession,
+} from "@/lib/auth/admin-auth";
 import { adminLoginSchema } from "@/lib/validation/admin-auth";
 
 export async function POST(request: Request) {
@@ -19,16 +22,15 @@ export async function POST(request: Request) {
     );
   }
 
-  if (
-    result.data.email !== serverEnv.ADMIN_LOGIN_EMAIL ||
-    result.data.password !== serverEnv.ADMIN_LOGIN_PASSWORD
-  ) {
+  const loginResult = await loginAdmin(result.data);
+
+  if (!loginResult.ok) {
     return NextResponse.json(
       {
-        error: "Credentials do not match the configured admin account.",
+        error: loginResult.error,
       },
       {
-        status: 401,
+        status: loginResult.status,
       },
     );
   }
@@ -37,12 +39,16 @@ export async function POST(request: Request) {
     success: true,
   });
 
-  response.cookies.set(ADMIN_SESSION_COOKIE, "authenticated", {
+  response.cookies.set(
+    ADMIN_SESSION_COOKIE,
+    serializeAdminSession(loginResult.session),
+    {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
     secure: process.env.NODE_ENV === "production",
-  });
+    },
+  );
 
   return response;
 }

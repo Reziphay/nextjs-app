@@ -33,17 +33,19 @@ pnpm dev
 ## Hidden Admin
 
 - The admin route is controlled by `ADMIN_ROUTE_SEGMENT`.
+- The auth adapter mode is controlled by `ADMIN_AUTH_MODE`.
 - Default local route from `.env.example`: `/operator`
 - Default local credentials from `.env.example`:
   - `ops@reziphay.local`
   - `reziphay-admin`
 
-This auth flow is a frontend placeholder so the admin shell can be built now. The next step is wiring it to backend admin endpoints.
+In `mock` mode, the internal API route validates those credentials and stores a typed session cookie. In `remote` mode, the same route proxies to the configured backend auth paths.
 
 ## Data Source
 
 - `NEXT_PUBLIC_USE_MOCK_DATA=true` keeps the app on local typed mock data.
 - Set `NEXT_PUBLIC_USE_MOCK_DATA=false` to use the remote REST adapter at `NEXT_PUBLIC_API_BASE_URL`.
+- Set `ADMIN_AUTH_MODE=remote` to switch admin login/logout to backend auth endpoints.
 
 The remote adapter already expects admin endpoints such as `/admin/reports`, `/admin/users`, `/admin/brands`, `/admin/services`, and `/admin/analytics/overview`.
 

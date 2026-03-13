@@ -23,6 +23,9 @@ const serverEnvSchema = z.object({
     .min(3)
     .regex(/^[a-z0-9-]+$/)
     .default("operator"),
+  ADMIN_AUTH_MODE: z.enum(["mock", "remote"]).default("mock"),
+  ADMIN_AUTH_LOGIN_PATH: z.string().trim().min(1).default("/admin/auth/login"),
+  ADMIN_AUTH_LOGOUT_PATH: z.string().trim().min(1).default("/admin/auth/logout"),
   ADMIN_LOGIN_EMAIL: z.email().default("ops@reziphay.local"),
   ADMIN_LOGIN_PASSWORD: z.string().min(8).default("reziphay-admin"),
 });
@@ -39,6 +42,9 @@ export const publicEnv = publicEnvSchema.parse({
 
 export const serverEnv = serverEnvSchema.parse({
   ADMIN_ROUTE_SEGMENT: process.env.ADMIN_ROUTE_SEGMENT,
+  ADMIN_AUTH_MODE: process.env.ADMIN_AUTH_MODE,
+  ADMIN_AUTH_LOGIN_PATH: process.env.ADMIN_AUTH_LOGIN_PATH,
+  ADMIN_AUTH_LOGOUT_PATH: process.env.ADMIN_AUTH_LOGOUT_PATH,
   ADMIN_LOGIN_EMAIL: process.env.ADMIN_LOGIN_EMAIL,
   ADMIN_LOGIN_PASSWORD: process.env.ADMIN_LOGIN_PASSWORD,
 });

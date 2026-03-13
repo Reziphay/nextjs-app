@@ -18,10 +18,10 @@ export default async function ProtectedAdminLayout({
   params,
 }: ProtectedAdminLayoutProps) {
   const { adminRoute } = await params;
-  const isAuthenticated = await readAdminSession();
+  const session = await readAdminSession();
   const result = resolveAdminGuard({
     adminRoute,
-    isAuthenticated,
+    isAuthenticated: Boolean(session),
     pathname: buildAdminPath("/", adminRoute),
   });
 

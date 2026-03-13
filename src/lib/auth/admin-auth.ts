@@ -4,6 +4,15 @@ import { serverEnv } from "@/lib/config/env";
 
 export const ADMIN_SESSION_COOKIE = "reziphay_admin_session";
 
+export type AdminSession = {
+  mode: "mock" | "remote";
+  email: string;
+  accessToken?: string;
+  refreshToken?: string;
+  expiresAt?: string;
+  issuedAt: string;
+};
+
 export function getAdminRoute() {
   return serverEnv.ADMIN_ROUTE_SEGMENT;
 }
@@ -18,8 +27,41 @@ export function buildAdminPath(path = "/", adminRoute = getAdminRoute()) {
   return `/${adminRoute}${normalizedPath}`;
 }
 
-export function isValidAdminSession(session: string | undefined) {
-  return session === "authenticated";
+export function serializeAdminSession(session: AdminSession) {
+  return encodeURIComponent(JSON.stringify(session));
+}
+
+export function parseAdminSession(
+  value: string | undefined,
+): AdminSession | null {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(decodeURIComponent(value)) as Partial<AdminSession>;
+
+    if (
+      (parsed.mode === "mock" || parsed.mode === "remote") &&
+      typeof parsed.email === "string" &&
+      typeof parsed.issuedAt === "string"
+    ) {
+      return {
+        mode: parsed.mode,
+        email: parsed.email,
+        issuedAt: parsed.issuedAt,
+        accessToken: parsed.accessToken,
+        refreshToken: parsed.refreshToken,
+        expiresAt: parsed.expiresAt,
+      };
+    }
+  } catch {}
+
+  return null;
+}
+
+export function isValidAdminSession(session: AdminSession | null | undefined) {
+  return Boolean(session?.email && session?.issuedAt);
 }
 
 export function sanitizeNextPath(
@@ -80,5 +122,5 @@ export async function readAdminSession() {
   const cookieStore = await cookies();
   const session = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
 
-  return isValidAdminSession(session);
+  return parseAdminSession(session);
 }

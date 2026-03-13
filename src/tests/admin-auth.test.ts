@@ -1,6 +1,8 @@
 import {
   buildAdminLoginRedirect,
+  parseAdminSession,
   resolveAdminGuard,
+  serializeAdminSession,
   sanitizeNextPath,
 } from "@/lib/auth/admin-auth";
 
@@ -40,5 +42,24 @@ describe("buildAdminLoginRedirect", () => {
     expect(buildAdminLoginRedirect("/operator/users/123?tab=reports", "operator")).toBe(
       "/operator/login?next=%2Foperator%2Fusers%2F123%3Ftab%3Dreports",
     );
+  });
+});
+
+describe("admin session serialization", () => {
+  it("round-trips a typed admin session cookie payload", () => {
+    const serialized = serializeAdminSession({
+      mode: "mock",
+      email: "ops@reziphay.local",
+      issuedAt: "2026-03-13T16:00:00.000Z",
+    });
+
+    expect(parseAdminSession(serialized)).toEqual({
+      mode: "mock",
+      email: "ops@reziphay.local",
+      issuedAt: "2026-03-13T16:00:00.000Z",
+      accessToken: undefined,
+      refreshToken: undefined,
+      expiresAt: undefined,
+    });
   });
 });

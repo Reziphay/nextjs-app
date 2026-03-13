@@ -28,8 +28,9 @@ export default async function AdminLoginPage({
   }
 
   const nextPath = sanitizeNextPath(next, `/${adminRoute}`);
+  const session = await readAdminSession();
 
-  if (await readAdminSession()) {
+  if (session) {
     redirect(nextPath);
   }
 
