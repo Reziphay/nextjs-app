@@ -1,25 +1,42 @@
 import { publicEnv } from "@/lib/config/env";
-import { fetchJson } from "@/lib/api/http";
+import { ApiError, fetchJson } from "@/lib/api/http";
 import {
+  adminEndpointTemplates,
+  compileAdminEndpoint,
+} from "@/lib/config/admin-endpoints";
+import {
+  activityRecords,
   adminOverview,
   analyticsSeries,
   brandRecords,
   reportRecords,
   serviceRecords,
+  sponsorshipCampaignRecords,
   userRecords,
+  visibilityAssignmentRecords,
 } from "@/lib/mock/admin-data";
 import type {
+  ActivityRecord,
   AdminOverview,
   AdminStatus,
   AnalyticsSeries,
+  BrandAdminDetail,
   BrandRecord,
   ListResult,
   ReportRecord,
+  ServiceAdminDetail,
   ServiceRecord,
+  SponsorshipCampaignRecord,
+  UserAdminDetail,
   UserRecord,
+  VisibilityAssignmentRecord,
 } from "@/lib/types/admin";
 
 const DEFAULT_PAGE_SIZE = 4;
+
+type AdminSessionLike = {
+  accessToken?: string;
+} | null;
 
 export type ReportListOptions = {
   query?: string;
@@ -114,10 +131,240 @@ function shouldUseMockData() {
   return publicEnv.NEXT_PUBLIC_USE_MOCK_DATA;
 }
 
-async function fetchAdmin<T>(path: string) {
+function buildAdminHeaders(session: AdminSessionLike) {
+  const headers: Record<string, string> = {};
+
+  if (session?.accessToken) {
+    headers.Authorization = `Bearer ${session.accessToken}`;
+  }
+
+  return headers;
+}
+
+async function readRemoteAdminSession(): Promise<AdminSessionLike> {
+  try {
+    const { readAdminSession } = await import("@/lib/auth/admin-auth");
+
+    return await readAdminSession();
+  } catch {
+    return null;
+  }
+}
+
+async function fetchAdmin<T>(path: string, session?: AdminSessionLike) {
+  const resolvedSession =
+    session === undefined ? await readRemoteAdminSession() : session;
+
   return fetchJson<T>(`${publicEnv.NEXT_PUBLIC_API_BASE_URL}${path}`, {
     cache: "no-store",
+    headers: buildAdminHeaders(resolvedSession),
   });
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function readArray<T>(value: unknown) {
+  return Array.isArray(value) ? (value as T[]) : [];
+}
+
+function isUserRecord(value: unknown): value is UserRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.name === "string" &&
+    Array.isArray(value.roles)
+  );
+}
+
+function isBrandRecord(value: unknown): value is BrandRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.name === "string" &&
+    typeof value.owner === "string"
+  );
+}
+
+function isServiceRecord(value: unknown): value is ServiceRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.name === "string" &&
+    typeof value.provider === "string" &&
+    typeof value.brand === "string"
+  );
+}
+
+function isActivityRecord(value: unknown): value is ActivityRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.title === "string" &&
+    typeof value.time === "string"
+  );
+}
+
+function isVisibilityAssignmentRecord(
+  value: unknown,
+): value is VisibilityAssignmentRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.label === "string" &&
+    typeof value.targetId === "string" &&
+    typeof value.targetName === "string"
+  );
+}
+
+function isSponsorshipCampaignRecord(
+  value: unknown,
+): value is SponsorshipCampaignRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.campaignName === "string" &&
+    typeof value.targetId === "string" &&
+    typeof value.targetName === "string"
+  );
+}
+
+function normalizeUserAdminDetailPayload(payload: unknown): UserAdminDetail | null {
+  if (isUserRecord(payload)) {
+    return {
+      user: payload,
+      relatedBrands: [],
+      relatedServices: [],
+      relatedReports: [],
+    };
+  }
+
+  if (!isRecord(payload) || !isUserRecord(payload.user)) {
+    return null;
+  }
+
+  return {
+    user: payload.user,
+    relatedBrands: readArray<BrandRecord>(payload.relatedBrands ?? payload.brands),
+    relatedServices: readArray<ServiceRecord>(
+      payload.relatedServices ?? payload.services,
+    ),
+    relatedReports: readArray<ReportRecord>(payload.relatedReports ?? payload.reports),
+  };
+}
+
+function normalizeBrandAdminDetailPayload(payload: unknown): BrandAdminDetail | null {
+  if (isBrandRecord(payload)) {
+    return {
+      brand: payload,
+      relatedServices: [],
+      relatedReports: [],
+    };
+  }
+
+  if (!isRecord(payload) || !isBrandRecord(payload.brand)) {
+    return null;
+  }
+
+  return {
+    brand: payload.brand,
+    relatedServices: readArray<ServiceRecord>(
+      payload.relatedServices ?? payload.services,
+    ),
+    relatedReports: readArray<ReportRecord>(payload.relatedReports ?? payload.reports),
+  };
+}
+
+function normalizeServiceAdminDetailPayload(payload: unknown): ServiceAdminDetail | null {
+  if (isServiceRecord(payload)) {
+    return {
+      service: payload,
+      relatedReports: [],
+      provider: null,
+      brand: null,
+    };
+  }
+
+  if (!isRecord(payload) || !isServiceRecord(payload.service)) {
+    return null;
+  }
+
+  return {
+    service: payload.service,
+    relatedReports: readArray<ReportRecord>(payload.relatedReports ?? payload.reports),
+    provider: isUserRecord(payload.provider) ? payload.provider : null,
+    brand: isBrandRecord(payload.brand) ? payload.brand : null,
+  };
+}
+
+async function fetchAdminDetailWithFallback<T>(
+  detailPath: string,
+  fallbackPath: string,
+  normalize: (payload: unknown) => T | null,
+) {
+  const session = await readRemoteAdminSession();
+
+  try {
+    const detailPayload = await fetchAdmin<unknown>(detailPath, session);
+    const detail = normalize(detailPayload);
+
+    if (detail) {
+      return detail;
+    }
+  } catch (error) {
+    if (
+      !(error instanceof ApiError) ||
+      ![404, 405, 501].includes(error.status)
+    ) {
+      throw error;
+    }
+  }
+
+  const fallbackPayload = await fetchAdmin<unknown>(fallbackPath, session);
+
+  return normalize(fallbackPayload);
+}
+
+async function fetchOptionalAdminCollection<T>(
+  path: string,
+  normalize: (payload: unknown) => T[],
+) {
+  try {
+    const payload = await fetchAdmin<unknown>(path);
+
+    return normalize(payload);
+  } catch (error) {
+    if (error instanceof ApiError && [404, 405, 501].includes(error.status)) {
+      return [];
+    }
+
+    throw error;
+  }
+}
+
+function normalizeCollectionPayload<T>(
+  payload: unknown,
+  isItem: (value: unknown) => value is T,
+  keys: string[],
+) {
+  if (Array.isArray(payload)) {
+    return payload.filter(isItem);
+  }
+
+  if (!isRecord(payload)) {
+    return [] as T[];
+  }
+
+  for (const key of ["items", ...keys]) {
+    const value = payload[key];
+
+    if (Array.isArray(value)) {
+      return value.filter(isItem);
+    }
+  }
+
+  return [] as T[];
 }
 
 async function getAdminOverviewMock() {
@@ -214,13 +461,74 @@ async function getAnalyticsOverviewMock() {
   return analyticsSeries;
 }
 
+async function getVisibilityAssignmentsMock() {
+  return visibilityAssignmentRecords;
+}
+
+async function getSponsorshipCampaignsMock() {
+  return sponsorshipCampaignRecords;
+}
+
+async function getActivityFeedMock() {
+  return activityRecords;
+}
+
+async function getUserAdminDetailMock(id: string) {
+  const user = await getUserByIdMock(id);
+
+  if (!user) {
+    return null;
+  }
+
+  return {
+    user,
+    relatedBrands: brandRecords.filter((brand) =>
+      user.linkedBrandIds.includes(brand.id),
+    ),
+    relatedServices: serviceRecords.filter((service) =>
+      user.linkedServiceIds.includes(service.id),
+    ),
+    relatedReports: reportRecords.filter((report) => report.targetId === user.id),
+  } satisfies UserAdminDetail;
+}
+
+async function getBrandAdminDetailMock(id: string) {
+  const brand = await getBrandByIdMock(id);
+
+  if (!brand) {
+    return null;
+  }
+
+  return {
+    brand,
+    relatedServices: serviceRecords.filter((service) => service.brandId === brand.id),
+    relatedReports: reportRecords.filter((report) => report.targetId === brand.id),
+  } satisfies BrandAdminDetail;
+}
+
+async function getServiceAdminDetailMock(id: string) {
+  const service = await getServiceByIdMock(id);
+
+  if (!service) {
+    return null;
+  }
+
+  return {
+    service,
+    relatedReports: reportRecords.filter((report) => report.targetId === service.id),
+    provider:
+      userRecords.find((user) => user.id === service.providerId) ?? null,
+    brand: brandRecords.find((brand) => brand.id === service.brandId) ?? null,
+  } satisfies ServiceAdminDetail;
+}
+
 async function getAdminOverviewRemote() {
-  return fetchAdmin<AdminOverview>("/admin/overview");
+  return fetchAdmin<AdminOverview>(adminEndpointTemplates.overview);
 }
 
 async function getReportsRemote(options?: ReportListOptions) {
   return fetchAdmin<ListResult<ReportRecord>>(
-    `/admin/reports${buildQueryString({
+    `${adminEndpointTemplates.reports}${buildQueryString({
       q: options?.query,
       page: options?.page,
       status: options?.status,
@@ -229,12 +537,14 @@ async function getReportsRemote(options?: ReportListOptions) {
 }
 
 async function getReportByIdRemote(id: string) {
-  return fetchAdmin<ReportRecord | null>(`/admin/reports/${id}`);
+  return fetchAdmin<ReportRecord | null>(
+    compileAdminEndpoint(adminEndpointTemplates.reportDetail, { id }),
+  );
 }
 
 async function getUsersRemote(options?: UserListOptions) {
   return fetchAdmin<ListResult<UserRecord>>(
-    `/admin/users${buildQueryString({
+    `${adminEndpointTemplates.users}${buildQueryString({
       q: options?.query,
       page: options?.page,
       status: options?.state,
@@ -243,12 +553,14 @@ async function getUsersRemote(options?: UserListOptions) {
 }
 
 async function getUserByIdRemote(id: string) {
-  return fetchAdmin<UserRecord | null>(`/admin/users/${id}`);
+  return fetchAdmin<UserRecord | null>(
+    compileAdminEndpoint(adminEndpointTemplates.userDetail, { id }),
+  );
 }
 
 async function getBrandsRemote(options?: BrandListOptions) {
   return fetchAdmin<ListResult<BrandRecord>>(
-    `/admin/brands${buildQueryString({
+    `${adminEndpointTemplates.brands}${buildQueryString({
       q: options?.query,
       page: options?.page,
       status: options?.status,
@@ -257,12 +569,14 @@ async function getBrandsRemote(options?: BrandListOptions) {
 }
 
 async function getBrandByIdRemote(id: string) {
-  return fetchAdmin<BrandRecord | null>(`/admin/brands/${id}`);
+  return fetchAdmin<BrandRecord | null>(
+    compileAdminEndpoint(adminEndpointTemplates.brandDetail, { id }),
+  );
 }
 
 async function getServicesRemote(options?: ServiceListOptions) {
   return fetchAdmin<ListResult<ServiceRecord>>(
-    `/admin/services${buildQueryString({
+    `${adminEndpointTemplates.services}${buildQueryString({
       q: options?.query,
       page: options?.page,
       status: options?.status,
@@ -271,11 +585,63 @@ async function getServicesRemote(options?: ServiceListOptions) {
 }
 
 async function getServiceByIdRemote(id: string) {
-  return fetchAdmin<ServiceRecord | null>(`/admin/services/${id}`);
+  return fetchAdmin<ServiceRecord | null>(
+    compileAdminEndpoint(adminEndpointTemplates.serviceDetail, { id }),
+  );
 }
 
 async function getAnalyticsOverviewRemote() {
-  return fetchAdmin<AnalyticsSeries[]>("/admin/analytics/overview");
+  return fetchAdmin<AnalyticsSeries[]>(adminEndpointTemplates.analyticsOverview);
+}
+
+async function getVisibilityAssignmentsRemote() {
+  return fetchOptionalAdminCollection(adminEndpointTemplates.visibilityLabels, (payload) =>
+    normalizeCollectionPayload(
+      payload,
+      isVisibilityAssignmentRecord,
+      ["assignments", "visibilityAssignments"],
+    ),
+  );
+}
+
+async function getSponsorshipCampaignsRemote() {
+  return fetchOptionalAdminCollection(adminEndpointTemplates.sponsoredVisibility, (payload) =>
+    normalizeCollectionPayload(
+      payload,
+      isSponsorshipCampaignRecord,
+      ["campaigns", "sponsorships"],
+    ),
+  );
+}
+
+async function getActivityFeedRemote() {
+  return fetchOptionalAdminCollection(adminEndpointTemplates.activity, (payload) =>
+    normalizeCollectionPayload(payload, isActivityRecord, ["activity", "events"]),
+  );
+}
+
+async function getUserAdminDetailRemote(id: string) {
+  return fetchAdminDetailWithFallback(
+    compileAdminEndpoint(adminEndpointTemplates.userAdminDetail, { id }),
+    compileAdminEndpoint(adminEndpointTemplates.userDetail, { id }),
+    normalizeUserAdminDetailPayload,
+  );
+}
+
+async function getBrandAdminDetailRemote(id: string) {
+  return fetchAdminDetailWithFallback(
+    compileAdminEndpoint(adminEndpointTemplates.brandAdminDetail, { id }),
+    compileAdminEndpoint(adminEndpointTemplates.brandDetail, { id }),
+    normalizeBrandAdminDetailPayload,
+  );
+}
+
+async function getServiceAdminDetailRemote(id: string) {
+  return fetchAdminDetailWithFallback(
+    compileAdminEndpoint(adminEndpointTemplates.serviceAdminDetail, { id }),
+    compileAdminEndpoint(adminEndpointTemplates.serviceDetail, { id }),
+    normalizeServiceAdminDetailPayload,
+  );
 }
 
 export async function getAdminOverview() {
@@ -322,4 +688,38 @@ export async function getAnalyticsOverview() {
   return shouldUseMockData()
     ? getAnalyticsOverviewMock()
     : getAnalyticsOverviewRemote();
+}
+
+export async function getVisibilityAssignments() {
+  return shouldUseMockData()
+    ? getVisibilityAssignmentsMock()
+    : getVisibilityAssignmentsRemote();
+}
+
+export async function getSponsorshipCampaigns() {
+  return shouldUseMockData()
+    ? getSponsorshipCampaignsMock()
+    : getSponsorshipCampaignsRemote();
+}
+
+export async function getActivityFeed() {
+  return shouldUseMockData() ? getActivityFeedMock() : getActivityFeedRemote();
+}
+
+export async function getUserAdminDetail(id: string) {
+  return shouldUseMockData()
+    ? getUserAdminDetailMock(id)
+    : getUserAdminDetailRemote(id);
+}
+
+export async function getBrandAdminDetail(id: string) {
+  return shouldUseMockData()
+    ? getBrandAdminDetailMock(id)
+    : getBrandAdminDetailRemote(id);
+}
+
+export async function getServiceAdminDetail(id: string) {
+  return shouldUseMockData()
+    ? getServiceAdminDetailMock(id)
+    : getServiceAdminDetailRemote(id);
 }

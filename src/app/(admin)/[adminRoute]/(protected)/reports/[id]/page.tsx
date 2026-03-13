@@ -51,7 +51,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
         </Card>
         <Card>
           <h3 className="text-lg font-semibold text-[var(--color-ink)]">Action panel</h3>
-          <ReportActionForm />
+          <ReportActionForm reportId={report.id} />
         </Card>
       </div>
     </>

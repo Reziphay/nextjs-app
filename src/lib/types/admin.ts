@@ -4,6 +4,7 @@ export type ReportRecord = {
   id: string;
   subject: string;
   targetType: "service" | "brand" | "review" | "user";
+  targetId: string;
   status: AdminStatus;
   reason: string;
   submittedAt: string;
@@ -20,26 +21,73 @@ export type UserRecord = {
   brands: number;
   services: number;
   joinedAt: string;
+  completedReservations: number;
+  linkedBrandIds: string[];
+  linkedServiceIds: string[];
 };
 
 export type BrandRecord = {
   id: string;
   name: string;
+  ownerId: string;
   owner: string;
   members: number;
+  memberNames: string[];
   services: number;
+  serviceIds: string[];
   visibility: string[];
   status: "healthy" | "flagged";
+  responseReliability: string;
 };
 
 export type ServiceRecord = {
   id: string;
   name: string;
+  providerId: string;
   provider: string;
+  brandId: string;
   brand: string;
   visibility: string[];
   status: "active" | "paused" | "flagged";
   requestsToday: number;
+  category: string;
+  reservationMode: "manual" | "automatic";
+  waitingTimeMinutes: number;
+  leadTimeLabel: string;
+};
+
+export type ActivityRecord = {
+  id: string;
+  title: string;
+  detail: string;
+  time: string;
+  category: "moderation" | "visibility" | "account" | "sponsorship";
+  actor: string;
+};
+
+export type VisibilityAssignmentRecord = {
+  id: string;
+  label: string;
+  targetId: string;
+  targetName: string;
+  targetType: "brand" | "service";
+  startsAt: string;
+  endsAt: string;
+  note: string;
+  status: "scheduled" | "active" | "ended";
+};
+
+export type SponsorshipCampaignRecord = {
+  id: string;
+  campaignName: string;
+  targetId: string;
+  targetName: string;
+  targetType: "brand" | "service";
+  startsAt: string;
+  endsAt: string;
+  note: string;
+  status: "scheduled" | "active" | "ended";
+  performanceLabel: string;
 };
 
 export type AdminOverview = {
@@ -48,12 +96,7 @@ export type AdminOverview = {
     value: string;
     detail: string;
   }>;
-  activity: Array<{
-    id: string;
-    title: string;
-    detail: string;
-    time: string;
-  }>;
+  activity: ActivityRecord[];
 };
 
 export type AnalyticsSeries = {
@@ -68,4 +111,24 @@ export type ListResult<T> = {
   pageSize: number;
   totalPages: number;
   counts: Record<string, number>;
+};
+
+export type UserAdminDetail = {
+  user: UserRecord;
+  relatedBrands: BrandRecord[];
+  relatedServices: ServiceRecord[];
+  relatedReports: ReportRecord[];
+};
+
+export type BrandAdminDetail = {
+  brand: BrandRecord;
+  relatedServices: ServiceRecord[];
+  relatedReports: ReportRecord[];
+};
+
+export type ServiceAdminDetail = {
+  service: ServiceRecord;
+  relatedReports: ReportRecord[];
+  provider: UserRecord | null;
+  brand: BrandRecord | null;
 };
