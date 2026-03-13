@@ -132,3 +132,13 @@ export type ServiceAdminDetail = {
   provider: UserRecord | null;
   brand: BrandRecord | null;
 };
+
+export type ReportAdminDetail = {
+  report: ReportRecord;
+  targetUser: UserRecord | null;
+  targetBrand: BrandRecord | null;
+  targetService: ServiceRecord | null;
+  serviceProvider: UserRecord | null;
+  serviceBrand: BrandRecord | null;
+  relatedReports: ReportRecord[];
+};

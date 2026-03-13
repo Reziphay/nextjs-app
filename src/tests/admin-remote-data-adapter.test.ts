@@ -225,6 +225,138 @@ describe("remote admin data adapter", () => {
     );
   });
 
+  it("enriches remote report detail with linked service context", async () => {
+    vi.doMock("@/lib/config/env", () => ({
+      publicEnv: {
+        NEXT_PUBLIC_API_BASE_URL: "https://api.reziphay.test",
+        NEXT_PUBLIC_USE_MOCK_DATA: false,
+      },
+      serverEnv: createServerEnvMock(),
+    }));
+    vi.doMock("@/lib/auth/admin-auth", () => ({
+      readAdminSession: vi.fn().mockResolvedValue({
+        mode: "remote",
+        email: "ops@reziphay.local",
+        accessToken: "remote-token",
+        issuedAt: "2026-03-13T00:00:00.000Z",
+      }),
+    }));
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: {
+            id: "rpt-remote-4",
+            subject: "Remote service report",
+            targetType: "service",
+            targetId: "srv-remote-4",
+            status: "open",
+            reason: "Needs service-level review.",
+            submittedAt: "2026-03-13T09:00:00.000Z",
+            priority: "high",
+            reporterLabel: "Customer report",
+          },
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: {
+            id: "srv-remote-4",
+            name: "Remote Linked Service",
+            providerId: "usr-remote-4",
+            provider: "Remote Provider",
+            brandId: "brd-remote-4",
+            brand: "Remote Brand",
+            visibility: ["Featured"],
+            status: "active",
+            requestsToday: 6,
+            category: "Wellness",
+            reservationMode: "automatic",
+            waitingTimeMinutes: 15,
+            leadTimeLabel: "Same day to 5 days",
+          },
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: {
+            id: "usr-remote-4",
+            name: "Remote Provider",
+            roles: ["USO"],
+            state: "active",
+            penaltyPoints: 1,
+            brands: 1,
+            services: 1,
+            joinedAt: "2026-02-10T00:00:00.000Z",
+            completedReservations: 22,
+            linkedBrandIds: ["brd-remote-4"],
+            linkedServiceIds: ["srv-remote-4"],
+          },
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: {
+            id: "brd-remote-4",
+            name: "Remote Brand",
+            ownerId: "usr-remote-4",
+            owner: "Remote Provider",
+            members: 3,
+            memberNames: ["Remote Provider", "Support One", "Support Two"],
+            services: 1,
+            serviceIds: ["srv-remote-4"],
+            visibility: ["Featured"],
+            status: "healthy",
+            responseReliability: "95% in approval window",
+          },
+        }),
+      });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { getReportAdminDetail } = await import("@/lib/api/admin");
+    const detail = await getReportAdminDetail("rpt-remote-4");
+
+    expect(detail?.report.id).toBe("rpt-remote-4");
+    expect(detail?.targetService?.id).toBe("srv-remote-4");
+    expect(detail?.serviceProvider?.id).toBe("usr-remote-4");
+    expect(detail?.serviceBrand?.id).toBe("brd-remote-4");
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "https://api.reziphay.test/admin/reports/rpt-remote-4",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Accept: "application/json",
+          Authorization: "Bearer remote-token",
+        }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "https://api.reziphay.test/admin/services/srv-remote-4",
+      expect.any(Object),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      "https://api.reziphay.test/admin/users/usr-remote-4",
+      expect.any(Object),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      4,
+      "https://api.reziphay.test/admin/brands/brd-remote-4",
+      expect.any(Object),
+    );
+  });
+
   it("normalizes remote collection payloads for operations pages", async () => {
     vi.doMock("@/lib/config/env", () => ({
       publicEnv: {

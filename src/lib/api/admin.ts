@@ -23,6 +23,7 @@ import type {
   BrandAdminDetail,
   BrandRecord,
   ListResult,
+  ReportAdminDetail,
   ReportRecord,
   ServiceAdminDetail,
   ServiceRecord,
@@ -187,6 +188,21 @@ function isBrandRecord(value: unknown): value is BrandRecord {
   );
 }
 
+function isReportRecord(value: unknown): value is ReportRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.subject === "string" &&
+    typeof value.targetType === "string" &&
+    typeof value.targetId === "string" &&
+    typeof value.status === "string" &&
+    typeof value.reason === "string" &&
+    typeof value.submittedAt === "string" &&
+    typeof value.priority === "string" &&
+    typeof value.reporterLabel === "string"
+  );
+}
+
 function isServiceRecord(value: unknown): value is ServiceRecord {
   return (
     isRecord(value) &&
@@ -298,6 +314,72 @@ function normalizeServiceAdminDetailPayload(payload: unknown): ServiceAdminDetai
   };
 }
 
+function createReportAdminDetail(
+  report: ReportRecord,
+  detail: Partial<Omit<ReportAdminDetail, "report">> = {},
+): ReportAdminDetail {
+  return {
+    report,
+    targetUser: detail.targetUser ?? null,
+    targetBrand: detail.targetBrand ?? null,
+    targetService: detail.targetService ?? null,
+    serviceProvider: detail.serviceProvider ?? null,
+    serviceBrand: detail.serviceBrand ?? null,
+    relatedReports: detail.relatedReports ?? [],
+  };
+}
+
+function normalizeReportAdminDetailPayload(payload: unknown): ReportAdminDetail | null {
+  if (isReportRecord(payload)) {
+    return createReportAdminDetail(payload);
+  }
+
+  if (!isRecord(payload) || !isReportRecord(payload.report)) {
+    return null;
+  }
+
+  const report = payload.report;
+  const target = payload.target;
+  const targetBrand =
+    (isBrandRecord(payload.targetBrand) ? payload.targetBrand : null) ??
+    (report.targetType === "brand" && isBrandRecord(target) ? target : null) ??
+    (report.targetType === "brand" && isBrandRecord(payload.brand)
+      ? payload.brand
+      : null);
+  const targetUser =
+    (isUserRecord(payload.targetUser) ? payload.targetUser : null) ??
+    (report.targetType === "user" && isUserRecord(target) ? target : null) ??
+    (report.targetType === "user" && isUserRecord(payload.user) ? payload.user : null);
+  const targetService =
+    (isServiceRecord(payload.targetService) ? payload.targetService : null) ??
+    ((report.targetType === "service" || report.targetType === "review") &&
+    isServiceRecord(target)
+      ? target
+      : null) ??
+    ((report.targetType === "service" || report.targetType === "review") &&
+    isServiceRecord(payload.service)
+      ? payload.service
+      : null);
+
+  return createReportAdminDetail(report, {
+    targetUser,
+    targetBrand,
+    targetService,
+    serviceProvider:
+      (isUserRecord(payload.serviceProvider) ? payload.serviceProvider : null) ??
+      (isUserRecord(payload.provider) ? payload.provider : null),
+    serviceBrand:
+      (isBrandRecord(payload.serviceBrand) ? payload.serviceBrand : null) ??
+      ((report.targetType === "service" || report.targetType === "review") &&
+      isBrandRecord(payload.brand)
+        ? payload.brand
+        : null),
+    relatedReports: readArray<unknown>(payload.relatedReports ?? payload.reports)
+      .filter(isReportRecord)
+      .filter((relatedReport) => relatedReport.id !== report.id),
+  });
+}
+
 async function fetchAdminDetailWithFallback<T>(
   detailPath: string,
   fallbackPath: string,
@@ -324,6 +406,24 @@ async function fetchAdminDetailWithFallback<T>(
   const fallbackPayload = await fetchAdmin<unknown>(fallbackPath, session);
 
   return normalize(fallbackPayload);
+}
+
+async function fetchOptionalAdminDetail<T>(
+  path: string,
+  normalize: (payload: unknown) => T | null,
+  session?: AdminSessionLike,
+) {
+  try {
+    const payload = await fetchAdmin<unknown>(path, session);
+
+    return normalize(payload);
+  } catch (error) {
+    if (error instanceof ApiError && [404, 405, 501].includes(error.status)) {
+      return null;
+    }
+
+    throw error;
+  }
 }
 
 async function fetchOptionalAdminCollection<T>(
@@ -392,6 +492,43 @@ async function getReportsMock(options?: ReportListOptions) {
 
 async function getReportByIdMock(id: string) {
   return reportRecords.find((report) => report.id === id) ?? null;
+}
+
+async function getReportAdminDetailMock(id: string) {
+  const report = await getReportByIdMock(id);
+
+  if (!report) {
+    return null;
+  }
+
+  const targetService =
+    report.targetType === "service" || report.targetType === "review"
+      ? serviceRecords.find((service) => service.id === report.targetId) ?? null
+      : null;
+
+  return createReportAdminDetail(report, {
+    targetUser:
+      report.targetType === "user"
+        ? userRecords.find((user) => user.id === report.targetId) ?? null
+        : null,
+    targetBrand:
+      report.targetType === "brand"
+        ? brandRecords.find((brand) => brand.id === report.targetId) ?? null
+        : null,
+    targetService,
+    serviceProvider:
+      targetService
+        ? userRecords.find((user) => user.id === targetService.providerId) ?? null
+        : null,
+    serviceBrand:
+      targetService
+        ? brandRecords.find((brand) => brand.id === targetService.brandId) ?? null
+        : null,
+    relatedReports: reportRecords.filter(
+      (relatedReport) =>
+        relatedReport.id !== report.id && relatedReport.targetId === report.targetId,
+    ),
+  });
 }
 
 async function getUsersMock(options?: UserListOptions) {
@@ -542,6 +679,30 @@ async function getReportByIdRemote(id: string) {
   );
 }
 
+async function getOptionalUserByIdRemote(id: string, session: AdminSessionLike) {
+  return fetchOptionalAdminDetail(
+    compileAdminEndpoint(adminEndpointTemplates.userDetail, { id }),
+    (payload) => (isUserRecord(payload) ? payload : null),
+    session,
+  );
+}
+
+async function getOptionalBrandByIdRemote(id: string, session: AdminSessionLike) {
+  return fetchOptionalAdminDetail(
+    compileAdminEndpoint(adminEndpointTemplates.brandDetail, { id }),
+    (payload) => (isBrandRecord(payload) ? payload : null),
+    session,
+  );
+}
+
+async function getOptionalServiceByIdRemote(id: string, session: AdminSessionLike) {
+  return fetchOptionalAdminDetail(
+    compileAdminEndpoint(adminEndpointTemplates.serviceDetail, { id }),
+    (payload) => (isServiceRecord(payload) ? payload : null),
+    session,
+  );
+}
+
 async function getUsersRemote(options?: UserListOptions) {
   return fetchAdmin<ListResult<UserRecord>>(
     `${adminEndpointTemplates.users}${buildQueryString({
@@ -644,6 +805,51 @@ async function getServiceAdminDetailRemote(id: string) {
   );
 }
 
+async function getReportAdminDetailRemote(id: string) {
+  const session = await readRemoteAdminSession();
+  const detail = await fetchOptionalAdminDetail(
+    compileAdminEndpoint(adminEndpointTemplates.reportDetail, { id }),
+    normalizeReportAdminDetailPayload,
+    session,
+  );
+
+  if (!detail) {
+    return null;
+  }
+
+  const { report } = detail;
+  const targetService =
+    report.targetType === "service" || report.targetType === "review"
+      ? detail.targetService ??
+        (await getOptionalServiceByIdRemote(report.targetId, session))
+      : null;
+
+  return createReportAdminDetail(report, {
+    targetUser:
+      report.targetType === "user"
+        ? detail.targetUser ??
+          (await getOptionalUserByIdRemote(report.targetId, session))
+        : null,
+    targetBrand:
+      report.targetType === "brand"
+        ? detail.targetBrand ??
+          (await getOptionalBrandByIdRemote(report.targetId, session))
+        : null,
+    targetService,
+    serviceProvider:
+      targetService
+        ? detail.serviceProvider ??
+          (await getOptionalUserByIdRemote(targetService.providerId, session))
+        : null,
+    serviceBrand:
+      targetService
+        ? detail.serviceBrand ??
+          (await getOptionalBrandByIdRemote(targetService.brandId, session))
+        : null,
+    relatedReports: detail.relatedReports,
+  });
+}
+
 export async function getAdminOverview() {
   return shouldUseMockData() ? getAdminOverviewMock() : getAdminOverviewRemote();
 }
@@ -654,6 +860,12 @@ export async function getReports(options?: ReportListOptions) {
 
 export async function getReportById(id: string) {
   return shouldUseMockData() ? getReportByIdMock(id) : getReportByIdRemote(id);
+}
+
+export async function getReportAdminDetail(id: string) {
+  return shouldUseMockData()
+    ? getReportAdminDetailMock(id)
+    : getReportAdminDetailRemote(id);
 }
 
 export async function getUsers(options?: UserListOptions) {
