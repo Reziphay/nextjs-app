@@ -1,15 +1,17 @@
 import type { MetadataRoute } from "next";
 
-import { siteConfig } from "@/config/site";
+import { buildAdminPath } from "@/lib/auth/admin-auth";
+import { siteConfig } from "@/lib/config/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-      disallow: ["/admin/", "/app-link"],
-    },
-    sitemap: `${siteConfig.url}/sitemap.xml`,
+    rules: [
+      {
+        userAgent: "*",
+        allow: ["/"],
+        disallow: [buildAdminPath()],
+      },
+    ],
+    sitemap: `${siteConfig.appUrl}/sitemap.xml`,
   };
 }
-

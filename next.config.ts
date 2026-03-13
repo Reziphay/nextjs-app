@@ -1,11 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  reactStrictMode: true,
-  experimental: {
-    optimizePackageImports: ["lucide-react"],
-  },
+  /* config options here */
+  reactCompiler: true,
 };
 
 export default nextConfig;
-

@@ -1,182 +1,62 @@
-# Reziphay Website
+# Reziphay Web
 
-Marketing, SEO, and lead-capture website for `Reziphay.com`, built with Next.js App Router.
+Next.js web MVP for Reziphay. The project is split into:
 
-## Project overview
-
-This project is the public growth surface for the Reziphay product. It is intentionally separate from the mobile reservation experience.
-
-What the website does:
-
-- explains the product clearly
-- captures provider and customer intent
-- routes users toward app download and deep-link flows
-- provides SEO-ready category, city, FAQ, and blog surfaces
-- leaves a hidden admin gateway foundation for future internal tooling
-
-What the website does not do:
-
-- it does not implement a full web reservation engine
-- it does not collect payments, deposits, or refunds
-- it does not present availability as a hard-locked slot system
+- Public marketing and SEO pages
+- Hidden admin and operations pages behind a configurable route segment
 
 ## Stack
 
-- Next.js 15
-- React 19
+- Next.js App Router
 - TypeScript
-- Tailwind CSS 4
-- Framer Motion
+- Tailwind CSS v4
 - React Hook Form + Zod
-- shadcn-style UI primitives
 - Vitest + Testing Library
 
-## Main routes
+## Run
 
-- `/`
-- `/features`
-- `/for-customers`
-- `/for-providers`
-- `/how-it-works`
-- `/categories/[slug]`
-- `/cities/[slug]`
-- `/faq`
-- `/contact`
-- `/about`
-- `/privacy`
-- `/terms`
-- `/blog`
-- `/blog/[slug]`
-- `/download`
-- `/app-link`
-- `/admin/hidden/login`
-- `/api/contact`
-- `/api/provider-interest`
-- `/api/track`
-
-## Folder structure
-
-```txt
-src/
-  app/
-    (marketing)/
-    admin/
-    api/
-    app-link/
-    download/
-  components/
-    layout/
-    marketing/
-    providers/
-    sections/
-    ui/
-  config/
-  content/
-  features/
-    analytics/
-    forms/
-    seo/
-  lib/
-  types/
-```
-
-## Setup
+1. Copy `.env.example` to `.env.local`.
+2. Install dependencies:
 
 ```bash
-npm install
-npm run dev
+pnpm install
 ```
 
-The local dev server starts on the default Next.js port unless overridden.
-
-## Environment variables
-
-See `.env.example`.
-
-- `NEXT_PUBLIC_SITE_URL`
-- `NEXT_PUBLIC_APP_STORE_URL`
-- `NEXT_PUBLIC_PLAY_STORE_URL`
-- `NEXT_PUBLIC_APP_DEEP_LINK`
-- `NEXT_PUBLIC_GA_MEASUREMENT_ID`
-
-## Commands
+3. Start the dev server:
 
 ```bash
-npm run dev
-npm run lint
-npm run typecheck
-npm run test
-npm run build
-npm run start
+pnpm dev
 ```
 
-## SEO strategy
+4. Open `http://localhost:3000`.
 
-- App Router metadata helpers are centralized in `src/features/seo/metadata.ts`.
-- `robots.ts`, `sitemap.ts`, Open Graph image generation, and Twitter image generation are included.
-- Structured data is used for `Organization`, `WebSite`, `MobileApplication`, `FAQPage`, `BreadcrumbList`, and `Article`.
-- Category, city, blog, and FAQ surfaces are designed for scalable content expansion.
-- Canonical URLs are derived from `NEXT_PUBLIC_SITE_URL`.
+## Hidden Admin
 
-## Analytics strategy
+- The admin route is controlled by `ADMIN_ROUTE_SEGMENT`.
+- Default local route from `.env.example`: `/operator`
+- Default local credentials from `.env.example`:
+  - `ops@reziphay.local`
+  - `reziphay-admin`
 
-Analytics is centralized through a typed event map in [events.ts](/Users/vugarsafarzada/Developer/MyProjects/Reziphay/website/src/features/analytics/events.ts) and a shared tracker in [track.ts](/Users/vugarsafarzada/Developer/MyProjects/Reziphay/website/src/features/analytics/track.ts).
+This auth flow is a frontend placeholder so the admin shell can be built now. The next step is wiring it to backend admin endpoints.
 
-Current event coverage:
+## Data Source
 
-- `page_view`
-- `hero_cta_click`
-- `app_store_click`
-- `play_store_click`
-- `provider_interest_submit`
-- `contact_submit`
-- `faq_expand`
-- `pricing_or_visibility_interest_click`
-- `download_section_interaction`
-- `category_page_view`
-- `city_page_view`
-- `blog_article_view`
-- `navigation_click`
-- `app_link_attempt`
+- `NEXT_PUBLIC_USE_MOCK_DATA=true` keeps the app on local typed mock data.
+- Set `NEXT_PUBLIC_USE_MOCK_DATA=false` to use the remote REST adapter at `NEXT_PUBLIC_API_BASE_URL`.
 
-CTA components do not call vendors directly. Client events post to `/api/track`, with optional `gtag` passthrough when available.
+The remote adapter already expects admin endpoints such as `/admin/reports`, `/admin/users`, `/admin/brands`, `/admin/services`, and `/admin/analytics/overview`.
 
-## Forms strategy
+## Validation
 
-- Contact and provider-interest forms use React Hook Form and Zod.
-- Client and server validation are both enabled.
-- A honeypot field is included as basic spam protection.
-- Server routes return the same `{ success, data, meta }` and `{ success, error }` wrapper shape used elsewhere in the project context.
-- Current storage is placeholder-only and logs submissions in non-production environments.
+```bash
+pnpm lint
+pnpm test
+pnpm build
+```
 
-## Testing strategy
+## Current Scope
 
-Vitest covers the critical regressions requested in the TODO:
-
-- hero CTA rendering
-- navigation rendering
-- contact form validation
-- provider-interest form validation
-- metadata helper behavior
-- analytics payload mapping
-- FAQ interaction tracking
-
-## Admin hidden route note
-
-`/admin/hidden/login` exists as a distinct visual and layout foundation for future internal auth and operations tooling. It is intentionally isolated from the public marketing layout.
-
-## Known limitations
-
-- Contact and provider-interest submissions are not yet persisted to a real backend, CRM, or email provider.
-- App Store and Google Play links depend on environment configuration and may still point to fallback flows before launch.
-- Blog content is file-backed config content, not CMS-driven yet.
-- Navigation link tracking is only wired for the main CTA surfaces, not every passive nav link.
-
-## Future improvements
-
-- connect forms to backend persistence or CRM delivery
-- add CMS or MDX-backed blog authoring
-- add richer provider or category content modules
-- add full campaign parameter propagation for download flows
-- expand UI primitives with tabs, chips, drawers, toasts, and avatars where needed
-- add deeper accessibility and visual regression coverage
+- Public pages: landing, download, for-businesses, about, FAQ, contact, legal, SEO template
+- Hidden admin pages: login, overview, reports, users, brands, services, visibility labels, sponsored visibility, analytics, activity, settings
+- Typed mock admin data layer and local API placeholders for contact and admin auth

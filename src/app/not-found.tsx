@@ -1,48 +1,30 @@
-import { createMetadata } from "@/features/seo/metadata";
+import Link from "next/link";
 
-import { CtaLink } from "@/components/marketing/cta-link";
-import { PageHero } from "@/components/sections/page-hero";
-
-export const metadata = createMetadata({
-  title: "Page not found",
-  description:
-    "The page could not be found. Return to the Reziphay marketing site and continue through the main routes.",
-  noIndex: true,
-  path: "/404",
-});
+import { buttonStyles } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <PageHero
-        hero={{
-          eyebrow: "404",
-          title: "The route is missing, but the product path is still clear.",
-          description:
-            "Return to the main marketing surface, explore customer or provider value, or jump directly into the download flow.",
-        }}
-        actions={
-          <>
-            <CtaLink href="/">Go home</CtaLink>
-            <CtaLink href="/download" variant="outline">
-              Download flow
-            </CtaLink>
-          </>
-        }
-        aside={
-          <div className="space-y-4">
-            <p className="text-sm uppercase tracking-[0.2em] text-accent-strong">
-              Suggested next steps
-            </p>
-            <ul className="space-y-3 text-sm leading-6 text-muted">
-              <li>Review the main landing page and value proposition.</li>
-              <li>See customer and provider journeys in dedicated routes.</li>
-              <li>Use the contact form if you landed here from an old link.</li>
-            </ul>
-          </div>
-        }
-      />
-    </div>
+    <main className="mx-auto grid min-h-screen max-w-[960px] place-items-center px-4 py-16">
+      <div className="rounded-[32px] border border-[var(--color-border)] bg-white p-10 text-center shadow-[var(--shadow-soft)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-primary)]">
+          Not found
+        </p>
+        <h1 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-[var(--color-ink)]">
+          This route does not belong to the Reziphay web surface.
+        </h1>
+        <p className="mt-5 max-w-xl text-sm leading-8 text-[var(--color-ink-muted)]">
+          The public website and the hidden admin stay intentionally narrow. If
+          you expected an operational page, verify the configured admin route.
+        </p>
+        <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+          <Link href="/" className={buttonStyles({ kind: "primary" })}>
+            Go to homepage
+          </Link>
+          <Link href="/faq" className={buttonStyles({ kind: "secondary" })}>
+            Read the FAQ
+          </Link>
+        </div>
+      </div>
+    </main>
   );
 }
-
