@@ -264,8 +264,10 @@ export function ServiceDetail({ adminRoute, detail }: ServiceDetailProps) {
           title="Assign visibility label"
           description="Create a scheduled label assignment for this service directly from the detail view."
           lockedTargetId={service.id}
+          lockedTargetType="service"
           initialValues={{
             targetId: service.id,
+            targetType: "service",
             note: `Visibility review for ${service.name}.`,
           }}
         />

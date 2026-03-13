@@ -35,11 +35,16 @@ type RemoteAdminLoginPayload = {
   };
 };
 
+const MOCK_SESSION_TTL_MS = 1000 * 60 * 60 * 12;
+
 function createMockSession(email: string): AdminSession {
+  const now = Date.now();
+
   return {
     mode: "mock",
     email,
-    issuedAt: new Date().toISOString(),
+    issuedAt: new Date(now).toISOString(),
+    expiresAt: new Date(now + MOCK_SESSION_TTL_MS).toISOString(),
   };
 }
 

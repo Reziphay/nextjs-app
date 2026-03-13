@@ -49,6 +49,7 @@ describe("admin mutation adapters", () => {
     const visibilityResult = await createVisibilityAssignment(
       {
         label: "VIP",
+        targetType: "brand",
         targetId: "brd-11",
         startsAt: "2026-03-13",
         endsAt: "2026-04-13",
@@ -99,6 +100,7 @@ describe("admin mutation adapters", () => {
         ADMIN_SERVICE_ADMIN_DETAIL_PATH: "/admin/services/:id/detail",
         ADMIN_ANALYTICS_OVERVIEW_PATH: "/admin/analytics/overview",
         ADMIN_VISIBILITY_LABELS_PATH: "/ops/visibility",
+        ADMIN_VISIBILITY_LABEL_ASSIGN_PATH: "/ops/visibility/:id/assign",
         ADMIN_SPONSORED_VISIBILITY_PATH: "/ops/campaigns",
         ADMIN_ACTIVITY_PATH: "/admin/activity",
         ADMIN_LOGIN_EMAIL: "ops@reziphay.local",
@@ -108,7 +110,17 @@ describe("admin mutation adapters", () => {
 
     const fetchMock = vi
       .fn()
-      .mockResolvedValue({ ok: true, status: 200, json: async () => ({ data: null }) });
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ data: null }) })
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ data: null }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: [{ id: "lbl-remote-1", name: "VIP", slug: "vip" }],
+        }),
+      })
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ data: null }) })
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ data: null }) });
     vi.stubGlobal("fetch", fetchMock);
 
     const {
@@ -144,6 +156,7 @@ describe("admin mutation adapters", () => {
     await createVisibilityAssignment(
       {
         label: "VIP",
+        targetType: "brand",
         targetId: "brd-11",
         startsAt: "2026-03-13",
         endsAt: "2026-04-13",
@@ -184,13 +197,24 @@ describe("admin mutation adapters", () => {
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       3,
-      "https://api.reziphay.test/ops/visibility",
+      "https://api.reziphay.test/ops/visibility?targetType=BRAND",
+      expect.objectContaining({
+        cache: "no-store",
+        headers: expect.objectContaining({
+          Accept: "application/json",
+          Authorization: "Bearer remote-token",
+        }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      4,
+      "https://api.reziphay.test/ops/visibility/lbl-remote-1/assign",
       expect.objectContaining({
         method: "POST",
       }),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
-      4,
+      5,
       "https://api.reziphay.test/ops/campaigns",
       expect.objectContaining({
         method: "POST",

@@ -4,8 +4,10 @@ import { AdminFilterBar } from "@/components/admin/admin-filter-bar";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { AdminTopbar } from "@/components/admin/admin-topbar";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { StatusPill } from "@/components/ui/status-pill";
 import { getUsers } from "@/lib/api/admin";
+import { publicEnv } from "@/lib/config/env";
 
 type UsersPageProps = {
   params: Promise<{
@@ -57,33 +59,44 @@ export default async function UsersPage({ params, searchParams }: UsersPageProps
           { label: "Closed", value: "closed", count: result.counts.closed ?? 0 },
         ]}
       />
-      <div className="grid gap-4">
-        {result.items.map((user) => (
-          <Card key={user.id} className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <Link
-                href={`/${adminRoute}/users/${user.id}`}
-                className="text-lg font-semibold text-[var(--color-ink)] hover:text-[var(--color-primary)]"
-              >
-                {user.name}
-              </Link>
-              <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
-                {user.roles.join(", ")} · {user.penaltyPoints} penalty points
-              </p>
-            </div>
-            <StatusPill
-              label={user.state}
-              tone={
-                user.state === "active"
-                  ? "success"
-                  : user.state === "suspended"
-                    ? "warning"
-                    : "danger"
-              }
-            />
-          </Card>
-        ))}
-      </div>
+      {result.items.length ? (
+        <div className="grid gap-4">
+          {result.items.map((user) => (
+            <Card key={user.id} className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <Link
+                  href={`/${adminRoute}/users/${user.id}`}
+                  className="text-lg font-semibold text-[var(--color-ink)] hover:text-[var(--color-primary)]"
+                >
+                  {user.name}
+                </Link>
+                <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
+                  {user.roles.join(", ")} · {user.penaltyPoints} penalty points
+                </p>
+              </div>
+              <StatusPill
+                label={user.state}
+                tone={
+                  user.state === "active"
+                    ? "success"
+                    : user.state === "suspended"
+                      ? "warning"
+                      : "danger"
+                }
+              />
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          title="No user records available"
+          description={
+            publicEnv.NEXT_PUBLIC_USE_MOCK_DATA
+              ? "No users match the current query."
+              : "The current backend does not expose admin user reads for this screen yet. Direct moderation still works from reports and mutation endpoints."
+          }
+        />
+      )}
       <AdminPagination
         action={action}
         page={result.page}

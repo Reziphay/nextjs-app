@@ -266,8 +266,10 @@ export function BrandDetail({ adminRoute, detail }: BrandDetailProps) {
           title="Assign visibility label"
           description="Create a scheduled label assignment for this brand without leaving the detail view."
           lockedTargetId={brand.id}
+          lockedTargetType="brand"
           initialValues={{
             targetId: brand.id,
+            targetType: "brand",
             note: `Visibility review for ${brand.name}.`,
           }}
         />

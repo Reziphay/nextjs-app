@@ -43,10 +43,13 @@ export async function POST(request: Request) {
     ADMIN_SESSION_COOKIE,
     serializeAdminSession(loginResult.session),
     {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      expires: loginResult.session.expiresAt
+        ? new Date(loginResult.session.expiresAt)
+        : undefined,
     },
   );
 

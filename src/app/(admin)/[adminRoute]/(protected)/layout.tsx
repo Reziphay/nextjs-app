@@ -4,7 +4,12 @@ import { notFound, redirect } from "next/navigation";
 
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { LogoutButton } from "@/features/admin-auth/logout-button";
-import { buildAdminPath, resolveAdminGuard, readAdminSession } from "@/lib/auth/admin-auth";
+import {
+  buildAdminPath,
+  isValidAdminSession,
+  resolveAdminGuard,
+  readAdminSession,
+} from "@/lib/auth/admin-auth";
 
 type ProtectedAdminLayoutProps = {
   children: ReactNode;
@@ -21,7 +26,7 @@ export default async function ProtectedAdminLayout({
   const session = await readAdminSession();
   const result = resolveAdminGuard({
     adminRoute,
-    isAuthenticated: Boolean(session),
+    isAuthenticated: isValidAdminSession(session),
     pathname: buildAdminPath("/", adminRoute),
   });
 

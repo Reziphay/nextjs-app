@@ -20,6 +20,7 @@ function createServerEnvMock(overrides: Record<string, string> = {}) {
     ADMIN_SERVICE_ADMIN_DETAIL_PATH: "/admin/services/:id/detail",
     ADMIN_ANALYTICS_OVERVIEW_PATH: "/admin/analytics/overview",
     ADMIN_VISIBILITY_LABELS_PATH: "/admin/visibility-labels",
+    ADMIN_VISIBILITY_LABEL_ASSIGN_PATH: "/admin/visibility-labels/:id/assign",
     ADMIN_SPONSORED_VISIBILITY_PATH: "/admin/sponsored-visibility",
     ADMIN_ACTIVITY_PATH: "/admin/activity",
     ADMIN_LOGIN_EMAIL: "ops@reziphay.local",
@@ -192,6 +193,15 @@ describe("remote admin data adapter", () => {
             leadTimeLabel: "1 day to 7 days",
           },
         }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: {
+            reports: [],
+          },
+        }),
       });
 
     vi.stubGlobal("fetch", fetchMock);
@@ -200,8 +210,8 @@ describe("remote admin data adapter", () => {
     const detail = await getServiceAdminDetail("srv-remote-2");
 
     expect(detail?.service.id).toBe("srv-remote-2");
-    expect(detail?.provider).toBeNull();
-    expect(detail?.brand).toBeNull();
+    expect(detail?.provider?.id).toBe("usr-remote-2");
+    expect(detail?.brand?.id).toBe("brd-remote-2");
     expect(detail?.relatedReports).toEqual([]);
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
@@ -216,6 +226,16 @@ describe("remote admin data adapter", () => {
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
       "https://api.reziphay.test/admin/services/srv-remote-2",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Accept: "application/json",
+          Authorization: "Bearer remote-token",
+        }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      "https://api.reziphay.test/admin/reports?limit=100",
       expect.objectContaining({
         headers: expect.objectContaining({
           Accept: "application/json",
@@ -342,7 +362,7 @@ describe("remote admin data adapter", () => {
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
-      "https://api.reziphay.test/admin/services/srv-remote-4",
+      "https://api.reziphay.test/admin/services/srv-remote-4/detail",
       expect.any(Object),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
@@ -352,7 +372,7 @@ describe("remote admin data adapter", () => {
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       4,
-      "https://api.reziphay.test/admin/brands/brd-remote-4",
+      "https://api.reziphay.test/admin/brands/brd-remote-4/detail",
       expect.any(Object),
     );
   });

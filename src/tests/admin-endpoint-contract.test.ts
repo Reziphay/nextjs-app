@@ -20,6 +20,7 @@ function createServerEnvMock(overrides: Record<string, string> = {}) {
     ADMIN_SERVICE_ADMIN_DETAIL_PATH: "/admin/services/:id/detail",
     ADMIN_ANALYTICS_OVERVIEW_PATH: "/admin/analytics/overview",
     ADMIN_VISIBILITY_LABELS_PATH: "/admin/visibility-labels",
+    ADMIN_VISIBILITY_LABEL_ASSIGN_PATH: "/admin/visibility-labels/:id/assign",
     ADMIN_SPONSORED_VISIBILITY_PATH: "/admin/sponsored-visibility",
     ADMIN_ACTIVITY_PATH: "/admin/activity",
     ADMIN_LOGIN_EMAIL: "ops@reziphay.local",

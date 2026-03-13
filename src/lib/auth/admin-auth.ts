@@ -61,7 +61,15 @@ export function parseAdminSession(
 }
 
 export function isValidAdminSession(session: AdminSession | null | undefined) {
-  return Boolean(session?.email && session?.issuedAt);
+  if (!session?.email || !session.issuedAt) {
+    return false;
+  }
+
+  if (!session.expiresAt) {
+    return true;
+  }
+
+  return new Date(session.expiresAt).getTime() > Date.now();
 }
 
 export function sanitizeNextPath(
@@ -120,7 +128,8 @@ export function resolveAdminGuard(options: {
 
 export async function readAdminSession() {
   const cookieStore = await cookies();
-  const session = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
+  const serializedSession = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
+  const session = parseAdminSession(serializedSession);
 
-  return parseAdminSession(session);
+  return isValidAdminSession(session) ? session : null;
 }

@@ -3,7 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,21 +17,29 @@ type UserActionFormProps = {
   userId: string;
 };
 
+type UserActionFormValues = z.input<typeof userActionSchema>;
+
 export function UserActionForm({ userId }: UserActionFormProps) {
   const router = useRouter();
   const [submitError, setSubmitError] = useState("");
   const [submitMessage, setSubmitMessage] = useState("");
   const {
+    control,
     formState: { errors, isSubmitting, isSubmitSuccessful },
     handleSubmit,
     register,
     reset,
-  } = useForm<UserActionInput>({
+  } = useForm<UserActionFormValues, undefined, UserActionInput>({
     resolver: zodResolver(userActionSchema),
     defaultValues: {
       action: "suspend",
+      durationDays: 7,
       reason: "",
     },
+  });
+  const action = useWatch({
+    control,
+    name: "action",
   });
 
   const onSubmit = handleSubmit(async (values) => {
@@ -55,6 +64,7 @@ export function UserActionForm({ userId }: UserActionFormProps) {
     setSubmitMessage(result.message ?? "User action accepted.");
     reset({
       action: values.action,
+      durationDays: values.action === "suspend" ? values.durationDays : 7,
       reason: "",
     });
     router.refresh();
@@ -70,9 +80,20 @@ export function UserActionForm({ userId }: UserActionFormProps) {
         >
           <option value="suspend">Suspend</option>
           <option value="close">Close</option>
-          <option value="reopen">Reopen</option>
         </select>
       </label>
+      {action === "suspend" ? (
+        <Input
+          label="Duration (days)"
+          type="number"
+          min="1"
+          max="365"
+          error={
+            "durationDays" in errors ? errors.durationDays?.message : undefined
+          }
+          {...register("durationDays", { valueAsNumber: true })}
+        />
+      ) : null}
       <Input
         label="Reason"
         error={errors.reason?.message}

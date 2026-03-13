@@ -37,7 +37,7 @@ const serverEnvSchema = z.object({
     .string()
     .trim()
     .min(1)
-    .default("/admin/reports/:id/:action"),
+    .default("/admin/reports/:id/resolve"),
   ADMIN_USERS_PATH: z.string().trim().min(1).default("/admin/users"),
   ADMIN_USER_DETAIL_PATH: z
     .string()
@@ -86,6 +86,11 @@ const serverEnvSchema = z.object({
     .trim()
     .min(1)
     .default("/admin/visibility-labels"),
+  ADMIN_VISIBILITY_LABEL_ASSIGN_PATH: z
+    .string()
+    .trim()
+    .min(1)
+    .default("/admin/visibility-labels/:id/assign"),
   ADMIN_SPONSORED_VISIBILITY_PATH: z
     .string()
     .trim()
@@ -127,6 +132,8 @@ export const serverEnv = serverEnvSchema.parse({
   ADMIN_SERVICE_ADMIN_DETAIL_PATH: process.env.ADMIN_SERVICE_ADMIN_DETAIL_PATH,
   ADMIN_ANALYTICS_OVERVIEW_PATH: process.env.ADMIN_ANALYTICS_OVERVIEW_PATH,
   ADMIN_VISIBILITY_LABELS_PATH: process.env.ADMIN_VISIBILITY_LABELS_PATH,
+  ADMIN_VISIBILITY_LABEL_ASSIGN_PATH:
+    process.env.ADMIN_VISIBILITY_LABEL_ASSIGN_PATH,
   ADMIN_SPONSORED_VISIBILITY_PATH: process.env.ADMIN_SPONSORED_VISIBILITY_PATH,
   ADMIN_ACTIVITY_PATH: process.env.ADMIN_ACTIVITY_PATH,
   ADMIN_LOGIN_EMAIL: process.env.ADMIN_LOGIN_EMAIL,

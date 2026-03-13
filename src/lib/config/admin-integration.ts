@@ -91,7 +91,14 @@ function buildEndpointGroups(): AdminIntegrationEndpointGroup[] {
       endpoints: [
         { label: "Report action", path: adminEndpointTemplates.reportAction },
         { label: "User action", path: adminEndpointTemplates.userAction },
-        { label: "Visibility assignment", path: adminEndpointTemplates.visibilityLabels },
+        {
+          label: "Visibility label create",
+          path: adminEndpointTemplates.visibilityLabels,
+        },
+        {
+          label: "Visibility label assign",
+          path: adminEndpointTemplates.visibilityLabelAssign,
+        },
         {
           label: "Sponsored campaign",
           path: adminEndpointTemplates.sponsoredVisibility,

@@ -17,6 +17,7 @@ export const adminEndpointTemplates = {
   serviceAdminDetail: serverEnv.ADMIN_SERVICE_ADMIN_DETAIL_PATH,
   analyticsOverview: serverEnv.ADMIN_ANALYTICS_OVERVIEW_PATH,
   visibilityLabels: serverEnv.ADMIN_VISIBILITY_LABELS_PATH,
+  visibilityLabelAssign: serverEnv.ADMIN_VISIBILITY_LABEL_ASSIGN_PATH,
   sponsoredVisibility: serverEnv.ADMIN_SPONSORED_VISIBILITY_PATH,
   activity: serverEnv.ADMIN_ACTIVITY_PATH,
 } as const;

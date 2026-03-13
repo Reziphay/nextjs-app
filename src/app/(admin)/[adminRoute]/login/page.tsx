@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { AdminLoginForm } from "@/features/admin-auth/login-form";
 import {
   getAdminRoute,
+  isValidAdminSession,
   readAdminSession,
   sanitizeNextPath,
 } from "@/lib/auth/admin-auth";
@@ -30,7 +31,7 @@ export default async function AdminLoginPage({
   const nextPath = sanitizeNextPath(next, `/${adminRoute}`);
   const session = await readAdminSession();
 
-  if (session) {
+  if (isValidAdminSession(session)) {
     redirect(nextPath);
   }
 

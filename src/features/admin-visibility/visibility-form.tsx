@@ -18,12 +18,14 @@ type VisibilityFormProps = {
   description?: string;
   initialValues?: Partial<VisibilityLabelInput>;
   lockedTargetId?: string;
+  lockedTargetType?: VisibilityLabelInput["targetType"];
 };
 
 export function VisibilityForm({
   description,
   initialValues,
   lockedTargetId,
+  lockedTargetType,
   title,
 }: VisibilityFormProps = {}) {
   const router = useRouter();
@@ -38,6 +40,7 @@ export function VisibilityForm({
     resolver: zodResolver(visibilityLabelSchema),
     defaultValues: {
       label: initialValues?.label ?? "",
+      targetType: lockedTargetType ?? initialValues?.targetType ?? "brand",
       targetId: lockedTargetId ?? initialValues?.targetId ?? "",
       startsAt: initialValues?.startsAt ?? "",
       endsAt: initialValues?.endsAt ?? "",
@@ -89,6 +92,32 @@ export function VisibilityForm({
         onSubmit={onSubmit}
       >
         <Input label="Label name" error={errors.label?.message} {...register("label")} />
+        {lockedTargetType ? (
+          <div className="flex flex-col gap-2 text-sm text-[var(--color-ink)]">
+            <span className="font-medium">Target type</span>
+            <input type="hidden" {...register("targetType")} />
+            <div className="flex h-12 items-center rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm capitalize text-[var(--color-ink-muted)]">
+              {lockedTargetType}
+            </div>
+          </div>
+        ) : (
+          <label className="flex flex-col gap-2 text-sm text-[var(--color-ink)]">
+            <span className="font-medium">Target type</span>
+            <select
+              {...register("targetType")}
+              className="h-12 rounded-[16px] border border-[var(--color-border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)]"
+            >
+              <option value="brand">Brand</option>
+              <option value="service">Service</option>
+              <option value="user">User</option>
+            </select>
+            {errors.targetType?.message ? (
+              <span className="text-xs text-[var(--color-error)]">
+                {errors.targetType.message}
+              </span>
+            ) : null}
+          </label>
+        )}
         <Input
           label="Target ID"
           error={errors.targetId?.message}
@@ -122,7 +151,7 @@ export function VisibilityForm({
               ? submitMessage
               : isSubmitSuccessful
                 ? "Visibility assignment accepted."
-                : "Assignments stay explicit, scheduled, and auditable."}
+                : "Labels are created when missing, then assigned on a clear schedule."}
           </p>
           <Button type="submit" kind="admin" disabled={isSubmitting}>
             {isSubmitting ? "Saving..." : "Create assignment"}

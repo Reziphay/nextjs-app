@@ -70,7 +70,6 @@ export function ReportActionForm({ reportId }: ReportActionFormProps) {
         >
           <option value="resolve">Resolve</option>
           <option value="dismiss">Dismiss</option>
-          <option value="escalate">Escalate</option>
         </select>
       </label>
       <Input

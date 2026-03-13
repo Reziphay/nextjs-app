@@ -110,7 +110,7 @@ export function UserDetailState(props: UserDetailProps) {
     return (
       <EmptyState
         title="User data could not be loaded"
-        description="This placeholder admin foundation expects a typed backend endpoint next."
+        description="The current backend configuration does not expose the admin user detail contract needed by this screen."
       />
     );
   }

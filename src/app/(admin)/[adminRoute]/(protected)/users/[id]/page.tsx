@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { AdminTopbar } from "@/components/admin/admin-topbar";
 import { UserDetailState } from "@/features/admin-users/user-detail";
 import { getUserAdminDetail } from "@/lib/api/admin";
+import { publicEnv } from "@/lib/config/env";
 
 type UserDetailPageProps = {
   params: Promise<{
@@ -16,7 +17,19 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
   const detail = await getUserAdminDetail(id);
 
   if (!detail) {
-    notFound();
+    if (publicEnv.NEXT_PUBLIC_USE_MOCK_DATA) {
+      notFound();
+    }
+
+    return (
+      <>
+        <AdminTopbar
+          title="User detail"
+          description="Review role state, penalties, and linked business context before acting."
+        />
+        <UserDetailState state="error" />
+      </>
+    );
   }
 
   return (

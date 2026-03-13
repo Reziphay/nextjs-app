@@ -3,15 +3,15 @@ import { AnalyticsOverview } from "@/features/admin-analytics/analytics-overview
 import { getAnalyticsOverview } from "@/lib/api/admin";
 
 export default async function AnalyticsPage() {
-  const series = await getAnalyticsOverview();
+  const data = await getAnalyticsOverview();
 
   return (
     <>
       <AdminTopbar
         title="Analytics"
-        description="Simple trend cards for reservations, reports, and sponsored performance."
+        description="Operational snapshot for user, provider, reservation, report, and visibility health."
       />
-      <AnalyticsOverview series={series} />
+      <AnalyticsOverview data={data} />
     </>
   );
 }

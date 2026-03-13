@@ -77,6 +77,19 @@ export type VisibilityAssignmentRecord = {
   status: "scheduled" | "active" | "ended";
 };
 
+export type VisibilityLabelRecord = {
+  id: string;
+  name: string;
+  slug: string;
+  targetType: "brand" | "service" | "user";
+  description: string | null;
+  priority: number;
+  isActive: boolean;
+  assignmentCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type SponsorshipCampaignRecord = {
   id: string;
   campaignName: string;
@@ -102,6 +115,17 @@ export type AdminOverview = {
 export type AnalyticsSeries = {
   label: string;
   values: number[];
+};
+
+export type AnalyticsMetric = {
+  label: string;
+  value: string;
+  detail: string;
+};
+
+export type AnalyticsOverviewData = {
+  metrics: AnalyticsMetric[];
+  series: AnalyticsSeries[];
 };
 
 export type ListResult<T> = {
