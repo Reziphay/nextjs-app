@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.reziphay.app",
+      "sha256_cert_fingerprints": [
+        "96:CA:C2:11:1B:8A:C5:5C:8B:05:68:22:06:87:DA:17:FC:2B:F7:D7:BD:EA:78:45:45:F4:46:29:60:0D:3E:4E"
+      ]
+    }
+  }
+]
