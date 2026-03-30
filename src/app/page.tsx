@@ -1,13 +1,15 @@
-export default function Home() {
+import { HomePage } from "@/components/home/home-page";
+import { LocaleProvider } from "@/components/providers/locale-provider";
+import { getServerLocale } from "@/i18n/server";
+import { getApiBaseUrl } from "@/lib/api";
+
+export default async function Page() {
+  const locale = await getServerLocale();
+  const apiBaseUrl = getApiBaseUrl();
+
   return (
-    <main className="home">
-      <section className="hero">
-        <span className="eyebrow">Next.js 16 Starter</span>
-        <h1>Reziphay Next App</h1>
-        <p>
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Vitae consequuntur neque sit cumque labore laborum officiis laboriosam tenetur qui eos repudiandae sint maiores laudantium culpa, voluptatem magni molestiae veniam quia.
-        </p>
-      </section>
-    </main>
+    <LocaleProvider initialLocale={locale}>
+      <HomePage apiBaseUrl={apiBaseUrl} />
+    </LocaleProvider>
   );
 }

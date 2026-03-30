@@ -1,23 +1,32 @@
 import type { Metadata } from "next";
+import { getMessages } from "@/i18n/config";
+import { getServerLocale } from "@/i18n/server";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  applicationName: "Reziphay Next App",
-  title: {
-    default: "Reziphay Next App",
-    template: "%s | Reziphay Next App",
-  },
-  description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae consequuntur neque sit cumque labore laborum officiis laboriosam tenetur qui eos repudiandae sint maiores laudantium culpa, voluptatem magni molestiae veniam quia.",
-  authors: [{ name: "Vugar Safarzada" }],
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const messages = getMessages(locale);
 
-export default function RootLayout({
+  return {
+    applicationName: "Reziphay Next App",
+    title: {
+      default: "Reziphay Next App",
+      template: "%s | Reziphay Next App",
+    },
+    description: messages.metadata.description,
+    authors: [{ name: "Vugar Safarzada" }],
+  };
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getServerLocale();
+
   return (
-    <html lang="az">
+    <html lang={locale} suppressHydrationWarning>
       <body>{children}</body>
     </html>
   );
