@@ -1,117 +1,99 @@
-@import "tailwindcss";
-
-/* ─── App (Consumer) CSS Variables ─────────────────────────────────────── */
-/* These are set dynamically by applyPaletteToRoot() based on active role.  */
-/* Defaults match UCR (red) palette.                                         */
 :root {
-  --rz-ucr-primary: #cc444b;
-  --rz-ucr-primary-light: #df7373;
-  --rz-ucr-primary-soft: rgba(204, 68, 75, 0.12);
-  --rz-uso-primary: #77bfa3;
-  --rz-uso-primary-light: #bfd8bd;
-  --rz-uso-primary-soft: rgba(119, 191, 163, 0.16);
-
-  --app-primary: #cc444b;
-  --app-primary-strong: #b63f46;
-  --app-primary-soft: rgba(204, 68, 75, 0.14);
-  --app-primary-light: #df7373;
-  --app-primary-surface: #fdf0ef;
-  --app-nav-indicator: #cc444b;
-
-  /* App neutral tones */
-  --app-base-bg: #ffffff;
-  --app-bg: #f2f2f7;
-  --app-card: #ffffff;
-  --app-surface: #e5e5ea;
-  --app-card-muted: #f2f2f7;
-  --app-ink: #000000;
-  --app-ink-muted: #8e8e93;
-  --app-ink-faint: #c7c7cc;
-  --app-border: #e5e5ea;
-  --app-divider: #e5e5ea;
-  --app-shadow: 0 12px 28px rgba(13, 13, 18, 0.08);
-}
-
-.dark {
-  --app-base-bg: #0d0d12;
-  --app-bg: #17171c;
-  --app-card: #1c1c24;
-  --app-surface: #252530;
-  --app-card-muted: #17171c;
-  --app-ink: #f2f2f7;
-  --app-ink-muted: #8e8e9a;
-  --app-ink-faint: #636374;
-  --app-border: #2c2c3e;
-  --app-divider: #2c2c3e;
-  --app-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
-}
-
-/* ─── Public / Admin site tokens ────────────────────────────────────────── */
-:root {
-  --color-primary: #cc444b;
-  --color-primary-strong: #b63f46;
-  --color-primary-soft: rgba(204, 68, 75, 0.14);
-  --color-secondary: #77bfa3;
-  --color-secondary-soft: rgba(119, 191, 163, 0.16);
-  --color-ink: #101114;
-  --color-ink-muted: #6d6d78;
-  --color-ink-faint: #9f9fa9;
-  --color-paper: #ffffff;
-  --color-card: rgba(255, 255, 255, 0.92);
-  --color-surface: #f2f2f7;
-  --color-surface-strong: #e5e5ea;
-  --color-border: rgba(13, 13, 18, 0.08);
-  --color-border-strong: rgba(13, 13, 18, 0.12);
-  --color-success: #34c759;
-  --color-warning: #ff9500;
-  --color-error: #ff3b30;
-  --color-panel-dark: #17171c;
-  --color-glass: rgba(255, 255, 255, 0.8);
-  --shadow-soft: 0 18px 44px rgba(13, 13, 18, 0.08);
-  --shadow-card: 0 12px 28px rgba(13, 13, 18, 0.08);
-}
-
-@theme inline {
-  --font-sans: "SF Pro Display", "SF Pro Text", var(--font-geist-sans), sans-serif;
-  --color-background: var(--color-paper);
-  --color-foreground: var(--color-ink);
-}
-
-* {
-  border-color: var(--color-border);
+  --background: #f3eee3;
+  --surface: rgba(255, 255, 255, 0.74);
+  --foreground: #1d1b18;
+  --muted: #62584a;
+  --accent: #165f59;
+  --border: rgba(29, 27, 24, 0.1);
 }
 
 html {
-  scroll-behavior: smooth;
+  height: 100%;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 body {
-  min-height: 100vh;
+  min-height: 100%;
+  color: var(--foreground);
   background:
-    radial-gradient(circle at top left, rgba(204, 68, 75, 0.15), transparent 26%),
-    radial-gradient(circle at top right, rgba(119, 191, 163, 0.12), transparent 24%),
-    linear-gradient(180deg, #ffffff 0%, #fafafc 56%, #f2f2f7 100%);
-  color: var(--color-ink);
-  font-family: "SF Pro Display", "SF Pro Text", var(--font-geist-sans), sans-serif;
-  text-rendering: optimizeLegibility;
+    radial-gradient(circle at top, rgba(22, 95, 89, 0.18), transparent 38%),
+    linear-gradient(180deg, #fcfaf5 0%, var(--background) 100%);
+  font-family:
+    "Segoe UI",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-::selection {
-  background: rgba(204, 68, 75, 0.2);
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-a,
-button {
-  cursor: pointer;
+.home {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px;
 }
 
-main {
-  isolation: isolate;
+.hero {
+  width: min(100%, 720px);
+  padding: 40px;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: var(--surface);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 24px 80px rgba(55, 46, 34, 0.12);
+}
+
+.eyebrow {
+  display: inline-flex;
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(22, 95, 89, 0.1);
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  font-size: clamp(2.5rem, 7vw, 4.75rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.hero p {
+  max-width: 48ch;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 640px) {
+  .home {
+    padding: 20px;
+  }
+
+  .hero {
+    padding: 28px;
+    border-radius: 24px;
+  }
 }

@@ -1,33 +1,24 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
-
-import { siteConfig } from "@/lib/config/site";
-
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.appUrl),
+  applicationName: "Reziphay Next App",
   title: {
-    default: siteConfig.name,
-    template: `%s | ${siteConfig.name}`,
+    default: "Reziphay Next App",
+    template: "%s | Reziphay Next App",
   },
-  description: siteConfig.description,
+  description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae consequuntur neque sit cumque labore laborum officiis laboriosam tenetur qui eos repudiandae sint maiores laudantium culpa, voluptatem magni molestiae veniam quia.",
+  authors: [{ name: "Vugar Safarzada" }],
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} font-sans antialiased`}>{children}</body>
+    <html lang="az">
+      <body>{children}</body>
     </html>
   );
 }

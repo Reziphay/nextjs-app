@@ -18,7 +18,6 @@
         "name": "next"
       }
     ],
-    "types": ["vitest/globals"],
     "paths": {
       "@/*": ["./src/*"]
     }
@@ -29,8 +28,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts",
-    "vitest.config.ts"
+    "**/*.mts"
   ],
   "exclude": ["node_modules"]
 }
