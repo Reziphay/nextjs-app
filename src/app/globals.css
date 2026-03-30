@@ -1,5 +1,23 @@
 :root {
   color-scheme: light;
+  --general-border-radius: 0.8rem;
+  --general-border-radius-2xs: calc(var(--general-border-radius) * 0.286);
+  --general-border-radius-xs: calc(var(--general-border-radius) * 0.357);
+  --general-border-radius-sm: calc(var(--general-border-radius) * 0.571);
+  --general-border-radius-md: calc(var(--general-border-radius) * 0.714);
+  --general-border-radius-lg: calc(var(--general-border-radius) * 0.857);
+  --general-border-radius-xl: var(--general-border-radius);
+  --general-border-radius-2xl: calc(var(--general-border-radius) * 1.143);
+  --general-border-radius-3xl: calc(var(--general-border-radius) * 1.286);
+  --general-border-radius-4xl: calc(var(--general-border-radius) * 1.429);
+  --general-border-radius-5xl: calc(var(--general-border-radius) * 1.714);
+  --general-border-radius-6xl: calc(var(--general-border-radius) * 2);
+  --general-border-radius-card: calc(var(--general-border-radius) * 1.375);
+  --general-border-radius-code: calc(var(--general-border-radius) * 1.125);
+  --general-border-radius-mobile-hero: calc(var(--general-border-radius) * 1.5);
+  --general-border-radius-hero: calc(var(--general-border-radius) * 1.75);
+  --general-border-radius-pill: 999px;
+  --general-border-radius-round: 50%;
 }
 
 html {
@@ -87,7 +105,7 @@ pre {
   width: min(100%, 920px);
   padding: 40px;
   border: 1px solid var(--app-border-soft);
-  border-radius: 28px;
+  border-radius: var(--general-border-radius-hero);
   background:
     linear-gradient(
       145deg,
@@ -118,7 +136,7 @@ pre {
   justify-content: center;
   padding: 0;
   background: transparent;
-  border-radius: 50%;
+  border-radius: var(--general-border-radius-round);
   cursor: pointer;
   transition: transform 160ms ease;
 }
@@ -138,7 +156,7 @@ pre {
   width: fit-content;
   padding: 8px 12px;
   border: 1px solid var(--app-border-primary-soft);
-  border-radius: 999px;
+  border-radius: var(--general-border-radius-pill);
   background: var(--app-bg-primary-soft);
   color: var(--app-primary);
   font-size: var(--font-size-extra-small);
@@ -160,7 +178,7 @@ pre {
   min-width: 54px;
   padding: 10px 14px;
   border: 1px solid var(--app-border-soft);
-  border-radius: 999px;
+  border-radius: var(--general-border-radius-pill);
   background: var(--app-bg-surface-strong);
   color: var(--app-text-muted);
   cursor: pointer;
@@ -220,7 +238,7 @@ pre {
   gap: 14px;
   padding: 22px;
   border: 1px solid var(--app-border-soft);
-  border-radius: 22px;
+  border-radius: var(--general-border-radius-card);
   background: var(--app-bg-surface-strong);
   box-shadow: 0 8px 24px var(--app-shadow-card-soft);
 }
@@ -239,7 +257,7 @@ pre {
 .inlineCode,
 .codeBlock {
   border: 1px solid var(--app-border-primary-soft);
-  border-radius: 18px;
+  border-radius: var(--general-border-radius-code);
   background: var(--app-bg-code);
 }
 
@@ -286,7 +304,7 @@ pre {
 
   .hero {
     padding: 24px;
-    border-radius: 24px;
+    border-radius: var(--general-border-radius-mobile-hero);
   }
 
   .languageNav {

@@ -11,7 +11,7 @@
   flex-wrap: wrap;
   padding: 0.429rem 0.857rem;
   border: 1px solid var(--app-border-soft);
-  border-radius: 0.857rem;
+  border-radius: var(--general-border-radius-lg);
   background: var(--app-bg-surface-strong);
   box-shadow: 0 0 0 0 transparent;
   transition:
@@ -93,7 +93,7 @@
   gap: 0.143rem;
   padding: 0.429rem;
   border: 1px solid var(--app-border-soft);
-  border-radius: 1rem;
+  border-radius: var(--general-border-radius-xl);
   background: var(--app-bg-surface-strong);
   box-shadow: 0 1rem 2.286rem var(--app-shadow-color);
 }
@@ -105,7 +105,7 @@
   align-items: center;
   gap: 0.857rem;
   padding: 0.571rem 0.714rem;
-  border-radius: 0.714rem;
+  border-radius: var(--general-border-radius-md);
   background: transparent;
   color: var(--app-text-strong);
   text-align: left;
@@ -146,7 +146,7 @@
   min-height: 1.714rem;
   padding: 0.214rem 0.429rem;
   border: 1px solid var(--app-border-soft);
-  border-radius: 0.571rem;
+  border-radius: var(--general-border-radius-sm);
   background: var(--app-bg-surface-muted);
   color: var(--app-text-strong);
   font-size: var(--font-size-small);

@@ -34,7 +34,7 @@
   min-height: 2.857rem;
   padding: 0.714rem 1rem;
   border: 1px solid var(--app-border-soft);
-  border-radius: 0.857rem;
+  border-radius: var(--general-border-radius-lg);
   background: var(--app-bg-surface-strong);
   color: var(--app-text-strong);
   font-family: var(--font-family-base);
@@ -107,7 +107,7 @@
   margin-right: 0.857rem;
   padding: 0.571rem 0.857rem;
   border: 1px solid var(--app-border-soft);
-  border-radius: 0.714rem;
+  border-radius: var(--general-border-radius-md);
   background: var(--app-bg-surface);
   color: var(--app-text-strong);
   font-family: var(--font-family-base);

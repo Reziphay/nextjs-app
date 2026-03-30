@@ -10,6 +10,8 @@ export type Messages = {
     aboutUs: string;
     questions: string;
     contactUs: string;
+    openMenu: string;
+    closeMenu: string;
   };
   comingSoon: {
     badge: string;
@@ -83,8 +85,7 @@ export type Messages = {
       noTypeResults: string;
       submit: string;
       submitting: string;
-      haveAccount: string;
-      signIn: string;
+      termsAgreement: string;
       successTitle: string;
       successDescription: string;
       errorTitle: string;

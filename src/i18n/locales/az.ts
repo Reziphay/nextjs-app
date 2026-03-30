@@ -13,6 +13,8 @@ export const azMessages: Messages = {
     aboutUs: "Haqqımızda",
     questions: "Sual-cavab",
     contactUs: "Əlaqə",
+    openMenu: "Menyunu aç",
+    closeMenu: "Menyunu bağla",
   },
   comingSoon: {
     badge: "Tezliklə",
@@ -91,8 +93,7 @@ export const azMessages: Messages = {
       noTypeResults: "Uyğun istifadəçi tipi tapılmadı.",
       submit: "Qeydiyyatdan keç",
       submitting: "Göndərilir",
-      haveAccount: "Artıq hesabınız var?",
-      signIn: "Daxil olun",
+      termsAgreement: "Qeydiyyatdan keçərək şərtlər və qaydaları qəbul etmiş olursunuz.",
       successTitle: "Qeydiyyat sorğusu göndərildi",
       successDescription: "Hesab yaradıldıqdan sonra daxil ola biləcəksiniz.",
       errorTitle: "Qeydiyyat alınmadı",

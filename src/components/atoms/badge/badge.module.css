@@ -6,7 +6,7 @@
   min-height: 1.857rem;
   padding: 0.357rem 0.714rem;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--general-border-radius-pill);
   font-family: var(--font-family-base);
   font-size: var(--font-size-small);
   font-weight: 600;

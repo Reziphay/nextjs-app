@@ -8,7 +8,7 @@
   overflow: hidden;
   isolation: isolate;
   border: 1px solid transparent;
-  border-radius: 0.857rem;
+  border-radius: var(--general-border-radius-lg);
   background: transparent;
   color: var(--app-text-strong);
   cursor: pointer;
@@ -33,7 +33,7 @@
   z-index: 0;
   width: 140%;
   aspect-ratio: 1;
-  border-radius: 999px;
+  border-radius: var(--general-border-radius-pill);
   background: radial-gradient(
     circle,
     var(--button-ripple-color) 0%,
@@ -161,7 +161,7 @@
   --button-ripple-color: var(--app-bg-primary-soft);
   min-height: auto;
   padding: 0;
-  border-radius: 0.286rem;
+  border-radius: var(--general-border-radius-2xs);
   color: var(--app-text-strong);
 }
 

@@ -4,7 +4,7 @@
   gap: 1rem;
   padding: 2rem;
   border: 1px solid var(--app-border-soft);
-  border-radius: 1.429rem;
+  border-radius: var(--general-border-radius-4xl);
   background:
     linear-gradient(
       145deg,

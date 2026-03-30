@@ -10,7 +10,7 @@
   display: inline-flex;
   margin: 0.071rem 0 0;
   border: 1px solid var(--app-border-strong);
-  border-radius: 999px;
+  border-radius: var(--general-border-radius-pill);
   background: var(--app-border-soft);
   box-shadow:
     inset 0 0 0 1px var(--app-bg-overlay-strong),
@@ -32,7 +32,7 @@
   width: var(--switch-thumb-size);
   height: var(--switch-thumb-size);
   border: 1px solid var(--app-border-soft);
-  border-radius: 50%;
+  border-radius: var(--general-border-radius-round);
   background: var(--app-bg-surface-strong);
   box-shadow: 0 0.143rem 0.571rem var(--app-shadow-card-soft);
   transform: translate(0, -50%);

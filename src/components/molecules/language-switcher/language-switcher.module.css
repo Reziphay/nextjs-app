@@ -5,6 +5,55 @@
   gap: 0.571rem;
 }
 
+.compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.071rem;
+  padding: 0.143rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-pill);
+  background: var(--app-bg-surface-strong);
+  box-shadow: 0 0.286rem 0.857rem var(--app-shadow-card-soft);
+}
+
+.compactButton {
+  min-width: 2.143rem;
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.357rem 0.5rem;
+  border: 0;
+  border-radius: var(--general-border-radius-pill);
+  background: transparent;
+  color: var(--app-text-muted);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-extra-small);
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.compactButton:hover {
+  color: var(--app-text-strong);
+  background: var(--app-bg-surface);
+}
+
+.compactButton:focus-visible {
+  outline: 3px solid var(--app-focus-ring);
+  outline-offset: 2px;
+}
+
+.compactButtonActive {
+  background: var(--app-primary);
+  color: var(--app-text-inverse);
+}
+
 .iconWrap {
   width: 2.857rem;
   height: 2.857rem;
@@ -13,7 +62,7 @@
   justify-content: center;
   flex-shrink: 0;
   border: 1px solid var(--app-border-soft);
-  border-radius: 0.857rem;
+  border-radius: var(--general-border-radius-lg);
   background: var(--app-bg-surface-strong);
   box-shadow: 0 0.429rem 1.143rem var(--app-shadow-card-soft);
   color: var(--app-primary);
@@ -52,7 +101,7 @@
   flex-wrap: wrap;
   padding: 0.286rem;
   border: 1px solid var(--app-border-soft);
-  border-radius: 999px;
+  border-radius: var(--general-border-radius-pill);
   background: var(--app-bg-surface-strong);
   box-shadow: 0 0.429rem 1.143rem var(--app-shadow-card-soft);
 }
@@ -64,7 +113,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: 999px;
+  border-radius: var(--general-border-radius-pill);
   background: var(--app-bg-primary-soft);
   color: var(--app-primary);
 }
@@ -73,7 +122,7 @@
   min-width: 3.286rem;
 }
 
-@media (max-width: 48rem) {
+@media (max-width: 72rem) {
   .dropdownShell {
     width: 100%;
   }
@@ -85,5 +134,10 @@
 
   .segmented {
     justify-content: flex-end;
+  }
+
+  .compact {
+    width: fit-content;
+    max-width: 100%;
   }
 }

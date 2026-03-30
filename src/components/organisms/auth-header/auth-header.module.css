@@ -6,6 +6,11 @@
   min-height: 4rem;
 }
 
+.mobileToggle,
+.mobilePanel {
+  display: none;
+}
+
 .brand {
   display: inline-flex;
   align-items: center;
@@ -55,7 +60,7 @@
   right: 0;
   bottom: -0.571rem;
   height: 2px;
-  border-radius: 999px;
+  border-radius: var(--general-border-radius-pill);
   background: var(--app-primary);
   transform: scaleX(0);
   transform-origin: center;
@@ -111,7 +116,7 @@
   justify-content: center;
   min-height: 2.857rem;
   padding: 0.714rem 1rem;
-  border-radius: 999px;
+  border-radius: var(--general-border-radius-pill);
   font-size: var(--font-size-small);
   font-weight: 800;
   line-height: 1;
@@ -163,20 +168,123 @@
   border-color: var(--app-primary-strong);
 }
 
-@media (max-width: 64rem) {
+@media (max-width: 72rem) {
   .header {
-    grid-template-columns: auto 1fr;
-    row-gap: 0.857rem;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
   }
 
-  .navigation {
-    grid-column: 1 / -1;
-    order: 3;
-    justify-content: flex-start;
+  .brandName {
+    font-size: var(--font-size-medium);
   }
 
+  .navigation,
   .actions {
-    justify-self: end;
+    display: none;
+  }
+
+  .mobileToggle {
+    display: inline-flex;
+    justify-content: flex-end;
+  }
+
+  .menuButton {
+    box-shadow: none;
+  }
+
+  .mobilePanelOpen {
+    width: 100%;
+    display: grid;
+    grid-column: 1 / -1;
+    justify-items: start;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--app-border-soft);
+  }
+
+  .mobileSwitcher {
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .mobileNavigation {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.714rem;
+  }
+
+  .mobileNavigation .navigationLink {
+    min-height: 2.857rem;
+    justify-content: flex-start;
+    padding: 0.857rem 1rem;
+    border: 1px solid var(--app-border-soft);
+    border-radius: var(--general-border-radius-xl);
+    background: var(--app-bg-surface);
+    color: var(--app-text-strong);
+    transform: none;
+  }
+
+  .mobileNavigation .navigationLink::after {
+    display: none;
+  }
+
+  .mobileNavigation .navigationLinkActive {
+    border-color: var(--app-border-primary-strong);
+    background: var(--app-bg-primary-soft);
+    color: var(--app-primary-strong);
+  }
+
+  .mobileAuthActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.714rem;
+  }
+
+  .mobileAuthLink,
+  .mobileAuthButton {
+    display: inline-flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--general-border-radius-xl);
+    font-size: var(--font-size-small);
+    font-weight: 800;
+    line-height: 1;
+    text-align: center;
+    transition:
+      color 160ms ease,
+      background-color 160ms ease,
+      border-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .mobileAuthLink {
+    border: 1px solid var(--app-border-soft);
+    background: var(--app-bg-surface);
+    color: var(--app-text-strong);
+  }
+
+  .mobileAuthLink:hover,
+  .mobileAuthButton:hover {
+    transform: translateY(-1px);
+  }
+
+  .mobileAuthLinkActive {
+    border-color: var(--app-border-primary-strong);
+    background: var(--app-bg-primary-soft);
+    color: var(--app-primary-strong);
+  }
+
+  .mobileAuthButton {
+    border: 1px solid var(--app-primary);
+    background: var(--app-primary);
+    color: var(--app-text-inverse);
+    box-shadow: 0 0.857rem 2rem var(--app-shadow-primary-soft);
+  }
+
+  .mobileAuthButtonActive {
+    background: var(--app-primary-strong);
+    border-color: var(--app-primary-strong);
   }
 }
 
@@ -189,47 +297,11 @@
     font-size: var(--font-size-medium);
   }
 
-  .navigation {
-    justify-content: flex-start;
+  .mobileNavigation {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .actions {
-    grid-column: 1 / -1;
-    order: 4;
-    justify-content: space-between;
-    width: 100%;
-  }
-
-  .authActions {
-    margin-left: auto;
-  }
-}
-
-@media (max-width: 40rem) {
-  .navigation {
-    gap: 0.857rem 1.286rem;
-  }
-
-  .actions {
-    gap: 0.857rem;
-  }
-
-  .switcher {
-    width: 100%;
-  }
-
-  .authActions {
-    width: 100%;
-    justify-content: space-between;
-    margin-left: 0;
-  }
-
-  .authLink,
-  .authButton {
-    flex: 1;
-  }
-
-  .authButton {
-    min-width: 0;
+  .mobileAuthActions {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

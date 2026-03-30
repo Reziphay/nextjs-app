@@ -13,6 +13,8 @@ export const ruMessages: Messages = {
     aboutUs: "О нас",
     questions: "Вопросы",
     contactUs: "Контакты",
+    openMenu: "Открыть меню",
+    closeMenu: "Закрыть меню",
   },
   comingSoon: {
     badge: "Скоро",
@@ -90,8 +92,7 @@ export const ruMessages: Messages = {
       noTypeResults: "Подходящий тип пользователя не найден.",
       submit: "Создать аккаунт",
       submitting: "Отправка",
-      haveAccount: "Уже есть аккаунт?",
-      signIn: "Войти",
+      termsAgreement: "Регистрируясь, вы соглашаетесь с условиями и правилами.",
       successTitle: "Запрос на регистрацию отправлен",
       successDescription: "После создания аккаунта вы сможете войти.",
       errorTitle: "Регистрация не удалась",

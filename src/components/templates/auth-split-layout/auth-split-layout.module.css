@@ -4,10 +4,20 @@
   isolation: isolate;
   padding: 0 1.429rem 2rem;
   background:
-    radial-gradient(circle at top left, var(--app-glow-primary-soft), transparent 32%),
-    radial-gradient(circle at top right, var(--app-glow-primary-strong), transparent 30%);
+    radial-gradient(
+      circle at top left,
+      var(--app-glow-primary-soft),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at top right,
+      var(--app-glow-primary-strong),
+      transparent 30%
+    );
   background-repeat: no-repeat;
-  background-size: 100% 100%, 100% 100%;
+  background-size:
+    100% 100%,
+    100% 100%;
 }
 
 .topbar {
@@ -17,9 +27,9 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 40;
-  padding: 1rem 1.714rem;
+  padding: 0.1rem 1.714rem;
   border: 1px solid var(--app-border-soft);
-  border-radius: 1.429rem;
+  border-radius: var(--general-border-radius-4xl);
   background: var(--app-bg-surface-strong);
   box-shadow: 0 1rem 2.5rem var(--app-shadow-card-soft);
 }
@@ -40,7 +50,7 @@
   gap: 0.857rem;
   padding: 0.857rem;
   border: 1px solid var(--app-border-soft);
-  border-radius: 2rem;
+  border-radius: var(--general-border-radius-6xl);
   background:
     linear-gradient(
       135deg,
@@ -66,7 +76,7 @@
   display: grid;
   align-content: center;
   padding: clamp(1.714rem, 2.4vw, 3rem);
-  border-radius: 1.714rem;
+  border-radius: var(--general-border-radius-5xl);
   background: var(--app-bg-surface-strong);
   box-shadow: 0 0.857rem 2.286rem var(--app-shadow-card-soft);
 }
@@ -109,11 +119,11 @@
 
   .frame {
     padding: 0.714rem;
-    border-radius: 1.429rem;
+    border-radius: var(--general-border-radius-4xl);
   }
 
   .formPaneInner {
     padding: 1.286rem;
-    border-radius: 1.286rem;
+    border-radius: var(--general-border-radius-3xl);
   }
 }

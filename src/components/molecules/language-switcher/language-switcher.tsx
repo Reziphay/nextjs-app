@@ -17,7 +17,7 @@ import {
 } from "@/i18n/config";
 import styles from "./language-switcher.module.css";
 
-type LanguageSwitcherVariant = "dropdown" | "segmented";
+type LanguageSwitcherVariant = "dropdown" | "segmented" | "compact";
 
 type LanguageSwitcherProps = {
   className?: string;
@@ -39,6 +39,36 @@ export function LanguageSwitcher({
   variant = "dropdown",
 }: LanguageSwitcherProps) {
   const { locale, messages, setLocale } = useLocale();
+
+  if (variant === "compact") {
+    return (
+      <div
+        className={joinClassNames(styles.compact, className)}
+        role="group"
+        aria-label={messages.languageSwitcherAriaLabel}
+      >
+        {locales.map((entry) => {
+          const isActive = entry === locale;
+
+          return (
+            <button
+              key={entry}
+              type="button"
+              className={`${styles.compactButton} ${
+                isActive ? styles.compactButtonActive : ""
+              }`}
+              aria-label={`${messages.languageSwitcherAriaLabel}: ${localeNames[entry]}`}
+              aria-pressed={isActive}
+              title={localeNames[entry]}
+              onClick={() => setLocale(entry)}
+            >
+              {localeLabels[entry]}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
 
   if (variant === "segmented") {
     return (

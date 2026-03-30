@@ -10,7 +10,7 @@
   align-items: flex-start;
   padding: 1rem 1.143rem;
   border: 1px solid var(--alert-border);
-  border-radius: 1rem;
+  border-radius: var(--general-border-radius-xl);
   background: var(--alert-bg);
   color: var(--alert-accent);
   box-shadow: 0 0.571rem 1.714rem var(--app-shadow-card-soft);

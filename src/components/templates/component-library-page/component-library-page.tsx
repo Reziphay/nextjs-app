@@ -184,6 +184,10 @@ export function ComponentLibraryPage() {
               <LanguageSwitcher />
             </ShowcaseCard>
 
+            <ShowcaseCard title="Compact" description="Header üçün az yer tutan qısa variant">
+              <LanguageSwitcher variant="compact" />
+            </ShowcaseCard>
+
             <ShowcaseCard title="Segmented" description="Hero və üst panel üçün sürətli seçim">
               <LanguageSwitcher variant="segmented" />
             </ShowcaseCard>

@@ -7,7 +7,7 @@
   place-content: center;
   margin: 0.143rem 0 0;
   border: 1px solid var(--app-border-soft);
-  border-radius: 0.357rem;
+  border-radius: var(--general-border-radius-xs);
   background: var(--app-bg-surface-strong);
   box-shadow: 0 0 0 0 transparent;
   cursor: pointer;

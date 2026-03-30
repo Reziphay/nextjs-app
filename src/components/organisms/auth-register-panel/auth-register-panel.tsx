@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -162,63 +161,65 @@ export function AuthRegisterPanel() {
             </Field>
           </div>
 
-          <Field
-            className={sharedStyles.fieldFull}
-            data-invalid={errors.birthday ? "" : undefined}
-          >
-            <FieldLabel htmlFor="birthday" required>
-              {register.birthdayLabel}
-            </FieldLabel>
-            <Input
-              id="birthday"
-              type="date"
-              value={values.birthday}
-              max={getTodayDateValue()}
-              autoComplete="bday"
-              aria-invalid={errors.birthday ? "true" : undefined}
-              onChange={(event) => {
-                dispatch(
-                  setRegisterField({
-                    field: "birthday",
-                    value: event.target.value,
-                  }),
-                );
-              }}
-            />
-            {errors.birthday ? (
-              <FieldDescription>{errors.birthday}</FieldDescription>
-            ) : null}
-          </Field>
-
-          <Field
-            className={sharedStyles.fieldFull}
-            data-invalid={errors.country ? "" : undefined}
-          >
-            <FieldLabel htmlFor="country" required>
-              {register.countryLabel}
-            </FieldLabel>
-            <Combobox
-              id="country"
-              items={countryOptions}
-              value={values.country}
-              placeholder={register.countryPlaceholder}
-              emptyMessage={register.noCountryResults}
-              aria-invalid={errors.country ? "true" : undefined}
-              onValueChange={(value) => {
-                if (typeof value === "string") {
+          <div className={sharedStyles.fieldGrid}>
+            <Field
+              className={sharedStyles.fieldFull}
+              data-invalid={errors.birthday ? "" : undefined}
+            >
+              <FieldLabel htmlFor="birthday" required>
+                {register.birthdayLabel}
+              </FieldLabel>
+              <Input
+                id="birthday"
+                type="date"
+                value={values.birthday}
+                max={getTodayDateValue()}
+                autoComplete="bday"
+                aria-invalid={errors.birthday ? "true" : undefined}
+                onChange={(event) => {
                   dispatch(
                     setRegisterField({
-                      field: "country",
-                      value,
+                      field: "birthday",
+                      value: event.target.value,
                     }),
                   );
-                }
-              }}
-            />
-            {errors.country ? (
-              <FieldDescription>{errors.country}</FieldDescription>
-            ) : null}
-          </Field>
+                }}
+              />
+              {errors.birthday ? (
+                <FieldDescription>{errors.birthday}</FieldDescription>
+              ) : null}
+            </Field>
+
+            <Field
+              className={sharedStyles.fieldFull}
+              data-invalid={errors.country ? "" : undefined}
+            >
+              <FieldLabel htmlFor="country" required>
+                {register.countryLabel}
+              </FieldLabel>
+              <Combobox
+                id="country"
+                items={countryOptions}
+                value={values.country}
+                placeholder={register.countryPlaceholder}
+                emptyMessage={register.noCountryResults}
+                aria-invalid={errors.country ? "true" : undefined}
+                onValueChange={(value) => {
+                  if (typeof value === "string") {
+                    dispatch(
+                      setRegisterField({
+                        field: "country",
+                        value,
+                      }),
+                    );
+                  }
+                }}
+              />
+              {errors.country ? (
+                <FieldDescription>{errors.country}</FieldDescription>
+              ) : null}
+            </Field>
+          </div>
 
           <Field
             className={sharedStyles.fieldFull}
@@ -317,12 +318,7 @@ export function AuthRegisterPanel() {
         </form>
 
         <div className={sharedStyles.footer}>
-          <p className={sharedStyles.footerText}>
-            {register.haveAccount}
-            <Link className={sharedStyles.footerLink} href="/auth/login">
-              {register.signIn}
-            </Link>
-          </p>
+          <p className={sharedStyles.footerText}>{register.termsAgreement}</p>
         </div>
       </div>
     </section>

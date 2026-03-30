@@ -13,6 +13,8 @@ export const enMessages: Messages = {
     aboutUs: "About Us",
     questions: "F&Q",
     contactUs: "Contact Us",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
   },
   comingSoon: {
     badge: "Coming soon",
@@ -90,8 +92,7 @@ export const enMessages: Messages = {
       noTypeResults: "No matching user type found.",
       submit: "Create account",
       submitting: "Submitting",
-      haveAccount: "Already have an account?",
-      signIn: "Sign in",
+      termsAgreement: "By creating an account, you agree to the terms and conditions.",
       successTitle: "Registration request sent",
       successDescription: "You can sign in after your account is created.",
       errorTitle: "Registration failed",

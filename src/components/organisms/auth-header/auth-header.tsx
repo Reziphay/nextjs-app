@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Button } from "@/components/atoms";
 import { Logo } from "@/components/logo";
 import { LanguageSwitcher } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
@@ -17,11 +19,28 @@ const navigationLinks = [
 export function AuthHeader() {
   const pathname = usePathname();
   const { messages } = useLocale();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const loginHref = "/auth/login";
   const registerHref = "/auth/register";
 
   const isActiveLink = (href: string) =>
     href === "/" ? pathname === href : pathname.startsWith(href);
+
+  function renderNavigationItems(onItemClick?: () => void) {
+    return navigationLinks.map((link) => (
+      <Link
+        key={link.href}
+        aria-current={isActiveLink(link.href) ? "page" : undefined}
+        className={`${styles.navigationLink} ${
+          isActiveLink(link.href) ? styles.navigationLinkActive : ""
+        }`}
+        href={link.href}
+        onClick={onItemClick}
+      >
+        {messages.navigation[link.key]}
+      </Link>
+    ));
+  }
 
   return (
     <header className={styles.header}>
@@ -34,22 +53,11 @@ export function AuthHeader() {
         aria-label={messages.navigationAriaLabel}
         className={styles.navigation}
       >
-        {navigationLinks.map((link) => (
-          <Link
-            key={link.href}
-            aria-current={isActiveLink(link.href) ? "page" : undefined}
-            className={`${styles.navigationLink} ${
-              isActiveLink(link.href) ? styles.navigationLinkActive : ""
-            }`}
-            href={link.href}
-          >
-            {messages.navigation[link.key]}
-          </Link>
-        ))}
+        {renderNavigationItems()}
       </nav>
 
       <div className={styles.actions}>
-        <LanguageSwitcher className={styles.switcher} variant="dropdown" />
+        <LanguageSwitcher className={styles.switcher} variant="compact" />
 
         <div className={styles.authActions}>
           <Link
@@ -68,6 +76,63 @@ export function AuthHeader() {
               isActiveLink(registerHref) ? styles.authButtonActive : ""
             }`}
             href={registerHref}
+          >
+            {messages.auth.login.signUp}
+          </Link>
+        </div>
+      </div>
+
+      <div className={styles.mobileToggle}>
+        <Button
+          aria-controls="auth-mobile-menu"
+          aria-expanded={isMenuOpen}
+          aria-label={
+            isMenuOpen
+              ? messages.navigation.closeMenu
+              : messages.navigation.openMenu
+          }
+          className={styles.menuButton}
+          icon={isMenuOpen ? "close" : "menu"}
+          size="medium"
+          variant="icon"
+          onClick={() => setIsMenuOpen((previousValue) => !previousValue)}
+        />
+      </div>
+
+      <div
+        id="auth-mobile-menu"
+        className={`${styles.mobilePanel} ${
+          isMenuOpen ? styles.mobilePanelOpen : ""
+        }`}
+      >
+        <LanguageSwitcher className={styles.mobileSwitcher} variant="compact" />
+
+        <nav
+          aria-label={messages.navigationAriaLabel}
+          className={styles.mobileNavigation}
+        >
+          {renderNavigationItems(() => setIsMenuOpen(false))}
+        </nav>
+
+        <div className={styles.mobileAuthActions}>
+          <Link
+            aria-current={isActiveLink(loginHref) ? "page" : undefined}
+            className={`${styles.mobileAuthLink} ${
+              isActiveLink(loginHref) ? styles.mobileAuthLinkActive : ""
+            }`}
+            href={loginHref}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            {messages.auth.login.submit}
+          </Link>
+
+          <Link
+            aria-current={isActiveLink(registerHref) ? "page" : undefined}
+            className={`${styles.mobileAuthButton} ${
+              isActiveLink(registerHref) ? styles.mobileAuthButtonActive : ""
+            }`}
+            href={registerHref}
+            onClick={() => setIsMenuOpen(false)}
           >
             {messages.auth.login.signUp}
           </Link>

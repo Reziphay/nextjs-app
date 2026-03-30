@@ -4,10 +4,20 @@
   isolation: isolate;
   padding: 0 1.429rem 2rem;
   background:
-    radial-gradient(circle at top left, var(--app-glow-primary-soft), transparent 38%),
-    radial-gradient(circle at top right, var(--app-glow-primary-strong), transparent 34%);
+    radial-gradient(
+      circle at top left,
+      var(--app-glow-primary-soft),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at top right,
+      var(--app-glow-primary-strong),
+      transparent 34%
+    );
   background-repeat: no-repeat;
-  background-size: 100% 100%, 100% 100%;
+  background-size:
+    100% 100%,
+    100% 100%;
 }
 
 .topbar {
@@ -17,9 +27,9 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 40;
-  padding: 1rem 1.714rem;
+  padding: 0.3rem 1.714rem;
   border: 1px solid var(--app-border-soft);
-  border-radius: 1.429rem;
+  border-radius: var(--general-border-radius-4xl);
   background: var(--app-bg-surface-strong);
   box-shadow: 0 1rem 2.5rem var(--app-shadow-card-soft);
 }
