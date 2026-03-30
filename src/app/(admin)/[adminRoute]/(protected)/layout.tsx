@@ -39,13 +39,17 @@ export default async function ProtectedAdminLayout({
   }
 
   return (
-    <main className="mx-auto grid min-h-screen max-w-[1440px] gap-6 px-4 py-6 sm:px-6 xl:grid-cols-[280px_1fr] xl:px-8">
-      <AdminSidebar adminRoute={adminRoute} />
-      <div className="space-y-6">
-        <div className="flex justify-end">
-          <LogoutButton redirectTo={`/${adminRoute}/login`} />
+    <main className="relative overflow-hidden">
+      <div className="pointer-events-none absolute right-[-10rem] top-[-6rem] h-[24rem] w-[24rem] rounded-full bg-[var(--color-primary-soft)] blur-3xl" />
+      <div className="pointer-events-none absolute left-[-9rem] bottom-[-7rem] h-[26rem] w-[26rem] rounded-full bg-[var(--color-secondary-soft)] blur-3xl" />
+      <div className="mx-auto grid min-h-screen max-w-[1440px] gap-6 px-4 py-6 sm:px-6 xl:grid-cols-[280px_1fr] xl:px-8">
+        <AdminSidebar adminRoute={adminRoute} />
+        <div className="space-y-6">
+          <div className="flex justify-end">
+            <LogoutButton redirectTo={`/${adminRoute}/login`} />
+          </div>
+          {children}
         </div>
-        {children}
       </div>
     </main>
   );

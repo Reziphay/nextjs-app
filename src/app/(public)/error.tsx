@@ -11,7 +11,7 @@ export default function PublicError({
 }) {
   return (
     <main className="mx-auto grid min-h-[70vh] max-w-[960px] place-items-center px-4 py-16">
-      <Card className="max-w-xl text-center">
+      <Card tone="soft" className="max-w-xl text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-primary)]">
           Public website
         </p>

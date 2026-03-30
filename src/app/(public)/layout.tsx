@@ -9,10 +9,12 @@ export default function PublicLayout({
   children: ReactNode;
 }) {
   return (
-    <>
+    <div className="relative overflow-hidden">
+      <div className="pointer-events-none absolute left-[-8rem] top-[-6rem] -z-10 h-[24rem] w-[24rem] rounded-full bg-[var(--color-primary-soft)] blur-3xl" />
+      <div className="pointer-events-none absolute right-[-8rem] top-40 -z-10 h-[26rem] w-[26rem] rounded-full bg-[var(--color-secondary-soft)] blur-3xl" />
       <SiteHeader />
-      {children}
+      <div className="relative z-10">{children}</div>
       <SiteFooter />
-    </>
+    </div>
   );
 }

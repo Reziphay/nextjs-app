@@ -49,20 +49,20 @@ export function AdminFilterBar({
 }: AdminFilterBarProps) {
   return (
     <div className="space-y-4">
-      <form action={action} className="grid gap-4 rounded-[24px] border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-soft)] lg:grid-cols-[minmax(0,1fr)_220px_auto]">
+      <form action={action} className="grid gap-4 rounded-[24px] border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-[var(--shadow-soft)] backdrop-blur-sm lg:grid-cols-[minmax(0,1fr)_220px_auto]">
         <input
           type="search"
           name="q"
           defaultValue={query}
           placeholder={queryPlaceholder}
-          className="h-12 rounded-[18px] border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)]"
+          className="h-12 rounded-[18px] border border-transparent bg-[var(--color-surface)] px-4 text-sm text-[var(--color-ink)] outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)]"
         />
         <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-ink-faint)]">
           {selectLabel}
           <select
             name="status"
             defaultValue={selectedValue}
-            className="h-12 rounded-[18px] border border-[var(--color-border)] bg-white px-4 text-sm font-normal normal-case tracking-normal text-[var(--color-ink)] outline-none focus:border-[var(--color-primary)]"
+            className="h-12 rounded-[18px] border border-transparent bg-[var(--color-surface)] px-4 text-sm font-normal normal-case tracking-normal text-[var(--color-ink)] outline-none focus:border-[var(--color-primary)]"
           >
             {options.map((option) => (
               <option key={option.value} value={option.value}>
@@ -86,8 +86,8 @@ export function AdminFilterBar({
               className={cn(
                 "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition",
                 active
-                  ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)]"
-                  : "border-[var(--color-border)] bg-white text-[var(--color-ink-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-ink)]",
+                  ? "border-[var(--color-panel-dark)] bg-[var(--color-panel-dark)] text-[var(--color-paper)]"
+                  : "border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-ink-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-ink)]",
               )}
             >
               <span>{chip.label}</span>

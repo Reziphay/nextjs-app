@@ -22,8 +22,8 @@ export const metadata = buildMetadata({
 
 export default function LandingPage() {
   return (
-    <main>
-      <section className="mx-auto grid max-w-[1240px] gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:px-8 lg:py-24">
+    <main className="pb-10">
+      <section className="mx-auto grid max-w-[1240px] items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:px-8 lg:py-24">
         <div className="flex flex-col justify-center">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-primary)]">
             Mobile-first reservation utility
@@ -48,7 +48,7 @@ export default function LandingPage() {
           </div>
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
             {trustHighlights.map((item) => (
-              <Card key={item.title} className="rounded-[22px] p-5">
+              <Card key={item.title} className="rounded-[22px] border-white/70 p-5">
                 <p className="font-medium text-[var(--color-ink)]">{item.title}</p>
                 <p className="mt-2 text-sm leading-7 text-[var(--color-ink-muted)]">
                   {item.description}
@@ -68,7 +68,7 @@ export default function LandingPage() {
         />
         <div className="mt-10 grid gap-6 lg:grid-cols-3">
           {howItWorks.map((item, index) => (
-            <Card key={item.title}>
+            <Card key={item.title} className="border-white/70">
               <p className="text-sm font-semibold text-[var(--color-primary)]">
                 0{index + 1}
               </p>
@@ -84,7 +84,7 @@ export default function LandingPage() {
       </section>
 
       <section className="mx-auto max-w-[1240px] px-4 py-20 sm:px-6 lg:px-8">
-        <div className="grid gap-8 rounded-[32px] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-soft)] lg:grid-cols-[0.75fr_1.25fr] lg:p-12">
+        <div className="grid gap-8 rounded-[32px] border border-[var(--color-border)] bg-[var(--color-card)] p-8 shadow-[var(--shadow-soft)] backdrop-blur-sm lg:grid-cols-[0.75fr_1.25fr] lg:p-12">
           <SectionHeading
             eyebrow="Use cases"
             title="Built for any reservation-led service"
@@ -94,7 +94,7 @@ export default function LandingPage() {
             {featuredCategories.map((category) => (
               <div
                 key={category}
-                className="rounded-[22px] bg-[var(--color-surface)] px-5 py-6 text-sm font-medium text-[var(--color-ink)]"
+                className="rounded-[22px] border border-[var(--color-border)] bg-[var(--color-paper)] px-5 py-6 text-sm font-medium text-[var(--color-ink)]"
               >
                 {category}
               </div>
@@ -104,7 +104,7 @@ export default function LandingPage() {
       </section>
 
       <section className="mx-auto max-w-[1240px] px-4 py-20 sm:px-6 lg:px-8">
-        <div className="grid gap-8 rounded-[32px] bg-[var(--color-ink)] px-8 py-10 text-[var(--color-paper)] lg:grid-cols-[1.2fr_0.8fr] lg:px-12">
+        <div className="grid gap-8 rounded-[32px] bg-[var(--color-panel-dark)] px-8 py-10 text-[var(--color-paper)] shadow-[var(--shadow-soft)] lg:grid-cols-[1.2fr_0.8fr] lg:px-12">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-primary)]">
               Product philosophy

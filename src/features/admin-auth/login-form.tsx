@@ -56,8 +56,11 @@ export function AdminLoginForm({
   });
 
   return (
-    <Card className="w-full max-w-md p-8">
+    <Card tone="soft" className="w-full max-w-md p-8">
       <div>
+        <div className="grid h-12 w-12 place-items-center rounded-[18px] bg-[linear-gradient(135deg,var(--rz-ucr-primary)_0%,var(--rz-uso-primary)_100%)] text-sm font-semibold tracking-[-0.05em] text-white shadow-[var(--shadow-card)]">
+          Rz
+        </div>
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-primary)]">
           Hidden admin
         </p>

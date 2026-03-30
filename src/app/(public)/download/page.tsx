@@ -1,8 +1,8 @@
 import Link from "next/link";
 
+import { PageIntroPanel } from "@/components/marketing/page-intro-panel";
 import { buttonStyles } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { SectionHeading } from "@/components/ui/section-heading";
 import { buildMetadata, siteConfig } from "@/lib/config/site";
 
 export const metadata = buildMetadata({
@@ -14,13 +14,13 @@ export const metadata = buildMetadata({
 export default function DownloadPage() {
   return (
     <main className="mx-auto max-w-[1240px] px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-      <SectionHeading
+      <PageIntroPanel
         eyebrow="Get the app"
         title="The mobile app is where reservations happen"
         description="Use the website to understand the product, then move into the app for discovery, reservation requests, and ongoing account flows."
       />
       <div className="mt-10 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-        <Card className="p-8">
+        <Card tone="soft" className="p-8">
           <p className="text-sm font-medium text-[var(--color-ink-muted)]">
             App stores
           </p>
@@ -46,7 +46,7 @@ export default function DownloadPage() {
             "Track reservation changes",
             "Complete visits and review",
           ].map((item) => (
-            <Card key={item} className="min-h-48 bg-[var(--color-surface)]">
+            <Card key={item} tone="subtle" className="min-h-48">
               <p className="text-base font-semibold text-[var(--color-ink)]">
                 {item}
               </p>

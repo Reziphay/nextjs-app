@@ -28,13 +28,13 @@ export function buttonStyles({
   return cn(
     "inline-flex h-12 items-center justify-center rounded-[18px] px-5 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60",
     kind === "primary" &&
-      "bg-[var(--color-primary)] text-[var(--color-ink)] shadow-[var(--shadow-soft)] hover:bg-[var(--color-primary-strong)]",
+      "bg-[var(--color-primary)] text-white shadow-[var(--shadow-card)] hover:bg-[var(--color-primary-strong)]",
     kind === "secondary" &&
-      "border border-[var(--color-border-strong)] bg-white text-[var(--color-ink)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]",
+      "border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-ink)] hover:border-[var(--color-primary)] hover:bg-[var(--color-surface)] hover:text-[var(--color-primary)]",
     kind === "ghost" &&
-      "bg-transparent text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-strong)] hover:text-[var(--color-ink)]",
+      "bg-transparent text-[var(--color-ink-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-ink)]",
     kind === "admin" &&
-      "bg-[var(--color-ink)] text-[var(--color-paper)] hover:bg-[#0f0f0f]",
+      "bg-[var(--color-panel-dark)] text-[var(--color-paper)] shadow-[var(--shadow-card)] hover:opacity-95",
     kind === "destructive" &&
       "bg-[var(--color-error)] text-white hover:opacity-90",
     fullWidth && "w-full",

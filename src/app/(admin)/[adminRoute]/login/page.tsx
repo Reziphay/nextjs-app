@@ -36,7 +36,9 @@ export default async function AdminLoginPage({
   }
 
   return (
-    <main className="grid min-h-screen place-items-center px-4 py-12">
+    <main className="relative grid min-h-screen place-items-center overflow-hidden px-4 py-12">
+      <div className="pointer-events-none absolute right-[-8rem] top-[-5rem] h-[22rem] w-[22rem] rounded-full bg-[var(--color-primary-soft)] blur-3xl" />
+      <div className="pointer-events-none absolute left-[-8rem] bottom-[-5rem] h-[24rem] w-[24rem] rounded-full bg-[var(--color-secondary-soft)] blur-3xl" />
       <AdminLoginForm adminRoute={adminRoute} nextPath={nextPath} />
     </main>
   );

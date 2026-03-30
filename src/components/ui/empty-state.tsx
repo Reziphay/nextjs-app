@@ -7,7 +7,7 @@ type EmptyStateProps = {
 
 export function EmptyState({ description, title }: EmptyStateProps) {
   return (
-    <Card className="border-dashed text-center">
+    <Card tone="soft" className="border-dashed text-center">
       <h3 className="text-lg font-semibold text-[var(--color-ink)]">{title}</h3>
       <p className="mt-2 text-sm leading-7 text-[var(--color-ink-muted)]">
         {description}

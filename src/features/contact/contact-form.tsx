@@ -49,7 +49,7 @@ export function ContactForm() {
   });
 
   return (
-    <Card className="p-8">
+    <Card tone="soft" className="p-8">
       <form className="grid gap-5" onSubmit={onSubmit}>
         <div className="grid gap-5 md:grid-cols-2">
           <Input label="Full name" error={errors.name?.message} {...register("name")} />

@@ -54,7 +54,7 @@ export function AdminPagination({
   const end = Math.min(page * pageSize, total);
 
   return (
-    <div className="flex flex-col gap-4 rounded-[24px] border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-soft)] md:flex-row md:items-center md:justify-between">
+    <div className="flex flex-col gap-4 rounded-[24px] border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-[var(--shadow-soft)] backdrop-blur-sm md:flex-row md:items-center md:justify-between">
       <p className="text-sm text-[var(--color-ink-muted)]">
         Showing {start}-{end} of {total}
       </p>

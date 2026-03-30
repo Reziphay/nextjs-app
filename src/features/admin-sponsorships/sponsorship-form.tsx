@@ -110,7 +110,7 @@ export function SponsorshipForm({
               <span className="font-medium">Target type</span>
               <select
                 {...register("targetType")}
-                className="h-12 rounded-[16px] border border-[var(--color-border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)]"
+                className="h-12 rounded-[16px] border border-transparent bg-[var(--color-surface)] px-4 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)]"
                 defaultValue="service"
               >
                 <option value="service">Service</option>

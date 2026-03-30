@@ -46,7 +46,7 @@ export default function UcrLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-[var(--app-bg)]">
       {/* ── Desktop sidebar ── */}
-      <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-[var(--app-border)] bg-[var(--app-card)] py-8 px-4">
+      <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r border-[var(--app-border)] bg-[var(--app-base-bg)] px-4 py-8 shadow-[var(--app-shadow)]">
         <div className="px-3 mb-8">
           <h1 className="text-xl font-bold text-[var(--app-ink)]">Reziphay</h1>
           <p className="text-xs text-[var(--app-ink-faint)] mt-0.5">UCR</p>
@@ -89,7 +89,7 @@ export default function UcrLayout({ children }: { children: ReactNode }) {
       </main>
 
       {/* ── Mobile bottom navigation ── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--app-card)] border-t border-[var(--app-border)] flex z-40 safe-area-pb">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 flex border-t border-[var(--app-border)] bg-[var(--app-base-bg)] safe-area-pb">
         {NAV_ITEMS.map(({ href, labelKey, icon }) => {
           const active = pathname === href || pathname.startsWith(href + '/');
           return (
@@ -97,11 +97,18 @@ export default function UcrLayout({ children }: { children: ReactNode }) {
               key={href}
               href={href}
               className={cn(
-                'flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-xs transition-colors',
+                'flex-1 flex flex-col items-center justify-center gap-1 py-2 text-xs transition-colors',
                 active ? 'text-[var(--app-primary)]' : 'text-[var(--app-ink-faint)]',
               )}
             >
-              <span className="text-xl leading-none">{icon}</span>
+              <span
+                className={cn(
+                  'grid h-10 w-10 place-items-center rounded-full text-xl leading-none transition-colors',
+                  active ? 'bg-[var(--app-primary-soft)]' : '',
+                )}
+              >
+                {icon}
+              </span>
               <span className="font-medium">{t[labelKey]}</span>
             </Link>
           );

@@ -76,7 +76,7 @@ export function UserActionForm({ userId }: UserActionFormProps) {
         <span className="font-medium">Account action</span>
         <select
           {...register("action")}
-          className="h-12 rounded-[16px] border border-[var(--color-border)] bg-white px-4 text-sm outline-none focus:border-[var(--color-primary)]"
+          className="h-12 rounded-[16px] border border-transparent bg-[var(--color-surface)] px-4 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-primary)]"
         >
           <option value="suspend">Suspend</option>
           <option value="close">Close</option>

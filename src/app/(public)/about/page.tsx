@@ -1,8 +1,8 @@
 import Link from "next/link";
 
+import { PageIntroPanel } from "@/components/marketing/page-intro-panel";
 import { buttonStyles } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { SectionHeading } from "@/components/ui/section-heading";
 import { buildMetadata } from "@/lib/config/site";
 
 export const metadata = buildMetadata({
@@ -14,10 +14,20 @@ export const metadata = buildMetadata({
 export default function AboutPage() {
   return (
     <main className="mx-auto max-w-[1240px] px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-      <SectionHeading
+      <PageIntroPanel
         eyebrow="Product philosophy"
         title="A reservation mediation tool, not a payment platform and not a social app"
         description="The product stance is deliberate: flexible coordination, sector-agnostic discovery, and trust built through behavior rather than heavy-handed control."
+        actions={
+          <>
+            <Link href="/download" className={buttonStyles({ kind: "primary" })}>
+              Get the app
+            </Link>
+            <Link href="/contact" className={buttonStyles({ kind: "secondary" })}>
+              Contact support
+            </Link>
+          </>
+        }
       />
       <div className="mt-12 grid gap-6 lg:grid-cols-3">
         {[
@@ -25,13 +35,13 @@ export default function AboutPage() {
           "One account can evolve across customer and provider roles",
           "Trust is shaped by reviews, reports, and response behavior",
         ].map((item) => (
-          <Card key={item}>
+          <Card key={item} tone="soft">
             <p className="font-medium text-[var(--color-ink)]">{item}</p>
           </Card>
         ))}
       </div>
       <div className="mt-12 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <Card>
+        <Card tone="soft">
           <h2 className="text-2xl font-semibold tracking-[-0.03em] text-[var(--color-ink)]">
             Broad sector fit
           </h2>
@@ -41,7 +51,7 @@ export default function AboutPage() {
             website should reflect that breadth without becoming generic or vague.
           </p>
         </Card>
-        <Card className="bg-[var(--color-surface)]">
+        <Card tone="subtle">
           <h2 className="text-2xl font-semibold tracking-[-0.03em] text-[var(--color-ink)]">
             Moderation approach
           </h2>

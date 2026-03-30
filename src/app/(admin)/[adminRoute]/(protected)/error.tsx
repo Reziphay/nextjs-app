@@ -10,7 +10,7 @@ export default function AdminError({
   reset: () => void;
 }) {
   return (
-    <Card>
+    <Card tone="soft">
       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-primary)]">
         Hidden admin
       </p>

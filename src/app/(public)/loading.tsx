@@ -1,12 +1,14 @@
+import { Card } from "@/components/ui/card";
+
 function LoadingCard() {
   return (
-    <div className="rounded-[24px] border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-soft)]">
+    <Card tone="soft">
       <div className="animate-pulse space-y-4">
         <div className="h-4 w-24 rounded-full bg-[var(--color-surface-strong)]" />
         <div className="h-8 w-2/3 rounded-full bg-[var(--color-surface-strong)]" />
         <div className="h-24 rounded-[20px] bg-[var(--color-surface-strong)]" />
       </div>
-    </div>
+    </Card>
   );
 }
 

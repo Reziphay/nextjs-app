@@ -12,7 +12,7 @@ export function AdminTopbar({
   title,
 }: AdminTopbarProps) {
   return (
-    <div className="flex flex-col justify-between gap-4 rounded-[28px] border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-soft)] md:flex-row md:items-center">
+    <div className="flex flex-col justify-between gap-4 rounded-[28px] border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-[var(--shadow-soft)] backdrop-blur-sm md:flex-row md:items-center">
       <div>
         <p className="text-sm font-medium text-[var(--color-ink-muted)]">
           Hidden operations

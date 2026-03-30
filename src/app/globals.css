@@ -4,55 +4,75 @@
 /* These are set dynamically by applyPaletteToRoot() based on active role.  */
 /* Defaults match UCR (red) palette.                                         */
 :root {
+  --rz-ucr-primary: #cc444b;
+  --rz-ucr-primary-light: #df7373;
+  --rz-ucr-primary-soft: rgba(204, 68, 75, 0.12);
+  --rz-uso-primary: #77bfa3;
+  --rz-uso-primary-light: #bfd8bd;
+  --rz-uso-primary-soft: rgba(119, 191, 163, 0.16);
+
   --app-primary: #cc444b;
-  --app-primary-strong: #b83840;
+  --app-primary-strong: #b63f46;
   --app-primary-soft: rgba(204, 68, 75, 0.14);
-  --app-primary-light: #e4b1ab;
+  --app-primary-light: #df7373;
   --app-primary-surface: #fdf0ef;
   --app-nav-indicator: #cc444b;
 
   /* App neutral tones */
-  --app-bg: #f9f9f9;
+  --app-base-bg: #ffffff;
+  --app-bg: #f2f2f7;
   --app-card: #ffffff;
-  --app-ink: #1a1a1a;
-  --app-ink-muted: #5c5c6e;
-  --app-ink-faint: #9090a0;
-  --app-border: rgba(0, 0, 0, 0.08);
-  --app-divider: rgba(0, 0, 0, 0.06);
+  --app-surface: #e5e5ea;
+  --app-card-muted: #f2f2f7;
+  --app-ink: #000000;
+  --app-ink-muted: #8e8e93;
+  --app-ink-faint: #c7c7cc;
+  --app-border: #e5e5ea;
+  --app-divider: #e5e5ea;
+  --app-shadow: 0 12px 28px rgba(13, 13, 18, 0.08);
 }
 
 .dark {
-  --app-bg: #0d0d12;
+  --app-base-bg: #0d0d12;
+  --app-bg: #17171c;
   --app-card: #1c1c24;
+  --app-surface: #252530;
+  --app-card-muted: #17171c;
   --app-ink: #f2f2f7;
-  --app-ink-muted: #a0a0b0;
-  --app-ink-faint: #606070;
-  --app-border: rgba(255, 255, 255, 0.08);
-  --app-divider: rgba(255, 255, 255, 0.05);
+  --app-ink-muted: #8e8e9a;
+  --app-ink-faint: #636374;
+  --app-border: #2c2c3e;
+  --app-divider: #2c2c3e;
+  --app-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
 }
 
 /* ─── Public / Admin site tokens ────────────────────────────────────────── */
 :root {
-  --color-primary: #9989ff;
-  --color-primary-strong: #8774ff;
-  --color-primary-soft: rgba(153, 137, 255, 0.16);
-  --color-secondary: #a89afe;
-  --color-ink: #1e1e1e;
-  --color-ink-muted: #5a5a6f;
-  --color-ink-faint: #8a8a9c;
-  --color-paper: #fdfdfd;
-  --color-surface: #f5f4fb;
-  --color-surface-strong: #ece8fb;
-  --color-border: rgba(30, 30, 30, 0.08);
-  --color-border-strong: rgba(30, 30, 30, 0.14);
-  --color-success: #1fa971;
-  --color-warning: #e8a317;
-  --color-error: #d84c4c;
-  --shadow-soft: 0 18px 48px rgba(30, 30, 30, 0.08);
+  --color-primary: #cc444b;
+  --color-primary-strong: #b63f46;
+  --color-primary-soft: rgba(204, 68, 75, 0.14);
+  --color-secondary: #77bfa3;
+  --color-secondary-soft: rgba(119, 191, 163, 0.16);
+  --color-ink: #101114;
+  --color-ink-muted: #6d6d78;
+  --color-ink-faint: #9f9fa9;
+  --color-paper: #ffffff;
+  --color-card: rgba(255, 255, 255, 0.92);
+  --color-surface: #f2f2f7;
+  --color-surface-strong: #e5e5ea;
+  --color-border: rgba(13, 13, 18, 0.08);
+  --color-border-strong: rgba(13, 13, 18, 0.12);
+  --color-success: #34c759;
+  --color-warning: #ff9500;
+  --color-error: #ff3b30;
+  --color-panel-dark: #17171c;
+  --color-glass: rgba(255, 255, 255, 0.8);
+  --shadow-soft: 0 18px 44px rgba(13, 13, 18, 0.08);
+  --shadow-card: 0 12px 28px rgba(13, 13, 18, 0.08);
 }
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
+  --font-sans: "SF Pro Display", "SF Pro Text", var(--font-geist-sans), sans-serif;
   --color-background: var(--color-paper);
   --color-foreground: var(--color-ink);
 }
@@ -68,14 +88,23 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(168, 154, 254, 0.18), transparent 28%),
-    linear-gradient(180deg, #fdfdfd 0%, #f7f6fc 58%, #fdfdfd 100%);
+    radial-gradient(circle at top left, rgba(204, 68, 75, 0.15), transparent 26%),
+    radial-gradient(circle at top right, rgba(119, 191, 163, 0.12), transparent 24%),
+    linear-gradient(180deg, #ffffff 0%, #fafafc 56%, #f2f2f7 100%);
   color: var(--color-ink);
-  font-family: var(--font-geist-sans), sans-serif;
+  font-family: "SF Pro Display", "SF Pro Text", var(--font-geist-sans), sans-serif;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: rgba(153, 137, 255, 0.22);
+  background: rgba(204, 68, 75, 0.2);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
 }
 
 a,

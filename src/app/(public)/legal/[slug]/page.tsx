@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 
+import { PageIntroPanel } from "@/components/marketing/page-intro-panel";
+import { Card } from "@/components/ui/card";
 import { legalDocuments } from "@/features/marketing/content";
 import { buildMetadata } from "@/lib/config/site";
 
@@ -38,16 +40,13 @@ export default async function LegalPage({ params }: LegalPageProps) {
 
   return (
     <main className="mx-auto max-w-[880px] px-4 py-16 sm:px-6 lg:py-20">
-      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-primary)]">
-        Legal
-      </p>
-      <h1 className="mt-4 text-5xl font-semibold tracking-[-0.05em] text-[var(--color-ink)]">
-        {document.title}
-      </h1>
-      <p className="mt-4 text-sm text-[var(--color-ink-muted)]">
-        Updated {document.updatedAt}
-      </p>
-      <div className="mt-10 space-y-10 rounded-[32px] border border-[var(--color-border)] bg-white p-8 shadow-[var(--shadow-soft)]">
+      <PageIntroPanel
+        eyebrow="Legal"
+        title={document.title}
+        description={`Updated ${document.updatedAt}`}
+        className="p-7 sm:p-8"
+      />
+      <Card tone="soft" className="mt-10 space-y-10 p-8">
         {document.sections.map((section) => (
           <section key={section.heading}>
             <h2 className="text-2xl font-semibold tracking-[-0.03em] text-[var(--color-ink)]">
@@ -58,7 +57,7 @@ export default async function LegalPage({ params }: LegalPageProps) {
             </p>
           </section>
         ))}
-      </div>
+      </Card>
     </main>
   );
 }

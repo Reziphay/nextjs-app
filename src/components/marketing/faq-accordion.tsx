@@ -19,7 +19,7 @@ export function FAQAccordion({ groups }: FAQAccordionProps) {
           {group.items.map((item) => (
             <details
               key={item.question}
-              className="group rounded-[20px] border border-[var(--color-border)] bg-white p-5 shadow-[var(--shadow-soft)]"
+              className="group rounded-[20px] border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-[var(--shadow-card)] backdrop-blur-sm"
             >
               <summary className="cursor-pointer list-none pr-6 text-sm font-medium text-[var(--color-ink)]">
                 {item.question}

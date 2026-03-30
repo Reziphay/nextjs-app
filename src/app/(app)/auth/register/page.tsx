@@ -1,20 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
 
-import { useT } from '@/lib/app/i18n/context';
-import { authService } from '@/lib/app/services/auth.service';
-import { useAuthStore } from '@/lib/app/stores/auth.store';
+import { AuthShell } from '@/components/app/auth-shell';
 import type { AppRole } from '@/lib/app/models/user';
+import { authService } from '@/lib/app/services/auth.service';
+import { useT } from '@/lib/app/i18n/context';
+import { useAuthStore } from '@/lib/app/stores/auth.store';
 
 const schema = z.object({
   fullName: z.string().min(2),
   email: z.string().email(),
 });
+
 type FormData = z.infer<typeof schema>;
 
 export default function RegisterPage() {
@@ -55,60 +57,59 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-[var(--app-bg)]">
-      <div className="w-full max-w-sm">
+    <AuthShell
+      title={t.registerTitle}
+      subtitle={t.registerSubtitle}
+      topSlot={
         <button
           onClick={() => router.back()}
-          className="mb-8 text-sm text-[var(--app-ink-muted)] hover:text-[var(--app-primary)] flex items-center gap-1"
+          className="text-sm text-[var(--app-ink-muted)] transition hover:text-[var(--app-primary)]"
         >
           ← {t.commonBack}
         </button>
+      }
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-[var(--app-ink)]">
+            {t.registerNameLabel}
+          </label>
+          <input
+            {...register('fullName')}
+            placeholder={t.registerNamePlaceholder}
+            autoFocus
+            className="w-full rounded-[16px] border border-transparent bg-[var(--app-bg)] px-4 py-3.5 text-base text-[var(--app-ink)] outline-none transition placeholder:text-[var(--app-ink-faint)] focus:border-[var(--app-primary)]"
+          />
+          {errors.fullName ? (
+            <p className="mt-1 text-xs text-[var(--color-error)]">{errors.fullName.message}</p>
+          ) : null}
+        </div>
 
-        <h1 className="text-2xl font-bold text-[var(--app-ink)] mb-2">{t.registerTitle}</h1>
-        <p className="text-[var(--app-ink-muted)] text-sm mb-8">{t.registerSubtitle}</p>
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-[var(--app-ink)]">
+            {t.registerEmailLabel}
+          </label>
+          <input
+            {...register('email')}
+            type="email"
+            placeholder={t.registerEmailPlaceholder}
+            className="w-full rounded-[16px] border border-transparent bg-[var(--app-bg)] px-4 py-3.5 text-base text-[var(--app-ink)] outline-none transition placeholder:text-[var(--app-ink-faint)] focus:border-[var(--app-primary)]"
+          />
+          {errors.email ? (
+            <p className="mt-1 text-xs text-[var(--color-error)]">{errors.email.message}</p>
+          ) : null}
+        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-sm font-medium text-[var(--app-ink)] mb-1.5">
-              {t.registerNameLabel}
-            </label>
-            <input
-              {...register('fullName')}
-              placeholder={t.registerNamePlaceholder}
-              autoFocus
-              className="w-full px-4 py-3.5 rounded-xl border border-[var(--app-border)] bg-[var(--app-card)] text-[var(--app-ink)] placeholder:text-[var(--app-ink-faint)] focus:outline-none focus:border-[var(--app-primary)] text-base"
-            />
-            {errors.fullName && (
-              <p className="mt-1 text-xs text-red-500">{errors.fullName.message}</p>
-            )}
-          </div>
+        {error ? <p className="text-sm text-[var(--color-error)]">{error}</p> : null}
 
-          <div>
-            <label className="block text-sm font-medium text-[var(--app-ink)] mb-1.5">
-              {t.registerEmailLabel}
-            </label>
-            <input
-              {...register('email')}
-              type="email"
-              placeholder={t.registerEmailPlaceholder}
-              className="w-full px-4 py-3.5 rounded-xl border border-[var(--app-border)] bg-[var(--app-card)] text-[var(--app-ink)] placeholder:text-[var(--app-ink-faint)] focus:outline-none focus:border-[var(--app-primary)] text-base"
-            />
-            {errors.email && (
-              <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
-            )}
-          </div>
-
-          {error && <p className="text-sm text-red-500">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full py-3.5 rounded-2xl bg-[var(--app-primary)] text-white font-semibold text-base hover:bg-[var(--app-primary-strong)] disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-all mt-2"
-          >
-            {isSubmitting ? t.commonLoading : t.registerSubmit}
-          </button>
-        </form>
-      </div>
-    </div>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="mt-2 h-14 rounded-[20px] bg-[var(--app-primary)] text-base font-semibold text-white shadow-[var(--app-shadow)] transition-all disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.99]"
+        >
+          {isSubmitting ? t.commonLoading : t.registerSubmit}
+        </button>
+      </form>
+    </AuthShell>
   );
 }

@@ -1,5 +1,5 @@
+import { PageIntroPanel } from "@/components/marketing/page-intro-panel";
 import { Card } from "@/components/ui/card";
-import { SectionHeading } from "@/components/ui/section-heading";
 import { ContactForm } from "@/features/contact/contact-form";
 import { buildMetadata, siteConfig } from "@/lib/config/site";
 
@@ -12,7 +12,7 @@ export const metadata = buildMetadata({
 export default function ContactPage() {
   return (
     <main className="mx-auto max-w-[1240px] px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-      <SectionHeading
+      <PageIntroPanel
         eyebrow="Support"
         title="Keep support clear and lightweight"
         description="This surface is for general questions, provider onboarding inquiries, and trust-related follow-up."
@@ -20,7 +20,7 @@ export default function ContactPage() {
       <div className="mt-10 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <ContactForm />
         <div className="grid gap-6">
-          <Card>
+          <Card tone="soft">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-primary)]">
               Email
             </p>
@@ -32,7 +32,7 @@ export default function ContactPage() {
               feedback.
             </p>
           </Card>
-          <Card className="bg-[var(--color-surface)]">
+          <Card tone="subtle">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-primary)]">
               FAQ shortcut
             </p>

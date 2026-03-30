@@ -54,7 +54,7 @@ export function ProviderInquiryForm() {
   });
 
   return (
-    <Card className="p-8">
+    <Card tone="soft" className="p-8">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-primary)]">
           Provider inquiry
@@ -88,7 +88,7 @@ export function ProviderInquiryForm() {
           <span className="font-medium">Sector</span>
           <select
             {...register("sector")}
-            className="h-12 rounded-[16px] border border-[var(--color-border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)]"
+            className="h-12 rounded-[16px] border border-transparent bg-[var(--color-surface)] px-4 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)]"
           >
             <option>Barber / salon</option>
             <option>Dental / health</option>

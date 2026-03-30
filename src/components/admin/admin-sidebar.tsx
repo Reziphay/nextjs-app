@@ -26,7 +26,7 @@ export function AdminSidebar({ adminRoute }: AdminSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="rounded-[28px] border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-soft)]">
+    <aside className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-[var(--shadow-soft)] backdrop-blur-sm">
       <div className="mb-6 px-3 pt-2">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-primary)]">
           Hidden admin
@@ -47,7 +47,7 @@ export function AdminSidebar({ adminRoute }: AdminSidebarProps) {
               className={cn(
                 "block rounded-[18px] px-3 py-3 text-sm transition",
                 active
-                  ? "bg-[var(--color-ink)] text-[var(--color-paper)]"
+                  ? "bg-[var(--color-panel-dark)] text-[var(--color-paper)]"
                   : "text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-strong)] hover:text-[var(--color-ink)]",
               )}
             >
