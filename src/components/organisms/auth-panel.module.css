@@ -1,38 +1,40 @@
 .wrapper {
   width: min(100%, 32rem);
+  margin: 0 auto;
   display: grid;
 }
 
 .card {
   display: grid;
-  gap: 1rem;
-  padding: 1.429rem;
-  border: 1px solid var(--app-border-soft);
-  border-radius: 1.143rem;
-  background: var(--app-bg-surface-strong);
-  box-shadow: 0 1rem 2.857rem var(--app-shadow-card-soft);
+  gap: 1.143rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .cardHeader {
   display: grid;
-  gap: 0.571rem;
+  gap: 0.714rem;
+  text-align: center;
 }
 
 .cardHeader h1 {
   color: var(--app-text-strong);
-  font-size: var(--font-size-medium);
-  line-height: 1.3;
+  font-size: var(--font-size-large);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
 }
 
 .cardHeader p {
   color: var(--app-text-muted);
   font-size: var(--font-size-small);
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .form {
   display: grid;
-  gap: 0.857rem;
+  gap: 1rem;
 }
 
 .fieldGrid {
@@ -55,6 +57,7 @@
 
 .submitButton {
   width: 100%;
+  margin-top: 0.143rem;
 }
 
 .footer {
@@ -93,10 +96,6 @@
 }
 
 @media (max-width: 48rem) {
-  .card {
-    padding: 1.286rem;
-  }
-
   .labelRow,
   .fieldGrid {
     grid-template-columns: minmax(0, 1fr);

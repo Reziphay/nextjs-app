@@ -15,68 +15,19 @@ body {
 
 body {
   min-height: 100%;
-  --app-background-pattern-size: 27px;
-  --app-background-pattern-shade-1: #b2b2b2;
-  --app-background-pattern-shade-2: #ffffff;
-  --app-background-pattern-shade-3: #d9d9d9;
-  --app-background-pattern-gradient:
-    var(--app-background-pattern-shade-3) 0 120deg, transparent 0;
+  --app-background-stripe-base: var(--app-primary);
+  --app-background-stripe-accent: var(--app-primary-strong);
   color: var(--app-text-base);
-  background-color: var(--app-background-pattern-shade-2);
-  background-image:
-    radial-gradient(
-      circle at top left,
-      var(--app-glow-primary-soft),
-      transparent 34%
-    ),
-    radial-gradient(
-      circle at top right,
-      var(--app-glow-primary-strong),
-      transparent 30%
-    ),
-    conic-gradient(
-      from -60deg at 50% calc(100% / 3),
-      var(--app-background-pattern-gradient)
-    ),
-    conic-gradient(
-      from 120deg at 50% calc(200% / 3),
-      var(--app-background-pattern-gradient)
-    ),
-    conic-gradient(
-      from 60deg at calc(200% / 3),
-      var(--app-background-pattern-shade-3) 60deg,
-      var(--app-background-pattern-shade-2) 0 120deg,
-      transparent 0
-    ),
-    conic-gradient(
-      from 180deg at calc(100% / 3),
-      var(--app-background-pattern-shade-1) 60deg,
-      var(--app-background-pattern-gradient)
-    ),
-    linear-gradient(
-      90deg,
-      var(--app-background-pattern-shade-1) calc(100% / 6),
-      var(--app-background-pattern-shade-2) 0 50%,
-      var(--app-background-pattern-shade-1) 0 calc(500% / 6),
-      var(--app-background-pattern-shade-2) 0
-    );
-  background-repeat:
-    no-repeat, no-repeat, repeat, repeat, repeat, repeat, repeat;
-  background-attachment:
-    fixed, fixed, fixed, fixed, fixed, fixed, fixed;
-  background-size:
-    100% 100%,
-    100% 100%,
-    calc(1.732 * var(--app-background-pattern-size))
-      var(--app-background-pattern-size),
-    calc(1.732 * var(--app-background-pattern-size))
-      var(--app-background-pattern-size),
-    calc(1.732 * var(--app-background-pattern-size))
-      var(--app-background-pattern-size),
-    calc(1.732 * var(--app-background-pattern-size))
-      var(--app-background-pattern-size),
-    calc(1.732 * var(--app-background-pattern-size))
-      var(--app-background-pattern-size);
+  background: repeating-linear-gradient(
+      -45deg,
+      var(--app-background-stripe-base),
+      var(--app-background-stripe-accent) 10px,
+      var(--app-background-stripe-base) 10px,
+      var(--app-background-stripe-accent) 20px
+    )
+    var(--app-background-stripe-base);
+  background-attachment: fixed;
+  background-blend-mode: screen;
   font-family: var(--font-family-base);
   font-size: var(--font-size-medium);
   -webkit-font-smoothing: antialiased;

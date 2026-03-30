@@ -1,4 +1,4 @@
-// Mirrors the core shape of `User` and `UserType` from `nodejs-app/prisma/schema.prisma`.
+// Mirrors `User`, `UserType`, and auth response contracts from `nodejs-app`.
 
 export const userTypes = ["uso", "ucr", "admin"] as const;
 
@@ -13,8 +13,12 @@ type UserProfileFields = {
   last_name: string;
   birthday: Date;
   country: string;
-  country_prefix: string;
+  country_prefix: string | null;
   email: string;
+};
+
+type UserIdentityFields = {
+  id: string;
 };
 
 type UserVerificationFields = {
@@ -22,11 +26,14 @@ type UserVerificationFields = {
   email_verified: boolean;
 };
 
-export type User = UserProfileFields &
+export type User = UserIdentityFields &
+  UserProfileFields &
   UserVerificationFields & {
     phone: string | null;
     hashed_password: string;
     type: UserType;
+    created_at: Date;
+    updated_at: Date;
   };
 
 export type Users = User[];
@@ -41,6 +48,41 @@ export type RegisterRequestBody = Omit<
 };
 
 export type RegisterFormValues = RegisterRequestBody;
+
+export type LoginRequestBody = {
+  email: string;
+  password: string;
+};
+
+export type LoginFormValues = LoginRequestBody;
+
+export type AuthenticatedUser = Pick<
+  User,
+  "id" | "email" | "type" | "first_name" | "last_name" | "email_verified"
+>;
+
+export type RegisteredUser = Pick<
+  User,
+  "first_name" | "last_name" | "email" | "type" | "email_verified" | "created_at"
+>;
+
+export type AuthTokens = {
+  access_token: string;
+  refresh_token: string;
+};
+
+export type LoginResponseData = {
+  user: AuthenticatedUser;
+} & AuthTokens;
+
+export type RegisterResponseData = {
+  user: RegisteredUser;
+};
+
+export type ApiSuccessResponse<TData> = {
+  success: boolean;
+  data: TData;
+};
 
 export function isRegisterUserType(
   value: string,

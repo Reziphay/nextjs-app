@@ -11,24 +11,17 @@
 }
 
 .topbar {
-  width: min(calc(100% - 2.858rem), 84rem);
+  width: min(calc(100% - 2.858rem), 88rem);
   position: fixed;
-  top: 0;
+  top: 1rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 40;
-  padding: 0.857rem 1.143rem;
+  padding: 1rem 1.714rem;
   border: 1px solid var(--app-border-soft);
-  border-top: 0;
-  border-radius: 0 0 1.429rem 1.429rem;
-  background:
-    linear-gradient(
-      180deg,
-      var(--app-bg-overlay-strong) 0%,
-      var(--app-bg-overlay-soft) 100%
-    ),
-    var(--app-bg-surface-strong);
-  box-shadow: 0 1rem 2.857rem var(--app-shadow-card-soft);
+  border-radius: 1.429rem;
+  background: var(--app-bg-surface-strong);
+  box-shadow: 0 1rem 2.5rem var(--app-shadow-card-soft);
 }
 
 .content {
@@ -36,7 +29,7 @@
   display: grid;
   justify-items: center;
   align-content: start;
-  padding: 5.714rem 0 3.429rem;
+  padding: 8rem 0 3.429rem;
 }
 
 .shell {
@@ -54,10 +47,11 @@
 
   .topbar {
     width: calc(100% - 2rem);
-    padding: 0.857rem 0.857rem;
+    top: 0.714rem;
+    padding: 0.857rem 1rem;
   }
 
   .content {
-    padding-top: 5.286rem;
+    padding-top: 7.857rem;
   }
 }

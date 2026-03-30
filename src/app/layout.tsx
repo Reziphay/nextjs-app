@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getMessages } from "@/i18n/config";
+import { StoreProvider } from "@/components/providers/store-provider";
 import { getServerLocale } from "@/i18n/server";
 import { lightThemeStyle } from "@/theme/light-theme";
 import { fontLinks, typographyStyle } from "@/theme/typography";
@@ -44,7 +45,9 @@ export default async function RootLayout({
           />
         ))}
       </head>
-      <body>{children}</body>
+      <body>
+        <StoreProvider>{children}</StoreProvider>
+      </body>
     </html>
   );
 }

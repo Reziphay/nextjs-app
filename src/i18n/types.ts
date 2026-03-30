@@ -16,17 +16,44 @@ export type Messages = {
     description: string;
   };
   auth: {
+    shell: {
+      badge: string;
+      title: string;
+      description: string;
+      featureOneTitle: string;
+      featureOneDescription: string;
+      featureTwoTitle: string;
+      featureTwoDescription: string;
+      featureThreeTitle: string;
+      featureThreeDescription: string;
+    };
     login: {
       title: string;
       description: string;
       emailLabel: string;
       emailPlaceholder: string;
       passwordLabel: string;
+      passwordPlaceholder: string;
       forgotPassword: string;
       submit: string;
+      submitting: string;
       continueWithGoogle: string;
       noAccount: string;
       signUp: string;
+      errorTitle: string;
+      errorDescription: string;
+      configurationErrorDescription: string;
+      networkErrorDescription: string;
+      badRequestDescription: string;
+      unauthorizedDescription: string;
+      forbiddenDescription: string;
+      notFoundDescription: string;
+      rateLimitedDescription: string;
+      serverErrorDescription: string;
+      validationErrorDescription: string;
+      requiredMessage: string;
+      emailInvalidMessage: string;
+      passwordRequiredMessage: string;
     };
     register: {
       title: string;
@@ -74,10 +101,12 @@ export type Messages = {
       serverErrorDescription: string;
       validationErrorDescription: string;
       requiredMessage: string;
+      firstNameInvalidMessage: string;
+      lastNameInvalidMessage: string;
       birthdayRequiredMessage: string;
+      birthdayAgeMessage: string;
       emailInvalidMessage: string;
       passwordInvalidMessage: string;
-      countryPrefixInvalidMessage: string;
       typeRequiredMessage: string;
     };
   };

@@ -1,0 +1,119 @@
+.page {
+  min-height: 100dvh;
+  position: relative;
+  isolation: isolate;
+  padding: 0 1.429rem 2rem;
+  background:
+    radial-gradient(circle at top left, var(--app-glow-primary-soft), transparent 32%),
+    radial-gradient(circle at top right, var(--app-glow-primary-strong), transparent 30%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%, 100% 100%;
+}
+
+.topbar {
+  width: min(calc(100% - 2.858rem), 88rem);
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  padding: 1rem 1.714rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 1.429rem;
+  background: var(--app-bg-surface-strong);
+  box-shadow: 0 1rem 2.5rem var(--app-shadow-card-soft);
+}
+
+.content {
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  padding: 8.714rem 0 3.429rem;
+}
+
+.frame {
+  width: min(100%, 84rem);
+  min-height: 48rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.06fr) minmax(22rem, 0.94fr);
+  gap: 0.857rem;
+  padding: 0.857rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 2rem;
+  background:
+    linear-gradient(
+      135deg,
+      var(--app-bg-overlay-strong) 0%,
+      var(--app-bg-overlay-soft) 100%
+    ),
+    var(--app-bg-surface);
+  box-shadow: 0 1.714rem 5rem var(--app-shadow-color);
+}
+
+.visualPane,
+.formPane {
+  min-width: 0;
+}
+
+.formPane {
+  display: grid;
+  align-items: stretch;
+}
+
+.formPaneInner {
+  height: 100%;
+  display: grid;
+  align-content: center;
+  padding: clamp(1.714rem, 2.4vw, 3rem);
+  border-radius: 1.714rem;
+  background: var(--app-bg-surface-strong);
+  box-shadow: 0 0.857rem 2.286rem var(--app-shadow-card-soft);
+}
+
+@media (max-width: 72rem) {
+  .frame {
+    min-height: unset;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .visualPane {
+    display: none;
+  }
+
+  .formPaneInner {
+    min-height: unset;
+  }
+}
+
+@media (max-width: 64rem) {
+  .page {
+    padding: 0 1rem 1.429rem;
+  }
+
+  .topbar {
+    width: calc(100% - 2rem);
+    top: 0.714rem;
+    padding: 0.857rem 1rem;
+  }
+
+  .content {
+    padding-top: 7.857rem;
+  }
+}
+
+@media (max-width: 48rem) {
+  .content {
+    padding-top: 9.714rem;
+  }
+
+  .frame {
+    padding: 0.714rem;
+    border-radius: 1.429rem;
+  }
+
+  .formPaneInner {
+    padding: 1.286rem;
+    border-radius: 1.286rem;
+  }
+}

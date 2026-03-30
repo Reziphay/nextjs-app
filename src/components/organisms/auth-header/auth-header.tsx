@@ -17,15 +17,18 @@ const navigationLinks = [
 export function AuthHeader() {
   const pathname = usePathname();
   const { messages } = useLocale();
+  const loginHref = "/auth/login";
+  const registerHref = "/auth/register";
 
   const isActiveLink = (href: string) =>
     href === "/" ? pathname === href : pathname.startsWith(href);
 
   return (
     <header className={styles.header}>
-      <div className={styles.brand}>
+      <Link className={styles.brand} href="/">
         <Logo size={28} />
-      </div>
+        <span className={styles.brandName}>Reziphay</span>
+      </Link>
 
       <nav
         aria-label={messages.navigationAriaLabel}
@@ -45,7 +48,31 @@ export function AuthHeader() {
         ))}
       </nav>
 
-      <LanguageSwitcher className={styles.switcher} variant="segmented" />
+      <div className={styles.actions}>
+        <LanguageSwitcher className={styles.switcher} variant="dropdown" />
+
+        <div className={styles.authActions}>
+          <Link
+            aria-current={isActiveLink(loginHref) ? "page" : undefined}
+            className={`${styles.authLink} ${
+              isActiveLink(loginHref) ? styles.authLinkActive : ""
+            }`}
+            href={loginHref}
+          >
+            {messages.auth.login.submit}
+          </Link>
+
+          <Link
+            aria-current={isActiveLink(registerHref) ? "page" : undefined}
+            className={`${styles.authButton} ${
+              isActiveLink(registerHref) ? styles.authButtonActive : ""
+            }`}
+            href={registerHref}
+          >
+            {messages.auth.login.signUp}
+          </Link>
+        </div>
+      </div>
     </header>
   );
 }

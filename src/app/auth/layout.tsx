@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { AuthLayoutTemplate } from "@/components";
+import { AuthSplitLayoutTemplate } from "@/components";
 import { LocaleProvider } from "@/components/providers/locale-provider";
 import { getServerLocale } from "@/i18n/server";
 
@@ -12,7 +12,7 @@ export default async function AuthLayout({
 
   return (
     <LocaleProvider initialLocale={locale}>
-      <AuthLayoutTemplate>{children}</AuthLayoutTemplate>
+      <AuthSplitLayoutTemplate>{children}</AuthSplitLayoutTemplate>
     </LocaleProvider>
   );
 }

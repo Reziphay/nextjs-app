@@ -19,6 +19,21 @@ export const azMessages: Messages = {
     description: "Bu səhifə hələ hazırlanır.",
   },
   auth: {
+    shell: {
+      badge: "Reziphay Access",
+      title: "Reziphay hesabınızı hər yerdən idarə edin",
+      description:
+        "Xidmət sahibi və müştəri axınlarını tək, səliqəli və təhlükəsiz auth təcrübəsində birləşdirin.",
+      featureOneTitle: "Ortaq giriş təcrübəsi",
+      featureOneDescription:
+        "Login, qeydiyyat və gələcək auth səhifələri eyni shell üzərində işləyir.",
+      featureTwoTitle: "Rol əsaslı onboarding",
+      featureTwoDescription:
+        "Xidmət sahibi və müştəri axınları aydın və qarışmadan ayrılır.",
+      featureThreeTitle: "Responsive və sürətli",
+      featureThreeDescription:
+        "Desktop və mobil görünüşlərdə form fokusunu itirmədən rahat istifadə olunur.",
+    },
     login: {
       title: "Hesabınıza daxil olun",
       description:
@@ -26,11 +41,27 @@ export const azMessages: Messages = {
       emailLabel: "Email",
       emailPlaceholder: "m@example.com",
       passwordLabel: "Şifrə",
+      passwordPlaceholder: "Şifrənizi daxil edin",
       forgotPassword: "Şifrənizi unutmusunuz?",
       submit: "Daxil ol",
+      submitting: "Daxil olunur",
       continueWithGoogle: "Google ilə daxil ol",
       noAccount: "Hesabınız yoxdur?",
       signUp: "Qeydiyyat",
+      errorTitle: "Daxilolma alınmadı",
+      errorDescription: "Daxilolma zamanı xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.",
+      configurationErrorDescription: "Daxilolma servisi hazır deyil. API bağlantısını yoxlayın.",
+      networkErrorDescription: "Serverə qoşulmaq mümkün olmadı. Zəhmət olmasa yenidən cəhd edin.",
+      badRequestDescription: "Göndərilən məlumat qəbul edilmədi.",
+      unauthorizedDescription: "Email və ya şifrə yanlışdır.",
+      forbiddenDescription: "Bu əməliyyatı etməyə icazəniz yoxdur.",
+      notFoundDescription: "Daxilolma servisi tapılmadı.",
+      rateLimitedDescription: "Çox sayda cəhd edildi. Bir az sonra yenidən yoxlayın.",
+      serverErrorDescription: "Server xətası baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.",
+      validationErrorDescription: "Davam etməzdən əvvəl formadakı xətaları düzəldin.",
+      requiredMessage: "Bu sahə mütləqdir.",
+      emailInvalidMessage: "Düzgün email ünvanı daxil edin.",
+      passwordRequiredMessage: "Şifrəni daxil edin.",
     },
     register: {
       title: "Yeni hesab yaradın",
@@ -78,10 +109,13 @@ export const azMessages: Messages = {
       serverErrorDescription: "Server xətası baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.",
       validationErrorDescription: "Davam etməzdən əvvəl formadakı xətaları düzəldin.",
       requiredMessage: "Bu sahə mütləqdir.",
+      firstNameInvalidMessage: "Ad ən azı 2 simvol olmalıdır.",
+      lastNameInvalidMessage: "Soyad ən azı 2 simvol olmalıdır.",
       birthdayRequiredMessage: "Doğum tarixini daxil edin.",
+      birthdayAgeMessage: "Qeydiyyat üçün ən azı 13 yaşınız olmalıdır.",
       emailInvalidMessage: "Düzgün email ünvanı daxil edin.",
-      passwordInvalidMessage: "Şifrə ən azı 8 simvol olmalıdır.",
-      countryPrefixInvalidMessage: "Prefiks `+` ilə başlamalıdır.",
+      passwordInvalidMessage:
+        "Şifrə ən azı 8 simvol olmalı, böyük hərf, kiçik hərf və rəqəm içərməlidir.",
       typeRequiredMessage: "İstifadəçi tipini seçin.",
     },
   },

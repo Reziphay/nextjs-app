@@ -21,8 +21,13 @@ export {
   AuthHeader,
   AuthLoginPanel,
   AuthRegisterPanel,
+  AuthShowcasePanel,
   ComingSoonPanel,
 } from "./organisms";
-export { AuthLayoutTemplate, ComponentLibraryPage } from "./templates";
+export {
+  AuthLayoutTemplate,
+  AuthSplitLayoutTemplate,
+  ComponentLibraryPage,
+} from "./templates";
 export { Icon } from "./icon";
 export { Logo } from "./logo";

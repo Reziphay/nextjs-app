@@ -1,0 +1,38 @@
+.panel {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.714rem, 2.4vw, 2.857rem);
+  border-radius: 1.714rem;
+  background: var(--app-primary);
+  box-shadow: 0 1.429rem 3.429rem var(--app-shadow-primary-soft);
+  overflow: hidden;
+}
+
+.logoWrap {
+  width: clamp(8rem, 18vw, 12rem);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 2vw, 1.571rem);
+  border-radius: 1.714rem;
+  background: var(--app-bg-surface-strong);
+  box-shadow: 0 1rem 2.857rem var(--app-shadow-card-soft);
+}
+
+@media (max-width: 72rem) {
+  .panel {
+    min-height: 20rem;
+  }
+}
+
+@media (max-width: 48rem) {
+  .panel {
+    min-height: 14rem;
+    border-radius: 1.286rem;
+  }
+
+  .logoWrap {
+    border-radius: 1.286rem;
+  }
+}
