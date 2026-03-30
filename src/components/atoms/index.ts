@@ -1,2 +1,9 @@
 export { Button } from "./button";
-export { Field, FieldDescription, FieldLabel, Input } from "./input";
+export { Checkbox } from "./checkbox";
+export {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  Input,
+} from "./input";

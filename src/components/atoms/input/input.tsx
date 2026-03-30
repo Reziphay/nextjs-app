@@ -14,6 +14,8 @@ type FieldLabelProps = LabelHTMLAttributes<HTMLLabelElement> & {
 
 type FieldDescriptionProps = HTMLAttributes<HTMLParagraphElement>;
 
+type FieldContentProps = HTMLAttributes<HTMLDivElement>;
+
 type InputProps = InputHTMLAttributes<HTMLInputElement>;
 
 function joinClassNames(...classNames: Array<string | undefined>) {
@@ -44,6 +46,12 @@ export function FieldDescription({
 }: FieldDescriptionProps) {
   return (
     <p className={joinClassNames(styles.fieldDescription, className)} {...props} />
+  );
+}
+
+export function FieldContent({ className, ...props }: FieldContentProps) {
+  return (
+    <div className={joinClassNames(styles.fieldContent, className)} {...props} />
   );
 }
 

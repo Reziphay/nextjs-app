@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import {
   Button,
+  Checkbox,
   Field,
+  FieldContent,
   FieldDescription,
   FieldLabel,
   Input,
@@ -22,6 +24,13 @@ const iconSamples = [
 ] as const;
 
 const buttonSizes = ["small", "medium", "large"] as const;
+
+const checkboxItems = [
+  { label: "Hard disks", defaultChecked: true },
+  { label: "External disks", defaultChecked: true },
+  { label: "CDs, DVDs, and iPods", defaultChecked: false },
+  { label: "Connected servers", defaultChecked: false },
+] as const;
 
 type ShowcaseCardProps = {
   title: string;
@@ -294,6 +303,110 @@ export function ComponentLibraryPage() {
                   This field must be filled out.
                 </FieldDescription>
               </Field>
+            </ShowcaseCard>
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionEyebrow}>Atoms</span>
+            <h2>Checkbox</h2>
+            <p>
+              `Checkbox` komponenti `Field`, `FieldLabel`, `FieldContent` və
+              `FieldDescription` ilə birlikdə istifadə olunacaq şəkildə
+              qurulub. Aşağıda basic, helper text, disabled və group nümunələri
+              görünür.
+            </p>
+          </div>
+
+          <div className={styles.cardGrid}>
+            <ShowcaseCard
+              title="Basic"
+              description="Sadə label ilə checkbox istifadəsi"
+            >
+              <Field className={styles.checkboxField}>
+                <Checkbox id="component-library-checkbox-basic" />
+                <FieldLabel
+                  htmlFor="component-library-checkbox-basic"
+                  className={styles.checkboxLabel}
+                >
+                  Accept terms and conditions
+                </FieldLabel>
+              </Field>
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Description"
+              description="FieldContent və FieldDescription ilə helper text"
+            >
+              <Field className={styles.checkboxField}>
+                <Checkbox
+                  id="component-library-checkbox-description"
+                  defaultChecked
+                />
+                <FieldContent className={styles.checkboxContent}>
+                  <FieldLabel
+                    htmlFor="component-library-checkbox-description"
+                    className={styles.checkboxLabel}
+                  >
+                    Accept terms and conditions
+                  </FieldLabel>
+                  <FieldDescription>
+                    By clicking this checkbox, you agree to the terms and
+                    conditions.
+                  </FieldDescription>
+                </FieldContent>
+              </Field>
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Disabled"
+              description="disabled prop və data-disabled wrapper istifadəsi"
+            >
+              <Field className={styles.checkboxField} data-disabled>
+                <Checkbox
+                  id="component-library-checkbox-disabled"
+                  disabled
+                />
+                <FieldLabel
+                  htmlFor="component-library-checkbox-disabled"
+                  className={styles.checkboxLabel}
+                >
+                  Enable notifications
+                </FieldLabel>
+              </Field>
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Group"
+              description="Bir neçə checkbox ilə list quruluşu"
+            >
+              <div className={styles.checkboxGroup}>
+                <div className={styles.checkboxGroupHeader}>
+                  <strong>Show these items on the desktop:</strong>
+                  <p>Select the items you want to show on the desktop.</p>
+                </div>
+
+                <div className={styles.checkboxList}>
+                  {checkboxItems.map((item) => {
+                    const id = `component-library-checkbox-${item.label
+                      .toLowerCase()
+                      .replaceAll(/[^a-z0-9]+/g, "-")}`;
+
+                    return (
+                      <Field key={id} className={styles.checkboxField}>
+                        <Checkbox id={id} defaultChecked={item.defaultChecked} />
+                        <FieldLabel
+                          htmlFor={id}
+                          className={styles.checkboxLabel}
+                        >
+                          {item.label}
+                        </FieldLabel>
+                      </Field>
+                    );
+                  })}
+                </div>
+              </div>
             </ShowcaseCard>
           </div>
         </section>

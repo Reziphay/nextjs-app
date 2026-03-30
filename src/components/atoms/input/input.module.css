@@ -24,6 +24,11 @@
   line-height: 1.6;
 }
 
+.fieldContent {
+  display: grid;
+  gap: 0.286rem;
+}
+
 .input {
   width: 100%;
   min-height: 2.857rem;
