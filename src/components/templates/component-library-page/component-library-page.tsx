@@ -1,5 +1,11 @@
 import type { ReactNode } from "react";
-import { Button } from "@/components/atoms";
+import {
+  Button,
+  Field,
+  FieldDescription,
+  FieldLabel,
+  Input,
+} from "@/components/atoms";
 import { Icon } from "@/components/icon";
 import { Logo } from "@/components/logo";
 import styles from "./component-library-page.module.css";
@@ -173,6 +179,121 @@ export function ComponentLibraryPage() {
                   aria-label="Loading"
                 />
               </div>
+            </ShowcaseCard>
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionEyebrow}>Atoms</span>
+            <h2>Input</h2>
+            <p>
+              Form primitive-ləri `Input`, `Field`, `FieldLabel` və
+              `FieldDescription` üzərindən kompozisiya olunur. Basic, invalid,
+              disabled, file və required halları aşağıda görünür.
+            </p>
+          </div>
+
+          <div className={styles.cardGrid}>
+            <ShowcaseCard title="Basic" description="Sadə text input nümunəsi">
+              <Input
+                className={styles.basicInput}
+                aria-label="Basic input example"
+                placeholder="Enter text"
+              />
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Field"
+              description="Label və description ilə birlikdə istifadə"
+            >
+              <Field className={styles.fieldShowcase}>
+                <FieldLabel htmlFor="component-library-username">
+                  Username
+                </FieldLabel>
+                <Input
+                  id="component-library-username"
+                  placeholder="Enter your username"
+                />
+                <FieldDescription>
+                  Choose a unique username for your account.
+                </FieldDescription>
+              </Field>
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Invalid"
+              description="aria-invalid və data-invalid ilə validation halı"
+            >
+              <Field className={styles.fieldShowcase} data-invalid>
+                <FieldLabel htmlFor="component-library-invalid">
+                  Invalid Input
+                </FieldLabel>
+                <Input
+                  id="component-library-invalid"
+                  defaultValue="Error"
+                  aria-invalid="true"
+                />
+                <FieldDescription>
+                  This field contains validation errors.
+                </FieldDescription>
+              </Field>
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Disabled"
+              description="disabled input və data-disabled wrapper"
+            >
+              <Field className={styles.fieldShowcase} data-disabled>
+                <FieldLabel htmlFor="component-library-disabled">
+                  Email
+                </FieldLabel>
+                <Input
+                  id="component-library-disabled"
+                  placeholder="Email"
+                  disabled
+                />
+                <FieldDescription>
+                  This field is currently disabled.
+                </FieldDescription>
+              </Field>
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="File"
+              description="type=file üzərindən fayl seçimi"
+            >
+              <Field className={styles.fieldShowcase}>
+                <FieldLabel htmlFor="component-library-file">
+                  Picture
+                </FieldLabel>
+                <Input id="component-library-file" type="file" />
+                <FieldDescription>
+                  Select a picture to upload.
+                </FieldDescription>
+              </Field>
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Required"
+              description="required input və label üzərində ulduz"
+            >
+              <Field className={styles.fieldShowcase}>
+                <FieldLabel
+                  htmlFor="component-library-required"
+                  required
+                >
+                  Required Field
+                </FieldLabel>
+                <Input
+                  id="component-library-required"
+                  placeholder="This field is required"
+                  required
+                />
+                <FieldDescription>
+                  This field must be filled out.
+                </FieldDescription>
+              </Field>
             </ShowcaseCard>
           </div>
         </section>

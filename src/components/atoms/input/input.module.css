@@ -1,0 +1,134 @@
+.field {
+  display: grid;
+  gap: 0.571rem;
+  width: min(100%, 24rem);
+}
+
+.fieldLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.286rem;
+  color: var(--app-text-strong);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.requiredMark {
+  color: var(--app-error);
+}
+
+.fieldDescription {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  line-height: 1.6;
+}
+
+.input {
+  width: 100%;
+  min-height: 2.857rem;
+  padding: 0.714rem 1rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 0.857rem;
+  background: var(--app-bg-surface-strong);
+  color: var(--app-text-strong);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-small);
+  line-height: 1.4;
+  box-shadow: 0 0 0 0 transparent;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease;
+}
+
+.input::placeholder {
+  color: var(--app-text-subtle);
+}
+
+.input:hover:not(:disabled) {
+  border-color: var(--app-border-primary-strong);
+  background: var(--app-bg-canvas);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--app-primary);
+  box-shadow: 0 0 0 0.286rem var(--app-focus-ring);
+}
+
+.input:disabled {
+  border-color: var(--app-border-soft);
+  background: var(--app-bg-surface-muted);
+  color: var(--app-text-subtle);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--app-error);
+  box-shadow: 0 0 0 0.214rem var(--app-error-bg);
+}
+
+.field[data-invalid] .fieldLabel {
+  color: var(--app-error);
+}
+
+.field[data-invalid] .input {
+  border-color: var(--app-error);
+  box-shadow: 0 0 0 0.214rem var(--app-error-bg);
+}
+
+.field[data-disabled] .fieldLabel,
+.field[data-disabled] .fieldDescription {
+  color: var(--app-text-subtle);
+}
+
+.field[data-disabled] .input {
+  border-color: var(--app-border-soft);
+  background: var(--app-bg-surface-muted);
+  color: var(--app-text-subtle);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.input[type="file"] {
+  padding: 0.429rem;
+}
+
+.input[type="file"]::file-selector-button {
+  margin-right: 0.857rem;
+  padding: 0.571rem 0.857rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 0.714rem;
+  background: var(--app-bg-surface);
+  color: var(--app-text-strong);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.input[type="file"]::file-selector-button:hover {
+  border-color: var(--app-border-primary-strong);
+  background: var(--app-bg-canvas);
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .input,
+  .input[type="file"]::file-selector-button {
+    transition-duration: 0ms;
+  }
+
+  .input[type="file"]::file-selector-button:hover {
+    transform: none;
+  }
+}

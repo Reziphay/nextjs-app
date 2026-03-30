@@ -1,2 +1,1 @@
-export { Button } from "./button";
 export { Field, FieldDescription, FieldLabel, Input } from "./input";
