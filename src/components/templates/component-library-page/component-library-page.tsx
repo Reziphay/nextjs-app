@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
   Button,
   Checkbox,
   Field,
@@ -479,6 +482,70 @@ export function ComponentLibraryPage() {
                   Disabled
                 </FieldLabel>
               </Field>
+            </ShowcaseCard>
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionEyebrow}>Atoms</span>
+            <h2>Alert</h2>
+            <p>
+              `Alert`, `AlertTitle` və `AlertDescription` birlikdə işləyən
+              kompozisiya olunan bir quruluşdur. Variant ilə fərqli semantik
+              halları idarə etmək olur.
+            </p>
+          </div>
+
+          <div className={styles.cardGrid}>
+            <ShowcaseCard
+              title="Basic"
+              description="Icon, title və description ilə standart alert"
+            >
+              <Alert
+                className={styles.alertShowcase}
+                icon="check_circle"
+              >
+                <AlertTitle>Account updated successfully</AlertTitle>
+                <AlertDescription>
+                  Your profile information has been saved. Changes will be
+                  reflected immediately.
+                </AlertDescription>
+              </Alert>
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Destructive"
+              description="variant=destructive ilə xəta alert-i"
+            >
+              <Alert
+                variant="destructive"
+                className={styles.alertShowcase}
+                icon="error"
+              >
+                <AlertTitle>Payment failed</AlertTitle>
+                <AlertDescription>
+                  Your payment could not be processed. Please check your
+                  payment method and try again.
+                </AlertDescription>
+              </Alert>
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Warning"
+              description="variant=warning ilə xəbərdarlıq alert-i"
+            >
+              <Alert
+                variant="warning"
+                className={styles.alertShowcase}
+                icon="warning"
+              >
+                <AlertTitle>Your subscription will expire in 3 days.</AlertTitle>
+                <AlertDescription>
+                  Renew now to avoid service interruption or upgrade to a paid
+                  plan to continue using the service.
+                </AlertDescription>
+              </Alert>
             </ShowcaseCard>
           </div>
         </section>

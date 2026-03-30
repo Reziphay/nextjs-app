@@ -209,6 +209,10 @@
   gap: 1rem;
 }
 
+.alertShowcase {
+  width: min(100%, 32rem);
+}
+
 .iconGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
