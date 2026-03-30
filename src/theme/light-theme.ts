@@ -1,15 +1,6 @@
 import type { CSSProperties } from "react";
 
-export const primaryColors = [
-  "#590d22",
-  "#800f2f",
-  "#a4133c",
-  "#c9184a",
-  "#ff4d6d",
-  "#ff758f",
-  "#ff8fa3",
-  "#ffb3c1",
-] as const;
+export const primaryColors = ["#f94144", "#f3722c", "#f8961e", "#f9844a", "#f9c74f", "#90be6d", "#43aa8b", "#4d908e"];
 
 export const blackColors = [
   "#131316",
@@ -22,31 +13,31 @@ export const blackColors = [
   "#6a6b70",
 ] as const;
 
+export const whiteColors = [
+  "#fff",
+  "#fff",
+  "#fff",
+  "#fff",
+  "#fff",
+  "#fff",
+  "#fff",
+  "#fff",
+] as const;
+
 export const errorColors = ["#880d1e", "#dd2d4a", "#f26a8d", "#f49cbb"] as const;
 
 export const warnColors = ["#f7b267", "#f79d65", "#f4845f", "#f27059"] as const;
 
 export const successColors = ["#073b3a", "#0b6e4f", "#08a045", "#6bbf59"] as const;
 
-export const whiteColors = [
-  "#edead8",
-  "#e7e5da",
-  "#fffefa",
-  "#f7f6f0",
-  "#f3f2eb",
-  "#efeee6",
-  "#f4f3ee",
-  "#f9f7f1",
-] as const;
-
 function hexToRgbChannels(hex: string) {
   const normalized = hex.replace("#", "");
   const fullHex =
     normalized.length === 3
       ? normalized
-          .split("")
-          .map((value) => `${value}${value}`)
-          .join("")
+        .split("")
+        .map((value) => `${value}${value}`)
+        .join("")
       : normalized;
 
   const parsed = Number.parseInt(fullHex, 16);

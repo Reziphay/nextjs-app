@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getMessages } from "@/i18n/config";
 import { getServerLocale } from "@/i18n/server";
 import { lightThemeStyle } from "@/theme/light-theme";
+import { fontLinks, typographyStyle } from "@/theme/typography";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -30,9 +31,19 @@ export default async function RootLayout({
     <html
       lang={locale}
       data-theme="light"
-      style={lightThemeStyle}
+      style={{ ...lightThemeStyle, ...typographyStyle }}
       suppressHydrationWarning
     >
+      <head>
+        {fontLinks.map((link) => (
+          <link
+            key={`${link.rel}-${link.href}`}
+            rel={link.rel}
+            href={link.href}
+            crossOrigin={link.crossOrigin}
+          />
+        ))}
+      </head>
       <body>{children}</body>
     </html>
   );
