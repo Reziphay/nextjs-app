@@ -7,6 +7,17 @@ export const ruMessages: Messages = {
       "Многоязычный стартовый проект Next.js с азербайджанским языком по умолчанию и готовым Axios-клиентом.",
   },
   languageSwitcherAriaLabel: "Переключение языка",
+  navigationAriaLabel: "Основная навигация",
+  navigation: {
+    home: "Главная",
+    aboutUs: "О нас",
+    questions: "Вопросы",
+    contactUs: "Контакты",
+  },
+  comingSoon: {
+    badge: "Скоро",
+    description: "Эта страница пока находится в разработке.",
+  },
   auth: {
     login: {
       title: "Войдите в аккаунт",

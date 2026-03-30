@@ -4,6 +4,17 @@ export type Messages = {
     description: string;
   };
   languageSwitcherAriaLabel: string;
+  navigationAriaLabel: string;
+  navigation: {
+    home: string;
+    aboutUs: string;
+    questions: string;
+    contactUs: string;
+  };
+  comingSoon: {
+    badge: string;
+    description: string;
+  };
   auth: {
     login: {
       title: string;

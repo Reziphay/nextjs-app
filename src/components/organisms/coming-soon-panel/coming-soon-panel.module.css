@@ -1,0 +1,30 @@
+.panel {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 1.429rem;
+  background:
+    linear-gradient(
+      145deg,
+      var(--app-bg-overlay-strong) 0%,
+      var(--app-bg-overlay-soft) 100%
+    ),
+    var(--app-bg-surface-strong);
+  box-shadow: 0 1rem 2.857rem var(--app-shadow-card-soft);
+  text-align: center;
+}
+
+.panel h1 {
+  color: var(--app-text-strong);
+  font-size: var(--font-size-large);
+  line-height: 1.1;
+}
+
+.panel p {
+  max-width: 30ch;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-medium);
+  line-height: 1.7;
+}

@@ -17,7 +17,12 @@ export {
   Switch,
 } from "./atoms";
 export { LanguageSwitcher } from "./molecules";
-export { AuthHeader, AuthLoginPanel, AuthRegisterPanel } from "./organisms";
+export {
+  AuthHeader,
+  AuthLoginPanel,
+  AuthRegisterPanel,
+  ComingSoonPanel,
+} from "./organisms";
 export { AuthLayoutTemplate, ComponentLibraryPage } from "./templates";
 export { Icon } from "./icon";
 export { Logo } from "./logo";

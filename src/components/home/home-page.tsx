@@ -1,29 +1,21 @@
-"use client";
-
-import { LanguageSwitcher, Logo } from "@/components";
-import { useLocale } from "@/components/providers/locale-provider";
+import type { Messages } from "@/i18n/config";
+import { AuthLayoutTemplate } from "@/components/templates";
 
 type HomePageProps = {
   apiBaseUrl: string;
+  messages: Messages;
 };
 
 const exampleRequest = `import { api } from "@/lib/api";
 
 await api.get("/health");`;
 
-export function HomePage({ apiBaseUrl }: HomePageProps) {
-  const { messages } = useLocale();
-
+export function HomePage({ apiBaseUrl, messages }: HomePageProps) {
   return (
-    <main className="home">
-      <section className="hero">
+    <AuthLayoutTemplate shellVariant="wide">
+      <section className="home">
         <div className="heroTop">
-          <div className="brandBlock">
-            <Logo size={24} priority />
-            <span className="eyebrow">{messages.hero.eyebrow}</span>
-          </div>
-
-          <LanguageSwitcher variant="segmented" />
+          <span className="eyebrow">{messages.hero.eyebrow}</span>
         </div>
 
         <h1>{messages.hero.title}</h1>
@@ -49,6 +41,6 @@ export function HomePage({ apiBaseUrl }: HomePageProps) {
           </article>
         </div>
       </section>
-    </main>
+    </AuthLayoutTemplate>
   );
 }
