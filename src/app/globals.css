@@ -1,6 +1,6 @@
 :root {
   color-scheme: light;
-  --general-border-radius: 0.8rem;
+  --general-border-radius: 0.4rem;
   --general-border-radius-2xs: calc(var(--general-border-radius) * 0.286);
   --general-border-radius-xs: calc(var(--general-border-radius) * 0.357);
   --general-border-radius-sm: calc(var(--general-border-radius) * 0.571);
@@ -33,23 +33,54 @@ body {
 
 body {
   min-height: 100%;
-  --app-background-stripe-base: var(--app-primary);
-  --app-background-stripe-accent: var(--app-primary-strong);
+  --app-background-gradient-duration: 30000ms;
   color: var(--app-text-base);
-  background: repeating-linear-gradient(
-      -45deg,
-      var(--app-background-stripe-base),
-      var(--app-background-stripe-accent) 10px,
-      var(--app-background-stripe-base) 10px,
-      var(--app-background-stripe-accent) 20px
-    )
-    var(--app-background-stripe-base);
+  background-color: var(--app-bg-canvas);
+  background-image: linear-gradient(
+    -45deg,
+    var(--color-primary-3),
+    var(--color-primary-6),
+    var(--color-primary-5),
+    var(--color-primary-4),
+    var(--color-primary-7),
+    var(--color-primary-2)
+  );
+  background-size: 400% 400%;
   background-attachment: fixed;
-  background-blend-mode: screen;
+  animation: app-background-gradient var(--app-background-gradient-duration)
+    ease infinite;
   font-family: var(--font-family-base);
   font-size: var(--font-size-medium);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes app-background-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  25% {
+    background-position: 50% 100%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  75% {
+    background-position: 50% 0%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    animation: none;
+  }
 }
 
 * {

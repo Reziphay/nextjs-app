@@ -18,6 +18,7 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children?: ReactNode;
   size?: ButtonSize;
   icon?: string;
+  iconNode?: ReactNode;
   variant?: ButtonVariant;
   isLoading?: boolean;
 };
@@ -49,6 +50,7 @@ export function Button({
   children,
   size = "medium",
   icon,
+  iconNode,
   variant = "default",
   isLoading = false,
   className,
@@ -77,6 +79,8 @@ export function Button({
             fill={isLoading ? false : variant === "icon"}
             className={`${styles.iconGlyph}${isLoading ? ` ${styles.spinning}` : ""}`}
           />
+        ) : iconNode ? (
+          <span className={styles.customIcon}>{iconNode}</span>
         ) : null}
         {children ? (
           <span className={variant === "link" ? styles.linkContent : undefined}>

@@ -13,6 +13,7 @@ export {
   FieldContent,
   FieldDescription,
   FieldLabel,
+  GoogleIcon,
   Input,
   Switch,
 } from "./atoms";

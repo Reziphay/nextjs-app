@@ -3,7 +3,17 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, type FormEvent } from "react";
-import { Alert, AlertDescription, AlertTitle, Button, Field, FieldDescription, FieldLabel, Input } from "@/components/atoms";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Button,
+  Field,
+  FieldDescription,
+  FieldLabel,
+  GoogleIcon,
+  Input,
+} from "@/components/atoms";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -139,6 +149,7 @@ export function AuthLoginPanel() {
             variant="outline"
             type="button"
             disabled={isSubmitting}
+            iconNode={<GoogleIcon />}
           >
             {login.continueWithGoogle}
           </Button>

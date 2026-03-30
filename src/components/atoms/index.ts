@@ -8,6 +8,7 @@ export {
   ComboboxItem,
   type ComboboxOption,
 } from "./combobox";
+export { GoogleIcon } from "./google-icon";
 export {
   Field,
   FieldContent,

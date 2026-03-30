@@ -116,7 +116,7 @@
   justify-content: center;
   min-height: 2.857rem;
   padding: 0.714rem 1rem;
-  border-radius: var(--general-border-radius-pill);
+  border-radius: var(--general-border-radius-5xl);
   font-size: var(--font-size-small);
   font-weight: 800;
   line-height: 1;
