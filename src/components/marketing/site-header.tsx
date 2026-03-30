@@ -35,6 +35,12 @@ export function SiteHeader() {
                   {item.label}
                 </Link>
               ))}
+              <Link
+                href="/onboarding"
+                className="rounded-[14px] px-3 py-2 text-sm font-medium text-[var(--color-primary)] transition hover:bg-[var(--color-surface-strong)]"
+              >
+                Sign In
+              </Link>
             </nav>
           </div>
         </details>
@@ -49,15 +55,20 @@ export function SiteHeader() {
             </Link>
           ))}
         </nav>
-        <Link
-          href="/download"
-          className={buttonStyles({
-            className: "hidden md:inline-flex",
-            kind: "secondary",
-          })}
-        >
-          Get the app
-        </Link>
+        <div className="hidden md:flex items-center gap-3">
+          <Link
+            href="/onboarding"
+            className={buttonStyles({ kind: "primary" })}
+          >
+            Sign In
+          </Link>
+          <Link
+            href="/download"
+            className={buttonStyles({ kind: "secondary" })}
+          >
+            Get the app
+          </Link>
+        </div>
       </div>
     </header>
   );

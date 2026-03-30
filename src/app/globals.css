@@ -1,5 +1,37 @@
 @import "tailwindcss";
 
+/* ─── App (Consumer) CSS Variables ─────────────────────────────────────── */
+/* These are set dynamically by applyPaletteToRoot() based on active role.  */
+/* Defaults match UCR (red) palette.                                         */
+:root {
+  --app-primary: #cc444b;
+  --app-primary-strong: #b83840;
+  --app-primary-soft: rgba(204, 68, 75, 0.14);
+  --app-primary-light: #e4b1ab;
+  --app-primary-surface: #fdf0ef;
+  --app-nav-indicator: #cc444b;
+
+  /* App neutral tones */
+  --app-bg: #f9f9f9;
+  --app-card: #ffffff;
+  --app-ink: #1a1a1a;
+  --app-ink-muted: #5c5c6e;
+  --app-ink-faint: #9090a0;
+  --app-border: rgba(0, 0, 0, 0.08);
+  --app-divider: rgba(0, 0, 0, 0.06);
+}
+
+.dark {
+  --app-bg: #0d0d12;
+  --app-card: #1c1c24;
+  --app-ink: #f2f2f7;
+  --app-ink-muted: #a0a0b0;
+  --app-ink-faint: #606070;
+  --app-border: rgba(255, 255, 255, 0.08);
+  --app-divider: rgba(255, 255, 255, 0.05);
+}
+
+/* ─── Public / Admin site tokens ────────────────────────────────────────── */
 :root {
   --color-primary: #9989ff;
   --color-primary-strong: #8774ff;
