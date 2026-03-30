@@ -7,6 +7,7 @@ import {
   FieldDescription,
   FieldLabel,
   Input,
+  Switch,
 } from "@/components/atoms";
 import { Icon } from "@/components/icon";
 import { Logo } from "@/components/logo";
@@ -407,6 +408,77 @@ export function ComponentLibraryPage() {
                   })}
                 </div>
               </div>
+            </ShowcaseCard>
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionEyebrow}>Atoms</span>
+            <h2>Switch</h2>
+            <p>
+              `Switch` komponenti native checkbox əsasında qurulub və `size`
+              prop-u ilə ölçü dəyişir. `Field` primitive-ləri ilə birlikdə
+              label, description və disabled halları rahat kompozisiya olunur.
+            </p>
+          </div>
+
+          <div className={styles.cardGrid}>
+            <ShowcaseCard
+              title="Basic"
+              description="Sadə switch və label istifadəsi"
+            >
+              <Field className={styles.switchField}>
+                <Switch id="component-library-switch-basic" />
+                <FieldLabel
+                  htmlFor="component-library-switch-basic"
+                  className={styles.switchLabel}
+                >
+                  Airplane Mode
+                </FieldLabel>
+              </Field>
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Size"
+              description="small və default ölçüləri"
+            >
+              <div className={styles.switchStack}>
+                <Field className={styles.switchField}>
+                  <Switch id="component-library-switch-small" size="small" />
+                  <FieldLabel
+                    htmlFor="component-library-switch-small"
+                    className={styles.switchLabel}
+                  >
+                    Small
+                  </FieldLabel>
+                </Field>
+
+                <Field className={styles.switchField}>
+                  <Switch id="component-library-switch-default" />
+                  <FieldLabel
+                    htmlFor="component-library-switch-default"
+                    className={styles.switchLabel}
+                  >
+                    Default
+                  </FieldLabel>
+                </Field>
+              </div>
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Disabled"
+              description="disabled prop və data-disabled wrapper istifadəsi"
+            >
+              <Field className={styles.switchField} data-disabled>
+                <Switch id="component-library-switch-disabled" disabled />
+                <FieldLabel
+                  htmlFor="component-library-switch-disabled"
+                  className={styles.switchLabel}
+                >
+                  Disabled
+                </FieldLabel>
+              </Field>
             </ShowcaseCard>
           </div>
         </section>

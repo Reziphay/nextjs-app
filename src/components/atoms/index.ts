@@ -7,3 +7,4 @@ export {
   FieldLabel,
   Input,
 } from "./input";
+export { Switch } from "./switch";

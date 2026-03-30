@@ -6,6 +6,7 @@ export {
   FieldDescription,
   FieldLabel,
   Input,
+  Switch,
 } from "./atoms";
 export { ComponentLibraryPage } from "./templates";
 export { Icon } from "./icon";
