@@ -7,6 +7,20 @@ export const ruMessages: Messages = {
       "Многоязычный стартовый проект Next.js с азербайджанским языком по умолчанию и готовым Axios-клиентом.",
   },
   languageSwitcherAriaLabel: "Переключение языка",
+  auth: {
+    login: {
+      title: "Войдите в аккаунт",
+      description: "Введите свой email ниже, чтобы войти в аккаунт",
+      emailLabel: "Email",
+      emailPlaceholder: "m@example.com",
+      passwordLabel: "Пароль",
+      forgotPassword: "Забыли пароль?",
+      submit: "Войти",
+      continueWithGoogle: "Войти через Google",
+      noAccount: "Нет аккаунта?",
+      signUp: "Регистрация",
+    },
+  },
   hero: {
     eyebrow: "Мультиязычный Next.js starter",
     title: "Reziphay Next App",

@@ -7,6 +7,21 @@ export const azMessages: Messages = {
       "Azərbaycan dili default olan, çoxdilli və Axios ilə hazır Next.js başlanğıc layihəsi.",
   },
   languageSwitcherAriaLabel: "Dil seçimi",
+  auth: {
+    login: {
+      title: "Hesabınıza daxil olun",
+      description:
+        "Hesabınıza daxil olmaq üçün email ünvanınızı aşağıya yazın",
+      emailLabel: "Email",
+      emailPlaceholder: "m@example.com",
+      passwordLabel: "Şifrə",
+      forgotPassword: "Şifrənizi unutmusunuz?",
+      submit: "Daxil ol",
+      continueWithGoogle: "Google ilə daxil ol",
+      noAccount: "Hesabınız yoxdur?",
+      signUp: "Qeydiyyat",
+    },
+  },
   hero: {
     eyebrow: "Çoxdilli Next.js starter",
     title: "Reziphay Next App",

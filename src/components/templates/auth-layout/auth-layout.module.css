@@ -1,0 +1,37 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  padding: 1.143rem 1.429rem 2rem;
+}
+
+.topbar {
+  width: min(100%, 84rem);
+  margin: 0 auto;
+  padding-bottom: 0.857rem;
+}
+
+.content {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  padding-top: 1.143rem;
+}
+
+.shell {
+  width: min(100%, 28rem);
+}
+
+@media (max-width: 64rem) {
+  .page {
+    padding: 1rem 1rem 1.429rem;
+  }
+
+  .topbar {
+    padding-bottom: 0.571rem;
+  }
+
+  .content {
+    padding-top: 0.857rem;
+  }
+}

@@ -16,6 +16,7 @@ export {
   Input,
   Switch,
 } from "./atoms";
-export { ComponentLibraryPage } from "./templates";
+export { AuthHeader, AuthLoginPanel } from "./organisms";
+export { AuthLayoutTemplate, ComponentLibraryPage } from "./templates";
 export { Icon } from "./icon";
 export { Logo } from "./logo";

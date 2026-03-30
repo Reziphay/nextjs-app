@@ -1,0 +1,53 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.857rem;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+}
+
+.localeLabel {
+  display: inline-flex;
+  align-items: center;
+}
+
+.localeSelect {
+  min-width: 5.286rem;
+  min-height: 2.286rem;
+  padding: 0.429rem 0.857rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 999px;
+  background: var(--app-bg-surface-strong);
+  color: var(--app-text-strong);
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.localeSelect:hover {
+  border-color: var(--app-border-primary-strong);
+}
+
+.localeSelect:focus-visible {
+  border-color: var(--app-primary);
+  box-shadow: 0 0 0 0.214rem var(--app-focus-ring);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
