@@ -1,0 +1,182 @@
+import type { ReactNode } from "react";
+import { Button } from "@/components/atoms";
+import { Icon } from "@/components/icon";
+import { Logo } from "@/components/logo";
+import styles from "./component-library-page.module.css";
+
+const logoSizes = [40, 64, 96] as const;
+
+const iconSamples = [
+  { label: "Home", icon: "home", color: "primary" as const, fill: true },
+  { label: "Search", icon: "search", color: "black" as const, fill: false },
+  { label: "Done", icon: "check_circle", color: "success" as const, fill: true },
+  { label: "Warning", icon: "warning", color: "warn" as const, fill: true },
+  { label: "Delete", icon: "delete", color: "error" as const, fill: true },
+  { label: "Favorite", icon: "favorite", color: "primary" as const, fill: false },
+] as const;
+
+const buttonSizes = ["small", "medium", "large"] as const;
+
+type ShowcaseCardProps = {
+  title: string;
+  description?: string;
+  children: ReactNode;
+};
+
+function ShowcaseCard({ title, description, children }: ShowcaseCardProps) {
+  return (
+    <article className={styles.card}>
+      <div className={styles.cardHeader}>
+        <h3>{title}</h3>
+        {description ? <p>{description}</p> : null}
+      </div>
+      <div className={styles.preview}>{children}</div>
+    </article>
+  );
+}
+
+export function ComponentLibraryPage() {
+  return (
+    <main className={styles.page}>
+      <div className={styles.shell}>
+        <header className={styles.header}>
+          <span className={styles.badge}>/lib</span>
+          <h1>Component Library</h1>
+          <p className={styles.lead}>
+            Hazirki atom və əsas UI komponentləri bu səhifədə bir yerdə
+            sərgilənir. Yeni komponentlər əlavə olunduqca bu route onların
+            vizual yoxlanış nöqtəsi kimi istifadə oluna bilər.
+          </p>
+        </header>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionEyebrow}>Brand</span>
+            <h2>Logo</h2>
+            <p>
+              `Logo` komponenti klik zamanı həmişə ana səhifəyə yönləndirir və
+              `size` prop-u ilə ölçü alır.
+            </p>
+          </div>
+
+          <div className={styles.cardGrid}>
+            {logoSizes.map((size) => (
+              <ShowcaseCard
+                key={size}
+                title={`${size}px`}
+                description="Ana səhifəyə kliklə dönən brend elementi"
+              >
+                <Logo size={size} priority={size === logoSizes[0]} />
+              </ShowcaseCard>
+            ))}
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionEyebrow}>Atoms</span>
+            <h2>Icon</h2>
+            <p>
+              Google Fonts Material Symbols Rounded üzərindən işləyən ikon
+              komponenti. `icon`, `size`, `color` və `fill` prop-ları ilə idarə
+              olunur.
+            </p>
+          </div>
+
+          <div className={styles.iconGrid}>
+            {iconSamples.map((sample) => (
+              <article key={sample.label} className={styles.iconCard}>
+                <div className={styles.iconPreview}>
+                  <Icon
+                    icon={sample.icon}
+                    size={32}
+                    color={sample.color}
+                    fill={sample.fill}
+                  />
+                </div>
+                <div className={styles.iconMeta}>
+                  <strong>{sample.label}</strong>
+                  <span>{sample.icon}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionEyebrow}>Atoms</span>
+            <h2>Button</h2>
+            <p>
+              Bütün variantlar eyni `Button` komponentində props-larla idarə
+              olunur. Aşağıda həm variant, həm size, həm də loading nümunələri
+              görünür.
+            </p>
+          </div>
+
+          <div className={styles.cardGrid}>
+            <ShowcaseCard title="Variants" description="Əsas görünüş variantları">
+              <div className={styles.buttonStack}>
+                <Button>Default</Button>
+                <Button variant="outline">Outline</Button>
+                <Button variant="secondary">Secondary</Button>
+                <Button variant="ghost">Ghost</Button>
+                <Button variant="destructive">Destructive</Button>
+                <Button variant="link">Link</Button>
+              </div>
+            </ShowcaseCard>
+
+            <ShowcaseCard title="Sizes" description="Eyni komponentin size variantları">
+              <div className={styles.buttonStack}>
+                {buttonSizes.map((size) => (
+                  <Button key={size} size={size}>
+                    {size}
+                  </Button>
+                ))}
+              </div>
+            </ShowcaseCard>
+
+            <ShowcaseCard title="With Icon" description="Mətnlə birlikdə icon istifadəsi">
+              <div className={styles.buttonStack}>
+                <Button icon="account_tree">New Branch</Button>
+                <Button variant="outline" icon="download">
+                  Download
+                </Button>
+                <Button variant="secondary" icon="share">
+                  Share
+                </Button>
+              </div>
+            </ShowcaseCard>
+
+            <ShowcaseCard title="Icon Only" description="Yalnız ikon göstərən variant">
+              <div className={styles.buttonStack}>
+                <Button variant="icon" icon="home" aria-label="Home" />
+                <Button
+                  variant="icon"
+                  icon="favorite"
+                  aria-label="Favorite"
+                />
+                <Button variant="icon" icon="settings" aria-label="Settings" />
+              </div>
+            </ShowcaseCard>
+
+            <ShowcaseCard title="Loading" description="İşləmə halı və disabled davranışı">
+              <div className={styles.buttonStack}>
+                <Button isLoading>Saving</Button>
+                <Button variant="outline" isLoading>
+                  Processing
+                </Button>
+                <Button
+                  variant="icon"
+                  icon="autorenew"
+                  isLoading
+                  aria-label="Loading"
+                />
+              </div>
+            </ShowcaseCard>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}

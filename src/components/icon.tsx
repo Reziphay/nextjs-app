@@ -1,12 +1,21 @@
 import type { CSSProperties } from "react";
 
-type IconColor = "primary" | "white" | "black" | "success" | "warn" | "error" | "errror";
+type IconColor =
+  | "primary"
+  | "white"
+  | "black"
+  | "success"
+  | "warn"
+  | "error"
+  | "errror"
+  | "current";
 
 type IconProps = {
   icon: string;
   size?: number;
   color?: IconColor;
   fill?: boolean;
+  className?: string;
 };
 
 const iconColorMap: Record<IconColor, string> = {
@@ -17,6 +26,7 @@ const iconColorMap: Record<IconColor, string> = {
   warn: "var(--app-warning)",
   error: "var(--app-error)",
   errror: "var(--app-error)",
+  current: "currentColor",
 };
 
 export function Icon({
@@ -24,6 +34,7 @@ export function Icon({
   size = 24,
   color = "black",
   fill = false,
+  className,
 }: IconProps) {
   const style = {
     fontSize: `${size}px`,
@@ -34,7 +45,7 @@ export function Icon({
   return (
     <span
       aria-hidden="true"
-      className="material-symbols-rounded iconGlyph"
+      className={`material-symbols-rounded iconGlyph${className ? ` ${className}` : ""}`}
       style={style}
     >
       {icon}
