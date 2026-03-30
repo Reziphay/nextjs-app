@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { ReziphayLogo } from "@/components/shared/reziphay-logo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -58,9 +59,7 @@ export function AdminLoginForm({
   return (
     <Card tone="soft" className="w-full max-w-md p-8">
       <div>
-        <div className="grid h-12 w-12 place-items-center rounded-[18px] bg-[linear-gradient(135deg,var(--rz-ucr-primary)_0%,var(--rz-uso-primary)_100%)] text-sm font-semibold tracking-[-0.05em] text-white shadow-[var(--shadow-card)]">
-          Rz
-        </div>
+        <ReziphayLogo size={56} className="rounded-[18px] shadow-[var(--shadow-card)]" />
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-primary)]">
           Hidden admin
         </p>

@@ -6,10 +6,10 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { AuthShell } from '@/components/app/auth-shell';
+import { EntryFlowPanel } from '@/components/app/entry-flow-panel';
+import { useT } from '@/lib/app/i18n/context';
 import type { AppRole } from '@/lib/app/models/user';
 import { authService } from '@/lib/app/services/auth.service';
-import { useT } from '@/lib/app/i18n/context';
 import { useAuthStore } from '@/lib/app/stores/auth.store';
 
 const schema = z.object({
@@ -35,8 +35,11 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+    formState: { errors, isSubmitting, isValid },
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    mode: 'onChange',
+  });
 
   async function onSubmit(data: FormData) {
     setError(null);
@@ -57,59 +60,69 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthShell
+    <EntryFlowPanel
       title={t.registerTitle}
       subtitle={t.registerSubtitle}
-      topSlot={
+      backSlot={
         <button
+          type="button"
           onClick={() => router.back()}
-          className="text-sm text-[var(--app-ink-muted)] transition hover:text-[var(--app-primary)]"
+          className="inline-flex items-center gap-1 text-sm text-[var(--app-ink-muted)] transition hover:text-[var(--app-primary)]"
         >
-          ← {t.commonBack}
+          <span aria-hidden="true">←</span>
+          {t.commonBack}
         </button>
       }
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-[var(--app-ink)]">
+          <label className="mb-1.5 block text-[13px] font-medium text-[var(--app-ink-muted)]">
             {t.registerNameLabel}
           </label>
           <input
             {...register('fullName')}
             placeholder={t.registerNamePlaceholder}
             autoFocus
-            className="w-full rounded-[16px] border border-transparent bg-[var(--app-bg)] px-4 py-3.5 text-base text-[var(--app-ink)] outline-none transition placeholder:text-[var(--app-ink-faint)] focus:border-[var(--app-primary)]"
+            className="h-14 w-full rounded-[14px] border border-[var(--app-border)] bg-[var(--app-bg)] px-4 text-base text-[var(--app-ink)] outline-none transition placeholder:text-[var(--app-ink-faint)] focus:border-[var(--app-primary)] focus:bg-[var(--app-card)]"
           />
           {errors.fullName ? (
-            <p className="mt-1 text-xs text-[var(--color-error)]">{errors.fullName.message}</p>
+            <p className="mt-1 text-xs leading-5 text-[var(--color-error)]">
+              {errors.fullName.message}
+            </p>
           ) : null}
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-[var(--app-ink)]">
+          <label className="mb-1.5 block text-[13px] font-medium text-[var(--app-ink-muted)]">
             {t.registerEmailLabel}
           </label>
           <input
             {...register('email')}
             type="email"
             placeholder={t.registerEmailPlaceholder}
-            className="w-full rounded-[16px] border border-transparent bg-[var(--app-bg)] px-4 py-3.5 text-base text-[var(--app-ink)] outline-none transition placeholder:text-[var(--app-ink-faint)] focus:border-[var(--app-primary)]"
+            className="h-14 w-full rounded-[14px] border border-[var(--app-border)] bg-[var(--app-bg)] px-4 text-base text-[var(--app-ink)] outline-none transition placeholder:text-[var(--app-ink-faint)] focus:border-[var(--app-primary)] focus:bg-[var(--app-card)]"
           />
           {errors.email ? (
-            <p className="mt-1 text-xs text-[var(--color-error)]">{errors.email.message}</p>
+            <p className="mt-1 text-xs leading-5 text-[var(--color-error)]">
+              {errors.email.message}
+            </p>
           ) : null}
         </div>
 
-        {error ? <p className="text-sm text-[var(--color-error)]">{error}</p> : null}
+        {error ? <p className="text-sm leading-6 text-[var(--color-error)]">{error}</p> : null}
 
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="mt-2 h-14 rounded-[20px] bg-[var(--app-primary)] text-base font-semibold text-white shadow-[var(--app-shadow)] transition-all disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.99]"
+          disabled={isSubmitting || !isValid}
+          className={`mt-3 h-14 w-full rounded-[16px] text-base font-semibold transition-all disabled:cursor-not-allowed active:scale-[0.99] ${
+            isValid
+              ? 'bg-[var(--app-primary)] text-white shadow-[var(--app-shadow)]'
+              : 'bg-[var(--app-surface)] text-[var(--app-ink-muted)]'
+          } ${isSubmitting ? 'opacity-80' : ''}`}
         >
           {isSubmitting ? t.commonLoading : t.registerSubmit}
         </button>
       </form>
-    </AuthShell>
+    </EntryFlowPanel>
   );
 }

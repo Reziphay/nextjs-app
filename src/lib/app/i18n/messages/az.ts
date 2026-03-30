@@ -17,10 +17,12 @@ const az: Messages = {
   // Auth
   phoneEntryTitle: 'Telefon nömrənizi daxil edin',
   phoneEntrySubtitle: 'Doğrulama kodu göndərəcəyik',
+  phoneEntryLabel: 'Telefon nömrəsi',
   phoneEntryPlaceholder: '+994 50 000 00 00',
   phoneEntryContinue: 'Kod göndər',
   otpTitle: 'Kodu daxil edin',
   otpSubtitle: (phone: string) => `${phone} nömrəsinə kod göndərildi`,
+  otpVerify: 'Təsdiqlə',
   otpResendIn: (sec: number) => `Yenidən göndər (${sec}s)`,
   otpResend: 'Kodu yenidən göndər',
   registerTitle: 'Hesab yaradın',

@@ -1,6 +1,7 @@
 'use client';
 
 import { E } from './endpoints';
+import { normalizeAuthTokens } from '../models/auth';
 
 // ─── Token Storage ────────────────────────────────────────────────────────────
 
@@ -29,6 +30,11 @@ export const tokenStore = {
 
 type ApiEnvelope<T> = { data: T };
 
+type ApiErrorPayload = {
+  message?: string | string[];
+  error?: string;
+};
+
 function unwrap<T>(payload: unknown): T {
   if (
     typeof payload === 'object' &&
@@ -52,6 +58,26 @@ export class AppApiError extends Error {
   get isServerError() { return this.status >= 500; }
 }
 
+function getErrorMessage(payload: unknown, status: number): string {
+  if (typeof payload === 'object' && payload !== null) {
+    const { error, message } = payload as ApiErrorPayload;
+
+    if (Array.isArray(message) && message.length > 0) {
+      return message.join(', ');
+    }
+
+    if (typeof message === 'string' && message.trim()) {
+      return message;
+    }
+
+    if (typeof error === 'string' && error.trim()) {
+      return error;
+    }
+  }
+
+  return `Request failed: ${status}`;
+}
+
 // ─── Core fetch with 401-refresh-retry ───────────────────────────────────────
 
 let isRefreshing = false;
@@ -73,9 +99,16 @@ async function tryRefresh(): Promise<string | null> {
   }
 
   const json = (await res.json()) as unknown;
-  const data = unwrap<{ accessToken: string; refreshToken: string }>(json);
-  tokenStore.save(data.accessToken, data.refreshToken);
-  return data.accessToken;
+  const data = unwrap<unknown>(json);
+  const tokens = normalizeAuthTokens(data);
+
+  if (!tokens) {
+    tokenStore.clear();
+    return null;
+  }
+
+  tokenStore.save(tokens.accessToken, tokens.refreshToken);
+  return tokens.accessToken;
 }
 
 async function rawFetch(
@@ -130,7 +163,16 @@ export async function appFetch<T>(
   }
 
   if (!res.ok) {
-    throw new AppApiError(`Request failed: ${res.status}`, res.status);
+    let message = `Request failed: ${res.status}`;
+
+    try {
+      const payload = (await res.json()) as unknown;
+      message = getErrorMessage(payload, res.status);
+    } catch {
+      // ignore non-JSON error bodies
+    }
+
+    throw new AppApiError(message, res.status);
   }
 
   if (res.status === 204) return null as T;

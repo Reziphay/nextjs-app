@@ -6,40 +6,72 @@ import type {
   OtpVerifyResult,
   AuthSession,
 } from '../models/auth';
-import type { User } from '../models/user';
-import type { AppRole } from '../models/user';
+import {
+  normalizeAuthSession,
+  normalizeUserResponse,
+} from '../models/auth';
+import type { User, AppRole } from '../models/user';
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function persistSessionOrThrow(payload: unknown, message: string): AuthSession {
+  const session = normalizeAuthSession(payload);
+
+  if (!session) {
+    throw new Error(message);
+  }
+
+  tokenStore.save(session.accessToken, session.refreshToken);
+  return session;
+}
+
+function extractUserOrThrow(payload: unknown, message: string): User {
+  const user = normalizeUserResponse(payload);
+
+  if (!user) {
+    throw new Error(message);
+  }
+
+  return user;
+}
 
 export const authService = {
   async requestOtp(phone: string, purpose: OtpPurpose): Promise<OtpRequestResponse> {
     return api.post<OtpRequestResponse>(E.requestPhoneOtp, { phone, purpose });
   },
 
-  async verifyOtp(phone: string, code: string): Promise<OtpVerifyResult> {
-    const result = await api.post<{
-      authenticated?: boolean;
-      accessToken?: string;
-      refreshToken?: string;
-      user?: User;
-      registrationToken?: string;
-    }>(E.verifyPhoneOtp, { phone, code });
+  async verifyOtp(
+    phone: string,
+    code: string,
+    purpose: OtpPurpose = 'AUTHENTICATE',
+  ): Promise<OtpVerifyResult> {
+    const result = await api.post<unknown>(E.verifyPhoneOtp, { phone, code, purpose });
+    const session = normalizeAuthSession(result);
 
-    if (result.accessToken && result.refreshToken && result.user) {
-      tokenStore.save(result.accessToken, result.refreshToken);
+    if (session) {
+      tokenStore.save(session.accessToken, session.refreshToken);
       return {
         type: 'authenticated',
-        session: {
-          accessToken: result.accessToken,
-          refreshToken: result.refreshToken,
-          user: result.user,
-        } satisfies AuthSession,
+        session,
       };
+    }
+
+    const registrationToken =
+      isRecord(result) && typeof result.registrationToken === 'string'
+        ? result.registrationToken
+        : null;
+
+    if (!registrationToken) {
+      throw new Error('Invalid OTP verification response');
     }
 
     return {
       type: 'registration_pending',
       pending: {
         phone,
-        registrationToken: result.registrationToken!,
+        registrationToken,
       },
     };
   },
@@ -50,57 +82,51 @@ export const authService = {
     email: string,
     role: AppRole,
   ): Promise<AuthSession> {
-    const result = await api.post<{
-      accessToken: string;
-      refreshToken: string;
-      user: User;
-    }>(E.completeRegistration, { registrationToken, fullName, email, role });
+    const result = await api.post<unknown>(E.completeRegistration, {
+      registrationToken,
+      fullName,
+      email,
+      role,
+    });
 
-    tokenStore.save(result.accessToken, result.refreshToken);
-    return result;
+    return persistSessionOrThrow(result, 'Invalid registration response');
   },
 
   async validateSession(): Promise<User | null> {
     if (!tokenStore.hasTokens()) return null;
     try {
-      return await api.get<User>(E.authMe);
+      const result = await api.get<unknown>(E.authMe);
+      return normalizeUserResponse(result);
     } catch {
       return null;
     }
   },
 
   async getMe(): Promise<User> {
-    return api.get<User>(E.userMe);
+    const result = await api.get<unknown>(E.userMe);
+    return extractUserOrThrow(result, 'Invalid profile response');
   },
 
   async updateProfile(fullName?: string): Promise<User> {
-    return api.patch<User>(E.userMe, { fullName });
+    const result = await api.patch<unknown>(E.userMe, { fullName });
+    return extractUserOrThrow(result, 'Invalid profile update response');
   },
 
   async uploadAvatar(file: File): Promise<User> {
     const form = new FormData();
     form.append('file', file);
-    return api.upload<User>(E.userMeAvatar, form, 'POST');
+    const result = await api.upload<unknown>(E.userMeAvatar, form, 'POST');
+    return extractUserOrThrow(result, 'Invalid avatar upload response');
   },
 
   async activateUso(): Promise<AuthSession> {
-    const result = await api.post<{
-      accessToken: string;
-      refreshToken: string;
-      user: User;
-    }>(E.activateUso);
-    tokenStore.save(result.accessToken, result.refreshToken);
-    return result;
+    const result = await api.post<unknown>(E.activateUso);
+    return persistSessionOrThrow(result, 'Invalid role activation response');
   },
 
   async switchRole(role: AppRole): Promise<AuthSession> {
-    const result = await api.post<{
-      accessToken: string;
-      refreshToken: string;
-      user: User;
-    }>(E.switchRole, { role });
-    tokenStore.save(result.accessToken, result.refreshToken);
-    return result;
+    const result = await api.post<unknown>(E.switchRole, { role });
+    return persistSessionOrThrow(result, 'Invalid role switch response');
   },
 
   async logout(): Promise<void> {

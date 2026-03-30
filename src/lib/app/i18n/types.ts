@@ -15,10 +15,12 @@ export type Messages = {
   // Auth
   phoneEntryTitle: string;
   phoneEntrySubtitle: string;
+  phoneEntryLabel: string;
   phoneEntryPlaceholder: string;
   phoneEntryContinue: string;
   otpTitle: string;
   otpSubtitle: (phone: string) => string;
+  otpVerify: string;
   otpResendIn: (sec: number) => string;
   otpResend: string;
   registerTitle: string;
