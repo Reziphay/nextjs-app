@@ -1,5 +1,6 @@
 "use client";
 
+import { Logo } from "@/components";
 import { localeLabels, locales } from "@/i18n/config";
 import { useLocale } from "@/components/providers/locale-provider";
 
@@ -18,7 +19,10 @@ export function HomePage({ apiBaseUrl }: HomePageProps) {
     <main className="home">
       <section className="hero">
         <div className="heroTop">
-          <span className="eyebrow">{messages.hero.eyebrow}</span>
+          <div className="brandBlock">
+            <Logo size={24} priority />
+            <span className="eyebrow">{messages.hero.eyebrow}</span>
+          </div>
 
           <nav
             className="languageNav"
