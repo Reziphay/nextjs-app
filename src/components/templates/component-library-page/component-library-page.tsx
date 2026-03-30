@@ -182,6 +182,7 @@ export function ComponentLibraryPage() {
           <div className={styles.cardGrid}>
             <ShowcaseCard title="Variants" description="Əsas görünüş variantları">
               <div className={styles.buttonStack}>
+                <Button variant="primary">Primary</Button>
                 <Button>Default</Button>
                 <Button variant="outline">Outline</Button>
                 <Button variant="secondary">Secondary</Button>

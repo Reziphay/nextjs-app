@@ -90,6 +90,18 @@
   font-size: var(--font-size-medium);
 }
 
+.primary {
+  --button-ripple-color: var(--app-bg-overlay-soft);
+  background: var(--app-primary);
+  color: var(--app-text-inverse);
+  box-shadow: 0 0.857rem 2rem var(--app-shadow-primary-soft);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--app-primary-strong);
+  box-shadow: 0 1rem 2.286rem var(--app-shadow-primary-faint);
+}
+
 .default {
   --button-ripple-color: var(--app-bg-overlay-strong);
   background: var(--color-black-1);

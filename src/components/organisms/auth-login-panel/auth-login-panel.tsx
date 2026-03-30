@@ -47,7 +47,7 @@ export function AuthLoginPanel() {
             />
           </Field>
 
-          <Button className={styles.submitButton}>
+          <Button className={styles.submitButton} variant="primary">
             {login.submit}
           </Button>
 

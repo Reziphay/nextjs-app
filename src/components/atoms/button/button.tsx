@@ -3,6 +3,7 @@ import { Icon } from "@/components/icon";
 import styles from "./button.module.css";
 
 type ButtonVariant =
+  | "primary"
   | "default"
   | "outline"
   | "secondary"
