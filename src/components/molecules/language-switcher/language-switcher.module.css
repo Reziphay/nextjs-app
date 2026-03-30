@@ -1,0 +1,89 @@
+.dropdownShell {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.571rem;
+}
+
+.iconWrap {
+  width: 2.857rem;
+  height: 2.857rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 0.857rem;
+  background: var(--app-bg-surface-strong);
+  box-shadow: 0 0.429rem 1.143rem var(--app-shadow-card-soft);
+  color: var(--app-primary);
+}
+
+.dropdown {
+  width: min(100%, 12.5rem);
+}
+
+.optionRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.714rem;
+}
+
+.optionLabel {
+  min-width: 0;
+  color: var(--app-text-strong);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.optionCode {
+  min-height: 1.429rem;
+  padding: 0.214rem 0.5rem;
+  font-size: var(--font-size-extra-small);
+}
+
+.segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.429rem;
+  flex-wrap: wrap;
+  padding: 0.286rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 999px;
+  background: var(--app-bg-surface-strong);
+  box-shadow: 0 0.429rem 1.143rem var(--app-shadow-card-soft);
+}
+
+.segmentedIcon {
+  width: 2.286rem;
+  height: 2.286rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--app-bg-primary-soft);
+  color: var(--app-primary);
+}
+
+.segmentButton {
+  min-width: 3.286rem;
+}
+
+@media (max-width: 48rem) {
+  .dropdownShell {
+    width: 100%;
+  }
+
+  .dropdown {
+    flex: 1;
+    width: 100%;
+  }
+
+  .segmented {
+    justify-content: flex-end;
+  }
+}

@@ -11,8 +11,27 @@ export type ApiClientOptions = {
   headers?: Record<string, string>;
 };
 
+function resolveEnvValue(value?: string | null, fallback?: string | null) {
+  const normalizedValue = value?.trim();
+
+  if (normalizedValue && !normalizedValue.startsWith("$")) {
+    return normalizedValue;
+  }
+
+  return fallback?.trim() ?? "";
+}
+
+function normalizeBaseUrl(value: string) {
+  return value.endsWith("/") ? value.slice(0, -1) : value;
+}
+
 export function getApiBaseUrl() {
-  return process.env.NEXT_PUBLIC_API_URL ?? process.env.API_URL ?? "";
+  const resolvedValue = resolveEnvValue(
+    process.env.NEXT_PUBLIC_API_URL,
+    process.env.API_URL,
+  );
+
+  return normalizeBaseUrl(resolvedValue);
 }
 
 export function createApiClient(

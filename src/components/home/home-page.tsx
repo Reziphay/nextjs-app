@@ -1,7 +1,6 @@
 "use client";
 
-import { Logo } from "@/components";
-import { localeLabels, locales } from "@/i18n/config";
+import { LanguageSwitcher, Logo } from "@/components";
 import { useLocale } from "@/components/providers/locale-provider";
 
 type HomePageProps = {
@@ -13,7 +12,7 @@ const exampleRequest = `import { api } from "@/lib/api";
 await api.get("/health");`;
 
 export function HomePage({ apiBaseUrl }: HomePageProps) {
-  const { locale, messages, setLocale } = useLocale();
+  const { messages } = useLocale();
 
   return (
     <main className="home">
@@ -24,26 +23,7 @@ export function HomePage({ apiBaseUrl }: HomePageProps) {
             <span className="eyebrow">{messages.hero.eyebrow}</span>
           </div>
 
-          <nav
-            className="languageNav"
-            aria-label={messages.languageSwitcherAriaLabel}
-          >
-            {locales.map((entry) => {
-              const isActive = entry === locale;
-
-              return (
-                <button
-                  key={entry}
-                  type="button"
-                  className={`languageLink${isActive ? " isActive" : ""}`}
-                  aria-pressed={isActive}
-                  onClick={() => setLocale(entry)}
-                >
-                  {localeLabels[entry]}
-                </button>
-              );
-            })}
-          </nav>
+          <LanguageSwitcher variant="segmented" />
         </div>
 
         <h1>{messages.hero.title}</h1>

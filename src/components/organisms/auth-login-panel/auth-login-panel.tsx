@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Button,
   Field,
@@ -7,7 +8,7 @@ import {
   Input,
 } from "@/components/atoms";
 import { useLocale } from "@/components/providers/locale-provider";
-import styles from "./auth-login-panel.module.css";
+import styles from "../auth-panel.module.css";
 
 export function AuthLoginPanel() {
   const { messages } = useLocale();
@@ -57,11 +58,11 @@ export function AuthLoginPanel() {
         </form>
 
         <div className={styles.footer}>
-          <p>
+          <p className={styles.footerText}>
             {login.noAccount}
-            <Button variant="link" type="button">
+            <Link className={styles.footerLink} href="/auth/register">
               {login.signUp}
-            </Button>
+            </Link>
           </p>
         </div>
       </div>

@@ -1,8 +1,14 @@
 .page {
-  min-height: 100vh;
+  min-height: 100dvh;
+  position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-rows: auto 1fr;
   padding: 1.143rem 1.429rem 2rem;
+  background:
+    radial-gradient(circle at top left, var(--app-glow-primary-soft), transparent 38%),
+    radial-gradient(circle at top right, var(--app-glow-primary-strong), transparent 34%),
+    var(--app-bg-canvas);
 }
 
 .topbar {
@@ -14,8 +20,10 @@
 .content {
   width: 100%;
   display: grid;
-  place-items: center;
-  padding-top: 1.143rem;
+  justify-items: center;
+  align-content: start;
+  min-height: 0;
+  padding: 1.143rem 0 3.429rem;
 }
 
 .shell {

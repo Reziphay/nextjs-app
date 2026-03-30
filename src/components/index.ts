@@ -16,7 +16,8 @@ export {
   Input,
   Switch,
 } from "./atoms";
-export { AuthHeader, AuthLoginPanel } from "./organisms";
+export { LanguageSwitcher } from "./molecules";
+export { AuthHeader, AuthLoginPanel, AuthRegisterPanel } from "./organisms";
 export { AuthLayoutTemplate, ComponentLibraryPage } from "./templates";
 export { Icon } from "./icon";
 export { Logo } from "./logo";

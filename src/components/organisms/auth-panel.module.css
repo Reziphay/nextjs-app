@@ -1,5 +1,5 @@
 .wrapper {
-  width: min(100%, 26rem);
+  width: min(100%, 32rem);
   display: grid;
 }
 
@@ -35,8 +35,15 @@
   gap: 0.857rem;
 }
 
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.857rem;
+}
+
 .fieldFull {
   width: 100%;
+  min-width: 0;
 }
 
 .labelRow {
@@ -54,7 +61,7 @@
   text-align: center;
 }
 
-.footer p {
+.footerText {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -65,9 +72,34 @@
   line-height: 1.6;
 }
 
+.footerLink {
+  color: var(--app-text-strong);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.214rem;
+  transition:
+    color 160ms ease,
+    text-decoration-color 160ms ease;
+}
+
+.footerLink:hover {
+  color: var(--app-primary-strong);
+  text-decoration-color: currentColor;
+}
+
+.feedback {
+  margin-bottom: 0.143rem;
+}
+
 @media (max-width: 48rem) {
   .card {
     padding: 1.286rem;
+  }
+
+  .labelRow,
+  .fieldGrid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .labelRow {

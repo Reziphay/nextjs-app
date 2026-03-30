@@ -17,6 +17,7 @@ import {
   Input,
   Switch,
 } from "@/components/atoms";
+import { LanguageSwitcher } from "@/components/molecules";
 import { Icon } from "@/components/icon";
 import { Logo } from "@/components/logo";
 import styles from "./component-library-page.module.css";
@@ -165,6 +166,27 @@ export function ComponentLibraryPage() {
                 </div>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionEyebrow}>Molecules</span>
+            <h2>Language Switcher</h2>
+            <p>
+              Eyni locale switching davranışı həm dropdown, həm də segmented
+              görünüşdə reusable komponent kimi istifadə olunur.
+            </p>
+          </div>
+
+          <div className={styles.cardGrid}>
+            <ShowcaseCard title="Dropdown" description="Auth header üçün kompakt seçim">
+              <LanguageSwitcher />
+            </ShowcaseCard>
+
+            <ShowcaseCard title="Segmented" description="Hero və üst panel üçün sürətli seçim">
+              <LanguageSwitcher variant="segmented" />
+            </ShowcaseCard>
           </div>
         </section>
 
