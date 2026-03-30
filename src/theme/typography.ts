@@ -6,11 +6,31 @@ export const fontEmbedMarkup = `
 <link href="https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 `.trim();
 
+export const iconEmbedMarkup = `
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+`.trim();
+
 type LinkDefinition = {
   href: string;
   rel?: string;
   crossOrigin?: "" | "anonymous" | "use-credentials";
 };
+
+function dedupeLinks(links: LinkDefinition[]) {
+  const uniqueLinks = new Map<string, LinkDefinition>();
+
+  for (const link of links) {
+    const key = `${link.rel ?? ""}|${link.href}|${link.crossOrigin ?? ""}`;
+
+    if (!uniqueLinks.has(key)) {
+      uniqueLinks.set(key, link);
+    }
+  }
+
+  return [...uniqueLinks.values()];
+}
 
 function parseLinkTagAttributes(markup: string): LinkDefinition[] {
   const linkTagPattern = /<link\s+([^>]+)>/g;
@@ -30,7 +50,7 @@ function parseLinkTagAttributes(markup: string): LinkDefinition[] {
       continue;
     }
 
-    links.push({
+    const linkDefinition: LinkDefinition = {
       href: attributes.href,
       rel: attributes.rel,
       crossOrigin:
@@ -39,7 +59,11 @@ function parseLinkTagAttributes(markup: string): LinkDefinition[] {
             ? "use-credentials"
             : "anonymous"
           : undefined,
-    });
+    };
+
+    if (!links.some((link) => link.href === linkDefinition.href)) {
+      links.push(linkDefinition);
+    }
   }
 
   return links;
@@ -91,7 +115,10 @@ const fontSizeScale = {
   extraLarge: "clamp(2.75rem, 2.15rem + 2.4vw, 5rem)",
 } as const;
 
-export const fontLinks = parseLinkTagAttributes(fontEmbedMarkup);
+export const fontLinks = dedupeLinks([
+  ...parseLinkTagAttributes(fontEmbedMarkup),
+  ...parseLinkTagAttributes(iconEmbedMarkup),
+]);
 
 export const typographyTheme = {
   rootFontSizePx: 14,

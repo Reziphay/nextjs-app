@@ -67,6 +67,16 @@ pre {
     monospace;
 }
 
+.iconGlyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
 .home {
   min-height: 100vh;
   display: grid;
