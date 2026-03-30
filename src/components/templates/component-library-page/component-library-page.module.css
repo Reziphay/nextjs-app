@@ -221,6 +221,14 @@
   gap: 0.714rem;
 }
 
+.comboboxShowcase {
+  width: min(100%, 18rem);
+}
+
+.comboboxWide {
+  width: min(100%, 22rem);
+}
+
 .iconGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));

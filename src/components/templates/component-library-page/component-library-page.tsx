@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactNode } from "react";
 import {
   Alert,
@@ -6,6 +8,8 @@ import {
   Badge,
   Button,
   Checkbox,
+  Combobox,
+  ComboboxItem,
   Field,
   FieldContent,
   FieldDescription,
@@ -35,6 +39,47 @@ const checkboxItems = [
   { label: "External disks", defaultChecked: true },
   { label: "CDs, DVDs, and iPods", defaultChecked: false },
   { label: "Connected servers", defaultChecked: false },
+] as const;
+
+const frameworkOptions = [
+  { value: "nextjs", label: "Next.js" },
+  { value: "sveltekit", label: "SvelteKit" },
+  { value: "nuxt", label: "Nuxt.js" },
+  { value: "remix", label: "Remix" },
+  { value: "astro", label: "Astro" },
+] as const;
+
+const countryOptions = [
+  {
+    value: "ar",
+    label: "Argentina",
+    description: "South America (ar)",
+    keywords: ["south america", "argentina"],
+  },
+  {
+    value: "au",
+    label: "Australia",
+    description: "Oceania (au)",
+    keywords: ["oceania", "australia"],
+  },
+  {
+    value: "br",
+    label: "Brazil",
+    description: "South America (br)",
+    keywords: ["south america", "brazil"],
+  },
+  {
+    value: "ca",
+    label: "Canada",
+    description: "North America (ca)",
+    keywords: ["north america", "canada"],
+  },
+  {
+    value: "cn",
+    label: "China",
+    description: "Asia (cn)",
+    keywords: ["asia", "china"],
+  },
 ] as const;
 
 type ShowcaseCardProps = {
@@ -591,6 +636,103 @@ export function ComponentLibraryPage() {
                   Bookmark
                 </Badge>
               </div>
+            </ShowcaseCard>
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionEyebrow}>Atoms</span>
+            <h2>Combobox</h2>
+            <p>
+              `Combobox` single və multiple seçim, search, chips, custom item
+              render, invalid və disabled halları dəstəkləyir. `ComboboxItem`
+              custom dropdown content, `ComboboxChips` isə multiple seçim
+              görünüşü üçün daxildə istifadə olunur.
+            </p>
+          </div>
+
+          <div className={styles.cardGrid}>
+            <ShowcaseCard
+              title="Basic"
+              description="Tək seçim və seçilmiş dəyərin göstərilməsi"
+            >
+              <Combobox
+                className={styles.comboboxShowcase}
+                items={frameworkOptions}
+                defaultValue="sveltekit"
+                placeholder="Select a framework"
+                aria-label="Framework combobox basic example"
+              />
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Search"
+              description="Yazdıqca nəticələri filter edən combobox"
+            >
+              <Combobox
+                className={styles.comboboxShowcase}
+                items={frameworkOptions}
+                placeholder="Search frameworks..."
+                aria-label="Framework combobox search example"
+              />
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Multiple"
+              description="multiple seçim və chip görünüşü"
+            >
+              <Combobox
+                className={styles.comboboxWide}
+                items={frameworkOptions}
+                defaultValue={["nextjs"]}
+                placeholder="Select frameworks..."
+                multiple
+                aria-label="Framework combobox multiple example"
+              />
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Custom Items"
+              description="Dropdown item-larını custom content ilə render etmək"
+            >
+              <Combobox
+                className={styles.comboboxShowcase}
+                items={countryOptions}
+                placeholder="Search countries..."
+                aria-label="Country combobox custom item example"
+                renderItem={(item) => (
+                  <ComboboxItem description={item.description}>
+                    {item.label}
+                  </ComboboxItem>
+                )}
+              />
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Invalid"
+              description="aria-invalid ilə xəta halı"
+            >
+              <Combobox
+                className={styles.comboboxShowcase}
+                items={frameworkOptions}
+                placeholder="Select a framework"
+                aria-label="Framework combobox invalid example"
+                aria-invalid="true"
+              />
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Disabled"
+              description="disabled prop ilə interaction-un bağlanması"
+            >
+              <Combobox
+                className={styles.comboboxShowcase}
+                items={frameworkOptions}
+                placeholder="Select a framework"
+                aria-label="Framework combobox disabled example"
+                disabled
+              />
             </ShowcaseCard>
           </div>
         </section>
