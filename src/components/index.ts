@@ -2,6 +2,7 @@ export {
   Alert,
   AlertDescription,
   AlertTitle,
+  Badge,
   Button,
   Checkbox,
   Field,

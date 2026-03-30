@@ -3,6 +3,7 @@ import {
   Alert,
   AlertDescription,
   AlertTitle,
+  Badge,
   Button,
   Checkbox,
   Field,
@@ -546,6 +547,50 @@ export function ComponentLibraryPage() {
                   plan to continue using the service.
                 </AlertDescription>
               </Alert>
+            </ShowcaseCard>
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionEyebrow}>Atoms</span>
+            <h2>Badge</h2>
+            <p>
+              `Badge` komponenti qısa status və kateqoriya göstəriciləri üçün
+              nəzərdə tutulub. `variant`, `icon` və `iconPosition` ilə eyni
+              komponent daxilində fərqli görünüşlər idarə olunur.
+            </p>
+          </div>
+
+          <div className={styles.cardGrid}>
+            <ShowcaseCard
+              title="Basic"
+              description="Əsas variantların birlikdə görünüşü"
+            >
+              <div className={styles.badgeStack}>
+                <Badge>Badge</Badge>
+                <Badge variant="secondary">Secondary</Badge>
+                <Badge variant="destructive">Destructive</Badge>
+                <Badge variant="outline">Outline</Badge>
+              </div>
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="With Icon"
+              description="İkonu solda və ya sağda göstərmək olur"
+            >
+              <div className={styles.badgeStack}>
+                <Badge variant="secondary" icon="verified">
+                  Verified
+                </Badge>
+                <Badge
+                  variant="outline"
+                  icon="bookmark"
+                  iconPosition="inline-end"
+                >
+                  Bookmark
+                </Badge>
+              </div>
             </ShowcaseCard>
           </div>
         </section>

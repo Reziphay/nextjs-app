@@ -213,6 +213,14 @@
   width: min(100%, 32rem);
 }
 
+.badgeStack {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.714rem;
+}
+
 .iconGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
