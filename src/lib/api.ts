@@ -8,6 +8,7 @@ const API_TIMEOUT_MS = 10_000;
 
 export type ApiClientOptions = {
   locale?: string;
+  accessToken?: string;
   headers?: Record<string, string>;
 };
 
@@ -45,6 +46,10 @@ export function createApiClient(
 
   if (options.locale) {
     headers["Accept-Language"] = options.locale;
+  }
+
+  if (options.accessToken) {
+    headers["Authorization"] = `Bearer ${options.accessToken}`;
   }
 
   const config: CreateAxiosDefaults = {

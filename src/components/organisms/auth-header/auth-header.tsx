@@ -7,6 +7,8 @@ import { Button } from "@/components/atoms";
 import { Logo } from "@/components/logo";
 import { LanguageSwitcher } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
+import { useAppSelector } from "@/store/hooks";
+import { selectAuthSession, selectIsAuthenticated } from "@/store/auth";
 import styles from "./auth-header.module.css";
 
 const navigationLinks = [
@@ -20,8 +22,15 @@ export function AuthHeader() {
   const pathname = usePathname();
   const { messages } = useLocale();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const session = useAppSelector(selectAuthSession);
   const loginHref = "/auth/login";
   const registerHref = "/auth/register";
+
+  const user = session.user;
+  const initials = user
+    ? `${user.first_name[0] ?? ""}${user.last_name[0] ?? ""}`.toUpperCase()
+    : "";
 
   const isActiveLink = (href: string) =>
     href === "/" ? pathname === href : pathname.startsWith(href);
@@ -60,25 +69,33 @@ export function AuthHeader() {
         <LanguageSwitcher className={styles.switcher} variant="compact" />
 
         <div className={styles.authActions}>
-          <Link
-            aria-current={isActiveLink(loginHref) ? "page" : undefined}
-            className={`${styles.authLink} ${
-              isActiveLink(loginHref) ? styles.authLinkActive : ""
-            }`}
-            href={loginHref}
-          >
-            {messages.auth.login.submit}
-          </Link>
+          {isAuthenticated ? (
+            <Link href="/home" className={styles.avatarLink}>
+              <span className={styles.avatar}>{initials}</span>
+            </Link>
+          ) : (
+            <>
+              <Link
+                aria-current={isActiveLink(loginHref) ? "page" : undefined}
+                className={`${styles.authLink} ${
+                  isActiveLink(loginHref) ? styles.authLinkActive : ""
+                }`}
+                href={loginHref}
+              >
+                {messages.auth.login.submit}
+              </Link>
 
-          <Link
-            aria-current={isActiveLink(registerHref) ? "page" : undefined}
-            className={`${styles.authButton} ${
-              isActiveLink(registerHref) ? styles.authButtonActive : ""
-            }`}
-            href={registerHref}
-          >
-            {messages.auth.login.signUp}
-          </Link>
+              <Link
+                aria-current={isActiveLink(registerHref) ? "page" : undefined}
+                className={`${styles.authButton} ${
+                  isActiveLink(registerHref) ? styles.authButtonActive : ""
+                }`}
+                href={registerHref}
+              >
+                {messages.auth.login.signUp}
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
@@ -115,27 +132,39 @@ export function AuthHeader() {
         </nav>
 
         <div className={styles.mobileAuthActions}>
-          <Link
-            aria-current={isActiveLink(loginHref) ? "page" : undefined}
-            className={`${styles.mobileAuthLink} ${
-              isActiveLink(loginHref) ? styles.mobileAuthLinkActive : ""
-            }`}
-            href={loginHref}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            {messages.auth.login.submit}
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              href="/home"
+              className={styles.mobileAuthButton}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {messages.dashboard.home}
+            </Link>
+          ) : (
+            <>
+              <Link
+                aria-current={isActiveLink(loginHref) ? "page" : undefined}
+                className={`${styles.mobileAuthLink} ${
+                  isActiveLink(loginHref) ? styles.mobileAuthLinkActive : ""
+                }`}
+                href={loginHref}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {messages.auth.login.submit}
+              </Link>
 
-          <Link
-            aria-current={isActiveLink(registerHref) ? "page" : undefined}
-            className={`${styles.mobileAuthButton} ${
-              isActiveLink(registerHref) ? styles.mobileAuthButtonActive : ""
-            }`}
-            href={registerHref}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            {messages.auth.login.signUp}
-          </Link>
+              <Link
+                aria-current={isActiveLink(registerHref) ? "page" : undefined}
+                className={`${styles.mobileAuthButton} ${
+                  isActiveLink(registerHref) ? styles.mobileAuthButtonActive : ""
+                }`}
+                href={registerHref}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {messages.auth.login.signUp}
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

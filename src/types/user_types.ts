@@ -61,6 +61,16 @@ export type AuthenticatedUser = Pick<
   "id" | "email" | "type" | "first_name" | "last_name" | "email_verified"
 >;
 
+// Full profile returned by GET /auth/me
+export type UserProfile = UserIdentityFields &
+  UserProfileFields &
+  UserVerificationFields & {
+    phone: string | null;
+    type: UserType;
+    created_at: string;
+    updated_at: string;
+  };
+
 export type RegisteredUser = Pick<
   User,
   "first_name" | "last_name" | "email" | "type" | "email_verified" | "created_at"

@@ -35,7 +35,7 @@ export function AuthLoginPanel() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace("/");
+      router.replace("/home");
     }
   }, [isAuthenticated, router]);
 
@@ -44,7 +44,7 @@ export function AuthLoginPanel() {
 
     try {
       await dispatch(submitLogin({ locale })).unwrap();
-      router.replace("/");
+      router.replace("/home");
     } catch {
       return;
     }

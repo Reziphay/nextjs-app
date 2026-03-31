@@ -1,0 +1,23 @@
+.layout {
+  display: flex;
+  min-height: 100dvh;
+  background: var(--app-bg-canvas);
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.content {
+  width: min(100%, 72rem);
+  margin-inline: auto;
+  padding: 2.5rem 2rem;
+}
+
+@media (max-width: 64rem) {
+  .content {
+    padding: 1.714rem 1.25rem;
+  }
+}

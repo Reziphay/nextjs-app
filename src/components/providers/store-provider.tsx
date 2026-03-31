@@ -8,64 +8,19 @@ import {
   hydrateAuthSession,
   selectAuthHydrated,
   selectAuthSession,
-  type PersistedAuthSession,
 } from "@/store/auth";
-
-const authStorageKey = "reziphay-auth-session";
+import { createApiClient } from "@/lib/api";
+import {
+  clearAuthCookies,
+  getStoredAccessToken,
+  getStoredRefreshToken,
+  writeAuthCookies,
+} from "@/lib/auth-cookies";
+import type { ApiSuccessResponse, AuthenticatedUser } from "@/types";
 
 type StoreProviderProps = {
   children: ReactNode;
 };
-
-function readPersistedAuthSession(): PersistedAuthSession | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const rawValue = window.localStorage.getItem(authStorageKey);
-
-  if (!rawValue) {
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(rawValue) as Partial<PersistedAuthSession>;
-
-    if (
-      parsed.status !== "anonymous" &&
-      parsed.status !== "authenticated"
-    ) {
-      return null;
-    }
-
-    return {
-      user: parsed.user ?? null,
-      accessToken: parsed.accessToken ?? null,
-      refreshToken: parsed.refreshToken ?? null,
-      status: parsed.status,
-    };
-  } catch {
-    return null;
-  }
-}
-
-function writePersistedAuthSession(session: PersistedAuthSession) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  if (
-    session.status !== "authenticated" ||
-    !session.user ||
-    !session.accessToken ||
-    !session.refreshToken
-  ) {
-    window.localStorage.removeItem(authStorageKey);
-    return;
-  }
-
-  window.localStorage.setItem(authStorageKey, JSON.stringify(session));
-}
 
 function AuthStoreSync() {
   const dispatch = useAppDispatch();
@@ -73,7 +28,42 @@ function AuthStoreSync() {
   const session = useAppSelector(selectAuthSession);
 
   useEffect(() => {
-    dispatch(hydrateAuthSession(readPersistedAuthSession()));
+    async function restoreSession() {
+      const accessToken = getStoredAccessToken();
+      const refreshToken = getStoredRefreshToken();
+
+      if (!accessToken || !refreshToken) {
+        dispatch(hydrateAuthSession(null));
+        return;
+      }
+
+      try {
+        const client = createApiClient({ accessToken });
+        const response = await client.get<ApiSuccessResponse<{ user: AuthenticatedUser }>>("/auth/me", {
+          headers: { "Cache-Control": "no-cache" },
+        });
+        const user = response.data?.data?.user;
+
+        if (user?.id && user?.email) {
+          dispatch(
+            hydrateAuthSession({
+              user,
+              accessToken,
+              refreshToken,
+              status: "authenticated",
+            }),
+          );
+          return;
+        }
+      } catch {
+        // Token expired or invalid
+      }
+
+      clearAuthCookies();
+      dispatch(hydrateAuthSession(null));
+    }
+
+    restoreSession();
   }, [dispatch]);
 
   useEffect(() => {
@@ -81,12 +71,11 @@ function AuthStoreSync() {
       return;
     }
 
-    writePersistedAuthSession({
-      user: session.user,
-      accessToken: session.accessToken,
-      refreshToken: session.refreshToken,
-      status: session.status,
-    });
+    if (session.status === "authenticated" && session.accessToken && session.refreshToken) {
+      writeAuthCookies(session.accessToken, session.refreshToken);
+    } else {
+      clearAuthCookies();
+    }
   }, [hydrated, session]);
 
   return null;

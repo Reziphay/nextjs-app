@@ -168,6 +168,31 @@
   border-color: var(--app-primary-strong);
 }
 
+.avatarLink {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.571rem;
+  height: 2.571rem;
+  border-radius: var(--general-border-radius-pill);
+  background: var(--app-primary);
+  color: var(--app-text-inverse);
+  font-size: var(--font-size-extra-small);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  transition: opacity 140ms ease;
+}
+
+.avatarLink:hover .avatar {
+  opacity: 0.85;
+}
+
 @media (max-width: 72rem) {
   .header {
     grid-template-columns: 1fr auto;

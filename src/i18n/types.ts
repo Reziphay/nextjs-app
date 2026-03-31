@@ -127,4 +127,31 @@ export type Messages = {
     title: string;
     description: string;
   };
+  dashboard: {
+    home: string;
+    profile: string;
+    settings: string;
+    signOut: string;
+    greeting: string;
+  };
+  profile: {
+    title: string;
+    description: string;
+    personalInfo: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    birthday: string;
+    country: string;
+    phone: string;
+    phoneMissing: string;
+    accountInfo: string;
+    userType: string;
+    emailVerified: string;
+    emailNotVerified: string;
+    memberSince: string;
+    typeUso: string;
+    typeUcr: string;
+    typeAdmin: string;
+  };
 };

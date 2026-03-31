@@ -5,6 +5,7 @@ import { createApiClient } from "@/lib/api";
 import {
   isRegisterUserType,
   type ApiSuccessResponse,
+  type AuthTokens,
   type AuthenticatedUser,
   type LoginFormValues,
   type LoginResponseData,
@@ -15,6 +16,7 @@ import {
 import type { RootState } from "@/store";
 
 const authLoginEndpoint = "/auth/login";
+const authMeEndpoint = "/auth/me";
 const authRegisterEndpoint = "/auth/register";
 const invalidApiResponseError = "INVALID_AUTH_API_RESPONSE";
 const minimumRegisterAge = 13;
@@ -426,24 +428,39 @@ export const submitLogin = createAsyncThunk<
 
   try {
     const client = createApiClient({ locale });
-    const response = await client.request<ApiSuccessResponse<LoginResponseData>>({
+    const loginResponse = await client.request<ApiSuccessResponse<AuthTokens>>({
       url: authLoginEndpoint,
       method: "POST",
       data: values,
     });
-    const contentType = String(response.headers["content-type"] ?? "");
-    const payload = response.data?.data;
+    const contentType = String(loginResponse.headers["content-type"] ?? "");
+    const tokens = loginResponse.data?.data;
 
     if (
       contentType.includes("text/html") ||
-      !payload?.user ||
-      !payload.access_token ||
-      !payload.refresh_token
+      !tokens?.access_token ||
+      !tokens?.refresh_token
     ) {
       throw new Error(invalidApiResponseError);
     }
 
-    return payload;
+    const meClient = createApiClient({ accessToken: tokens.access_token });
+    const meResponse = await meClient.request<ApiSuccessResponse<{ user: AuthenticatedUser }>>({
+      url: authMeEndpoint,
+      method: "GET",
+      headers: { "Cache-Control": "no-cache" },
+    });
+    const user = meResponse.data?.data?.user;
+
+    if (!user?.id || !user?.email) {
+      throw new Error(invalidApiResponseError);
+    }
+
+    return {
+      user,
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+    };
   } catch (error) {
     return thunkApi.rejectWithValue(getLoginErrorResult(error, messages));
   }
