@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-export const primaryColors = ["#271f7f", "#213f8b", "#1c5f97", "#167fa3", "#119fb0", "#0bbfbc", "#06dfc8", "#00ffd4"];
+export const primaryColors = ["#f5f5f4", "#e5e6e4", "#e13434", "#e13434", "#f6efeb", "#eee7df", "#f6f4ea", "#eceae2"]
 
 export const blackColors = [
   "#131316",

@@ -33,54 +33,61 @@ body {
 
 body {
   min-height: 100%;
-  --app-background-gradient-duration: 30000ms;
+  --app-background-pattern-size: 4rem;
+  --app-background-pattern-offset: calc(var(--app-background-pattern-size) / 2);
+  --app-background-pattern-base: var(--color-primary-7);
+  --app-background-pattern-contrast: var(--color-white-1);
   color: var(--app-text-base);
-  background-color: var(--app-bg-canvas);
-  background-image: linear-gradient(
-    -45deg,
-    var(--color-primary-3),
-    var(--color-primary-6),
-    var(--color-primary-5),
-    var(--color-primary-4),
-    var(--color-primary-7),
-    var(--color-primary-2)
-  );
-  background-size: 400% 400%;
+  background-color: var(--app-background-pattern-base);
+  background-image:
+    linear-gradient(
+      45deg,
+      transparent calc(25% / 3),
+      var(--app-background-pattern-contrast) 0 calc(50% / 3),
+      transparent 0 calc(250% / 3),
+      var(--app-background-pattern-contrast) 0 calc(275% / 3),
+      transparent 0
+    ),
+    linear-gradient(
+      45deg,
+      var(--app-background-pattern-contrast) calc(25% / 3),
+      transparent 0 calc(50% / 3),
+      var(--app-background-pattern-contrast) 0 25%,
+      transparent 0 75%,
+      var(--app-background-pattern-contrast) 0 calc(250% / 3),
+      transparent 0 calc(275% / 3),
+      var(--app-background-pattern-contrast) 0
+    ),
+    linear-gradient(
+      -45deg,
+      transparent calc(25% / 3),
+      var(--app-background-pattern-contrast) 0 calc(50% / 3),
+      transparent 0 calc(250% / 3),
+      var(--app-background-pattern-contrast) 0 calc(275% / 3),
+      transparent 0
+    ),
+    linear-gradient(
+      -45deg,
+      var(--app-background-pattern-contrast) calc(25% / 3),
+      transparent 0 calc(50% / 3),
+      var(--app-background-pattern-contrast) 0 25%,
+      transparent 0 75%,
+      var(--app-background-pattern-contrast) 0 calc(250% / 3),
+      transparent 0 calc(275% / 3),
+      var(--app-background-pattern-contrast) 0
+    );
+  background-size: var(--app-background-pattern-size)
+    var(--app-background-pattern-size);
+  background-position:
+    0 0,
+    var(--app-background-pattern-offset) var(--app-background-pattern-offset),
+    0 0,
+    var(--app-background-pattern-offset) var(--app-background-pattern-offset);
   background-attachment: fixed;
-  animation: app-background-gradient var(--app-background-gradient-duration)
-    ease infinite;
   font-family: var(--font-family-base);
   font-size: var(--font-size-medium);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-@keyframes app-background-gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  25% {
-    background-position: 50% 100%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  75% {
-    background-position: 50% 0%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  body {
-    animation: none;
-  }
 }
 
 * {
