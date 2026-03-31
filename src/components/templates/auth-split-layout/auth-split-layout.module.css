@@ -34,9 +34,10 @@
 
 .content {
   width: 100%;
+  min-height: 100dvh;
   display: grid;
   justify-items: center;
-  align-content: start;
+  align-content: center;
   padding: 7rem 0 3.429rem;
 }
 
@@ -80,6 +81,11 @@
 }
 
 @media (max-width: 72rem) {
+  .content {
+    min-height: unset;
+    align-content: start;
+  }
+
   .frame {
     min-height: unset;
     grid-template-columns: minmax(0, 1fr);
