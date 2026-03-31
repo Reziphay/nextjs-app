@@ -2,6 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
   height: 3.143rem;
   padding: 0 1rem;
   border-bottom: 1px solid var(--app-border-soft);
@@ -16,7 +17,44 @@
   display: flex;
   align-items: center;
   gap: 0.571rem;
+  flex: 1;
   min-width: 0;
+}
+
+.right {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.571rem;
+  flex-shrink: 0;
+}
+
+.supportLink {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-xl);
+  background: var(--app-bg-surface-strong);
+  color: var(--app-text-muted);
+  text-decoration: none;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.supportLink:hover {
+  background: var(--app-bg-surface);
+  border-color: var(--app-border-strong);
+  color: var(--app-text-strong);
+}
+
+.supportIcon {
+  font-size: 1.143rem;
 }
 
 /* ── Toggle button ── */
@@ -64,11 +102,14 @@
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .crumbItem {
   display: inline-flex;
   align-items: center;
+  min-width: 0;
 }
 
 .crumbSep {
@@ -93,4 +134,27 @@
   color: var(--app-text-strong);
   font-size: var(--font-size-small);
   font-weight: 600;
+}
+
+@media (max-width: 48rem) {
+  .header {
+    padding: 0 0.714rem;
+  }
+
+  .left {
+    gap: 0.429rem;
+  }
+
+  .right {
+    gap: 0.429rem;
+  }
+
+  .separator {
+    display: none;
+  }
+
+  .crumbLink,
+  .crumbCurrent {
+    font-size: var(--font-size-extra-small);
+  }
 }

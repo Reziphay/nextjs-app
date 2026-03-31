@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LanguageSwitcher } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import styles from "./dashboard-header.module.css";
 
@@ -65,6 +66,20 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
             </span>
           ))}
         </nav>
+      </div>
+
+      <div className={styles.right}>
+        <Link
+          href="/contact"
+          aria-label={db.support}
+          title={db.support}
+          className={styles.supportLink}
+        >
+          <span className={`material-symbols-rounded ${styles.supportIcon}`}>
+            help
+          </span>
+        </Link>
+        <LanguageSwitcher variant="compact" />
       </div>
     </header>
   );

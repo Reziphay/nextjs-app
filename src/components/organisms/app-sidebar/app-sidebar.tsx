@@ -109,22 +109,6 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
       {/* Footer */}
       <div className={styles.footer}>
         <nav className={styles.footerNav}>
-          <Link
-            href="/contact"
-            title={collapsed ? db.support : undefined}
-            className={styles.footerItem}
-          >
-            <span className={`material-symbols-rounded ${styles.navIcon}`}>help</span>
-            <span className={styles.navLabel}>{db.support}</span>
-          </Link>
-          <Link
-            href="/contact"
-            title={collapsed ? db.feedback : undefined}
-            className={styles.footerItem}
-          >
-            <span className={`material-symbols-rounded ${styles.navIcon}`}>send</span>
-            <span className={styles.navLabel}>{db.feedback}</span>
-          </Link>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <button
