@@ -143,6 +143,11 @@ export const enMessages: Messages = {
     profile: "Profile",
     settings: "Settings",
     signOut: "Sign out",
+    signOutConfirmTitle: "Are you sure you want to sign out?",
+    signOutConfirmDescription:
+      "This will end your current session and return you to the login page.",
+    cancel: "Cancel",
+    confirmSignOut: "Sign out",
     greeting: "Welcome",
     platform: "Platform",
     support: "Support",

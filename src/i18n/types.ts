@@ -132,6 +132,10 @@ export type Messages = {
     profile: string;
     settings: string;
     signOut: string;
+    signOutConfirmTitle: string;
+    signOutConfirmDescription: string;
+    cancel: string;
+    confirmSignOut: string;
     greeting: string;
     platform: string;
     support: string;

@@ -143,6 +143,11 @@ export const ruMessages: Messages = {
     profile: "Профиль",
     settings: "Настройки",
     signOut: "Выйти",
+    signOutConfirmTitle: "Вы уверены, что хотите выйти?",
+    signOutConfirmDescription:
+      "Это завершит текущую сессию и вернёт вас на страницу входа.",
+    cancel: "Отмена",
+    confirmSignOut: "Выйти",
     greeting: "Добро пожаловать",
     platform: "Платформа",
     support: "Поддержка",

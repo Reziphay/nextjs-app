@@ -1,0 +1,134 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgb(19 19 22 / 0.42);
+  backdrop-filter: blur(12px);
+}
+
+.content {
+  width: min(100%, 42rem);
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-5xl);
+  background: var(--app-bg-surface-strong);
+  box-shadow: 0 2rem 4rem var(--app-shadow-color-strong);
+  outline: none;
+}
+
+.contentSm {
+  width: min(100%, 32rem);
+}
+
+.media {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  width: 4.25rem;
+  height: 4.25rem;
+  margin-top: 1.714rem;
+  border-radius: var(--general-border-radius-2xl);
+  background: var(--app-bg-surface-muted);
+  color: var(--app-text-strong);
+  box-shadow: 0 0.857rem 2rem var(--app-shadow-card-soft);
+}
+
+.mediaDestructive {
+  background: var(--app-error-bg);
+  color: var(--app-error);
+}
+
+.header {
+  display: grid;
+  gap: 0.714rem;
+  padding: 1.714rem;
+}
+
+.media + .header {
+  padding-top: 1rem;
+}
+
+.title {
+  color: var(--app-text-strong);
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.05em;
+}
+
+.description {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-medium);
+  line-height: 1.6;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.857rem;
+  padding: 1.286rem 1.714rem 1.714rem;
+  border-top: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface);
+}
+
+.footer button {
+  min-width: 7rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .overlay {
+    animation: alert-dialog-fade-in 180ms ease;
+  }
+
+  .content {
+    animation: alert-dialog-scale-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@keyframes alert-dialog-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes alert-dialog-scale-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 48rem) {
+  .overlay {
+    padding: 1rem;
+  }
+
+  .header {
+    padding: 1.429rem;
+  }
+
+  .footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    padding: 1rem 1.429rem 1.429rem;
+  }
+
+  .footer button {
+    width: 100%;
+  }
+}

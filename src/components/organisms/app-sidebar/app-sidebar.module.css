@@ -1,5 +1,5 @@
 .sidebar {
-  width: 16rem;
+  width: 20rem;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -58,7 +58,6 @@
   height: 2rem;
   min-width: 2rem;
   border-radius: var(--general-border-radius-xl);
-  background: var(--app-text-strong);
   color: var(--app-text-inverse);
   overflow: hidden;
 }

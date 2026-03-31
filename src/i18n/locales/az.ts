@@ -144,6 +144,11 @@ export const azMessages: Messages = {
     profile: "Profil",
     settings: "Parametrlər",
     signOut: "Çıxış",
+    signOutConfirmTitle: "Çıxış etmək istədiyinizə əminsiniz?",
+    signOutConfirmDescription:
+      "Bu əməliyyat cari sessiyanızı bağlayacaq və sizi giriş səhifəsinə qaytaracaq.",
+    cancel: "Ləğv et",
+    confirmSignOut: "Çıxış et",
     greeting: "Xoş gəlmisiniz",
     platform: "Platform",
     support: "Dəstək",

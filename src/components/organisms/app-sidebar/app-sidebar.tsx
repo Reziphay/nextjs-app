@@ -2,8 +2,22 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/atoms";
+import { Icon } from "@/components/icon";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { signOut, selectAuthSession } from "@/store/auth";
+import { clearAuthCookies } from "@/lib/auth-cookies";
 import { useLocale } from "@/components/providers/locale-provider";
 import { Logo } from "@/components/logo";
 import styles from "./app-sidebar.module.css";
@@ -38,7 +52,8 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
     admin: db.typeAdmin,
   };
 
-  function handleSignOut() {
+  function handleConfirmSignOut() {
+    clearAuthCookies();
     dispatch(signOut());
     onClose?.();
     router.replace("/auth/login");
@@ -110,6 +125,41 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
             <span className={`material-symbols-rounded ${styles.navIcon}`}>send</span>
             <span className={styles.navLabel}>{db.feedback}</span>
           </Link>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button
+                type="button"
+                title={collapsed ? db.signOut : undefined}
+                className={styles.footerItem}
+              >
+                <span className={`material-symbols-rounded ${styles.navIcon}`}>
+                  logout
+                </span>
+                <span className={styles.navLabel}>{db.signOut}</span>
+              </button>
+            </AlertDialogTrigger>
+
+            <AlertDialogContent size="sm">
+              <AlertDialogMedia tone="destructive">
+                <Icon icon="logout" size={28} color="error" />
+              </AlertDialogMedia>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{db.signOutConfirmTitle}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {db.signOutConfirmDescription}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{db.cancel}</AlertDialogCancel>
+                <AlertDialogAction
+                  destructive
+                  onClick={handleConfirmSignOut}
+                >
+                  {db.confirmSignOut}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </nav>
 
         <div className={styles.divider} />

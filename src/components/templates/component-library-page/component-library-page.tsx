@@ -4,6 +4,16 @@ import type { ReactNode } from "react";
 import {
   Alert,
   AlertDescription,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
   AlertTitle,
   Badge,
   Button,
@@ -166,6 +176,109 @@ export function ComponentLibraryPage() {
                 </div>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionEyebrow}>Atoms</span>
+            <h2>Alert Dialog</h2>
+            <p>
+              `AlertDialog` təsdiq tələb edən axınlar üçündür. Media elementi,
+              destructive action və `size=&quot;sm&quot;` kimi variantları
+              dəstəkləyir.
+            </p>
+          </div>
+
+          <div className={styles.cardGrid}>
+            <ShowcaseCard
+              title="Basic"
+              description="Standart təsdiq dialoqu"
+            >
+              <div className={styles.buttonStack}>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline">Show dialog</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you absolutely sure?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete your account from our servers.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction>Continue</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Destructive"
+              description="Media və destructive action ilə istifadə"
+            >
+              <div className={styles.buttonStack}>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive">Delete chat</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent size="sm">
+                    <AlertDialogMedia tone="destructive">
+                      <Icon icon="delete" size={30} color="error" />
+                    </AlertDialogMedia>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete chat?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete this chat conversation and
+                        any local data tied to it.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction destructive>
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </ShowcaseCard>
+
+            <ShowcaseCard
+              title="Small"
+              description="size=sm ilə daha yığcam görünüş"
+            >
+              <div className={styles.buttonStack}>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button icon="share" variant="secondary">
+                      Share project
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent size="sm">
+                    <AlertDialogMedia>
+                      <Icon icon="share" size={28} color="black" />
+                    </AlertDialogMedia>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Share this project?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Anyone with the link will be able to view this project.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction>Share</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </ShowcaseCard>
           </div>
         </section>
 
