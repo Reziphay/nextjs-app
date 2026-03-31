@@ -1,5 +1,6 @@
 export {
   hydrateAuthSession,
+  refreshAuthToken,
   resetLoginState,
   resetRegisterState,
   selectAuthHydrated,

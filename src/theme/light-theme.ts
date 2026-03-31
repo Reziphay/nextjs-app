@@ -58,6 +58,7 @@ const semanticColors = {
   "app-bg-surface": whiteColors[3],
   "app-bg-surface-strong": whiteColors[0],
   "app-bg-surface-muted": whiteColors[5],
+  "app-bg-sidebar": primaryColors[1],
   "app-bg-primary-soft": withAlpha(primaryColors[6], 0.18),
   "app-bg-code": withAlpha(primaryColors[2], 0.08),
   "app-bg-overlay-strong": withAlpha(whiteColors[2], 0.48),

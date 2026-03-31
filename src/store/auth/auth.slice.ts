@@ -17,6 +17,7 @@ import type { RootState } from "@/store";
 
 const authLoginEndpoint = "/auth/login";
 const authMeEndpoint = "/auth/me";
+const authRefreshEndpoint = "/auth/refresh";
 const authRegisterEndpoint = "/auth/register";
 const invalidApiResponseError = "INVALID_AUTH_API_RESPONSE";
 const minimumRegisterAge = 13;
@@ -516,6 +517,36 @@ export const submitRegister = createAsyncThunk<
   }
 });
 
+export const refreshAuthToken = createAsyncThunk<
+  AuthTokens,
+  void,
+  { state: RootState }
+>("auth/refreshToken", async (_, thunkApi) => {
+  const { refreshToken } = thunkApi.getState().auth.session;
+
+  if (!refreshToken) {
+    return thunkApi.rejectWithValue(null);
+  }
+
+  try {
+    const client = createApiClient();
+    const response = await client.request<ApiSuccessResponse<AuthTokens>>({
+      url: authRefreshEndpoint,
+      method: "POST",
+      data: { refresh_token: refreshToken },
+    });
+    const tokens = response.data?.data;
+
+    if (!tokens?.access_token || !tokens?.refresh_token) {
+      return thunkApi.rejectWithValue(null);
+    }
+
+    return tokens;
+  } catch (error) {
+    return thunkApi.rejectWithValue(null);
+  }
+});
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -627,6 +658,13 @@ const authSlice = createSlice({
             variant: "destructive",
           };
         state.register.errors = action.payload?.fieldErrors ?? {};
+      })
+      .addCase(refreshAuthToken.fulfilled, (state, action) => {
+        state.session.accessToken = action.payload.access_token;
+        state.session.refreshToken = action.payload.refresh_token;
+      })
+      .addCase(refreshAuthToken.rejected, (state) => {
+        state.session = { ...createInitialSessionState(), hydrated: true };
       });
   },
 });

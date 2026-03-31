@@ -7,8 +7,10 @@
   position: sticky;
   top: 0;
   border-right: 1px solid var(--app-border-soft);
-  background: var(--app-bg-surface-strong);
+  background: var(--app-bg-sidebar);
   transition: width 240ms cubic-bezier(0.4, 0, 0.2, 1);
+  border-top-right-radius: var(--general-border-radius-xl);
+  border-bottom-right-radius: var(--general-border-radius-xl);
 }
 
 .sidebarCollapsed {

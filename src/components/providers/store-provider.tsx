@@ -4,8 +4,10 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Provider } from "react-redux";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { makeStore, type AppStore } from "@/store";
+import { setStoreRef } from "@/store/store-ref";
 import {
   hydrateAuthSession,
+  refreshAuthToken,
   selectAuthHydrated,
   selectAuthSession,
 } from "@/store/auth";
@@ -28,6 +30,14 @@ function AuthStoreSync() {
   const session = useAppSelector(selectAuthSession);
 
   useEffect(() => {
+    async function fetchMe(accessToken: string) {
+      const client = createApiClient({ accessToken });
+      const response = await client.get<ApiSuccessResponse<{ user: AuthenticatedUser }>>("/auth/me", {
+        headers: { "Cache-Control": "no-cache" },
+      });
+      return response.data?.data?.user ?? null;
+    }
+
     async function restoreSession() {
       const accessToken = getStoredAccessToken();
       const refreshToken = getStoredRefreshToken();
@@ -37,12 +47,9 @@ function AuthStoreSync() {
         return;
       }
 
+      // Try with stored access token
       try {
-        const client = createApiClient({ accessToken });
-        const response = await client.get<ApiSuccessResponse<{ user: AuthenticatedUser }>>("/auth/me", {
-          headers: { "Cache-Control": "no-cache" },
-        });
-        const user = response.data?.data?.user;
+        const user = await fetchMe(accessToken);
 
         if (user?.id && user?.email) {
           dispatch(
@@ -56,7 +63,37 @@ function AuthStoreSync() {
           return;
         }
       } catch {
-        // Token expired or invalid
+        // Access token may be expired — try refresh below
+      }
+
+      // Access token expired: attempt refresh
+      try {
+        // Temporarily hydrate with stored tokens so the thunk can read refreshToken
+        dispatch(
+          hydrateAuthSession({
+            user: null,
+            accessToken,
+            refreshToken,
+            status: "anonymous",
+          }),
+        );
+
+        const tokens = await dispatch(refreshAuthToken()).unwrap();
+        const user = await fetchMe(tokens.access_token);
+
+        if (user?.id && user?.email) {
+          dispatch(
+            hydrateAuthSession({
+              user,
+              accessToken: tokens.access_token,
+              refreshToken: tokens.refresh_token,
+              status: "authenticated",
+            }),
+          );
+          return;
+        }
+      } catch {
+        // Refresh also failed
       }
 
       clearAuthCookies();
@@ -82,7 +119,11 @@ function AuthStoreSync() {
 }
 
 export function StoreProvider({ children }: StoreProviderProps) {
-  const [store] = useState<AppStore>(makeStore);
+  const [store] = useState<AppStore>(() => {
+    const s = makeStore();
+    setStoreRef(s);
+    return s;
+  });
 
   return (
     <Provider store={store}>
