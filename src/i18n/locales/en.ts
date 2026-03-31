@@ -144,6 +144,12 @@ export const enMessages: Messages = {
     settings: "Settings",
     signOut: "Sign out",
     greeting: "Welcome",
+    platform: "Platform",
+    support: "Support",
+    feedback: "Feedback",
+    typeUso: "Service Owner",
+    typeUcr: "Customer",
+    typeAdmin: "Admin",
   },
   profile: {
     title: "My Profile",

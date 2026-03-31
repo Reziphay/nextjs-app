@@ -133,6 +133,12 @@ export type Messages = {
     settings: string;
     signOut: string;
     greeting: string;
+    platform: string;
+    support: string;
+    feedback: string;
+    typeUso: string;
+    typeUcr: string;
+    typeAdmin: string;
   };
   profile: {
     title: string;

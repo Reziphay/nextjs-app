@@ -86,7 +86,6 @@ export function AuthLoginPanel() {
               type="email"
               value={values.email}
               placeholder={login.emailPlaceholder}
-              autoComplete="email"
               aria-invalid={errors.email ? "true" : undefined}
               onChange={(event) => {
                 dispatch(
@@ -119,7 +118,6 @@ export function AuthLoginPanel() {
               type="password"
               value={values.password}
               placeholder={login.passwordPlaceholder}
-              autoComplete="current-password"
               aria-invalid={errors.password ? "true" : undefined}
               onChange={(event) => {
                 dispatch(

@@ -4,37 +4,60 @@ import Link from "next/link";
 import { useAppSelector } from "@/store/hooks";
 import { selectAuthSession } from "@/store/auth";
 import { useLocale } from "@/components/providers/locale-provider";
-import type { Messages } from "@/i18n/config";
 import styles from "./home-dashboard-panel.module.css";
 
-type HomeDashboardPanelProps = {
-  messages: Messages;
-};
-
-export function HomeDashboardPanel({ messages }: HomeDashboardPanelProps) {
+export function HomeDashboardPanel() {
   const session = useAppSelector(selectAuthSession);
-  const { messages: clientMessages } = useLocale();
-  const db = clientMessages.dashboard;
+  const { messages } = useLocale();
+  const db = messages.dashboard;
+  const p = messages.profile;
   const user = session.user;
+
+  const quickCards = [
+    {
+      href: "/home/profile",
+      icon: "person",
+      title: db.profile,
+      description: p.description,
+    },
+    {
+      href: "/home/settings",
+      icon: "settings",
+      title: db.settings,
+      description: p.accountInfo,
+    },
+    {
+      href: "/contact",
+      icon: "help",
+      title: db.support,
+      description: p.personalInfo,
+    },
+  ];
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.header}>
-        <h1 className={styles.greeting}>
-          {db.greeting},{" "}
-          <span className={styles.name}>{user?.first_name ?? ""}</span>
+      <div className={styles.pageHeader}>
+        <h1 className={styles.title}>
+          {db.greeting}
+          {user ? `, ${user.first_name}` : ""}
         </h1>
       </div>
 
-      <div className={styles.cards}>
-        <Link href="/home/profile" className={styles.card}>
-          <span className={`${styles.cardIcon} material-symbols-rounded`}>person</span>
-          <div>
-            <p className={styles.cardTitle}>{db.profile}</p>
-            <p className={styles.cardSub}>{clientMessages.profile.description}</p>
-          </div>
-        </Link>
+      <div className={styles.cardRow}>
+        {quickCards.map((card) => (
+          <Link key={card.href} href={card.href} className={styles.card}>
+            <span className={`material-symbols-rounded ${styles.cardIcon}`}>
+              {card.icon}
+            </span>
+            <div className={styles.cardBody}>
+              <p className={styles.cardTitle}>{card.title}</p>
+              <p className={styles.cardSub}>{card.description}</p>
+            </div>
+          </Link>
+        ))}
       </div>
+
+      <div className={styles.contentArea} />
     </div>
   );
 }

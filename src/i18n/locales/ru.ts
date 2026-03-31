@@ -144,6 +144,12 @@ export const ruMessages: Messages = {
     settings: "Настройки",
     signOut: "Выйти",
     greeting: "Добро пожаловать",
+    platform: "Платформа",
+    support: "Поддержка",
+    feedback: "Обратная связь",
+    typeUso: "Владелец сервиса",
+    typeUcr: "Клиент",
+    typeAdmin: "Администратор",
   },
   profile: {
     title: "Мой профиль",

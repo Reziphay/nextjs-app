@@ -117,7 +117,6 @@ export function AuthRegisterPanel() {
                 id="first_name"
                 value={values.first_name}
                 placeholder={register.firstNamePlaceholder}
-                autoComplete="given-name"
                 aria-invalid={errors.first_name ? "true" : undefined}
                 onChange={(event) => {
                   dispatch(
@@ -144,7 +143,6 @@ export function AuthRegisterPanel() {
                 id="last_name"
                 value={values.last_name}
                 placeholder={register.lastNamePlaceholder}
-                autoComplete="family-name"
                 aria-invalid={errors.last_name ? "true" : undefined}
                 onChange={(event) => {
                   dispatch(
@@ -174,7 +172,6 @@ export function AuthRegisterPanel() {
                 type="date"
                 value={values.birthday}
                 max={getTodayDateValue()}
-                autoComplete="bday"
                 aria-invalid={errors.birthday ? "true" : undefined}
                 onChange={(event) => {
                   dispatch(
@@ -233,7 +230,6 @@ export function AuthRegisterPanel() {
               type="email"
               value={values.email}
               placeholder={register.emailPlaceholder}
-              autoComplete="email"
               aria-invalid={errors.email ? "true" : undefined}
               onChange={(event) => {
                 dispatch(
@@ -261,7 +257,6 @@ export function AuthRegisterPanel() {
               type="password"
               value={values.password}
               placeholder={register.passwordPlaceholder}
-              autoComplete="new-password"
               aria-invalid={errors.password ? "true" : undefined}
               onChange={(event) => {
                 dispatch(

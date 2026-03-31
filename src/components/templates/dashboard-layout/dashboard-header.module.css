@@ -1,0 +1,96 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 3.143rem;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface-strong);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 0.571rem;
+  min-width: 0;
+}
+
+/* ── Toggle button ── */
+.toggleBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--general-border-radius-xl);
+  background: transparent;
+  color: var(--app-text-muted);
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.toggleBtn:hover {
+  background: var(--app-border-soft);
+  color: var(--app-text-strong);
+}
+
+.toggleIcon {
+  font-size: 1.143rem;
+  transition: transform 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggleIconCollapsed {
+  transform: scaleX(-1);
+}
+
+/* ── Separator ── */
+.separator {
+  width: 1px;
+  height: 1.143rem;
+  background: var(--app-border-soft);
+  flex-shrink: 0;
+}
+
+/* ── Breadcrumb ── */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.crumbItem {
+  display: inline-flex;
+  align-items: center;
+}
+
+.crumbSep {
+  font-size: 1rem;
+  color: var(--app-text-subtle);
+  margin: 0 0.143rem;
+}
+
+.crumbLink {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+
+.crumbLink:hover {
+  color: var(--app-text-strong);
+}
+
+.crumbCurrent {
+  color: var(--app-text-strong);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+}

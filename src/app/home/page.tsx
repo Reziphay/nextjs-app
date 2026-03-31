@@ -9,9 +9,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: messages.dashboard.home };
 }
 
-export default async function HomeDashboardPage() {
-  const locale = await getServerLocale();
-  const messages = getMessages(locale);
-
-  return <HomeDashboardPanel messages={messages} />;
+export default function HomeDashboardPage() {
+  return <HomeDashboardPanel />;
 }

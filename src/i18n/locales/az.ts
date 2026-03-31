@@ -145,6 +145,12 @@ export const azMessages: Messages = {
     settings: "Parametrlər",
     signOut: "Çıxış",
     greeting: "Xoş gəlmisiniz",
+    platform: "Platform",
+    support: "Dəstək",
+    feedback: "Geri bildirim",
+    typeUso: "Xidmət sahibi",
+    typeUcr: "Müştəri",
+    typeAdmin: "Admin",
   },
   profile: {
     title: "Profilim",

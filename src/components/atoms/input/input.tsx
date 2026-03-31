@@ -64,6 +64,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       ref={ref}
       type={type}
       className={joinClassNames(styles.input, className)}
+      autoComplete="off"
       {...props}
     />
   );
