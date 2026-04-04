@@ -5,4 +5,5 @@ export { AuthRegisterPanel } from "./auth-register-panel";
 export { AuthShowcasePanel } from "./auth-showcase-panel";
 export { ComingSoonPanel } from "./coming-soon-panel";
 export { HomeDashboardPanel } from "./home-dashboard-panel";
+export { ProtectedComingSoonRoute } from "./protected-coming-soon-route";
 export { UserProfilePanel } from "./user-profile-panel";

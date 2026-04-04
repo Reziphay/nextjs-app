@@ -141,7 +141,15 @@ export const enMessages: Messages = {
   dashboard: {
     home: "Home",
     profile: "Profile",
+    account: "My Account",
     settings: "Settings",
+    notifications: "Notifications",
+    services: "Services",
+    brands: "Brands",
+    dashboardPage: "Dashboard",
+    reservations: "Rezervations",
+    favorites: "Favorites",
+    moderation: "Moderation",
     signOut: "Sign out",
     signOutConfirmTitle: "Are you sure you want to sign out?",
     signOutConfirmDescription:

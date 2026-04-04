@@ -18,10 +18,12 @@ import { useLocale } from "@/components/providers/locale-provider";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   selectIsAuthenticated,
+  selectAuthSession,
   selectLoginState,
   setLoginField,
   submitLogin,
 } from "@/store/auth";
+import { getDefaultAppRouteForUserType } from "@/lib/app-routes";
 import styles from "../auth-panel.module.css";
 
 export function AuthLoginPanel() {
@@ -29,22 +31,24 @@ export function AuthLoginPanel() {
   const dispatch = useAppDispatch();
   const { locale, messages } = useLocale();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const session = useAppSelector(selectAuthSession);
   const { errors, feedback, status, values } = useAppSelector(selectLoginState);
   const login = messages.auth.login;
   const isSubmitting = status === "loading";
+  const defaultAppHref = getDefaultAppRouteForUserType(session.user?.type);
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace("/home");
+      router.replace(defaultAppHref);
     }
-  }, [isAuthenticated, router]);
+  }, [defaultAppHref, isAuthenticated, router]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     try {
-      await dispatch(submitLogin({ locale })).unwrap();
-      router.replace("/home");
+      const payload = await dispatch(submitLogin({ locale })).unwrap();
+      router.replace(getDefaultAppRouteForUserType(payload.user.type));
     } catch {
       return;
     }

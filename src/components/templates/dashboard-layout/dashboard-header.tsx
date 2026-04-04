@@ -18,6 +18,10 @@ import {
 import { Icon } from "@/components/icon";
 import { LanguageSwitcher } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
+import {
+  getProtectedRouteLabel,
+  isProtectedAppPath,
+} from "@/lib/app-routes";
 import { clearAuthCookies } from "@/lib/auth-cookies";
 import { signOut } from "@/store/auth";
 import { useAppDispatch } from "@/store/hooks";
@@ -38,19 +42,16 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
   const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
   const settingsWrapRef = useRef<HTMLDivElement>(null);
 
-  const crumbMap: Record<string, string> = {
-    "/home": db.home,
-    "/home/profile": db.profile,
-    "/home/settings": db.settings,
-  };
-
   const segments = pathname.split("/").filter(Boolean);
   const crumbs: { label: string; href: string }[] = [];
   let current = "";
   for (const seg of segments) {
     current += `/${seg}`;
-    if (crumbMap[current]) {
-      crumbs.push({ label: crumbMap[current], href: current });
+    if (isProtectedAppPath(current)) {
+      crumbs.push({
+        label: getProtectedRouteLabel(messages, current),
+        href: current,
+      });
     }
   }
 
@@ -126,13 +127,13 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
 
       <div className={styles.right}>
         <Link
-          href="/contact"
-          aria-label={db.support}
-          title={db.support}
+          href="/notification"
+          aria-label={db.notifications}
+          title={db.notifications}
           className={styles.supportLink}
         >
           <span className={`material-symbols-rounded ${styles.supportIcon}`}>
-            help
+            notifications
           </span>
         </Link>
 

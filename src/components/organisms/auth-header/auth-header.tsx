@@ -7,6 +7,10 @@ import { Button } from "@/components/atoms";
 import { Logo } from "@/components/logo";
 import { LanguageSwitcher } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
+import {
+  getDefaultAppRouteForUserType,
+  getProtectedRouteLabel,
+} from "@/lib/app-routes";
 import { useAppSelector } from "@/store/hooks";
 import { selectAuthSession, selectIsAuthenticated } from "@/store/auth";
 import styles from "./auth-header.module.css";
@@ -28,6 +32,8 @@ export function AuthHeader() {
   const registerHref = "/auth/register";
 
   const user = session.user;
+  const defaultAppHref = getDefaultAppRouteForUserType(user?.type);
+  const defaultAppLabel = getProtectedRouteLabel(messages, defaultAppHref);
   const initials = user
     ? `${user.first_name[0] ?? ""}${user.last_name[0] ?? ""}`.toUpperCase()
     : "";
@@ -70,7 +76,7 @@ export function AuthHeader() {
 
         <div className={styles.authActions}>
           {isAuthenticated ? (
-            <Link href="/home" className={styles.avatarLink}>
+            <Link href={defaultAppHref} className={styles.avatarLink}>
               <span className={styles.avatar}>{initials}</span>
             </Link>
           ) : (
@@ -134,11 +140,11 @@ export function AuthHeader() {
         <div className={styles.mobileAuthActions}>
           {isAuthenticated ? (
             <Link
-              href="/home"
+              href={defaultAppHref}
               className={styles.mobileAuthButton}
               onClick={() => setIsMenuOpen(false)}
             >
-              {messages.dashboard.home}
+              {defaultAppLabel}
             </Link>
           ) : (
             <>

@@ -141,7 +141,15 @@ export const ruMessages: Messages = {
   dashboard: {
     home: "Главная",
     profile: "Профиль",
+    account: "Мой аккаунт",
     settings: "Настройки",
+    notifications: "Уведомления",
+    services: "Сервисы",
+    brands: "Бренды",
+    dashboardPage: "Панель",
+    reservations: "Резервации",
+    favorites: "Избранное",
+    moderation: "Модерация",
     signOut: "Выйти",
     signOutConfirmTitle: "Вы уверены, что хотите выйти?",
     signOutConfirmDescription:

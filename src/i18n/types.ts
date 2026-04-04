@@ -130,7 +130,15 @@ export type Messages = {
   dashboard: {
     home: string;
     profile: string;
+    account: string;
     settings: string;
+    notifications: string;
+    services: string;
+    brands: string;
+    dashboardPage: string;
+    reservations: string;
+    favorites: string;
+    moderation: string;
     signOut: string;
     signOutConfirmTitle: string;
     signOutConfirmDescription: string;

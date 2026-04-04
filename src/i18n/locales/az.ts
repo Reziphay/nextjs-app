@@ -142,7 +142,15 @@ export const azMessages: Messages = {
   dashboard: {
     home: "Ana səhifə",
     profile: "Profil",
+    account: "Hesabım",
     settings: "Parametrlər",
+    notifications: "Bildirişlər",
+    services: "Xidmətlər",
+    brands: "Brendlər",
+    dashboardPage: "Panel",
+    reservations: "Rezervasiyalar",
+    favorites: "Seçilmişlər",
+    moderation: "Moderasiya",
     signOut: "Çıxış",
     signOutConfirmTitle: "Çıxış etmək istədiyinizə əminsiniz?",
     signOutConfirmDescription:

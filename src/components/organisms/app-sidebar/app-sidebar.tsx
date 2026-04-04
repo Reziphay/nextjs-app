@@ -6,12 +6,11 @@ import { useAppSelector } from "@/store/hooks";
 import { selectAuthSession } from "@/store/auth";
 import { useLocale } from "@/components/providers/locale-provider";
 import { Logo } from "@/components/logo";
+import {
+  getDefaultAppRouteForUserType,
+  getSidebarRoutesForUserType,
+} from "@/lib/app-routes";
 import styles from "./app-sidebar.module.css";
-
-const platformNav = [
-  { href: "/home", key: "home" as const, icon: "home" },
-  { href: "/home/profile", key: "profile" as const, icon: "person" },
-] as const;
 
 type AppSidebarProps = {
   collapsed: boolean;
@@ -26,6 +25,10 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
   const db = messages.dashboard;
 
   const user = session.user;
+  const defaultHref = getDefaultAppRouteForUserType(user?.type);
+  const platformNav = user
+    ? getSidebarRoutesForUserType(messages, user.type)
+    : [];
   const initials = user
     ? `${user.first_name[0] ?? ""}${user.last_name[0] ?? ""}`.toUpperCase()
     : "?";
@@ -46,7 +49,7 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
     >
       {/* Brand */}
       <div className={styles.brand}>
-        <Link href="/home" className={styles.brandLink}>
+        <Link href={defaultHref} className={styles.brandLink}>
           <span className={styles.brandIcon}>
             <Logo size={22} />
           </span>
@@ -68,7 +71,7 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                title={collapsed ? db[item.key] : undefined}
+                title={collapsed ? item.label : undefined}
                 aria-current={isActive(item.href) ? "page" : undefined}
                 className={`${styles.navItem} ${isActive(item.href) ? styles.navItemActive : ""}`}
                 onClick={onClose}
@@ -76,7 +79,7 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
                 <span className={`material-symbols-rounded ${styles.navIcon}`}>
                   {item.icon}
                 </span>
-                <span className={styles.navLabel}>{db[item.key]}</span>
+                <span className={styles.navLabel}>{item.label}</span>
               </Link>
             ))}
           </nav>
@@ -90,7 +93,7 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
             type="button"
             title={collapsed ? `${user?.first_name} ${user?.last_name}` : undefined}
             className={styles.userBtn}
-            onClick={() => router.push("/home/profile")}
+            onClick={() => router.push("/account")}
           >
             <span className={styles.avatar}>{initials}</span>
             <span className={styles.userInfo}>

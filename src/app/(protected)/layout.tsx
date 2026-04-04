@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import { ProtectedAppLayoutTemplate } from "@/components/templates";
+import { ProtectedAppLayoutTemplate } from "@/components/templates/protected-app-layout";
 import { getServerLocale } from "@/i18n/server";
 
-export default async function HomeLayout({
+export default async function ProtectedLayout({
   children,
 }: Readonly<{
   children: ReactNode;

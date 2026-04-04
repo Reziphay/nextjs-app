@@ -1,5 +1,5 @@
 import { ProtectedComingSoonRoute } from "@/components/organisms/protected-coming-soon-route";
 
-export default function HomeDashboardPage() {
-  return <ProtectedComingSoonRoute path="/home" />;
+export default function SettingsPage() {
+  return <ProtectedComingSoonRoute path="/settings" />;
 }
