@@ -4,6 +4,7 @@ import { getApiBaseUrl } from "@/lib/api";
 import type { ApiSuccessResponse, UserProfile } from "@/types";
 import {
   canAccessProtectedRoute,
+  getDefaultAppRouteForUserType,
   type ProtectedAppPath,
 } from "./app-routes";
 
@@ -70,6 +71,16 @@ export async function getServerAuthenticatedUser() {
   }
 
   return fetchServerAuthenticatedUser(accessToken);
+}
+
+export async function redirectAuthenticatedUserFromAuthRoute() {
+  const user = await getServerAuthenticatedUser();
+
+  if (!user) {
+    return;
+  }
+
+  redirect(getDefaultAppRouteForUserType(user.type));
 }
 
 export async function requireProtectedRouteAccess(

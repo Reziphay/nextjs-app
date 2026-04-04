@@ -15,8 +15,13 @@ import {
   Input,
 } from "@/components/atoms";
 import { useLocale } from "@/components/providers/locale-provider";
+import {
+  getStoredAccessToken,
+  getStoredRefreshToken,
+} from "@/lib/auth-cookies";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
+  selectAuthHydrated,
   selectIsAuthenticated,
   selectAuthSession,
   selectLoginState,
@@ -30,6 +35,7 @@ export function AuthLoginPanel() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { locale, messages } = useLocale();
+  const hydrated = useAppSelector(selectAuthHydrated);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const session = useAppSelector(selectAuthSession);
   const { errors, feedback, status, values } = useAppSelector(selectLoginState);
@@ -38,10 +44,31 @@ export function AuthLoginPanel() {
   const defaultAppHref = getDefaultAppRouteForUserType(session.user?.type);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.replace(defaultAppHref);
+    if (
+      !hydrated ||
+      !isAuthenticated ||
+      !session.accessToken ||
+      !session.refreshToken
+    ) {
+      return;
     }
-  }, [defaultAppHref, isAuthenticated, router]);
+
+    if (
+      getStoredAccessToken() !== session.accessToken ||
+      getStoredRefreshToken() !== session.refreshToken
+    ) {
+      return;
+    }
+
+    router.replace(defaultAppHref);
+  }, [
+    defaultAppHref,
+    hydrated,
+    isAuthenticated,
+    router,
+    session.accessToken,
+    session.refreshToken,
+  ]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

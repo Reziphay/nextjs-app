@@ -15,9 +15,15 @@ import {
   type ComboboxOption,
 } from "@/components/atoms";
 import { useLocale } from "@/components/providers/locale-provider";
+import {
+  getStoredAccessToken,
+  getStoredRefreshToken,
+} from "@/lib/auth-cookies";
 import { getCountryOptions } from "@/lib/countries";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
+  selectAuthHydrated,
+  selectAuthSession,
   selectIsAuthenticated,
   selectRegisterState,
   setRegisterField,
@@ -33,6 +39,8 @@ export function AuthRegisterPanel() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { locale, messages } = useLocale();
+  const hydrated = useAppSelector(selectAuthHydrated);
+  const session = useAppSelector(selectAuthSession);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const { errors, feedback, status, values } = useAppSelector(selectRegisterState);
   const register = messages.auth.register;
@@ -65,10 +73,30 @@ export function AuthRegisterPanel() {
   );
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.replace("/");
+    if (
+      !hydrated ||
+      !isAuthenticated ||
+      !session.accessToken ||
+      !session.refreshToken
+    ) {
+      return;
     }
-  }, [isAuthenticated, router]);
+
+    if (
+      getStoredAccessToken() !== session.accessToken ||
+      getStoredRefreshToken() !== session.refreshToken
+    ) {
+      return;
+    }
+
+    router.replace("/");
+  }, [
+    hydrated,
+    isAuthenticated,
+    router,
+    session.accessToken,
+    session.refreshToken,
+  ]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

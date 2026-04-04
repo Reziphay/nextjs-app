@@ -22,8 +22,6 @@ type SidebarRouteLabelKey =
   | "services"
   | "brands"
   | "settings"
-  | "account"
-  | "notifications"
   | "reservations"
   | "favorites"
   | "moderation";
@@ -41,9 +39,7 @@ type RouteAccessInput = {
 };
 
 const commonSidebarItems: readonly SidebarRouteItem[] = [
-  { href: "/account", icon: "person", labelKey: "account" },
   { href: "/settings", icon: "settings", labelKey: "settings" },
-  { href: "/notification", icon: "notifications", labelKey: "notifications" },
 ] as const;
 
 const roleSidebarItems: Record<UserType, readonly SidebarRouteItem[]> = {
@@ -133,8 +129,6 @@ export function getSidebarRoutesForUserType(
     services: messages.dashboard.services,
     brands: messages.dashboard.brands,
     settings: messages.dashboard.settings,
-    account: messages.dashboard.account,
-    notifications: messages.dashboard.notifications,
     reservations: messages.dashboard.reservations,
     favorites: messages.dashboard.favorites,
     moderation: messages.dashboard.moderation,

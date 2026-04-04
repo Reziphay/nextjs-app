@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/tool
 import { isAxiosError } from "axios";
 import { getMessages, type Locale } from "@/i18n/config";
 import { createApiClient } from "@/lib/api";
+import { writeAuthCookies } from "@/lib/auth-cookies";
 import {
   isRegisterUserType,
   type ApiSuccessResponse,
@@ -457,6 +458,8 @@ export const submitLogin = createAsyncThunk<
       throw new Error(invalidApiResponseError);
     }
 
+    writeAuthCookies(tokens.access_token, tokens.refresh_token);
+
     return {
       user,
       access_token: tokens.access_token,
@@ -537,6 +540,8 @@ export const refreshAuthToken = createAsyncThunk<
     if (!tokens?.access_token || !tokens?.refresh_token) {
       return thunkApi.rejectWithValue(null);
     }
+
+    writeAuthCookies(tokens.access_token, tokens.refresh_token);
 
     return tokens;
   } catch {
