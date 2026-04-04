@@ -221,6 +221,7 @@ export const ruMessages: Messages = {
       "Слишком много попыток. Попробуйте немного позже.",
     photoServerErrorDescription:
       "Произошла ошибка сервера. Попробуйте ещё раз чуть позже.",
+    dismissFeedback: "Закрыть уведомление",
     emailLockedDescription:
       "Этот email уже подтверждён и больше не может быть изменён.",
     phoneLockedDescription:

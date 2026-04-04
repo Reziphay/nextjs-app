@@ -2,6 +2,7 @@ export {
   removeAccountAvatar,
   uploadAccountAvatar,
   cancelEditingAccount,
+  dismissAccountFeedback,
   hydrateAccountProfile,
   selectAccountState,
   setAccountDraftField,

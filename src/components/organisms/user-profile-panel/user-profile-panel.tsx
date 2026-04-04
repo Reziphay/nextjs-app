@@ -9,8 +9,6 @@ import {
   type FormEvent,
 } from "react";
 import {
-  Alert,
-  AlertDescription,
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -20,7 +18,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-  AlertTitle,
   Button,
   Combobox,
   Field,
@@ -29,7 +26,11 @@ import {
   Input,
   type ComboboxOption,
 } from "@/components/atoms";
-import { AvatarCropDialog, UserAvatar } from "@/components/molecules";
+import {
+  AvatarCropDialog,
+  FeedbackPopup,
+  UserAvatar,
+} from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   findCountryByValue,
@@ -39,6 +40,7 @@ import {
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   cancelEditingAccount,
+  dismissAccountFeedback,
   hydrateAccountProfile,
   selectAccountState,
   setAccountDraftField,
@@ -315,14 +317,14 @@ export function UserProfilePanel({
       </div>
 
       {feedback ? (
-        <Alert
-          className={styles.feedback}
+        <FeedbackPopup
+          title={feedback.title}
+          description={feedback.description}
           variant={feedback.variant}
           icon={feedback.icon}
-        >
-          <AlertTitle>{feedback.title}</AlertTitle>
-          <AlertDescription>{feedback.description}</AlertDescription>
-        </Alert>
+          closeLabel={p.dismissFeedback}
+          onClose={() => dispatch(dismissAccountFeedback())}
+        />
       ) : null}
 
       <AvatarCropDialog

@@ -50,7 +50,7 @@ type ApiErrorResponse = {
 type AccountFeedback = {
   title: string;
   description: string;
-  variant: "default" | "destructive";
+  variant: "success" | "destructive";
   icon: string;
 } | null;
 type ThunkReject = {
@@ -507,7 +507,7 @@ export const submitAccountUpdate = createAsyncThunk<
       feedback: {
         title: messages.updateSuccessTitle,
         description: messages.updateSuccessDescription,
-        variant: "default",
+        variant: "success",
         icon: "check_circle",
       },
     };
@@ -635,7 +635,7 @@ export function uploadAccountAvatar({
           feedback: {
             title: messages.photoUpdatedTitle,
             description: messages.photoUpdatedDescription,
-            variant: "default",
+            variant: "success",
             icon: "check_circle",
           },
         }),
@@ -720,7 +720,7 @@ export function removeAccountAvatar({ locale }: { locale: Locale }) {
           feedback: {
             title: messages.photoRemovedTitle,
             description: messages.photoRemovedDescription,
-            variant: "default",
+            variant: "success",
             icon: "check_circle",
           },
         }),
@@ -847,6 +847,9 @@ const accountSlice = createSlice({
       state.avatarPreviewUrl = null;
       state.feedback = action.payload.feedback;
     },
+    dismissAccountFeedback(state) {
+      state.feedback = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -884,6 +887,7 @@ export const {
   avatarUploadStarted,
   avatarUploadSucceeded,
   cancelEditingAccount,
+  dismissAccountFeedback,
   hydrateAccountProfile,
   setAccountDraftField,
   startEditingAccount,

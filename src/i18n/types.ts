@@ -197,6 +197,7 @@ export type Messages = {
     photoConflictDescription: string;
     photoRateLimitedDescription: string;
     photoServerErrorDescription: string;
+    dismissFeedback: string;
     emailLockedDescription: string;
     phoneLockedDescription: string;
     accountInfo: string;

@@ -27,7 +27,12 @@ export {
   Input,
   Switch,
 } from "./atoms";
-export { AvatarCropDialog, LanguageSwitcher, UserAvatar } from "./molecules";
+export {
+  AvatarCropDialog,
+  FeedbackPopup,
+  LanguageSwitcher,
+  UserAvatar,
+} from "./molecules";
 export {
   AuthHeader,
   AuthLoginPanel,

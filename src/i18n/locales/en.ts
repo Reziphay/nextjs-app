@@ -220,6 +220,7 @@ export const enMessages: Messages = {
       "Too many attempts were made. Please try again later.",
     photoServerErrorDescription:
       "A server error occurred. Please try again in a moment.",
+    dismissFeedback: "Dismiss notification",
     emailLockedDescription: "This email is verified and can no longer be changed.",
     phoneLockedDescription:
       "This phone number is verified and can no longer be changed.",

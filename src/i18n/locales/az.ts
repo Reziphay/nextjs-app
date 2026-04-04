@@ -222,6 +222,7 @@ export const azMessages: Messages = {
       "Çox sayda cəhd edildi. Bir az sonra yenidən yoxlayın.",
     photoServerErrorDescription:
       "Server xətası baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.",
+    dismissFeedback: "Bildirişi bağla",
     emailLockedDescription: "Email təsdiqləndiyi üçün artıq dəyişdirilə bilməz.",
     phoneLockedDescription:
       "Telefon nömrəsi təsdiqləndiyi üçün artıq dəyişdirilə bilməz.",
