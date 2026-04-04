@@ -52,6 +52,20 @@ function formatDate(value: string | Date, locale: string) {
   });
 }
 
+function formatPhoneWithPrefix(phone: string | null, prefix?: string | null) {
+  if (!phone) {
+    return null;
+  }
+
+  const normalizedPrefix = prefix?.trim();
+
+  if (!normalizedPrefix) {
+    return phone;
+  }
+
+  return `${normalizedPrefix}${phone}`;
+}
+
 export function UserProfilePanel({
   user,
   canEdit = false,
@@ -101,6 +115,12 @@ export function UserProfilePanel({
     findCountryByValue(draft.country || editableProfile?.country || "")?.prefix ??
     editableProfile?.country_prefix ??
     "—";
+  const formattedPhone =
+    formatPhoneWithPrefix(
+      editableProfile?.phone ?? null,
+      editableProfile?.country_prefix ??
+        findCountryByValue(editableProfile?.country ?? "")?.prefix,
+    ) ?? p.phoneMissing;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -380,7 +400,7 @@ export function UserProfilePanel({
                     <dd
                       className={`${styles.value} ${!editableProfile.phone ? styles.valueMuted : ""}`}
                     >
-                      {editableProfile.phone ?? p.phoneMissing}
+                      {formattedPhone}
                     </dd>
                   </div>
                 </>
@@ -408,6 +428,20 @@ export function UserProfilePanel({
                     {editableProfile.email_verified
                       ? p.emailVerified
                       : p.emailNotVerified}
+                  </span>
+                </dd>
+              </div>
+            ) : null}
+            {editableProfile ? (
+              <div className={styles.row}>
+                <dt className={styles.label}>{p.phone}</dt>
+                <dd className={styles.value}>
+                  <span
+                    className={`${styles.verifiedBadge} ${editableProfile.phone_verified ? styles.verifiedBadgeYes : styles.verifiedBadgeNo}`}
+                  >
+                    {editableProfile.phone_verified
+                      ? p.phoneVerified
+                      : p.phoneNotVerified}
                   </span>
                 </dd>
               </div>

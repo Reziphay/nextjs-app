@@ -186,6 +186,8 @@ export const azMessages: Messages = {
     userType: "İstifadəçi tipi",
     emailVerified: "Email təsdiqlənib",
     emailNotVerified: "Email təsdiqlənməyib",
+    phoneVerified: "Telefon təsdiqlənib",
+    phoneNotVerified: "Telefon təsdiqlənməyib",
     memberSince: "Üzv olma tarixi",
     editProfile: "Profili redaktə et",
     cancelEditing: "Ləğv et",

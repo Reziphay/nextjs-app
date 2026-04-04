@@ -185,6 +185,8 @@ export const enMessages: Messages = {
     userType: "User type",
     emailVerified: "Email verified",
     emailNotVerified: "Email not verified",
+    phoneVerified: "Phone verified",
+    phoneNotVerified: "Phone not verified",
     memberSince: "Member since",
     editProfile: "Edit profile",
     cancelEditing: "Cancel",

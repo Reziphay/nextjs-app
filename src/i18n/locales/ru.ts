@@ -186,6 +186,8 @@ export const ruMessages: Messages = {
     userType: "Тип пользователя",
     emailVerified: "Email подтверждён",
     emailNotVerified: "Email не подтверждён",
+    phoneVerified: "Телефон подтверждён",
+    phoneNotVerified: "Телефон не подтверждён",
     memberSince: "Дата регистрации",
     editProfile: "Редактировать профиль",
     cancelEditing: "Отмена",

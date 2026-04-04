@@ -9,7 +9,6 @@ import { requireProtectedRouteAccess } from "@/lib/protected-route";
 import type {
   ApiSuccessResponse,
   PublicUserProfile,
-  UserProfile,
 } from "@/types";
 
 type AccountPageProps = {
@@ -54,23 +53,10 @@ async function fetchUserProfileById(
       return null;
     }
 
-    const payload: ApiSuccessResponse<{ user: Partial<UserProfile> }> =
+    const payload: ApiSuccessResponse<{ user: PublicUserProfile }> =
       await response.json();
-    const targetUser = payload.data?.user;
 
-    if (!targetUser?.id) {
-      return null;
-    }
-
-    return {
-      id: targetUser.id,
-      first_name: targetUser.first_name ?? "",
-      last_name: targetUser.last_name ?? "",
-      email: targetUser.email ?? "",
-      type: targetUser.type ?? "ucr",
-      created_at: String(targetUser.created_at ?? ""),
-      updated_at: String(targetUser.updated_at ?? ""),
-    };
+    return payload.data?.user ?? null;
   } catch {
     return null;
   }

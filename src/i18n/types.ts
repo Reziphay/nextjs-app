@@ -172,6 +172,8 @@ export type Messages = {
     userType: string;
     emailVerified: string;
     emailNotVerified: string;
+    phoneVerified: string;
+    phoneNotVerified: string;
     memberSince: string;
     editProfile: string;
     cancelEditing: string;
