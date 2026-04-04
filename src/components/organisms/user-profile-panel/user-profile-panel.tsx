@@ -194,7 +194,10 @@ export function UserProfilePanel({
           {canEdit && isEditing ? (
             <form className={styles.form} onSubmit={handleSubmit} noValidate>
               <div className={styles.formGrid}>
-                <Field data-invalid={errors.first_name ? "" : undefined}>
+                <Field
+                  className={styles.formField}
+                  data-invalid={errors.first_name ? "" : undefined}
+                >
                   <FieldLabel htmlFor="account_first_name" required>
                     {p.firstName}
                   </FieldLabel>
@@ -216,7 +219,10 @@ export function UserProfilePanel({
                   ) : null}
                 </Field>
 
-                <Field data-invalid={errors.last_name ? "" : undefined}>
+                <Field
+                  className={styles.formField}
+                  data-invalid={errors.last_name ? "" : undefined}
+                >
                   <FieldLabel htmlFor="account_last_name" required>
                     {p.lastName}
                   </FieldLabel>
@@ -239,34 +245,9 @@ export function UserProfilePanel({
                 </Field>
 
                 <Field
-                  data-invalid={errors.email ? "" : undefined}
-                  data-disabled={isEmailLocked ? "" : undefined}
+                  className={styles.formField}
+                  data-invalid={errors.birthday ? "" : undefined}
                 >
-                  <FieldLabel htmlFor="account_email" required>
-                    {p.email}
-                  </FieldLabel>
-                  <Input
-                    id="account_email"
-                    type="email"
-                    value={draft.email}
-                    disabled={isEmailLocked}
-                    aria-invalid={errors.email ? "true" : undefined}
-                    onChange={(event) => {
-                      dispatch(
-                        setAccountDraftField({
-                          field: "email",
-                          value: event.target.value,
-                        }),
-                      );
-                    }}
-                  />
-                  <FieldDescription>
-                    {errors.email ??
-                      (isEmailLocked ? p.emailLockedDescription : undefined)}
-                  </FieldDescription>
-                </Field>
-
-                <Field data-invalid={errors.birthday ? "" : undefined}>
                   <FieldLabel htmlFor="account_birthday" required>
                     {p.birthday}
                   </FieldLabel>
@@ -289,11 +270,15 @@ export function UserProfilePanel({
                   ) : null}
                 </Field>
 
-                <Field data-invalid={errors.country ? "" : undefined}>
+                <Field
+                  className={styles.formField}
+                  data-invalid={errors.country ? "" : undefined}
+                >
                   <FieldLabel htmlFor="account_country" required>
                     {p.country}
                   </FieldLabel>
                   <Combobox
+                    className={styles.formCombobox}
                     id="account_country"
                     items={countryOptions}
                     value={draft.country}
@@ -315,7 +300,37 @@ export function UserProfilePanel({
                 </Field>
 
                 <Field
-                  className={styles.formGridFull}
+                  className={`${styles.formField} ${styles.formFieldFull}`}
+                  data-invalid={errors.email ? "" : undefined}
+                  data-disabled={isEmailLocked ? "" : undefined}
+                >
+                  <FieldLabel htmlFor="account_email" required>
+                    {p.email}
+                  </FieldLabel>
+                  <Input
+                    id="account_email"
+                    type="email"
+                    value={draft.email}
+                    disabled={isEmailLocked}
+                    aria-invalid={errors.email ? "true" : undefined}
+                    onChange={(event) => {
+                      dispatch(
+                        setAccountDraftField({
+                          field: "email",
+                          value: event.target.value,
+                        }),
+                      );
+                    }}
+                  />
+                  {errors.email || isEmailLocked ? (
+                    <FieldDescription>
+                      {errors.email ?? p.emailLockedDescription}
+                    </FieldDescription>
+                  ) : null}
+                </Field>
+
+                <Field
+                  className={`${styles.formField} ${styles.formFieldFull}`}
                   data-invalid={errors.phone ? "" : undefined}
                   data-disabled={isPhoneLocked ? "" : undefined}
                 >

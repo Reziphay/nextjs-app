@@ -2,6 +2,7 @@
   display: grid;
   gap: 0.571rem;
   width: min(100%, 24rem);
+  min-width: 0;
 }
 
 .fieldLabel {
@@ -19,6 +20,7 @@
 }
 
 .fieldDescription {
+  margin: 0;
   color: var(--app-text-muted);
   font-size: var(--font-size-small);
   line-height: 1.6;
