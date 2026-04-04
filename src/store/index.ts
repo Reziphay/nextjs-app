@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { accountReducer } from "./account";
 import { authReducer } from "./auth";
 
 export function makeStore() {
   return configureStore({
     reducer: {
+      account: accountReducer,
       auth: authReducer,
     },
   });

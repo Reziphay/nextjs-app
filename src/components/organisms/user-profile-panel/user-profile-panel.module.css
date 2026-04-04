@@ -6,13 +6,21 @@
 
 .hero {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 1.5rem;
   padding: 2rem;
   border-radius: var(--general-border-radius-2xl);
   background: var(--app-bg-surface-strong);
   border: 1px solid var(--app-border-soft);
   box-shadow: 0 0.5rem 1.5rem var(--app-shadow-card-soft);
+}
+
+.heroIdentity {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-width: 0;
 }
 
 .avatarLarge {
@@ -52,6 +60,17 @@
   font-size: var(--font-size-small);
 }
 
+.heroActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.feedback {
+  max-width: 54rem;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -74,11 +93,67 @@
   letter-spacing: -0.02em;
 }
 
+.cardHeaderRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.cardLead {
+  margin: -0.625rem 0 0;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+}
+
 .list {
   display: flex;
   flex-direction: column;
   gap: 0;
   margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.formGridFull {
+  grid-column: 1 / -1;
+}
+
+.phoneRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.phonePrefix {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5rem;
+  padding: 0 0.875rem;
+  border-radius: var(--general-border-radius-xl);
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface);
+  color: var(--app-text-strong);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }
 
 .row {
@@ -161,5 +236,35 @@
   .hero {
     flex-direction: column;
     text-align: center;
+    align-items: stretch;
+  }
+
+  .heroIdentity {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .heroActions {
+    justify-content: center;
+  }
+
+  .formGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .phoneRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .phonePrefix {
+    min-height: 3rem;
+  }
+
+  .formActions {
+    flex-direction: column-reverse;
+  }
+
+  .formActions > * {
+    width: 100%;
   }
 }

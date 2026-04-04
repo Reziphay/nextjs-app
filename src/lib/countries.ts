@@ -287,8 +287,34 @@ const collatorLocales: Record<Locale, string> = {
   ru: "ru-RU",
 };
 
+function normalizeLookupValue(value: string) {
+  return value.trim().toLocaleLowerCase();
+}
+
 export function findCountryByValue(value: string) {
-  return countryDirectory.find((country) => country.value === value);
+  const normalizedValue = normalizeLookupValue(value);
+
+  if (!normalizedValue) {
+    return undefined;
+  }
+
+  return countryDirectory.find((country) => {
+    if (normalizeLookupValue(country.value) === normalizedValue) {
+      return true;
+    }
+
+    return Object.values(country.labels).some(
+      (label) => normalizeLookupValue(label) === normalizedValue,
+    );
+  });
+}
+
+export function normalizeCountryValue(value: string) {
+  return findCountryByValue(value)?.value ?? value.trim();
+}
+
+export function getCountryLabel(value: string, locale: Locale) {
+  return findCountryByValue(value)?.labels[locale] ?? value;
 }
 
 export function getCountryOptions(locale: Locale) {

@@ -74,7 +74,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
   const requestedUserId = getSearchParamValue(resolvedSearchParams.id)?.trim();
 
   if (!requestedUserId || requestedUserId === user.id) {
-    return <UserProfilePanel user={user} />;
+    return <UserProfilePanel user={user} canEdit />;
   }
 
   const cookieStore = await cookies();

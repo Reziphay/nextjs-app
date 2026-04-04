@@ -601,6 +601,19 @@ const authSlice = createSlice({
         hydrated: true,
       };
     },
+    syncAuthenticatedUser(
+      state,
+      action: PayloadAction<Partial<AuthenticatedUser>>,
+    ) {
+      if (!state.session.user) {
+        return;
+      }
+
+      state.session.user = {
+        ...state.session.user,
+        ...action.payload,
+      };
+    },
     signOut(state) {
       state.session = { ...createInitialSessionState(), hydrated: true };
     },
@@ -673,6 +686,7 @@ export const {
   setLoginField,
   setRegisterField,
   signOut,
+  syncAuthenticatedUser,
 } = authSlice.actions;
 
 export const selectAuthSession = (state: RootState) => state.auth.session;

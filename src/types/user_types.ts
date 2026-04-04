@@ -49,6 +49,19 @@ export type RegisterRequestBody = Omit<
 
 export type RegisterFormValues = RegisterRequestBody;
 
+export type AccountProfileDraft = Omit<
+  UserProfileFields,
+  "birthday" | "country_prefix"
+> & {
+  birthday: string;
+  phone: string;
+};
+
+export type UpdateMyAccountRequestBody = Omit<AccountProfileDraft, "phone"> & {
+  phone: string | null;
+  country_prefix: string | null;
+};
+
 export type LoginRequestBody = {
   email: string;
   password: string;

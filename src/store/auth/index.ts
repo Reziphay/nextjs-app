@@ -11,6 +11,7 @@ export {
   setLoginField,
   setRegisterField,
   signOut,
+  syncAuthenticatedUser,
   submitLogin,
   submitRegister,
   type PersistedAuthSession,
