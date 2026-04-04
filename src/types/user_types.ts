@@ -21,6 +21,10 @@ type UserIdentityFields = {
   id: string;
 };
 
+type UserAvatarFields = {
+  avatar_url?: string | null;
+};
+
 type UserVerificationFields = {
   phone_verified: boolean;
   email_verified: boolean;
@@ -28,6 +32,7 @@ type UserVerificationFields = {
 
 export type User = UserIdentityFields &
   UserProfileFields &
+  UserAvatarFields &
   UserVerificationFields & {
     phone: string | null;
     hashed_password: string;
@@ -71,12 +76,19 @@ export type LoginFormValues = LoginRequestBody;
 
 export type AuthenticatedUser = Pick<
   User,
-  "id" | "email" | "type" | "first_name" | "last_name" | "email_verified"
+  | "id"
+  | "email"
+  | "type"
+  | "first_name"
+  | "last_name"
+  | "email_verified"
+  | "avatar_url"
 >;
 
 // Full profile returned by GET /auth/me
 export type UserProfile = UserIdentityFields &
   UserProfileFields &
+  UserAvatarFields &
   UserVerificationFields & {
     phone: string | null;
     type: UserType;
@@ -86,7 +98,12 @@ export type UserProfile = UserIdentityFields &
 
 export type PublicUserProfile = Pick<
   User,
-  "id" | "first_name" | "last_name" | "email" | "type"
+  | "id"
+  | "first_name"
+  | "last_name"
+  | "email"
+  | "type"
+  | "avatar_url"
 > & {
   created_at: string;
   updated_at: string;

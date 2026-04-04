@@ -23,19 +23,12 @@
   min-width: 0;
 }
 
-.avatarLarge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 5rem;
-  height: 5rem;
+.heroAvatar {
   flex-shrink: 0;
-  border-radius: var(--general-border-radius-pill);
-  background: var(--app-primary);
-  color: var(--app-text-inverse);
-  font-size: 1.75rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+}
+
+.fileInput {
+  display: none;
 }
 
 .heroText {
@@ -58,6 +51,14 @@
   margin: 0;
   color: var(--app-text-muted);
   font-size: var(--font-size-small);
+}
+
+.photoActions {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
 }
 
 .heroActions {
@@ -254,6 +255,10 @@
   .heroIdentity {
     flex-direction: column;
     text-align: center;
+  }
+
+  .photoActions {
+    justify-content: center;
   }
 
   .heroActions {

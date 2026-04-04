@@ -1,4 +1,6 @@
 export {
+  removeAccountAvatar,
+  uploadAccountAvatar,
   cancelEditingAccount,
   hydrateAccountProfile,
   selectAccountState,

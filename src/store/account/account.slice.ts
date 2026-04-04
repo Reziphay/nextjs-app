@@ -9,12 +9,21 @@ import type {
   UpdateMyAccountRequestBody,
   UserProfile,
 } from "@/types";
-import type { RootState } from "@/store";
+import type { AppDispatch, RootState } from "@/store";
 import { syncAuthenticatedUser } from "@/store/auth";
 
 const updateMyAccountEndpoint = "/users/me";
+const uploadAccountAvatarEndpoint = "/users/me/avatar";
+const removeAccountAvatarEndpoint = "/users/me/avatar";
 const invalidApiResponseError = "INVALID_ACCOUNT_API_RESPONSE";
 const minimumAccountAge = 13;
+const maximumAvatarFileSizeBytes = 5 * 1024 * 1024;
+const allowedAvatarMimeTypes = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+]);
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^[0-9()+\-\s]{7,20}$/;
 const accountFieldNames = [
@@ -55,6 +64,8 @@ type AccountState = {
   errors: AccountFieldErrors;
   feedback: AccountFeedback;
   status: RequestStatus;
+  avatarUploadStatus: RequestStatus;
+  avatarPreviewUrl: string | null;
   isEditing: boolean;
   canEdit: boolean;
 };
@@ -99,9 +110,32 @@ const initialState: AccountState = {
   errors: {},
   feedback: null,
   status: "idle",
+  avatarUploadStatus: "idle",
+  avatarPreviewUrl: null,
   isEditing: false,
   canEdit: false,
 };
+
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+        return;
+      }
+
+      reject(new Error("INVALID_ACCOUNT_FILE_READER_RESULT"));
+    };
+
+    reader.onerror = () => {
+      reject(new Error("INVALID_ACCOUNT_FILE_READER_RESULT"));
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
 
 function normalizeMessage(message: string | string[] | undefined) {
   if (Array.isArray(message)) {
@@ -307,6 +341,83 @@ function getAccountErrorResult(
   };
 }
 
+function getAvatarErrorResult(
+  error: unknown,
+  messages: ProfileMessages,
+): Exclude<AccountFeedback, null> {
+  if (error instanceof Error) {
+    if (error.message === invalidApiResponseError) {
+      return {
+        title: messages.photoUpdateErrorTitle,
+        description: messages.photoConfigurationErrorDescription,
+        variant: "destructive",
+        icon: "error",
+      };
+    }
+
+    if (error.message === "INVALID_ACCOUNT_FILE_READER_RESULT") {
+      return {
+        title: messages.photoUpdateErrorTitle,
+        description: messages.photoUpdateErrorDescription,
+        variant: "destructive",
+        icon: "error",
+      };
+    }
+  }
+
+  if (isAxiosError<ApiErrorResponse>(error)) {
+    const status = error.response?.status;
+    const apiMessage = normalizeMessage(error.response?.data?.message);
+
+    if (!status) {
+      return {
+        title: messages.photoUpdateErrorTitle,
+        description: messages.networkErrorDescription,
+        variant: "destructive",
+        icon: "wifi_off",
+      };
+    }
+
+    const descriptionByMessage: Record<string, string> = {
+      "errors.validation_error": messages.validationErrorDescription,
+      "errors.missing_token": messages.photoUnauthorizedDescription,
+      "errors.invalid_token": messages.photoUnauthorizedDescription,
+      "user.not_found": messages.photoNotFoundDescription,
+      "media.invalid_file_type": messages.photoInvalidTypeDescription,
+      "media.file_too_large": messages.photoTooLargeDescription,
+    };
+
+    const descriptionByStatus: Record<number, string> = {
+      400: messages.badRequestDescription,
+      401: messages.photoUnauthorizedDescription,
+      403: messages.photoForbiddenDescription,
+      404: messages.photoNotFoundDescription,
+      409: messages.photoConflictDescription,
+      413: messages.photoTooLargeDescription,
+      429: messages.photoRateLimitedDescription,
+    };
+
+    return {
+      title: messages.photoUpdateErrorTitle,
+      description:
+        descriptionByMessage[apiMessage ?? ""] ??
+        descriptionByStatus[status] ??
+        (status >= 500
+          ? messages.photoServerErrorDescription
+          : messages.photoUpdateErrorDescription),
+      variant: "destructive",
+      icon: "error",
+    };
+  }
+
+  return {
+    title: messages.photoUpdateErrorTitle,
+    description: messages.photoUpdateErrorDescription,
+    variant: "destructive",
+    icon: "error",
+  };
+}
+
 export const submitAccountUpdate = createAsyncThunk<
   {
     user: UserProfile;
@@ -376,17 +487,23 @@ export const submitAccountUpdate = createAsyncThunk<
       throw new Error(invalidApiResponseError);
     }
 
+    const nextUser: UserProfile = {
+      ...user,
+      avatar_url: user.avatar_url ?? profile?.avatar_url ?? null,
+    };
+
     thunkApi.dispatch(
       syncAuthenticatedUser({
-        first_name: user.first_name,
-        last_name: user.last_name,
-        email: user.email,
-        email_verified: user.email_verified,
+        first_name: nextUser.first_name,
+        last_name: nextUser.last_name,
+        email: nextUser.email,
+        email_verified: nextUser.email_verified,
+        avatar_url: nextUser.avatar_url ?? null,
       }),
     );
 
     return {
-      user,
+      user: nextUser,
       feedback: {
         title: messages.updateSuccessTitle,
         description: messages.updateSuccessDescription,
@@ -398,6 +515,225 @@ export const submitAccountUpdate = createAsyncThunk<
     return thunkApi.rejectWithValue(getAccountErrorResult(error, messages));
   }
 });
+
+type UploadAccountAvatarParams = {
+  file: File;
+  locale: Locale;
+};
+
+export function uploadAccountAvatar({
+  file,
+  locale,
+}: UploadAccountAvatarParams) {
+  return async (dispatch: AppDispatch, getState: () => RootState) => {
+    const messages = getMessages(locale).profile;
+    const state = getState();
+    const accessToken = state.auth.session.accessToken;
+    const profile = state.account.profile;
+
+    if (!accessToken || !profile) {
+      dispatch(
+        accountSlice.actions.avatarUploadFailed({
+          feedback: {
+            title: messages.photoUpdateErrorTitle,
+            description: messages.photoUnauthorizedDescription,
+            variant: "destructive",
+            icon: "lock",
+          },
+        }),
+      );
+      return;
+    }
+
+    if (!allowedAvatarMimeTypes.has(file.type)) {
+      dispatch(
+        accountSlice.actions.avatarUploadFailed({
+          feedback: {
+            title: messages.photoUpdateErrorTitle,
+            description: messages.photoInvalidTypeDescription,
+            variant: "destructive",
+            icon: "image",
+          },
+        }),
+      );
+      return;
+    }
+
+    if (file.size > maximumAvatarFileSizeBytes) {
+      dispatch(
+        accountSlice.actions.avatarUploadFailed({
+          feedback: {
+            title: messages.photoUpdateErrorTitle,
+            description: messages.photoTooLargeDescription,
+            variant: "destructive",
+            icon: "warning",
+          },
+        }),
+      );
+      return;
+    }
+
+    try {
+      const previewUrl = await readFileAsDataUrl(file);
+
+      dispatch(
+        accountSlice.actions.avatarUploadStarted({
+          previewUrl,
+        }),
+      );
+
+      const client = createApiClient({ accessToken, locale });
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await client.post<
+        ApiSuccessResponse<{
+          user?: Partial<UserProfile>;
+          avatar_url?: string | null;
+        }>
+      >(uploadAccountAvatarEndpoint, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const contentType = String(response.headers["content-type"] ?? "");
+      const user = response.data?.data?.user;
+      const avatarUrl =
+        response.data?.data?.avatar_url ??
+        user?.avatar_url ??
+        null;
+
+      if (
+        contentType.includes("text/html") ||
+        response.data?.success !== true ||
+        !avatarUrl
+      ) {
+        throw new Error(invalidApiResponseError);
+      }
+
+      const nextUser: UserProfile = {
+        ...profile,
+        ...user,
+        avatar_url: avatarUrl,
+      };
+
+      dispatch(
+        syncAuthenticatedUser({
+          first_name: nextUser.first_name,
+          last_name: nextUser.last_name,
+          email: nextUser.email,
+          email_verified: nextUser.email_verified,
+          avatar_url: nextUser.avatar_url ?? null,
+        }),
+      );
+
+      dispatch(
+        accountSlice.actions.avatarUploadSucceeded({
+          user: nextUser,
+          avatarUrl,
+          feedback: {
+            title: messages.photoUpdatedTitle,
+            description: messages.photoUpdatedDescription,
+            variant: "default",
+            icon: "check_circle",
+          },
+        }),
+      );
+    } catch (error) {
+      dispatch(
+        accountSlice.actions.avatarUploadFailed({
+          feedback: getAvatarErrorResult(error, messages),
+        }),
+      );
+    }
+  };
+}
+
+export function removeAccountAvatar({ locale }: { locale: Locale }) {
+  return async (dispatch: AppDispatch, getState: () => RootState) => {
+    const messages = getMessages(locale).profile;
+    const state = getState();
+    const accessToken = state.auth.session.accessToken;
+    const profile = state.account.profile;
+
+    if (!accessToken || !profile) {
+      dispatch(
+        accountSlice.actions.avatarUploadFailed({
+          feedback: {
+            title: messages.photoUpdateErrorTitle,
+            description: messages.photoUnauthorizedDescription,
+            variant: "destructive",
+            icon: "lock",
+          },
+        }),
+      );
+      return;
+    }
+
+    try {
+      dispatch(accountSlice.actions.avatarRemovalStarted());
+
+      const client = createApiClient({ accessToken, locale });
+      const response = await client.delete<
+        ApiSuccessResponse<{
+          user?: UserProfile;
+          avatar_url?: string | null;
+        }>
+      >(removeAccountAvatarEndpoint);
+
+      const contentType = String(response.headers["content-type"] ?? "");
+      const responseUser = response.data?.data?.user;
+
+      if (
+        contentType.includes("text/html") ||
+        response.data?.success !== true ||
+        (responseUser && !responseUser.id)
+      ) {
+        throw new Error(invalidApiResponseError);
+      }
+
+      const nextUser: UserProfile = responseUser
+        ? {
+            ...profile,
+            ...responseUser,
+            avatar_url: null,
+          }
+        : {
+            ...profile,
+            avatar_url: null,
+          };
+
+      dispatch(
+        syncAuthenticatedUser({
+          first_name: nextUser.first_name,
+          last_name: nextUser.last_name,
+          email: nextUser.email,
+          email_verified: nextUser.email_verified,
+          avatar_url: null,
+        }),
+      );
+
+      dispatch(
+        accountSlice.actions.avatarRemoved({
+          user: nextUser,
+          feedback: {
+            title: messages.photoRemovedTitle,
+            description: messages.photoRemovedDescription,
+            variant: "default",
+            icon: "check_circle",
+          },
+        }),
+      );
+    } catch (error) {
+      dispatch(
+        accountSlice.actions.avatarUploadFailed({
+          feedback: getAvatarErrorResult(error, messages),
+        }),
+      );
+    }
+  };
+}
 
 const accountSlice = createSlice({
   name: "account",
@@ -416,6 +752,8 @@ const accountSlice = createSlice({
       state.errors = {};
       state.feedback = null;
       state.status = "idle";
+      state.avatarUploadStatus = "idle";
+      state.avatarPreviewUrl = null;
       state.isEditing = false;
     },
     startEditingAccount(state) {
@@ -453,6 +791,62 @@ const accountSlice = createSlice({
         state.status = "idle";
       }
     },
+    avatarUploadStarted(
+      state,
+      action: PayloadAction<{
+        previewUrl: string;
+      }>,
+    ) {
+      state.avatarUploadStatus = "loading";
+      state.avatarPreviewUrl = action.payload.previewUrl;
+      state.feedback = null;
+    },
+    avatarRemovalStarted(state) {
+      state.avatarUploadStatus = "loading";
+      state.avatarPreviewUrl = null;
+      state.feedback = null;
+    },
+    avatarUploadSucceeded(
+      state,
+      action: PayloadAction<{
+        user: UserProfile;
+        avatarUrl: string | null;
+        feedback: Exclude<AccountFeedback, null>;
+      }>,
+    ) {
+      state.avatarUploadStatus = "succeeded";
+      state.avatarPreviewUrl = null;
+      state.profile = {
+        ...action.payload.user,
+        avatar_url: action.payload.avatarUrl,
+      };
+      state.feedback = action.payload.feedback;
+    },
+    avatarRemoved(
+      state,
+      action: PayloadAction<{
+        user: UserProfile;
+        feedback: Exclude<AccountFeedback, null>;
+      }>,
+    ) {
+      state.avatarUploadStatus = "succeeded";
+      state.avatarPreviewUrl = null;
+      state.profile = {
+        ...action.payload.user,
+        avatar_url: null,
+      };
+      state.feedback = action.payload.feedback;
+    },
+    avatarUploadFailed(
+      state,
+      action: PayloadAction<{
+        feedback: Exclude<AccountFeedback, null>;
+      }>,
+    ) {
+      state.avatarUploadStatus = "failed";
+      state.avatarPreviewUrl = null;
+      state.feedback = action.payload.feedback;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -484,6 +878,11 @@ const accountSlice = createSlice({
 });
 
 export const {
+  avatarRemoved,
+  avatarRemovalStarted,
+  avatarUploadFailed,
+  avatarUploadStarted,
+  avatarUploadSucceeded,
   cancelEditingAccount,
   hydrateAccountProfile,
   setAccountDraftField,

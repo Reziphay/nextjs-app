@@ -178,6 +178,48 @@ export const enMessages: Messages = {
     phonePlaceholder: "Enter your phone number",
     phoneMissing: "No phone added",
     phonePrefix: "Phone prefix",
+    photoAlt: "Profile photo",
+    changePhoto: "Change photo",
+    removePhoto: "Remove photo",
+    uploadPhoto: "Upload profile photo",
+    uploadingPhoto: "Uploading profile photo",
+    removingPhoto: "Removing photo",
+    cropPhotoTitle: "Crop profile photo",
+    cropPhotoDescription:
+      "Adjust the image to fit the square frame. Drag to reposition and use zoom to scale it.",
+    cropPhotoZoom: "Zoom",
+    cropPhotoHint: "The square preview will be used as your profile photo.",
+    cropPhotoCancel: "Cancel",
+    cropPhotoConfirm: "Crop and upload",
+    cropPhotoProcessing: "Preparing",
+    removePhotoConfirmTitle: "Remove profile photo?",
+    removePhotoConfirmDescription:
+      "Your current profile photo will be removed and your initials will be shown again.",
+    removePhotoConfirmAction: "Remove",
+    photoUpdatedTitle: "Profile photo updated",
+    photoUpdatedDescription: "Your profile photo has been updated successfully.",
+    photoRemovedTitle: "Profile photo removed",
+    photoRemovedDescription: "Your profile photo has been removed successfully.",
+    photoUpdateErrorTitle: "Profile photo update failed",
+    photoUpdateErrorDescription:
+      "Something went wrong while uploading your profile photo.",
+    photoConfigurationErrorDescription:
+      "The profile photo service is not configured yet. Please check the API connection.",
+    photoInvalidTypeDescription:
+      "You can only upload JPG, PNG, or WEBP images.",
+    photoTooLargeDescription: "Profile photo must be 5 MB or smaller.",
+    photoUnauthorizedDescription:
+      "You need to log in again to update your profile photo.",
+    photoForbiddenDescription:
+      "You do not have permission to update this profile photo.",
+    photoNotFoundDescription:
+      "The profile photo upload service could not be found.",
+    photoConflictDescription:
+      "This photo could not be uploaded right now. Please try again.",
+    photoRateLimitedDescription:
+      "Too many attempts were made. Please try again later.",
+    photoServerErrorDescription:
+      "A server error occurred. Please try again in a moment.",
     emailLockedDescription: "This email is verified and can no longer be changed.",
     phoneLockedDescription:
       "This phone number is verified and can no longer be changed.",

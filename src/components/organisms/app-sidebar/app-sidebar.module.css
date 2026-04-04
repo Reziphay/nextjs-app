@@ -286,19 +286,8 @@
   width: auto;
 }
 
-.avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
+.userAvatar {
   min-width: 2rem;
-  border-radius: var(--general-border-radius-pill);
-  background: var(--app-primary);
-  color: var(--app-text-inverse);
-  font-size: var(--font-size-extra-small);
-  font-weight: 800;
-  letter-spacing: 0.04em;
 }
 
 .userInfo {

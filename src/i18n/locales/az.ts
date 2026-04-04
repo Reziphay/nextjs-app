@@ -179,6 +179,49 @@ export const azMessages: Messages = {
     phonePlaceholder: "Telefon nömrənizi daxil edin",
     phoneMissing: "Telefon əlavə edilməyib",
     phonePrefix: "Telefon prefiksi",
+    photoAlt: "Profil şəkli",
+    changePhoto: "Şəkli dəyiş",
+    removePhoto: "Şəkli sil",
+    uploadPhoto: "Profil şəklini yüklə",
+    uploadingPhoto: "Profil şəkli yüklənir",
+    removingPhoto: "Şəkil silinir",
+    cropPhotoTitle: "Profil şəklini kəsin",
+    cropPhotoDescription:
+      "Şəkli kvadrat sahəyə uyğunlaşdırın. Drag edib yerini dəyişə, zoom ilə yaxınlaşdıra bilərsiniz.",
+    cropPhotoZoom: "Yaxınlaşdırma",
+    cropPhotoHint: "Kvadrat görünüş profil şəkli kimi istifadə olunacaq.",
+    cropPhotoCancel: "Ləğv et",
+    cropPhotoConfirm: "Kəs və yüklə",
+    cropPhotoProcessing: "Hazırlanır",
+    removePhotoConfirmTitle: "Profil şəklini silmək istəyirsiniz?",
+    removePhotoConfirmDescription:
+      "Profil şəkliniz silinəcək və avatar yerinə yenidən baş hərfləriniz görünəcək.",
+    removePhotoConfirmAction: "Sil",
+    photoUpdatedTitle: "Profil şəkli yeniləndi",
+    photoUpdatedDescription: "Profil şəkliniz uğurla yeniləndi.",
+    photoRemovedTitle: "Profil şəkli silindi",
+    photoRemovedDescription: "Profil şəkliniz uğurla silindi.",
+    photoUpdateErrorTitle: "Profil şəkli yenilənmədi",
+    photoUpdateErrorDescription:
+      "Profil şəklini yükləyərkən xəta baş verdi.",
+    photoConfigurationErrorDescription:
+      "Profil şəkli servisi hazır deyil. API bağlantısını yoxlayın.",
+    photoInvalidTypeDescription:
+      "Yalnız JPG, PNG və ya WEBP formatında şəkil yükləyə bilərsiniz.",
+    photoTooLargeDescription:
+      "Profil şəkli maksimum 5 MB ola bilər.",
+    photoUnauthorizedDescription:
+      "Profil şəklini yeniləmək üçün yenidən daxil olun.",
+    photoForbiddenDescription:
+      "Bu profil şəklini yeniləməyə icazəniz yoxdur.",
+    photoNotFoundDescription:
+      "Profil şəkli yükləmə servisi tapılmadı.",
+    photoConflictDescription:
+      "Bu şəkil hal-hazırda yüklənə bilmədi. Zəhmət olmasa yenidən cəhd edin.",
+    photoRateLimitedDescription:
+      "Çox sayda cəhd edildi. Bir az sonra yenidən yoxlayın.",
+    photoServerErrorDescription:
+      "Server xətası baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.",
     emailLockedDescription: "Email təsdiqləndiyi üçün artıq dəyişdirilə bilməz.",
     phoneLockedDescription:
       "Telefon nömrəsi təsdiqləndiyi üçün artıq dəyişdirilə bilməz.",

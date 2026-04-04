@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/atoms";
 import { Logo } from "@/components/logo";
-import { LanguageSwitcher } from "@/components/molecules";
+import { LanguageSwitcher, UserAvatar } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   getDefaultAppRouteForUserType,
@@ -77,7 +77,17 @@ export function AuthHeader() {
         <div className={styles.authActions}>
           {isAuthenticated ? (
             <Link href={defaultAppHref} className={styles.avatarLink}>
-              <span className={styles.avatar}>{initials}</span>
+              <UserAvatar
+                initials={initials}
+                src={user?.avatar_url ?? null}
+                alt={
+                  user
+                    ? `${user.first_name} ${user.last_name} — ${messages.profile.photoAlt}`
+                    : messages.profile.photoAlt
+                }
+                size="md"
+                className={styles.headerAvatar}
+              />
             </Link>
           ) : (
             <>

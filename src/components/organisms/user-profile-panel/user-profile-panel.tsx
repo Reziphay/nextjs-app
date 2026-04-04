@@ -1,9 +1,25 @@
 "use client";
 
-import { useEffect, useMemo, type FormEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import {
   Alert,
   AlertDescription,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
   AlertTitle,
   Button,
   Combobox,
@@ -13,6 +29,7 @@ import {
   Input,
   type ComboboxOption,
 } from "@/components/atoms";
+import { AvatarCropDialog, UserAvatar } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   findCountryByValue,
@@ -27,6 +44,8 @@ import {
   setAccountDraftField,
   startEditingAccount,
   submitAccountUpdate,
+  removeAccountAvatar,
+  uploadAccountAvatar,
 } from "@/store/account";
 import type { AccountUserProfile, UserProfile } from "@/types";
 import styles from "./user-profile-panel.module.css";
@@ -35,6 +54,11 @@ type UserProfilePanelProps = {
   user: AccountUserProfile;
   canEdit?: boolean;
 };
+
+type PendingCropImage = {
+  src: string;
+  name: string;
+} | null;
 
 function hasPrivateProfileFields(
   profile: AccountUserProfile,
@@ -82,10 +106,16 @@ export function UserProfilePanel({
   const feedback = canEdit ? accountState.feedback : null;
   const isEditing = canEdit ? accountState.isEditing : false;
   const isSaving = canEdit ? accountState.status === "loading" : false;
+  const isAvatarUploading =
+    canEdit && accountState.avatarUploadStatus === "loading";
+  const hasAvatar = Boolean(profile.avatar_url);
   const countryOptions: readonly ComboboxOption[] = useMemo(
     () => getCountryOptions(locale),
     [locale],
   );
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [pendingCropImage, setPendingCropImage] =
+    useState<PendingCropImage>(null);
 
   useEffect(() => {
     if (!canEdit || !hasPrivateProfileFields(user)) {
@@ -100,6 +130,16 @@ export function UserProfilePanel({
     );
   }, [canEdit, dispatch, user]);
 
+  useEffect(() => {
+    if (!pendingCropImage?.src.startsWith("blob:")) {
+      return undefined;
+    }
+
+    return () => {
+      URL.revokeObjectURL(pendingCropImage.src);
+    };
+  }, [pendingCropImage]);
+
   const typeLabel: Record<string, string> = {
     uso: p.typeUso,
     ucr: p.typeUcr,
@@ -111,6 +151,9 @@ export function UserProfilePanel({
   );
 
   const initials = `${profile.first_name[0] ?? ""}${profile.last_name[0] ?? ""}`.toUpperCase();
+  const avatarSrc = canEdit
+    ? (accountState.avatarPreviewUrl ?? profile.avatar_url ?? null)
+    : (profile.avatar_url ?? null);
   const derivedPhonePrefix =
     findCountryByValue(draft.country || editableProfile?.country || "")?.prefix ??
     editableProfile?.country_prefix ??
@@ -132,16 +175,118 @@ export function UserProfilePanel({
     }
   }
 
+  function handleOpenAvatarPicker() {
+    if (!canEdit || !isEditing || isAvatarUploading) {
+      return;
+    }
+
+    fileInputRef.current?.click();
+  }
+
+  function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.currentTarget.value = "";
+
+    if (!file || !canEdit || !isEditing) {
+      return;
+    }
+
+    setPendingCropImage({
+      src: URL.createObjectURL(file),
+      name: file.name,
+    });
+  }
+
+  function handleCloseCropDialog() {
+    setPendingCropImage(null);
+  }
+
+  async function handleConfirmCroppedAvatar(file: File) {
+    await dispatch(
+      uploadAccountAvatar({
+        file,
+        locale,
+      }),
+    );
+  }
+
+  async function handleRemoveAvatar() {
+    await dispatch(removeAccountAvatar({ locale }));
+  }
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.hero}>
         <div className={styles.heroIdentity}>
-          <span className={styles.avatarLarge}>{initials}</span>
+          <UserAvatar
+            initials={initials}
+            src={avatarSrc}
+            alt={`${profile.first_name} ${profile.last_name} — ${p.photoAlt}`}
+            size="xl"
+            editable={canEdit && isEditing}
+            isUploading={isAvatarUploading}
+            editLabel={
+              isAvatarUploading
+                ? p.uploadingPhoto
+                : hasAvatar
+                  ? p.changePhoto
+                  : p.uploadPhoto
+            }
+            className={styles.heroAvatar}
+            onEditClick={handleOpenAvatarPicker}
+          />
+          {canEdit && isEditing ? (
+            <input
+              ref={fileInputRef}
+              className={styles.fileInput}
+              type="file"
+              accept="image/png,image/jpeg,image/jpg,image/webp"
+              onChange={handleAvatarChange}
+            />
+          ) : null}
           <div className={styles.heroText}>
             <h1 className={styles.fullName}>
               {profile.first_name} {profile.last_name}
             </h1>
             <p className={styles.heroEmail}>{profile.email}</p>
+            {canEdit && isEditing && hasAvatar ? (
+              <div className={styles.photoActions}>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="small"
+                      type="button"
+                      icon="delete"
+                      disabled={isAvatarUploading}
+                    >
+                      {p.removePhoto}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent size="sm">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {p.removePhotoConfirmTitle}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {p.removePhotoConfirmDescription}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{p.cropPhotoCancel}</AlertDialogCancel>
+                      <AlertDialogAction
+                        destructive
+                        onClick={() => {
+                          void handleRemoveAvatar();
+                        }}
+                      >
+                        {p.removePhotoConfirmAction}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -179,6 +324,14 @@ export function UserProfilePanel({
           <AlertDescription>{feedback.description}</AlertDescription>
         </Alert>
       ) : null}
+
+      <AvatarCropDialog
+        imageName={pendingCropImage?.name ?? "avatar"}
+        imageSrc={pendingCropImage?.src ?? null}
+        open={Boolean(pendingCropImage)}
+        onClose={handleCloseCropDialog}
+        onConfirm={handleConfirmCroppedAvatar}
+      />
 
       <div className={styles.grid}>
         <section className={styles.card}>

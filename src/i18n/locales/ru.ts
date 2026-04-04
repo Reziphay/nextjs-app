@@ -178,6 +178,49 @@ export const ruMessages: Messages = {
     phonePlaceholder: "Введите номер телефона",
     phoneMissing: "Телефон не добавлен",
     phonePrefix: "Телефонный префикс",
+    photoAlt: "Фото профиля",
+    changePhoto: "Изменить фото",
+    removePhoto: "Удалить фото",
+    uploadPhoto: "Загрузить фото профиля",
+    uploadingPhoto: "Фото профиля загружается",
+    removingPhoto: "Фото удаляется",
+    cropPhotoTitle: "Обрезать фото профиля",
+    cropPhotoDescription:
+      "Подгоните изображение под квадратную область. Перетаскивайте для смещения и используйте масштабирование.",
+    cropPhotoZoom: "Масштаб",
+    cropPhotoHint: "Квадратный предварительный просмотр будет использован как фото профиля.",
+    cropPhotoCancel: "Отмена",
+    cropPhotoConfirm: "Обрезать и загрузить",
+    cropPhotoProcessing: "Подготовка",
+    removePhotoConfirmTitle: "Удалить фото профиля?",
+    removePhotoConfirmDescription:
+      "Текущее фото профиля будет удалено, и снова будут показаны ваши инициалы.",
+    removePhotoConfirmAction: "Удалить",
+    photoUpdatedTitle: "Фото профиля обновлено",
+    photoUpdatedDescription: "Ваше фото профиля успешно обновлено.",
+    photoRemovedTitle: "Фото профиля удалено",
+    photoRemovedDescription: "Ваше фото профиля успешно удалено.",
+    photoUpdateErrorTitle: "Не удалось обновить фото профиля",
+    photoUpdateErrorDescription:
+      "Во время загрузки фото профиля произошла ошибка.",
+    photoConfigurationErrorDescription:
+      "Сервис загрузки фото профиля пока не настроен. Проверьте подключение к API.",
+    photoInvalidTypeDescription:
+      "Можно загружать только изображения JPG, PNG или WEBP.",
+    photoTooLargeDescription:
+      "Размер фото профиля должен быть не больше 5 МБ.",
+    photoUnauthorizedDescription:
+      "Чтобы обновить фото профиля, войдите снова.",
+    photoForbiddenDescription:
+      "У вас нет прав на обновление этого фото профиля.",
+    photoNotFoundDescription:
+      "Сервис загрузки фото профиля не найден.",
+    photoConflictDescription:
+      "Сейчас не удалось загрузить это фото. Попробуйте ещё раз.",
+    photoRateLimitedDescription:
+      "Слишком много попыток. Попробуйте немного позже.",
+    photoServerErrorDescription:
+      "Произошла ошибка сервера. Попробуйте ещё раз чуть позже.",
     emailLockedDescription:
       "Этот email уже подтверждён и больше не может быть изменён.",
     phoneLockedDescription:

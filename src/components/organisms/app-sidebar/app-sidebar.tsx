@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { selectAuthSession } from "@/store/auth";
+import { UserAvatar } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import { Logo } from "@/components/logo";
 import {
@@ -95,7 +96,17 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
             className={styles.userBtn}
             onClick={() => router.push("/account")}
           >
-            <span className={styles.avatar}>{initials}</span>
+            <UserAvatar
+              initials={initials}
+              src={user?.avatar_url ?? null}
+              alt={
+                user
+                  ? `${user.first_name} ${user.last_name} — ${messages.profile.photoAlt}`
+                  : messages.profile.photoAlt
+              }
+              size="sm"
+              className={styles.userAvatar}
+            />
             <span className={styles.userInfo}>
               <span className={styles.userName}>
                 {user ? `${user.first_name} ${user.last_name}` : ""}
