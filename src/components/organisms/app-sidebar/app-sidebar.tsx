@@ -2,22 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/atoms";
-import { Icon } from "@/components/icon";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { signOut, selectAuthSession } from "@/store/auth";
-import { clearAuthCookies } from "@/lib/auth-cookies";
+import { useAppSelector } from "@/store/hooks";
+import { selectAuthSession } from "@/store/auth";
 import { useLocale } from "@/components/providers/locale-provider";
 import { Logo } from "@/components/logo";
 import styles from "./app-sidebar.module.css";
@@ -25,7 +11,6 @@ import styles from "./app-sidebar.module.css";
 const platformNav = [
   { href: "/home", key: "home" as const, icon: "home" },
   { href: "/home/profile", key: "profile" as const, icon: "person" },
-  { href: "/home/settings", key: "settings" as const, icon: "settings" },
 ] as const;
 
 type AppSidebarProps = {
@@ -36,7 +21,6 @@ type AppSidebarProps = {
 export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const dispatch = useAppDispatch();
   const { messages } = useLocale();
   const session = useAppSelector(selectAuthSession);
   const db = messages.dashboard;
@@ -51,13 +35,6 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
     ucr: db.typeUcr,
     admin: db.typeAdmin,
   };
-
-  function handleConfirmSignOut() {
-    clearAuthCookies();
-    dispatch(signOut());
-    onClose?.();
-    router.replace("/auth/login");
-  }
 
   function isActive(href: string) {
     return href === "/home" ? pathname === href : pathname.startsWith(href);
@@ -108,46 +85,6 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
 
       {/* Footer */}
       <div className={styles.footer}>
-        <nav className={styles.footerNav}>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <button
-                type="button"
-                title={collapsed ? db.signOut : undefined}
-                className={styles.footerItem}
-              >
-                <span className={`material-symbols-rounded ${styles.navIcon}`}>
-                  logout
-                </span>
-                <span className={styles.navLabel}>{db.signOut}</span>
-              </button>
-            </AlertDialogTrigger>
-
-            <AlertDialogContent size="sm">
-              <AlertDialogMedia tone="destructive">
-                <Icon icon="logout" size={28} color="error" />
-              </AlertDialogMedia>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{db.signOutConfirmTitle}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {db.signOutConfirmDescription}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{db.cancel}</AlertDialogCancel>
-                <AlertDialogAction
-                  destructive
-                  onClick={handleConfirmSignOut}
-                >
-                  {db.confirmSignOut}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </nav>
-
-        <div className={styles.divider} />
-
         <div className={styles.userRow}>
           <button
             type="button"

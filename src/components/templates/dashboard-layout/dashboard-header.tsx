@@ -1,9 +1,26 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  Button,
+} from "@/components/atoms";
+import { Icon } from "@/components/icon";
 import { LanguageSwitcher } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
+import { clearAuthCookies } from "@/lib/auth-cookies";
+import { signOut } from "@/store/auth";
+import { useAppDispatch } from "@/store/hooks";
 import styles from "./dashboard-header.module.css";
 
 type DashboardHeaderProps = {
@@ -13,8 +30,13 @@ type DashboardHeaderProps = {
 
 export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
   const { messages } = useLocale();
   const db = messages.dashboard;
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
+  const settingsWrapRef = useRef<HTMLDivElement>(null);
 
   const crumbMap: Record<string, string> = {
     "/home": db.home,
@@ -30,6 +52,40 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
     if (crumbMap[current]) {
       crumbs.push({ label: crumbMap[current], href: current });
     }
+  }
+
+  useEffect(() => {
+    if (!settingsOpen) {
+      return undefined;
+    }
+
+    function handlePointerDown(event: MouseEvent) {
+      if (!settingsWrapRef.current?.contains(event.target as Node)) {
+        setSettingsOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setSettingsOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [settingsOpen]);
+
+  function handleConfirmSignOut() {
+    clearAuthCookies();
+    dispatch(signOut());
+    setSignOutDialogOpen(false);
+    setSettingsOpen(false);
+    router.replace("/auth/login");
   }
 
   return (
@@ -79,7 +135,83 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
             help
           </span>
         </Link>
-        <LanguageSwitcher variant="compact" />
+
+        <div ref={settingsWrapRef} className={styles.settingsWrap}>
+          <button
+            type="button"
+            aria-label={db.settings}
+            aria-expanded={settingsOpen}
+            aria-haspopup="dialog"
+            title={db.settings}
+            className={styles.settingsTrigger}
+            onClick={() => setSettingsOpen((open) => !open)}
+          >
+            <span className={`material-symbols-rounded ${styles.supportIcon}`}>
+              settings
+            </span>
+          </button>
+
+          {settingsOpen ? (
+            <div
+              role="dialog"
+              aria-label={db.settings}
+              className={styles.settingsPopup}
+            >
+              <div className={styles.settingsSection}>
+                <p className={styles.settingsTitle}>{db.settings}</p>
+              </div>
+
+              <div className={styles.settingsSection}>
+                <span className={styles.settingsLabel}>
+                  {messages.languageSwitcherAriaLabel}
+                </span>
+                <LanguageSwitcher variant="compact" />
+              </div>
+
+              <div className={styles.settingsDivider} />
+
+              <div className={styles.settingsSection}>
+                <Button
+                  variant="destructive"
+                  icon="logout"
+                  className={styles.settingsAction}
+                  onClick={() => {
+                    setSettingsOpen(false);
+                    setSignOutDialogOpen(true);
+                  }}
+                >
+                  {db.signOut}
+                </Button>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <AlertDialog
+          open={signOutDialogOpen}
+          onOpenChange={setSignOutDialogOpen}
+        >
+          <AlertDialogContent size="sm">
+            <AlertDialogMedia tone="destructive">
+              <Icon icon="logout" size={28} color="error" />
+            </AlertDialogMedia>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{db.signOutConfirmTitle}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {db.signOutConfirmDescription}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{db.cancel}</AlertDialogCancel>
+              <AlertDialogAction
+                destructive
+                onClick={handleConfirmSignOut}
+              >
+                {db.confirmSignOut}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </header>
   );

@@ -86,12 +86,14 @@ export type LoginResponseData = {
 } & AuthTokens;
 
 export type RegisterResponseData = {
-  user: RegisteredUser;
+  user?: RegisteredUser;
 };
 
-export type ApiSuccessResponse<TData> = {
+export type ApiSuccessResponse<TData = never> = {
   success: boolean;
-  data: TData;
+  status: number;
+  message: string;
+  data?: TData;
 };
 
 export function isRegisterUserType(

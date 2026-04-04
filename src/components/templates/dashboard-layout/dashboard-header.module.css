@@ -27,6 +27,7 @@
   justify-content: flex-end;
   gap: 0.571rem;
   flex-shrink: 0;
+  position: relative;
 }
 
 .supportLink {
@@ -36,25 +37,93 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 1px solid var(--app-border-soft);
   border-radius: var(--general-border-radius-xl);
-  background: var(--app-bg-surface-strong);
+  background: transparent;
   color: var(--app-text-muted);
   text-decoration: none;
   transition:
     background-color 120ms ease,
-    border-color 120ms ease,
     color 120ms ease;
 }
 
 .supportLink:hover {
   background: var(--app-bg-surface);
-  border-color: var(--app-border-strong);
   color: var(--app-text-strong);
 }
 
 .supportIcon {
   font-size: 1.143rem;
+}
+
+.settingsWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.settingsTrigger {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: var(--general-border-radius-xl);
+  background: transparent;
+  color: var(--app-text-muted);
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.settingsTrigger:hover {
+  background: var(--app-bg-surface);
+  color: var(--app-text-strong);
+}
+
+.settingsPopup {
+  width: min(18rem, calc(100vw - 2rem));
+  position: absolute;
+  top: calc(100% + 0.714rem);
+  right: 0;
+  display: grid;
+  gap: 0.857rem;
+  padding: 1rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-3xl);
+  background: var(--app-bg-surface-strong);
+  box-shadow: 0 1rem 2.5rem var(--app-shadow-card-soft);
+}
+
+.settingsSection {
+  display: grid;
+  gap: 0.571rem;
+}
+
+.settingsTitle {
+  color: var(--app-text-strong);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.settingsLabel {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-extra-small);
+  font-weight: 700;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.settingsDivider {
+  height: 1px;
+  background: var(--app-border-soft);
+}
+
+.settingsAction {
+  width: 100%;
 }
 
 /* ── Toggle button ── */
@@ -147,6 +216,10 @@
 
   .right {
     gap: 0.429rem;
+  }
+
+  .settingsPopup {
+    top: calc(100% + 0.571rem);
   }
 
   .separator {

@@ -468,7 +468,7 @@ export const submitLogin = createAsyncThunk<
 });
 
 export const submitRegister = createAsyncThunk<
-  RegisterResponseData,
+  void,
   { locale: Locale },
   { state: RootState; rejectValue: ThunkReject<RegisterFieldName> }
 >("auth/submitRegister", async ({ locale }, thunkApi) => {
@@ -505,13 +505,10 @@ export const submitRegister = createAsyncThunk<
       },
     });
     const contentType = String(response.headers["content-type"] ?? "");
-    const payload = response.data?.data;
 
-    if (contentType.includes("text/html") || !payload?.user) {
+    if (contentType.includes("text/html") || response.data?.success !== true) {
       throw new Error(invalidApiResponseError);
     }
-
-    return payload;
   } catch (error) {
     return thunkApi.rejectWithValue(getRegisterErrorResult(error, messages));
   }
@@ -542,7 +539,7 @@ export const refreshAuthToken = createAsyncThunk<
     }
 
     return tokens;
-  } catch (error) {
+  } catch {
     return thunkApi.rejectWithValue(null);
   }
 });
