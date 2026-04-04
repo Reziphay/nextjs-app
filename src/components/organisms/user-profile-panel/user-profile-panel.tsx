@@ -28,13 +28,19 @@ import {
   startEditingAccount,
   submitAccountUpdate,
 } from "@/store/account";
-import type { UserProfile } from "@/types";
+import type { AccountUserProfile, UserProfile } from "@/types";
 import styles from "./user-profile-panel.module.css";
 
 type UserProfilePanelProps = {
-  user: UserProfile;
+  user: AccountUserProfile;
   canEdit?: boolean;
 };
+
+function hasPrivateProfileFields(
+  profile: AccountUserProfile,
+): profile is UserProfile {
+  return "email_verified" in profile;
+}
 
 function formatDate(value: string | Date, locale: string) {
   const date = new Date(value);
@@ -54,18 +60,24 @@ export function UserProfilePanel({
   const { messages, locale } = useLocale();
   const accountState = useAppSelector(selectAccountState);
   const p = messages.profile;
-  const profile = accountState.profile ?? user;
+  const profile = canEdit ? (accountState.profile ?? user) : user;
+  const editableProfile =
+    canEdit && hasPrivateProfileFields(profile) ? profile : null;
   const draft = accountState.draft;
-  const errors = accountState.errors;
-  const feedback = accountState.feedback;
-  const isEditing = accountState.isEditing;
-  const isSaving = accountState.status === "loading";
+  const errors = canEdit ? accountState.errors : {};
+  const feedback = canEdit ? accountState.feedback : null;
+  const isEditing = canEdit ? accountState.isEditing : false;
+  const isSaving = canEdit ? accountState.status === "loading" : false;
   const countryOptions: readonly ComboboxOption[] = useMemo(
     () => getCountryOptions(locale),
     [locale],
   );
 
   useEffect(() => {
+    if (!canEdit || !hasPrivateProfileFields(user)) {
+      return;
+    }
+
     dispatch(
       hydrateAccountProfile({
         profile: user,
@@ -79,13 +91,15 @@ export function UserProfilePanel({
     ucr: p.typeUcr,
     admin: p.typeAdmin,
   };
-  const isEmailLocked = profile.email_verified;
-  const isPhoneLocked = Boolean(profile.phone_verified && profile.phone);
+  const isEmailLocked = Boolean(editableProfile?.email_verified);
+  const isPhoneLocked = Boolean(
+    editableProfile?.phone_verified && editableProfile?.phone,
+  );
 
   const initials = `${profile.first_name[0] ?? ""}${profile.last_name[0] ?? ""}`.toUpperCase();
   const derivedPhonePrefix =
-    findCountryByValue(draft.country || profile.country)?.prefix ??
-    profile.country_prefix ??
+    findCountryByValue(draft.country || editableProfile?.country || "")?.prefix ??
+    editableProfile?.country_prefix ??
     "—";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -347,22 +361,30 @@ export function UserProfilePanel({
                 <dt className={styles.label}>{p.email}</dt>
                 <dd className={styles.value}>{profile.email}</dd>
               </div>
-              <div className={styles.row}>
-                <dt className={styles.label}>{p.birthday}</dt>
-                <dd className={styles.value}>{formatDate(profile.birthday, locale)}</dd>
-              </div>
-              <div className={styles.row}>
-                <dt className={styles.label}>{p.country}</dt>
-                <dd className={styles.value}>
-                  {getCountryLabel(profile.country, locale)}
-                </dd>
-              </div>
-              <div className={styles.row}>
-                <dt className={styles.label}>{p.phone}</dt>
-                <dd className={`${styles.value} ${!profile.phone ? styles.valueMuted : ""}`}>
-                  {profile.phone ?? p.phoneMissing}
-                </dd>
-              </div>
+              {editableProfile ? (
+                <>
+                  <div className={styles.row}>
+                    <dt className={styles.label}>{p.birthday}</dt>
+                    <dd className={styles.value}>
+                      {formatDate(editableProfile.birthday, locale)}
+                    </dd>
+                  </div>
+                  <div className={styles.row}>
+                    <dt className={styles.label}>{p.country}</dt>
+                    <dd className={styles.value}>
+                      {getCountryLabel(editableProfile.country, locale)}
+                    </dd>
+                  </div>
+                  <div className={styles.row}>
+                    <dt className={styles.label}>{p.phone}</dt>
+                    <dd
+                      className={`${styles.value} ${!editableProfile.phone ? styles.valueMuted : ""}`}
+                    >
+                      {editableProfile.phone ?? p.phoneMissing}
+                    </dd>
+                  </div>
+                </>
+              ) : null}
             </dl>
           )}
         </section>
@@ -376,16 +398,20 @@ export function UserProfilePanel({
                 <span className={styles.typeBadge}>{typeLabel[profile.type] ?? profile.type}</span>
               </dd>
             </div>
-            <div className={styles.row}>
-              <dt className={styles.label}>{p.email}</dt>
-              <dd className={styles.value}>
-                <span
-                  className={`${styles.verifiedBadge} ${profile.email_verified ? styles.verifiedBadgeYes : styles.verifiedBadgeNo}`}
-                >
-                  {profile.email_verified ? p.emailVerified : p.emailNotVerified}
-                </span>
-              </dd>
-            </div>
+            {editableProfile ? (
+              <div className={styles.row}>
+                <dt className={styles.label}>{p.email}</dt>
+                <dd className={styles.value}>
+                  <span
+                    className={`${styles.verifiedBadge} ${editableProfile.email_verified ? styles.verifiedBadgeYes : styles.verifiedBadgeNo}`}
+                  >
+                    {editableProfile.email_verified
+                      ? p.emailVerified
+                      : p.emailNotVerified}
+                  </span>
+                </dd>
+              </div>
+            ) : null}
             <div className={styles.row}>
               <dt className={styles.label}>{p.memberSince}</dt>
               <dd className={styles.value}>{formatDate(profile.created_at, locale)}</dd>

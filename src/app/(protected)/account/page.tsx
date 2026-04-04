@@ -6,7 +6,11 @@ import { getMessages } from "@/i18n/config";
 import { getServerLocale } from "@/i18n/server";
 import { getApiBaseUrl } from "@/lib/api";
 import { requireProtectedRouteAccess } from "@/lib/protected-route";
-import type { ApiSuccessResponse, UserProfile } from "@/types";
+import type {
+  ApiSuccessResponse,
+  PublicUserProfile,
+  UserProfile,
+} from "@/types";
 
 type AccountPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -25,7 +29,7 @@ function getSearchParamValue(
 async function fetchUserProfileById(
   userId: string,
   accessToken: string,
-): Promise<UserProfile | null> {
+): Promise<PublicUserProfile | null> {
   try {
     const response = await fetch(
       `${getApiBaseUrl()}/users/${encodeURIComponent(userId)}`,
@@ -50,10 +54,23 @@ async function fetchUserProfileById(
       return null;
     }
 
-    const payload: ApiSuccessResponse<{ user: UserProfile }> =
+    const payload: ApiSuccessResponse<{ user: Partial<UserProfile> }> =
       await response.json();
+    const targetUser = payload.data?.user;
 
-    return payload.data?.user ?? null;
+    if (!targetUser?.id) {
+      return null;
+    }
+
+    return {
+      id: targetUser.id,
+      first_name: targetUser.first_name ?? "",
+      last_name: targetUser.last_name ?? "",
+      email: targetUser.email ?? "",
+      type: targetUser.type ?? "ucr",
+      created_at: String(targetUser.created_at ?? ""),
+      updated_at: String(targetUser.updated_at ?? ""),
+    };
   } catch {
     return null;
   }

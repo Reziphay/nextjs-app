@@ -84,6 +84,16 @@ export type UserProfile = UserIdentityFields &
     updated_at: string;
   };
 
+export type PublicUserProfile = Pick<
+  User,
+  "id" | "first_name" | "last_name" | "email" | "type"
+> & {
+  created_at: string;
+  updated_at: string;
+};
+
+export type AccountUserProfile = UserProfile | PublicUserProfile;
+
 export type RegisteredUser = Pick<
   User,
   "first_name" | "last_name" | "email" | "type" | "email_verified" | "created_at"
