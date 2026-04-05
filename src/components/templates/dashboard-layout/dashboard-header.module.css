@@ -52,7 +52,7 @@
 }
 
 .supportIcon {
-  font-size: 1.143rem;
+  font-size: 0.813rem;
 }
 
 .settingsWrap {
@@ -156,7 +156,7 @@
 }
 
 .toggleIcon {
-  font-size: 1.143rem;
+  font-size: 0.813rem;
   transition: transform 240ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -188,7 +188,7 @@
 }
 
 .crumbSep {
-  font-size: 1rem;
+  font-size: 0.688rem;
   color: var(--app-primary-faint);
   margin: 0 0.143rem;
 }

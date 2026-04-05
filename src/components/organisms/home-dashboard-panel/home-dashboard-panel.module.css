@@ -45,7 +45,7 @@
 }
 
 .cardIcon {
-  font-size: 1.143rem;
+  font-size: 0.875rem;
   color: var(--app-text-muted);
   font-variation-settings: "FILL" 0, "wght" 300;
 }

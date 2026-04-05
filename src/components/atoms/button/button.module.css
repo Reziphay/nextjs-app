@@ -73,20 +73,20 @@
 }
 
 .small {
-  min-height: 2.286rem;
-  padding: 0.571rem 0.857rem;
+  min-height: 2.25rem;
+  padding: 0.5rem 0.75rem;
   font-size: var(--font-size-small);
 }
 
 .medium {
-  min-height: 2.857rem;
-  padding: 0.714rem 1rem;
+  min-height: 2.5rem;
+  padding: 0.571rem 0.875rem;
   font-size: var(--font-size-small);
 }
 
 .large {
-  min-height: 3.286rem;
-  padding: 0.857rem 1.143rem;
+  min-height: 2.75rem;
+  padding: 0.643rem 1rem;
   font-size: var(--font-size-medium);
 }
 
@@ -199,18 +199,18 @@
 }
 
 .icon.small {
-  min-width: 2.286rem;
-  padding-inline: 0.571rem;
+  min-width: 2.25rem;
+  padding-inline: 0.5rem;
 }
 
 .icon.medium {
-  min-width: 2.857rem;
-  padding-inline: 0.714rem;
+  min-width: 2.5rem;
+  padding-inline: 0.571rem;
 }
 
 .icon.large {
-  min-width: 3.286rem;
-  padding-inline: 0.857rem;
+  min-width: 2.75rem;
+  padding-inline: 0.643rem;
 }
 
 .icon:hover:not(:disabled) {

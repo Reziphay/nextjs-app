@@ -3,10 +3,10 @@ import type { CSSProperties } from "react";
 export const primaryColors = ["#002642", "#840032", "#e59500", "#e5dada"] as const;
 
 export const blackColors = [
-  "#000",
-  "#222",
-  "#444",
-  "#666",
+  "#000000",
+  "#1b1b1b",
+  "#141414",
+  "#2e2e2e",
 ] as const;
 
 export const whiteColors = ["#fff", "#eee", "#eee", "#ddd"] as const;

@@ -24,9 +24,9 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const buttonIconSizes: Record<ButtonSize, number> = {
-  small: 16,
-  medium: 18,
-  large: 20,
+  small: 14,
+  medium: 16,
+  large: 18,
 };
 
 function getButtonClassName(

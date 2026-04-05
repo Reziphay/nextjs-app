@@ -33,8 +33,8 @@
 
 .input {
   width: 100%;
-  min-height: 2.857rem;
-  padding: 0.714rem 1rem;
+  min-height: var(--general-control-height);
+  padding: 0 calc(var(--general-control-height) * 0.35);
   border: 1px solid var(--app-border-soft);
   border-radius: var(--general-border-radius-lg);
   background: var(--app-bg-surface-strong);

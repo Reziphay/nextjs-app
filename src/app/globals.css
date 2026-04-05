@@ -18,6 +18,7 @@
   --general-border-radius-hero: calc(var(--general-border-radius) * 1.75);
   --general-border-radius-pill: 999px;
   --general-border-radius-round: 50%;
+  --general-control-height: 2.5rem;
 }
 
 html {

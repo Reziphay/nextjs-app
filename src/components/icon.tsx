@@ -31,15 +31,17 @@ const iconColorMap: Record<IconColor, string> = {
 
 export function Icon({
   icon,
-  size = 24,
+  size = 16,
   color = "black",
   fill = false,
   className,
 }: IconProps) {
+  const resolvedSize = Math.max(12, Math.round(size * 0.85));
+
   const style = {
-    fontSize: `${size}px`,
+    fontSize: `${resolvedSize}px`,
     color: iconColorMap[color],
-    fontVariationSettings: `'FILL' ${fill ? 1 : 0}, 'wght' 400, 'GRAD' 0, 'opsz' ${Math.max(20, Math.round(size))}`,
+    fontVariationSettings: `'FILL' ${fill ? 1 : 0}, 'wght' 400, 'GRAD' 0, 'opsz' ${Math.max(20, resolvedSize)}`,
   } satisfies CSSProperties;
 
   return (

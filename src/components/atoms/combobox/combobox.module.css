@@ -4,12 +4,13 @@
 }
 
 .control {
-  min-height: 2.857rem;
+  min-height: var(--general-control-height);
   display: flex;
   align-items: center;
   gap: 0.571rem;
   flex-wrap: wrap;
-  padding: 0.429rem 0.857rem;
+  padding: calc(var(--general-control-height) * 0.14)
+    calc(var(--general-control-height) * 0.3);
   border: 1px solid var(--app-border-soft);
   border-radius: var(--general-border-radius-lg);
   background: var(--app-bg-surface-strong);

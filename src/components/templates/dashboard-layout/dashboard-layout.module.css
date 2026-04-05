@@ -19,6 +19,8 @@
 
 .main {
   flex: 1;
+  display: grid;
+  justify-items: center;
   background-color: var(--app-background-pattern-base);
   background-image: var(--app-background-pattern-image);
   background-size: var(--app-background-pattern-size)
@@ -26,7 +28,7 @@
 }
 
 .content {
-  width: min(100%, 80rem);
+  width: min(100%, 72rem);
   margin-inline: auto;
   margin-top: 2rem;
   padding: 1.714rem 2rem;
