@@ -140,6 +140,7 @@ export const ruMessages: Messages = {
   },
   dashboard: {
     home: "Главная",
+    search: "Поиск",
     profile: "Профиль",
     account: "Мой аккаунт",
     settings: "Настройки",

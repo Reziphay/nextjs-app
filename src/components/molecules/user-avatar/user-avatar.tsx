@@ -11,6 +11,7 @@ type UserAvatarProps = {
   src?: string | null;
   alt?: string;
   size?: UserAvatarSize;
+  surfaceClassName?: string;
   editable?: boolean;
   isUploading?: boolean;
   editLabel?: string;
@@ -74,6 +75,7 @@ export function UserAvatar({
   src,
   alt = "Profile photo",
   size = "md",
+  surfaceClassName,
   editable = false,
   isUploading = false,
   editLabel = "Upload profile photo",
@@ -87,7 +89,9 @@ export function UserAvatar({
     <div
       className={`${styles.root} ${styles[size]}${className ? ` ${className}` : ""}`}
     >
-      <span className={styles.surface}>
+      <span
+        className={`${styles.surface}${surfaceClassName ? ` ${surfaceClassName}` : ""}`}
+      >
         {avatarSource ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img

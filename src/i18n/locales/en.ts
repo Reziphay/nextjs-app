@@ -140,6 +140,7 @@ export const enMessages: Messages = {
   },
   dashboard: {
     home: "Home",
+    search: "Search",
     profile: "Profile",
     account: "My Account",
     settings: "Settings",

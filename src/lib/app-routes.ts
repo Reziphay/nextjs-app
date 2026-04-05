@@ -3,6 +3,7 @@ import type { UserType } from "@/types";
 
 export const protectedAppPaths = [
   "/home",
+  "/search",
   "/dashboard",
   "/services",
   "/brands",
@@ -18,6 +19,7 @@ export type ProtectedAppPath = (typeof protectedAppPaths)[number];
 
 type SidebarRouteLabelKey =
   | "home"
+  | "search"
   | "dashboardPage"
   | "services"
   | "brands"
@@ -39,6 +41,7 @@ type RouteAccessInput = {
 };
 
 const commonSidebarItems: readonly SidebarRouteItem[] = [
+  { href: "/search", icon: "search", labelKey: "search" },
   { href: "/settings", icon: "settings", labelKey: "settings" },
 ] as const;
 
@@ -78,6 +81,7 @@ export function canAccessProtectedRoute({
   const hasEntityId = Boolean(searchParams?.get("id")?.trim());
 
   switch (pathname) {
+    case "/search":
     case "/settings":
     case "/account":
     case "/notification":
@@ -105,6 +109,7 @@ export function getProtectedRouteLabel(
 ) {
   const labels: Record<ProtectedAppPath, string> = {
     "/home": messages.dashboard.home,
+    "/search": messages.dashboard.search,
     "/dashboard": messages.dashboard.dashboardPage,
     "/services": messages.dashboard.services,
     "/brands": messages.dashboard.brands,
@@ -125,6 +130,7 @@ export function getSidebarRoutesForUserType(
 ) {
   const labels: Record<SidebarRouteLabelKey, string> = {
     home: messages.dashboard.home,
+    search: messages.dashboard.search,
     dashboardPage: messages.dashboard.dashboardPage,
     services: messages.dashboard.services,
     brands: messages.dashboard.brands,

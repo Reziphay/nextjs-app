@@ -65,9 +65,23 @@
       "wght" 300;
   }
 
+  .avatar {
+    transform: scale(0.82);
+    transform-origin: center;
+  }
+
+  .avatarSurface {
+    box-shadow: none;
+    border-color: var(--app-border-soft);
+  }
+
   .itemActive .icon {
     font-variation-settings:
       "FILL" 1,
       "wght" 400;
+  }
+
+  .itemActive .avatarSurface {
+    border-color: var(--app-border-primary-soft);
   }
 }

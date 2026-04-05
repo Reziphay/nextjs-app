@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { UserAvatar } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import { selectAuthSession } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
@@ -29,11 +30,13 @@ export function DashboardBottomNav() {
       label: messages.dashboard.account,
     },
   ];
+  const initials = `${user.first_name[0] ?? ""}${user.last_name[0] ?? ""}`.toUpperCase();
 
   return (
     <nav aria-label={messages.dashboard.platform} className={styles.nav}>
       <div className={styles.inner}>
         {items.map((item) => {
+          const isAccountItem = item.href === "/account";
           const isActive =
             item.href === "/home"
               ? pathname === item.href
@@ -47,9 +50,20 @@ export function DashboardBottomNav() {
               aria-current={isActive ? "page" : undefined}
               className={`${styles.item} ${isActive ? styles.itemActive : ""}`}
             >
-              <span className={`material-symbols-rounded ${styles.icon}`}>
-                {item.icon}
-              </span>
+              {isAccountItem && user.avatar_url ? (
+                <UserAvatar
+                  initials={initials}
+                  src={user.avatar_url}
+                  alt={`${user.first_name} ${user.last_name} — ${messages.profile.photoAlt}`}
+                  size="sm"
+                  className={styles.avatar}
+                  surfaceClassName={styles.avatarSurface}
+                />
+              ) : (
+                <span className={`material-symbols-rounded ${styles.icon}`}>
+                  {item.icon}
+                </span>
+              )}
             </Link>
           );
         })}

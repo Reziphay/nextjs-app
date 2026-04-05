@@ -141,6 +141,7 @@ export const azMessages: Messages = {
   },
   dashboard: {
     home: "Ana səhifə",
+    search: "Axtarış",
     profile: "Profil",
     account: "Hesabım",
     settings: "Parametrlər",

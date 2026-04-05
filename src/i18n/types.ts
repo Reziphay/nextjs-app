@@ -129,6 +129,7 @@ export type Messages = {
   };
   dashboard: {
     home: string;
+    search: string;
     profile: string;
     account: string;
     settings: string;
