@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-export const primaryColors = ["#002642", "#840032", "#e59500", "#e5dada"] as const;
+export const primaryColors = ["#283d3b", "#197278", "#edddd4", "#c44536"] as const;
 
 export const blackColors = [
   "#000000",
@@ -47,7 +47,7 @@ const semanticColors = {
   "app-bg-surface-muted": whiteColors[3],
   "app-bg-sidebar": whiteColors[1],
   "app-bg-primary-soft": withAlpha(primaryColors[0], 0.14),
-  "app-bg-code": withAlpha(primaryColors[0], 0.08),
+  "app-bg-code": withAlpha(primaryColors[2], 0.08),
   "app-bg-overlay-strong": withAlpha(whiteColors[2], 0.48),
   "app-bg-overlay-soft": withAlpha(whiteColors[2], 0.16),
   "app-text-strong": blackColors[0],
@@ -57,17 +57,17 @@ const semanticColors = {
   "app-text-inverse": whiteColors[2],
   "app-border-soft": withAlpha(blackColors[0], 0.1),
   "app-border-strong": withAlpha(blackColors[0], 0.16),
-  "app-border-primary-soft": withAlpha(primaryColors[0], 0.12),
-  "app-border-primary-strong": withAlpha(primaryColors[0], 0.24),
+  "app-border-primary-soft": withAlpha(primaryColors[1], 0.12),
+  "app-border-primary-strong": withAlpha(primaryColors[2], 0.24),
   "app-primary": primaryColors[0],
-  "app-primary-strong": primaryColors[0],
-  "app-primary-soft": primaryColors[1],
-  "app-primary-faint": primaryColors[2],
-  "app-focus-ring": withAlpha(primaryColors[0], 0.22),
+  "app-primary-strong": primaryColors[1],
+  "app-primary-soft": primaryColors[2],
+  "app-primary-faint": primaryColors[3],
+  "app-focus-ring": withAlpha(primaryColors[3], 0.22),
   "app-shadow-color": withAlpha(blackColors[0], 0.14),
   "app-shadow-color-strong": withAlpha(blackColors[0], 0.18),
-  "app-shadow-primary-soft": withAlpha(primaryColors[0], 0.18),
-  "app-shadow-primary-faint": withAlpha(primaryColors[0], 0.12),
+  "app-shadow-primary-soft": withAlpha(primaryColors[1], 0.18),
+  "app-shadow-primary-faint": withAlpha(primaryColors[2], 0.12),
   "app-shadow-card-soft": withAlpha(blackColors[0], 0.04),
   "app-glow-primary-soft": withAlpha(primaryColors[2], 0.18),
   "app-glow-primary-strong": withAlpha(primaryColors[1], 0.18),
