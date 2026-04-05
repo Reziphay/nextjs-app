@@ -1,21 +1,52 @@
 import type { CSSProperties } from "react";
 
-export const primaryColors = ["#283d3b", "#197278", "#edddd4", "#c44536"] as const;
+export const primaryColors = [
+  "#247ba0",
+  "#70c1b3",
+  "#b2dbbf",
+  "#f3ffbd",
+  "#ff1654"
+] as const;
 
 export const blackColors = [
   "#000000",
-  "#1b1b1b",
-  "#141414",
-  "#2e2e2e",
+  "#3d2645",
+  "#0b090a",
+  "#161a1d",
+  "#4d4a50",
 ] as const;
 
-export const whiteColors = ["#fff", "#eee", "#eee", "#ddd"] as const;
+export const whiteColors = [
+  "#ffffff",
+  "#f5f5f5",
+  "#f7f7f7",
+  "#e0e0e0ff",
+  "#d1d1d1",
+] as const;
 
-export const errorColors = ["#880d1e", "#dd2d4a", "#f26a8d", "#f49cbb"] as const;
+export const errorColors = [
+  "#880d1e",
+  "#dd2d4a",
+  "#f26a8d",
+  "#f49cbb",
+  "#fbe1e8",
+] as const;
 
-export const warnColors = ["#f7b267", "#f79d65", "#f4845f", "#f27059"] as const;
+export const warnColors = [
+  "#f7b267",
+  "#f79d65",
+  "#f4845f",
+  "#f27059",
+  "#fce3cf",
+] as const;
 
-export const successColors = ["#073b3a", "#0b6e4f", "#08a045", "#6bbf59"] as const;
+export const successColors = [
+  "#073b3a",
+  "#0b6e4f",
+  "#08a045",
+  "#6bbf59",
+  "#ddf3e3",
+] as const;
 
 function hexToRgbChannels(hex: string) {
   const normalized = hex.replace("#", "");
@@ -46,8 +77,8 @@ const semanticColors = {
   "app-bg-surface-strong": whiteColors[0],
   "app-bg-surface-muted": whiteColors[3],
   "app-bg-sidebar": whiteColors[1],
-  "app-bg-primary-soft": withAlpha(primaryColors[0], 0.14),
-  "app-bg-code": withAlpha(primaryColors[2], 0.08),
+  "app-bg-primary-soft": withAlpha(primaryColors[2], 0.14),
+  "app-bg-code": withAlpha(primaryColors[1], 0.08),
   "app-bg-overlay-strong": withAlpha(whiteColors[2], 0.48),
   "app-bg-overlay-soft": withAlpha(whiteColors[2], 0.16),
   "app-text-strong": blackColors[0],
@@ -57,20 +88,21 @@ const semanticColors = {
   "app-text-inverse": whiteColors[2],
   "app-border-soft": withAlpha(blackColors[0], 0.1),
   "app-border-strong": withAlpha(blackColors[0], 0.16),
-  "app-border-primary-soft": withAlpha(primaryColors[1], 0.12),
+  "app-border-primary-soft": withAlpha(primaryColors[1], 0.16),
   "app-border-primary-strong": withAlpha(primaryColors[2], 0.24),
-  "app-primary": primaryColors[0],
-  "app-primary-strong": primaryColors[1],
-  "app-primary-soft": primaryColors[2],
-  "app-primary-faint": primaryColors[3],
-  "app-focus-ring": withAlpha(primaryColors[3], 0.22),
+  "app-primary-deep": primaryColors[0],
+  "app-primary": primaryColors[1],
+  "app-primary-strong": primaryColors[2],
+  "app-primary-soft": primaryColors[3],
+  "app-primary-faint": primaryColors[4],
+  "app-focus-ring": withAlpha(primaryColors[2], 0.2),
   "app-shadow-color": withAlpha(blackColors[0], 0.14),
   "app-shadow-color-strong": withAlpha(blackColors[0], 0.18),
-  "app-shadow-primary-soft": withAlpha(primaryColors[1], 0.18),
-  "app-shadow-primary-faint": withAlpha(primaryColors[2], 0.12),
+  "app-shadow-primary-soft": withAlpha(primaryColors[2], 0.18),
+  "app-shadow-primary-faint": withAlpha(primaryColors[1], 0.12),
   "app-shadow-card-soft": withAlpha(blackColors[0], 0.04),
-  "app-glow-primary-soft": withAlpha(primaryColors[2], 0.18),
-  "app-glow-primary-strong": withAlpha(primaryColors[1], 0.18),
+  "app-glow-primary-soft": withAlpha(primaryColors[3], 0.32),
+  "app-glow-primary-strong": withAlpha(primaryColors[2], 0.18),
   "app-error": errorColors[1],
   "app-error-strong": errorColors[0],
   "app-error-soft": errorColors[2],

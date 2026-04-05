@@ -209,9 +209,9 @@
   align-items: center;
   padding: 0.2rem 0.571rem;
   border-radius: var(--general-border-radius-pill);
-  background: var(--app-bg-primary-soft);
+  background: var(--app-primary-faint);
   border: 1px solid var(--app-border-primary-soft);
-  color: var(--app-primary-strong);
+  color: var(--app-primary-soft);
   font-size: var(--font-size-extra-small);
   font-weight: 700;
 }

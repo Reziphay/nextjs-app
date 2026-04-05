@@ -11,6 +11,7 @@
   top: 0;
   z-index: 10;
   flex-shrink: 0;
+  box-shadow: 0 0.357rem 1rem var(--app-shadow-card-soft);
 }
 
 .left {
@@ -39,7 +40,7 @@
   flex-shrink: 0;
   border-radius: var(--general-border-radius-xl);
   background: transparent;
-  color: var(--app-text-muted);
+  color: var(--app-primary);
   text-decoration: none;
   transition:
     background-color 120ms ease,
@@ -48,7 +49,7 @@
 
 .supportLink:hover {
   background: var(--app-bg-primary-soft);
-  color: var(--app-primary-strong);
+  color: var(--app-primary-deep);
 }
 
 .supportIcon {
@@ -70,7 +71,7 @@
   border: 0;
   border-radius: var(--general-border-radius-xl);
   background: transparent;
-  color: var(--app-text-muted);
+  color: var(--app-primary);
   cursor: pointer;
   transition:
     background-color 120ms ease,
@@ -79,12 +80,12 @@
 
 .settingsTrigger:hover {
   background: var(--app-bg-primary-soft);
-  color: var(--app-primary-strong);
+  color: var(--app-primary-deep);
 }
 
 .iconActionActive {
-  background: var(--app-bg-primary-soft);
-  color: var(--app-primary-strong);
+  background: var(--app-primary-soft);
+  color: var(--app-primary-deep);
   box-shadow: inset 0 0 0 1px var(--app-border-primary-soft);
 }
 
@@ -115,7 +116,7 @@
 }
 
 .settingsLabel {
-  color: var(--app-primary-strong);
+  color: var(--app-primary-deep);
   font-size: var(--font-size-extra-small);
   font-weight: 700;
   line-height: 1.4;
@@ -152,7 +153,7 @@
 
 .toggleBtn:hover {
   background: var(--app-bg-primary-soft);
-  color: var(--app-primary-strong);
+  color: var(--app-text-strong);
 }
 
 .toggleIcon {
@@ -189,7 +190,7 @@
 
 .crumbSep {
   font-size: 0.688rem;
-  color: var(--app-primary-faint);
+  color: var(--app-primary);
   margin: 0 0.143rem;
 }
 
@@ -202,11 +203,11 @@
 }
 
 .crumbLink:hover {
-  color: var(--app-primary-strong);
+  color: var(--app-primary-deep);
 }
 
 .crumbCurrent {
-  color: var(--app-primary-strong);
+  color: var(--app-text-strong);
   font-size: var(--font-size-small);
   font-weight: 600;
 }

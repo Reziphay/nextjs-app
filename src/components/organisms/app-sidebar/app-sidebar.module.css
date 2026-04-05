@@ -8,6 +8,7 @@
   top: 0;
   border-right: 1px solid var(--app-border-soft);
   background: var(--app-bg-sidebar);
+  box-shadow: 0.429rem 0 1.286rem var(--app-shadow-card-soft);
   transition: width 240ms cubic-bezier(0.4, 0, 0.2, 1);
   border-top-right-radius: var(--general-border-radius-xl);
   border-bottom-right-radius: var(--general-border-radius-xl);
@@ -84,7 +85,7 @@
 }
 
 .brandSub {
-  color: var(--app-primary-strong);
+  color: var(--app-primary-deep);
   font-size: var(--font-size-extra-small);
   font-weight: 600;
   line-height: 1.2;
@@ -118,7 +119,7 @@
 .sectionLabel {
   margin: 0 0 0.286rem;
   padding: 0 0.429rem;
-  color: var(--app-primary-strong);
+  color: var(--app-text-subtle);
   font-size: var(--font-size-extra-small);
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -160,12 +161,12 @@
 }
 
 .navItem:hover {
-  background: var(--app-bg-primary-soft);
+  background: var(--app-primary-soft);
   color: var(--app-text-strong);
 }
 
 .navItemActive {
-  color: var(--app-primary-strong);
+  background: var(--app-primary-soft);
   font-weight: 600;
 }
 
@@ -173,7 +174,7 @@
   font-size: 0.813rem;
   min-width: 0.813rem;
   flex-shrink: 0;
-  color: var(--app-text-subtle);
+  color: var(--app-text-muted);
   transition:
     color 120ms ease,
     transform 120ms ease;
@@ -183,12 +184,12 @@
 }
 
 .navItem:hover .navIcon {
-  color: var(--app-primary-strong);
+  color: var(--app-primary-faint);
   transform: translateY(-1px);
 }
 
 .navItemActive .navIcon {
-  color: var(--app-primary-strong);
+  color: var(--app-primary-faint);
   font-variation-settings:
     "FILL" 1,
     "wght" 400;
@@ -284,10 +285,11 @@
   white-space: nowrap;
   transition: background-color 120ms ease;
   text-align: left;
+  background: var(--app-bg-primary-soft);
 }
 
 .userBtn:hover {
-  background: var(--app-bg-primary-soft);
+  background: var(--app-primary-soft);
 }
 
 .sidebarCollapsed .userBtn {
@@ -316,7 +318,7 @@
 }
 
 .userName {
-  color: var(--app-text-strong);
+  color: var(--app-primary-faint);
   font-size: var(--font-size-small);
   font-weight: 600;
   line-height: 1.2;

@@ -35,8 +35,8 @@ body {
 body {
   min-height: 100%;
   --app-background-pattern-size: 2.7rem;
-  --app-background-pattern-base: var(--app-bg-subtle);
-  --app-background-pattern-line: var(--app-border-soft);
+  --app-background-pattern-base: var(--app-bg-canvas);
+  --app-background-pattern-line: var(--app-border-primary-soft);
   --app-background-pattern-image:
     linear-gradient(
       0deg,
