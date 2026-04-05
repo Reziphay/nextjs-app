@@ -32,9 +32,7 @@ function AuthStoreSync() {
   useEffect(() => {
     async function fetchMe(accessToken: string) {
       const client = createApiClient({ accessToken });
-      const response = await client.get<ApiSuccessResponse<{ user: AuthenticatedUser }>>("/auth/me", {
-        headers: { "Cache-Control": "no-cache" },
-      });
+      const response = await client.get<ApiSuccessResponse<{ user: AuthenticatedUser }>>("/auth/me");
       return response.data?.data?.user ?? null;
     }
 

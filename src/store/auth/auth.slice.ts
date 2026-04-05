@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { isAxiosError } from "axios";
 import { getMessages, type Locale } from "@/i18n/config";
-import { createApiClient } from "@/lib/api";
+import { checkApiHealth, createApiClient } from "@/lib/api";
 import { writeAuthCookies } from "@/lib/auth-cookies";
 import {
   isRegisterUserType,
@@ -256,10 +256,11 @@ function validateRegisterForm(
   return errors;
 }
 
-function getLoginErrorResult(
+async function getLoginErrorResult(
   error: unknown,
   messages: LoginMessages,
-): ThunkReject<LoginFieldName> {
+  locale: Locale,
+): Promise<ThunkReject<LoginFieldName>> {
   if (error instanceof Error && error.message === invalidApiResponseError) {
     return {
       feedback: {
@@ -279,10 +280,14 @@ function getLoginErrorResult(
     );
 
     if (!status) {
+      const isBackendAvailable = await checkApiHealth(locale);
+
       return {
         feedback: {
           title: messages.errorTitle,
-          description: messages.networkErrorDescription,
+          description: isBackendAvailable
+            ? messages.networkErrorDescription
+            : messages.maintenanceDescription,
           variant: "destructive",
         },
       };
@@ -330,10 +335,11 @@ function getLoginErrorResult(
   };
 }
 
-function getRegisterErrorResult(
+async function getRegisterErrorResult(
   error: unknown,
   messages: RegisterMessages,
-): ThunkReject<RegisterFieldName> {
+  locale: Locale,
+): Promise<ThunkReject<RegisterFieldName>> {
   if (error instanceof Error && error.message === invalidApiResponseError) {
     return {
       feedback: {
@@ -353,10 +359,14 @@ function getRegisterErrorResult(
     );
 
     if (!status) {
+      const isBackendAvailable = await checkApiHealth(locale);
+
       return {
         feedback: {
           title: messages.errorTitle,
-          description: messages.networkErrorDescription,
+          description: isBackendAvailable
+            ? messages.networkErrorDescription
+            : messages.maintenanceDescription,
           variant: "destructive",
         },
       };
@@ -450,7 +460,6 @@ export const submitLogin = createAsyncThunk<
     const meResponse = await meClient.request<ApiSuccessResponse<{ user: AuthenticatedUser }>>({
       url: authMeEndpoint,
       method: "GET",
-      headers: { "Cache-Control": "no-cache" },
     });
     const user = meResponse.data?.data?.user;
 
@@ -466,7 +475,9 @@ export const submitLogin = createAsyncThunk<
       refresh_token: tokens.refresh_token,
     };
   } catch (error) {
-    return thunkApi.rejectWithValue(getLoginErrorResult(error, messages));
+    return thunkApi.rejectWithValue(
+      await getLoginErrorResult(error, messages, locale),
+    );
   }
 });
 
@@ -513,7 +524,9 @@ export const submitRegister = createAsyncThunk<
       throw new Error(invalidApiResponseError);
     }
   } catch (error) {
-    return thunkApi.rejectWithValue(getRegisterErrorResult(error, messages));
+    return thunkApi.rejectWithValue(
+      await getRegisterErrorResult(error, messages, locale),
+    );
   }
 });
 

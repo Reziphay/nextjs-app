@@ -5,6 +5,7 @@ import axios, {
 } from "axios";
 
 const API_TIMEOUT_MS = 10_000;
+const HEALTH_TIMEOUT_MS = 3_000;
 
 export type ApiClientOptions = {
   locale?: string;
@@ -26,13 +27,39 @@ function normalizeBaseUrl(value: string) {
   return value.endsWith("/") ? value.slice(0, -1) : value;
 }
 
+function resolveBrowserReachableBaseUrl(value: string) {
+  const normalizedValue = normalizeBaseUrl(value);
+
+  if (typeof window === "undefined") {
+    return normalizedValue;
+  }
+
+  try {
+    const apiUrl = new URL(normalizedValue);
+    const currentUrl = new URL(window.location.href);
+    const isApiLoopback =
+      apiUrl.hostname === "localhost" || apiUrl.hostname === "127.0.0.1";
+    const isCurrentLoopback =
+      currentUrl.hostname === "localhost" ||
+      currentUrl.hostname === "127.0.0.1";
+
+    if (isApiLoopback && !isCurrentLoopback) {
+      apiUrl.hostname = currentUrl.hostname;
+    }
+
+    return normalizeBaseUrl(apiUrl.toString());
+  } catch {
+    return normalizedValue;
+  }
+}
+
 export function getApiBaseUrl() {
   const resolvedValue = resolveEnvValue(
     process.env.NEXT_PUBLIC_API_URL,
     process.env.API_URL,
   );
 
-  return normalizeBaseUrl(resolvedValue);
+  return resolveBrowserReachableBaseUrl(resolvedValue);
 }
 
 export function createApiClient(
@@ -40,7 +67,6 @@ export function createApiClient(
 ): AxiosInstance {
   const headers: Record<string, string> = {
     Accept: "application/json",
-    "Content-Type": "application/json",
     ...options.headers,
   };
 
@@ -69,4 +95,20 @@ export async function apiRequest<TResponse = unknown>(
 ) {
   const response = await client.request<TResponse>(config);
   return response.data;
+}
+
+export async function checkApiHealth(locale?: string) {
+  try {
+    const client = createApiClient({ locale });
+
+    await client.request({
+      url: "/health",
+      method: "GET",
+      timeout: HEALTH_TIMEOUT_MS,
+    });
+
+    return true;
+  } catch {
+    return false;
+  }
 }

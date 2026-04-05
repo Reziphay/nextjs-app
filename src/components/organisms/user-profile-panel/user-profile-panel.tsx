@@ -16,6 +16,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogMedia,
   AlertDialogTitle,
   AlertDialogTrigger,
   Button,
@@ -203,6 +204,14 @@ export function UserProfilePanel({
     setPendingCropImage(null);
   }
 
+  function handleChooseDifferentAvatar() {
+    setPendingCropImage(null);
+
+    window.setTimeout(() => {
+      fileInputRef.current?.click();
+    }, 0);
+  }
+
   async function handleConfirmCroppedAvatar(file: File) {
     await dispatch(
       uploadAccountAvatar({
@@ -265,16 +274,70 @@ export function UserProfilePanel({
                       {p.removePhoto}
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent size="sm">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
+                  <AlertDialogContent
+                    size="sm"
+                    className={styles.removePhotoDialog}
+                  >
+                    <AlertDialogMedia
+                      tone="destructive"
+                      className={styles.removePhotoDialogMedia}
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M3 6H5H21"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M8 6V4C8 3.44772 8.44772 3 9 3H15C15.5523 3 16 3.44772 16 4V6"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M19 6L18.133 18.142C18.0588 19.1813 17.1939 20 16.152 20H7.84795C6.80608 20 5.94116 19.1813 5.86698 18.142L5 6"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M10 11V17"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M14 11V17"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </AlertDialogMedia>
+                    <AlertDialogHeader className={styles.removePhotoDialogHeader}>
+                      <AlertDialogTitle className={styles.removePhotoDialogTitle}>
                         {p.removePhotoConfirmTitle}
                       </AlertDialogTitle>
-                      <AlertDialogDescription>
+                      <AlertDialogDescription
+                        className={styles.removePhotoDialogDescription}
+                      >
                         {p.removePhotoConfirmDescription}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
+                    <AlertDialogFooter className={styles.removePhotoDialogFooter}>
                       <AlertDialogCancel>{p.cropPhotoCancel}</AlertDialogCancel>
                       <AlertDialogAction
                         destructive
@@ -333,6 +396,7 @@ export function UserProfilePanel({
         open={Boolean(pendingCropImage)}
         onClose={handleCloseCropDialog}
         onConfirm={handleConfirmCroppedAvatar}
+        onChooseDifferentPicture={handleChooseDifferentAvatar}
       />
 
       <div className={styles.grid}>

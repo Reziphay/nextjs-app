@@ -46,6 +46,7 @@ export type Messages = {
       errorDescription: string;
       configurationErrorDescription: string;
       networkErrorDescription: string;
+      maintenanceDescription: string;
       badRequestDescription: string;
       unauthorizedDescription: string;
       forbiddenDescription: string;
@@ -92,6 +93,7 @@ export type Messages = {
       errorDescription: string;
       configurationErrorDescription: string;
       networkErrorDescription: string;
+      maintenanceDescription: string;
       badRequestDescription: string;
       unauthorizedDescription: string;
       forbiddenDescription: string;

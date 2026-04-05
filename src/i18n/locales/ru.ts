@@ -53,6 +53,8 @@ export const ruMessages: Messages = {
       errorDescription: "Во время входа произошла ошибка. Попробуйте еще раз.",
       configurationErrorDescription: "Сервис входа пока не настроен. Проверьте подключение к API.",
       networkErrorDescription: "Не удалось подключиться к серверу. Попробуйте еще раз.",
+      maintenanceDescription:
+        "Система временно недоступна. Пожалуйста, попробуйте немного позже.",
       badRequestDescription: "Отправленные данные не были приняты.",
       unauthorizedDescription: "Неверный email или пароль.",
       forbiddenDescription: "У вас нет прав для выполнения этого действия.",
@@ -99,6 +101,8 @@ export const ruMessages: Messages = {
       errorDescription: "Во время регистрации произошла ошибка. Попробуйте еще раз.",
       configurationErrorDescription: "Сервис регистрации пока не настроен. Проверьте подключение к API.",
       networkErrorDescription: "Не удалось подключиться к серверу. Попробуйте еще раз.",
+      maintenanceDescription:
+        "Система временно недоступна. Пожалуйста, попробуйте немного позже.",
       badRequestDescription: "Отправленные данные не были приняты.",
       unauthorizedDescription: "Этот запрос не авторизован.",
       forbiddenDescription: "У вас нет прав для выполнения этого действия.",

@@ -53,6 +53,8 @@ export const enMessages: Messages = {
       errorDescription: "Something went wrong while logging in. Please try again.",
       configurationErrorDescription: "The login service is not configured yet. Please check the API connection.",
       networkErrorDescription: "Could not connect to the server. Please try again.",
+      maintenanceDescription:
+        "The system is temporarily unavailable. Please try again shortly.",
       badRequestDescription: "The submitted data was not accepted.",
       unauthorizedDescription: "Invalid email or password.",
       forbiddenDescription: "You do not have permission to perform this action.",
@@ -99,6 +101,8 @@ export const enMessages: Messages = {
       errorDescription: "Something went wrong while registering. Please try again.",
       configurationErrorDescription: "The registration service is not configured yet. Please check the API connection.",
       networkErrorDescription: "Could not connect to the server. Please try again.",
+      maintenanceDescription:
+        "The system is temporarily unavailable. Please try again shortly.",
       badRequestDescription: "The submitted data was not accepted.",
       unauthorizedDescription: "This request is not authorized.",
       forbiddenDescription: "You do not have permission to perform this action.",

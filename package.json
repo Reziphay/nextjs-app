@@ -5,6 +5,7 @@
   "author": "Vugar Safarzada",
   "scripts": {
     "dev": "node scripts/next-with-app-port.mjs dev",
+    "host": "node scripts/next-with-app-port.mjs dev --hostname 0.0.0.0",
     "build": "next build",
     "start": "node scripts/next-with-app-port.mjs start",
     "lint": "eslint"

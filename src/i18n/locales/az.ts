@@ -54,6 +54,8 @@ export const azMessages: Messages = {
       errorDescription: "Daxilolma zamanı xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.",
       configurationErrorDescription: "Daxilolma servisi hazır deyil. API bağlantısını yoxlayın.",
       networkErrorDescription: "Serverə qoşulmaq mümkün olmadı. Zəhmət olmasa yenidən cəhd edin.",
+      maintenanceDescription:
+        "Sistem müvəqqəti bağlıdır. Zəhmət olmasa bir az sonra yenidən yoxlayın.",
       badRequestDescription: "Göndərilən məlumat qəbul edilmədi.",
       unauthorizedDescription: "Email və ya şifrə yanlışdır.",
       forbiddenDescription: "Bu əməliyyatı etməyə icazəniz yoxdur.",
@@ -100,6 +102,8 @@ export const azMessages: Messages = {
       errorDescription: "Qeydiyyat zamanı xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.",
       configurationErrorDescription: "Qeydiyyat servisi hazır deyil. API bağlantısını yoxlayın.",
       networkErrorDescription: "Serverə qoşulmaq mümkün olmadı. Zəhmət olmasa yenidən cəhd edin.",
+      maintenanceDescription:
+        "Sistem müvəqqəti bağlıdır. Zəhmət olmasa bir az sonra yenidən yoxlayın.",
       badRequestDescription: "Göndərilən məlumat qəbul edilmədi.",
       unauthorizedDescription: "Bu sorğu üçün icazə verilmədi.",
       forbiddenDescription: "Bu əməliyyatı etməyə icazəniz yoxdur.",

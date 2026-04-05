@@ -9,14 +9,12 @@ import {
 } from "react";
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
   AlertDialogTitle,
+  Button,
 } from "@/components/atoms";
+import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
 import styles from "./avatar-crop-dialog.module.css";
 
@@ -26,6 +24,7 @@ type AvatarCropDialogProps = {
   open: boolean;
   onClose: () => void;
   onConfirm: (file: File) => Promise<void> | void;
+  onChooseDifferentPicture?: () => void;
 };
 
 type Offset = {
@@ -113,6 +112,7 @@ export function AvatarCropDialog({
   open,
   onClose,
   onConfirm,
+  onChooseDifferentPicture,
 }: AvatarCropDialogProps) {
   const { messages } = useLocale();
   const p = messages.profile;
@@ -217,6 +217,16 @@ export function AvatarCropDialog({
     setOffset(constrainedOffset);
   }
 
+  function handleZoomStep(direction: -1 | 1) {
+    const nextZoom = clamp(
+      Number((zoom + direction * 0.1).toFixed(2)),
+      minimumZoom,
+      maximumZoom,
+    );
+
+    handleZoomChange(nextZoom);
+  }
+
   async function handleConfirm() {
     if (!imageSrc || !imageRef.current || !cropFrameRef.current) {
       return;
@@ -265,74 +275,120 @@ export function AvatarCropDialog({
   return (
     <AlertDialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
       <AlertDialogContent className={styles.content}>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{p.cropPhotoTitle}</AlertDialogTitle>
-          <AlertDialogDescription>
+        <div className={styles.header}>
+          <button
+            type="button"
+            className={styles.closeButton}
+            aria-label={p.cropPhotoCancel}
+            onClick={onClose}
+          >
+            <Icon icon="close" size={18} color="white" />
+          </button>
+          <AlertDialogTitle className={styles.title}>
+            {p.cropPhotoTitle}
+          </AlertDialogTitle>
+          <AlertDialogDescription className={styles.description}>
             {p.cropPhotoDescription}
           </AlertDialogDescription>
-        </AlertDialogHeader>
+        </div>
 
         <div className={styles.body}>
-          <div className={styles.cropAreaShell}>
-            <div
-              ref={cropFrameRef}
-              className={styles.cropArea}
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerUp}
-            >
-              {imageSrc ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  ref={imageRef}
-                  className={`${styles.cropImage} ${isDragging ? styles.dragging : ""}`}
-                  src={imageSrc}
-                  alt={p.photoAlt}
-                  draggable={false}
-                  onLoad={handleImageLoad}
-                  style={{
-                    transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px)) scale(${zoom})`,
-                  }}
-                />
-              ) : null}
+          <div className={styles.cropStage}>
+            <div className={styles.cropAreaShell}>
+              <div
+                ref={cropFrameRef}
+                className={styles.cropArea}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
+              >
+                {imageSrc ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    ref={imageRef}
+                    className={`${styles.cropImage} ${isDragging ? styles.dragging : ""}`}
+                    src={imageSrc}
+                    alt={p.photoAlt}
+                    draggable={false}
+                    onLoad={handleImageLoad}
+                    style={{
+                      transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px)) scale(${zoom})`,
+                    }}
+                  />
+                ) : null}
+                <div className={styles.cropGrid} />
+              </div>
             </div>
-
-            <p className={styles.hint}>{p.cropPhotoHint}</p>
           </div>
 
           <div className={styles.controls}>
+            <p className={styles.hint}>{p.cropPhotoHint}</p>
             <div className={styles.rangeLabelRow}>
               <span className={styles.rangeLabel}>{p.cropPhotoZoom}</span>
               <span className={styles.zoomValue}>{zoomLabel}</span>
             </div>
 
-            <input
-              className={styles.rangeInput}
-              type="range"
-              min={minimumZoom}
-              max={maximumZoom}
-              step={zoomStep}
-              value={zoom}
-              onChange={(event) => handleZoomChange(Number(event.target.value))}
-            />
+            <div className={styles.rangeControls}>
+              <button
+                type="button"
+                className={styles.zoomButton}
+                aria-label={`${p.cropPhotoZoom} -`}
+                onClick={() => handleZoomStep(-1)}
+              >
+                <Icon icon="remove" size={16} color="white" />
+              </button>
+              <input
+                className={styles.rangeInput}
+                type="range"
+                min={minimumZoom}
+                max={maximumZoom}
+                step={zoomStep}
+                value={zoom}
+                onChange={(event) => handleZoomChange(Number(event.target.value))}
+              />
+              <button
+                type="button"
+                className={styles.zoomButton}
+                aria-label={`${p.cropPhotoZoom} +`}
+                onClick={() => handleZoomStep(1)}
+              >
+                <Icon icon="add" size={16} color="white" />
+              </button>
+            </div>
           </div>
+
+          <button
+            type="button"
+            className={styles.changePicture}
+            onClick={onChooseDifferentPicture}
+          >
+            {p.changePhoto}
+          </button>
         </div>
 
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isProcessing}>
+        <div className={styles.footer}>
+          <Button
+            variant="outline"
+            type="button"
+            className={styles.cancelButton}
+            disabled={isProcessing}
+            onClick={onClose}
+          >
             {p.cropPhotoCancel}
-          </AlertDialogCancel>
-          <AlertDialogAction
+          </Button>
+          <Button
+            variant="primary"
             disabled={!imageSrc || isProcessing}
+            className={styles.confirmButton}
             onClick={(event) => {
               event.preventDefault();
               void handleConfirm();
             }}
           >
             {isProcessing ? p.cropPhotoProcessing : p.cropPhotoConfirm}
-          </AlertDialogAction>
-        </AlertDialogFooter>
+          </Button>
+        </div>
       </AlertDialogContent>
     </AlertDialog>
   );
