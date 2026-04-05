@@ -1,28 +1,15 @@
 import type { CSSProperties } from "react";
 
-export const primaryColors = ["#f5f5f4", "#e5e6e4", "#e13434", "#e13434", "#f6efeb", "#eee7df", "#f6f4ea", "#eceae2"]
+export const primaryColors = ["#002642", "#840032", "#e59500", "#e5dada"] as const;
 
 export const blackColors = [
-  "#131316",
-  "#1c1c21",
-  "#26262c",
-  "#2f3037",
-  "#393a41",
-  "#4b4c52",
-  "#5b5c62",
-  "#6a6b70",
+  "#000",
+  "#222",
+  "#444",
+  "#666",
 ] as const;
 
-export const whiteColors = [
-  "#fff",
-  "#fff",
-  "#fff",
-  "#fff",
-  "#fff",
-  "#fff",
-  "#fff",
-  "#fff",
-] as const;
+export const whiteColors = ["#fff", "#eee", "#eee", "#ddd"] as const;
 
 export const errorColors = ["#880d1e", "#dd2d4a", "#f26a8d", "#f49cbb"] as const;
 
@@ -54,36 +41,36 @@ function withAlpha(color: string, alpha: number) {
 
 const semanticColors = {
   "app-bg-canvas": whiteColors[2],
-  "app-bg-subtle": whiteColors[7],
-  "app-bg-surface": whiteColors[3],
+  "app-bg-subtle": whiteColors[3],
+  "app-bg-surface": whiteColors[2],
   "app-bg-surface-strong": whiteColors[0],
-  "app-bg-surface-muted": whiteColors[5],
-  "app-bg-sidebar": primaryColors[1],
-  "app-bg-primary-soft": withAlpha(primaryColors[6], 0.18),
-  "app-bg-code": withAlpha(primaryColors[2], 0.08),
+  "app-bg-surface-muted": whiteColors[3],
+  "app-bg-sidebar": whiteColors[1],
+  "app-bg-primary-soft": withAlpha(primaryColors[0], 0.14),
+  "app-bg-code": withAlpha(primaryColors[0], 0.08),
   "app-bg-overlay-strong": withAlpha(whiteColors[2], 0.48),
   "app-bg-overlay-soft": withAlpha(whiteColors[2], 0.16),
   "app-text-strong": blackColors[0],
-  "app-text-base": blackColors[2],
-  "app-text-muted": blackColors[5],
-  "app-text-subtle": blackColors[7],
+  "app-text-base": blackColors[1],
+  "app-text-muted": blackColors[2],
+  "app-text-subtle": blackColors[3],
   "app-text-inverse": whiteColors[2],
   "app-border-soft": withAlpha(blackColors[0], 0.1),
   "app-border-strong": withAlpha(blackColors[0], 0.16),
-  "app-border-primary-soft": withAlpha(primaryColors[3], 0.12),
-  "app-border-primary-strong": withAlpha(primaryColors[3], 0.24),
-  "app-primary": primaryColors[3],
-  "app-primary-strong": primaryColors[2],
-  "app-primary-soft": primaryColors[6],
-  "app-primary-faint": primaryColors[7],
-  "app-focus-ring": withAlpha(primaryColors[5], 0.28),
+  "app-border-primary-soft": withAlpha(primaryColors[0], 0.12),
+  "app-border-primary-strong": withAlpha(primaryColors[0], 0.24),
+  "app-primary": primaryColors[0],
+  "app-primary-strong": primaryColors[0],
+  "app-primary-soft": primaryColors[1],
+  "app-primary-faint": primaryColors[2],
+  "app-focus-ring": withAlpha(primaryColors[0], 0.22),
   "app-shadow-color": withAlpha(blackColors[0], 0.14),
   "app-shadow-color-strong": withAlpha(blackColors[0], 0.18),
-  "app-shadow-primary-soft": withAlpha(primaryColors[3], 0.18),
-  "app-shadow-primary-faint": withAlpha(primaryColors[3], 0.12),
+  "app-shadow-primary-soft": withAlpha(primaryColors[0], 0.18),
+  "app-shadow-primary-faint": withAlpha(primaryColors[0], 0.12),
   "app-shadow-card-soft": withAlpha(blackColors[0], 0.04),
-  "app-glow-primary-soft": withAlpha(primaryColors[7], 0.22),
-  "app-glow-primary-strong": withAlpha(primaryColors[4], 0.22),
+  "app-glow-primary-soft": withAlpha(primaryColors[2], 0.18),
+  "app-glow-primary-strong": withAlpha(primaryColors[1], 0.18),
   "app-error": errorColors[1],
   "app-error-strong": errorColors[0],
   "app-error-soft": errorColors[2],

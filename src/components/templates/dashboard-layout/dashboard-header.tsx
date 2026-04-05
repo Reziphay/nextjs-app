@@ -89,6 +89,9 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
     router.replace("/auth/login");
   }
 
+  const notificationsActive = pathname === "/notification";
+  const settingsActive = pathname === "/settings";
+
   return (
     <header className={styles.header}>
       <div className={styles.left}>
@@ -130,7 +133,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
           href="/notification"
           aria-label={db.notifications}
           title={db.notifications}
-          className={styles.supportLink}
+          className={`${styles.supportLink} ${notificationsActive ? styles.iconActionActive : ""}`}
         >
           <span className={`material-symbols-rounded ${styles.supportIcon}`}>
             notifications
@@ -144,7 +147,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
             aria-expanded={settingsOpen}
             aria-haspopup="dialog"
             title={db.settings}
-            className={styles.settingsTrigger}
+            className={`${styles.settingsTrigger} ${settingsActive || settingsOpen ? styles.iconActionActive : ""}`}
             onClick={() => setSettingsOpen((open) => !open)}
           >
             <span className={`material-symbols-rounded ${styles.supportIcon}`}>

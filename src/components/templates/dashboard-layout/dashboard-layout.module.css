@@ -1,7 +1,7 @@
 .layout {
   display: flex;
   min-height: 100dvh;
-  background: var(--app-bg-canvas);
+  background: transparent;
   position: relative;
 }
 
@@ -19,11 +19,17 @@
 
 .main {
   flex: 1;
+  background-color: var(--app-background-pattern-base);
+  background-image: var(--app-background-pattern-image);
+  background-size: var(--app-background-pattern-size)
+    var(--app-background-pattern-size);
 }
 
 .content {
+  width: min(100%, 80rem);
+  margin-inline: auto;
+  margin-top: 2rem;
   padding: 1.714rem 2rem;
-  max-width: 80rem;
 }
 
 /* ── Backdrop (mobile only) ── */
