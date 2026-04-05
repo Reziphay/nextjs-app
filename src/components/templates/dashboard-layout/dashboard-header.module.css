@@ -151,6 +151,17 @@
     color 120ms ease;
 }
 
+.mobileLogo {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: var(--general-border-radius-xl);
+  text-decoration: none;
+}
+
 .toggleBtn:hover {
   background: var(--app-bg-primary-soft);
   color: var(--app-text-strong);
@@ -236,5 +247,35 @@
   .crumbLink,
   .crumbCurrent {
     font-size: var(--font-size-extra-small);
+  }
+
+  .settingsPopup {
+    width: min(16rem, calc(100vw - 1.5rem));
+    gap: 0.714rem;
+    padding: 0.857rem;
+    border-radius: var(--general-border-radius-2xl);
+  }
+
+  .settingsTitle {
+    font-size: var(--font-size-extra-small);
+  }
+
+  .settingsLabel {
+    font-size: 0.625rem;
+  }
+}
+
+@media (max-width: 64rem) {
+  .mobileLogo {
+    display: inline-flex;
+  }
+
+  .toggleBtn {
+    display: none;
+  }
+
+  .iconActionActive {
+    background: transparent;
+    box-shadow: none;
   }
 }

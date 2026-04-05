@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/atoms";
@@ -41,6 +41,19 @@ export function AuthHeader() {
   const isActiveLink = (href: string) =>
     href === "/" ? pathname === href : pathname.startsWith(href);
 
+  useEffect(() => {
+    if (!isMenuOpen) {
+      return;
+    }
+
+    const { overflow } = document.body.style;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = overflow;
+    };
+  }, [isMenuOpen]);
+
   function renderNavigationItems(onItemClick?: () => void) {
     return navigationLinks.map((link) => (
       <Link
@@ -72,7 +85,7 @@ export function AuthHeader() {
       </nav>
 
       <div className={styles.actions}>
-        <LanguageSwitcher className={styles.switcher} variant="compact" />
+        <LanguageSwitcher className={styles.switcher} />
 
         <div className={styles.authActions}>
           {isAuthenticated ? (
@@ -133,54 +146,86 @@ export function AuthHeader() {
       </div>
 
       <div
+        aria-hidden={!isMenuOpen}
+        className={`${styles.mobileBackdrop} ${
+          isMenuOpen ? styles.mobileBackdropOpen : ""
+        }`}
+        onClick={() => setIsMenuOpen(false)}
+      />
+
+      <div
         id="auth-mobile-menu"
         className={`${styles.mobilePanel} ${
           isMenuOpen ? styles.mobilePanelOpen : ""
         }`}
       >
-        <LanguageSwitcher className={styles.mobileSwitcher} variant="compact" />
+        <div className={styles.mobilePanelHeader}>
+          <Link
+            className={styles.mobileBrand}
+            href="/"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <Logo size={28} />
+            <span className={styles.mobileBrandName}>Reziphay</span>
+          </Link>
 
-        <nav
-          aria-label={messages.navigationAriaLabel}
-          className={styles.mobileNavigation}
-        >
-          {renderNavigationItems(() => setIsMenuOpen(false))}
-        </nav>
+          <Button
+            aria-label={messages.navigation.closeMenu}
+            className={styles.mobileCloseButton}
+            icon="close"
+            size="medium"
+            variant="icon"
+            onClick={() => setIsMenuOpen(false)}
+          />
+        </div>
 
-        <div className={styles.mobileAuthActions}>
-          {isAuthenticated ? (
-            <Link
-              href={defaultAppHref}
-              className={styles.mobileAuthButton}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {defaultAppLabel}
-            </Link>
-          ) : (
-            <>
+        <div className={styles.mobilePanelContent}>
+          <LanguageSwitcher className={styles.mobileSwitcher} />
+
+          <nav
+            aria-label={messages.navigationAriaLabel}
+            className={styles.mobileNavigation}
+          >
+            {renderNavigationItems(() => setIsMenuOpen(false))}
+          </nav>
+
+          <div className={styles.mobileAuthActions}>
+            {isAuthenticated ? (
               <Link
-                aria-current={isActiveLink(loginHref) ? "page" : undefined}
-                className={`${styles.mobileAuthLink} ${
-                  isActiveLink(loginHref) ? styles.mobileAuthLinkActive : ""
-                }`}
-                href={loginHref}
+                href={defaultAppHref}
+                className={styles.mobileAuthButton}
                 onClick={() => setIsMenuOpen(false)}
               >
-                {messages.auth.login.submit}
+                {defaultAppLabel}
               </Link>
+            ) : (
+              <>
+                <Link
+                  aria-current={isActiveLink(loginHref) ? "page" : undefined}
+                  className={`${styles.mobileAuthLink} ${
+                    isActiveLink(loginHref) ? styles.mobileAuthLinkActive : ""
+                  }`}
+                  href={loginHref}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {messages.auth.login.submit}
+                </Link>
 
-              <Link
-                aria-current={isActiveLink(registerHref) ? "page" : undefined}
-                className={`${styles.mobileAuthButton} ${
-                  isActiveLink(registerHref) ? styles.mobileAuthButtonActive : ""
-                }`}
-                href={registerHref}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {messages.auth.login.signUp}
-              </Link>
-            </>
-          )}
+                <Link
+                  aria-current={isActiveLink(registerHref) ? "page" : undefined}
+                  className={`${styles.mobileAuthButton} ${
+                    isActiveLink(registerHref)
+                      ? styles.mobileAuthButtonActive
+                      : ""
+                  }`}
+                  href={registerHref}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {messages.auth.login.signUp}
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </header>

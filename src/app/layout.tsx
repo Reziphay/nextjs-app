@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { getMessages } from "@/i18n/config";
 import { StoreProvider } from "@/components/providers/store-provider";
 import { getServerLocale } from "@/i18n/server";
@@ -20,6 +20,12 @@ export async function generateMetadata(): Promise<Metadata> {
     authors: [{ name: "Vugar Safarzada" }],
   };
 }
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export default async function RootLayout({
   children,

@@ -19,13 +19,15 @@
 }
 
 .default {
-  background: var(--color-black-1);
+  background: var(--app-primary);
   color: var(--app-text-inverse);
+  box-shadow: 0 0.429rem 1rem var(--app-shadow-primary-soft);
 }
 
 .secondary {
-  background: var(--app-bg-surface-muted);
-  color: var(--app-text-strong);
+  background: var(--app-primary-faint);
+  color: var(--app-primary-soft);
+  border-color: var(--app-border-primary-soft);
 }
 
 .destructive {
@@ -34,9 +36,8 @@
 }
 
 .outline {
-  border-color: var(--app-border-soft);
-  background: var(--app-bg-surface-strong);
-  color: var(--app-text-strong);
+  border-color: var(--app-primary-deep);
+  color: var(--app-primary-deep);
 }
 
 .iconGlyph {

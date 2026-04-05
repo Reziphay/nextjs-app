@@ -287,22 +287,13 @@ export function ComponentLibraryPage() {
             <span className={styles.sectionEyebrow}>Molecules</span>
             <h2>Language Switcher</h2>
             <p>
-              Eyni locale switching davranışı həm dropdown, həm də segmented
-              görünüşdə reusable komponent kimi istifadə olunur.
+              Locale switching üçün istifadə olunan yığcam və sadə variant.
             </p>
           </div>
 
           <div className={styles.cardGrid}>
-            <ShowcaseCard title="Dropdown" description="Auth header üçün kompakt seçim">
+            <ShowcaseCard title="Compact" description="Header və popup üçün istifadə olunan yığcam variant">
               <LanguageSwitcher />
-            </ShowcaseCard>
-
-            <ShowcaseCard title="Compact" description="Header üçün az yer tutan qısa variant">
-              <LanguageSwitcher variant="compact" />
-            </ShowcaseCard>
-
-            <ShowcaseCard title="Segmented" description="Hero və üst panel üçün sürətli seçim">
-              <LanguageSwitcher variant="segmented" />
             </ShowcaseCard>
           </div>
         </section>

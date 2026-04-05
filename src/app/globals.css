@@ -24,6 +24,7 @@
 html {
   height: 100%;
   font-size: var(--font-size-root);
+  -webkit-text-size-adjust: 100%;
 }
 
 html,
@@ -99,6 +100,14 @@ select {
 
 button {
   border: 0;
+}
+
+button,
+a,
+label,
+summary,
+[role="button"] {
+  touch-action: manipulation;
 }
 
 code,
@@ -316,6 +325,15 @@ pre {
 
   .infoGrid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 64rem) {
+  input,
+  textarea,
+  select,
+  [contenteditable="true"] {
+    font-size: 1rem !important;
   }
 }
 

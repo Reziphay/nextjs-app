@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, type FormEvent } from "react";
+import { useEffect, useRef, type FormEvent } from "react";
 import {
   Alert,
   AlertDescription,
@@ -16,16 +16,20 @@ import {
 } from "@/components/atoms";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
+  clearAuthCookies,
   getStoredAccessToken,
   getStoredRefreshToken,
+  isStoredAccessTokenExpired,
 } from "@/lib/auth-cookies";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
+  refreshAuthToken,
   selectAuthHydrated,
   selectIsAuthenticated,
   selectAuthSession,
   selectLoginState,
   setLoginField,
+  signOut,
   submitLogin,
 } from "@/store/auth";
 import { getDefaultAppRouteForUserType } from "@/lib/app-routes";
@@ -42,6 +46,8 @@ export function AuthLoginPanel() {
   const login = messages.auth.login;
   const isSubmitting = status === "loading";
   const defaultAppHref = getDefaultAppRouteForUserType(session.user?.type);
+
+  const refreshingRef = useRef(false);
 
   useEffect(() => {
     if (
@@ -60,9 +66,28 @@ export function AuthLoginPanel() {
       return;
     }
 
+    if (isStoredAccessTokenExpired()) {
+      if (refreshingRef.current) return;
+      refreshingRef.current = true;
+      dispatch(refreshAuthToken())
+        .unwrap()
+        .then(() => {
+          router.replace(defaultAppHref);
+        })
+        .catch(() => {
+          clearAuthCookies();
+          dispatch(signOut());
+        })
+        .finally(() => {
+          refreshingRef.current = false;
+        });
+      return;
+    }
+
     router.replace(defaultAppHref);
   }, [
     defaultAppHref,
+    dispatch,
     hydrated,
     isAuthenticated,
     router,

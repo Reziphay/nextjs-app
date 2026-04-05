@@ -118,6 +118,10 @@
   background: var(--app-bg-surface-muted);
 }
 
+.option[aria-selected="true"] {
+  background: var(--app-primary-soft);
+}
+
 .optionContent {
   min-width: 0;
 }
@@ -146,10 +150,10 @@
   gap: 0.286rem;
   min-height: 1.714rem;
   padding: 0.214rem 0.429rem;
-  border: 1px solid var(--app-border-soft);
+  border: 1px solid var(--app-border-primary-soft);
   border-radius: var(--general-border-radius-sm);
-  background: var(--app-bg-surface-muted);
-  color: var(--app-text-strong);
+  background: var(--app-primary-soft);
+  color: var(--app-primary-deep);
   font-size: var(--font-size-small);
   line-height: 1;
 }

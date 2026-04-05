@@ -1,23 +1,26 @@
 .switch {
-  --switch-width: 2.571rem;
-  --switch-height: 1.429rem;
-  --switch-thumb-size: 1rem;
+  --switch-width: 2.25rem;
+  --switch-height: 1.25rem;
+  --switch-thumb-size: 0.875rem;
+  --switch-padding: 0.125rem;
   width: var(--switch-width);
   height: var(--switch-height);
   flex-shrink: 0;
+  box-sizing: border-box;
   appearance: none;
   position: relative;
   display: inline-flex;
-  margin: 0.071rem 0 0;
-  border: 1px solid var(--app-border-strong);
+  margin: 0;
+  border: 1px solid var(--app-border-soft);
   border-radius: var(--general-border-radius-pill);
-  background: var(--app-border-soft);
-  box-shadow:
-    inset 0 0 0 1px var(--app-bg-overlay-strong),
-    0 0 0 0 transparent;
+  background: color-mix(
+    in srgb,
+    var(--app-bg-surface-strong) 88%,
+    var(--app-bg-subtle) 12%
+  );
+  box-shadow: 0 0 0 0 transparent;
   cursor: pointer;
   transition:
-    transform 160ms ease,
     border-color 160ms ease,
     background-color 160ms ease,
     box-shadow 160ms ease,
@@ -28,28 +31,32 @@
   content: "";
   position: absolute;
   top: 50%;
-  left: 0.214rem;
+  left: var(--switch-padding);
   width: var(--switch-thumb-size);
   height: var(--switch-thumb-size);
   border: 1px solid var(--app-border-soft);
   border-radius: var(--general-border-radius-round);
   background: var(--app-bg-surface-strong);
-  box-shadow: 0 0.143rem 0.571rem var(--app-shadow-card-soft);
+  box-shadow: 0 0.125rem 0.286rem var(--app-shadow-card-soft);
   transform: translate(0, -50%);
   transition:
     transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
     background-color 160ms ease,
+    border-color 160ms ease,
     box-shadow 160ms ease;
 }
 
 .switch:hover:not(:disabled) {
-  transform: translateY(-1px);
-  border-color: var(--app-border-primary-strong);
-  background: var(--app-border-strong);
+  border-color: var(--app-border-strong);
+  background: color-mix(
+    in srgb,
+    var(--app-bg-surface-strong) 92%,
+    var(--app-bg-subtle) 8%
+  );
 }
 
 .switch:active:not(:disabled) {
-  transform: scale(0.96);
+  box-shadow: 0 0 0 0 transparent;
 }
 
 .switch:focus-visible {
@@ -59,22 +66,42 @@
 }
 
 .switch:checked {
-  border-color: var(--color-black-1);
-  background: var(--color-black-1);
+  border-color: color-mix(
+    in srgb,
+    var(--app-primary-faint) 56%,
+    var(--app-bg-surface-strong) 44%
+  );
+  background: color-mix(
+    in srgb,
+    var(--app-primary-faint) 24%,
+    var(--app-bg-surface-strong) 76%
+  );
   box-shadow: 0 0 0 0 transparent;
 }
 
 .switch:checked::after {
-  border-color: var(--color-black-1);
+  border-color: color-mix(
+    in srgb,
+    var(--app-primary-faint) 22%,
+    var(--app-border-soft) 78%
+  );
   transform: translate(
-      calc(var(--switch-width) - var(--switch-thumb-size) - 0.5rem),
+      calc(var(--switch-width) - var(--switch-thumb-size) - (var(--switch-padding) * 2)),
       -50%
     );
 }
 
 .switch:checked:hover:not(:disabled) {
-  border-color: var(--color-black-2);
-  background: var(--color-black-2);
+  border-color: color-mix(
+    in srgb,
+    var(--app-primary-faint) 68%,
+    var(--app-bg-surface-strong) 32%
+  );
+  background: color-mix(
+    in srgb,
+    var(--app-primary-faint) 30%,
+    var(--app-bg-surface-strong) 70%
+  );
 }
 
 .switch:disabled {
@@ -86,25 +113,34 @@
 
 .switch:disabled::after {
   background: var(--app-bg-surface);
-  border-color: var(--app-border-strong);
+  border-color: var(--app-border-soft);
   box-shadow: none;
 }
 
 .switch:checked:disabled {
-  border-color: var(--color-black-4);
-  background: var(--color-black-4);
+  border-color: color-mix(
+    in srgb,
+    var(--app-primary-faint) 34%,
+    var(--app-bg-surface-strong) 66%
+  );
+  background: color-mix(
+    in srgb,
+    var(--app-primary-faint) 16%,
+    var(--app-bg-surface-strong) 84%
+  );
 }
 
 .small {
-  --switch-width: 2rem;
-  --switch-height: 1.143rem;
-  --switch-thumb-size: 0.714rem;
+  --switch-width: 1.875rem;
+  --switch-height: 1rem;
+  --switch-thumb-size: 0.625rem;
+  --switch-padding: 0.125rem;
 }
 
 .default {
-  --switch-width: 2.571rem;
-  --switch-height: 1.429rem;
-  --switch-thumb-size: 1rem;
+  --switch-width: 2.25rem;
+  --switch-height: 1.25rem;
+  --switch-thumb-size: 0.875rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -115,6 +151,6 @@
 
   .switch:hover:not(:disabled),
   .switch:active:not(:disabled) {
-    transform: none;
+    box-shadow: 0 0 0 0 transparent;
   }
 }

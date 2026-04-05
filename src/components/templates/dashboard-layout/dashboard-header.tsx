@@ -16,15 +16,17 @@ import {
   Button,
 } from "@/components/atoms";
 import { Icon } from "@/components/icon";
+import { Logo } from "@/components/logo";
 import { LanguageSwitcher } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
+  getDefaultAppRouteForUserType,
   getProtectedRouteLabel,
   isProtectedAppPath,
 } from "@/lib/app-routes";
 import { clearAuthCookies } from "@/lib/auth-cookies";
-import { signOut } from "@/store/auth";
-import { useAppDispatch } from "@/store/hooks";
+import { selectAuthSession, signOut } from "@/store/auth";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import styles from "./dashboard-header.module.css";
 
 type DashboardHeaderProps = {
@@ -36,6 +38,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const session = useAppSelector(selectAuthSession);
   const { messages } = useLocale();
   const db = messages.dashboard;
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -91,10 +94,19 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
 
   const notificationsActive = pathname === "/notification";
   const settingsActive = pathname === "/settings";
+  const defaultHref = getDefaultAppRouteForUserType(session.user?.type);
 
   return (
     <header className={styles.header}>
       <div className={styles.left}>
+        <Link
+          href={defaultHref}
+          aria-label="Reziphay"
+          className={styles.mobileLogo}
+        >
+          <Logo size={20} />
+        </Link>
+
         <button
           type="button"
           onClick={onToggle}
@@ -169,7 +181,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
                 <span className={styles.settingsLabel}>
                   {messages.languageSwitcherAriaLabel}
                 </span>
-                <LanguageSwitcher variant="compact" />
+                <LanguageSwitcher />
               </div>
 
               <div className={styles.settingsDivider} />

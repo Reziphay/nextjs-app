@@ -54,3 +54,15 @@ export function clearAuthCookies() {
   removeCookie(ACCESS_TOKEN_KEY);
   removeCookie(REFRESH_TOKEN_KEY);
 }
+
+export function isStoredAccessTokenExpired(): boolean {
+  const token = getStoredAccessToken();
+  if (!token) return true;
+  try {
+    const [, b64] = token.split(".");
+    const payload = JSON.parse(atob(b64.replace(/-/g, "+").replace(/_/g, "/")));
+    return typeof payload.exp !== "number" || Date.now() / 1000 >= payload.exp;
+  } catch {
+    return true;
+  }
+}
