@@ -237,6 +237,48 @@
   color: var(--app-warning-strong);
 }
 
+.removePhotoDialog {
+  width: min(100%, 28rem);
+}
+
+.removePhotoDialogMedia {
+  width: 3rem;
+  height: 3rem;
+  margin: 1.5rem 0 0 1.5rem;
+  border-radius: 50%;
+  box-shadow: none;
+}
+
+.removePhotoDialogHeader {
+  gap: 0.375rem;
+  padding: 1.5rem 1.5rem 0.875rem 0.875rem;
+}
+
+.removePhotoDialogTitle {
+  margin: 0;
+  font-size: var(--font-size-medium);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.removePhotoDialogDescription {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  line-height: 1.6;
+}
+
+.removePhotoDialogFooter {
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.5rem;
+}
+
+.removePhotoDialogFooter button {
+  min-width: 7.5rem;
+}
+
 @media (max-width: 52rem) {
   .grid {
     grid-template-columns: minmax(0, 1fr);
@@ -279,5 +321,13 @@
 
   .formActions > * {
     width: 100%;
+  }
+
+  .removePhotoDialogHeader {
+    padding: 1.125rem 1.125rem 0.75rem 0.75rem;
+  }
+
+  .removePhotoDialogFooter {
+    padding: 0.875rem 1.125rem 1.125rem;
   }
 }
