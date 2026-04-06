@@ -20,7 +20,7 @@ type IconProps = {
 
 const iconColorMap: Record<IconColor, string> = {
   primary: "var(--app-primary)",
-  white: "var(--color-white-3)",
+  white: "var(--app-text-inverse)",
   black: "var(--color-black-1)",
   success: "var(--app-success)",
   warn: "var(--app-warning)",

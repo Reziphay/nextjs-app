@@ -43,7 +43,7 @@
 }
 
 .title {
-  color: var(--color-white-3);
+  color: var(--app-text-inverse);
   font-size: clamp(1.25rem, 0.8vw + 1rem, 1.45rem);
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -149,7 +149,7 @@
 }
 
 .rangeLabel {
-  color: var(--color-white-3);
+  color: var(--app-text-inverse);
   font-size: var(--font-size-small);
   font-weight: 700;
 }
@@ -199,7 +199,7 @@
 }
 
 .changePicture:hover {
-  color: var(--color-white-3);
+  color: var(--app-text-inverse);
 }
 
 .footer {
@@ -218,7 +218,7 @@
 .cancelButton {
   border-color: rgb(255 255 255 / 0.14);
   background: rgb(255 255 255 / 0.04);
-  color: var(--color-white-3);
+  color: var(--app-text-inverse);
 }
 
 .cancelButton:hover {

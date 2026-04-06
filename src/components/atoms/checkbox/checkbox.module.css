@@ -72,8 +72,8 @@
 }
 
 .checkbox:checked:disabled {
-  border-color: var(--color-black-4);
-  background: var(--color-black-4);
+  border-color: var(--color-black-2);
+  background: var(--color-black-2);
 }
 
 @media (prefers-reduced-motion: reduce) {

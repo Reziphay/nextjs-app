@@ -1,28 +1,18 @@
 import type { CSSProperties } from "react";
 
-export const primaryColors = [
-  "#247ba0",
-  "#70c1b3",
-  "#b2dbbf",
-  "#f3ffbd",
-  "#ff1654"
-] as const;
+const palette = [
+  "#000000", "#1c1c1c", "#393939",
+  "#555555", "#717171", "#8e8e8e",
+  "#aaaaaa", "#c6c6c6", "#e3e3e3",
+]
 
-export const blackColors = [
-  "#000000",
-  "#3d2645",
-  "#0b090a",
-  "#161a1d",
-  "#4d4a50",
-] as const;
 
-export const whiteColors = [
-  "#ffffff",
-  "#f5f5f5",
-  "#f7f7f7",
-  "#e0e0e0ff",
-  "#d1d1d1",
-] as const;
+// palette[0–2]: near-black → text range (darkest, near-neutral)
+export const blackColors = [palette[0], palette[1], palette[2]] as const;
+// palette[3–5]: mid-tones → accent/primary range (buttons, links, active states, focus rings)
+export const primaryColors = [palette[3], palette[4], palette[5]] as const;
+// palette[6–8]: near-white → borders, dividers, hover tints; always alpha-over-white for large fills
+export const whiteColors = [palette[6], palette[7], palette[8]] as const;
 
 export const errorColors = [
   "#880d1e",
@@ -48,7 +38,7 @@ export const successColors = [
   "#ddf3e3",
 ] as const;
 
-function hexToRgbChannels(hex: string) {
+function hexToRgb(hex: string) {
   const normalized = hex.replace("#", "");
   const fullHex =
     normalized.length === 3
@@ -63,6 +53,11 @@ function hexToRgbChannels(hex: string) {
   const green = (parsed >> 8) & 255;
   const blue = parsed & 255;
 
+  return [red, green, blue] as const;
+}
+
+function hexToRgbChannels(hex: string) {
+  const [red, green, blue] = hexToRgb(hex);
   return `${red} ${green} ${blue}`;
 }
 
@@ -71,50 +66,92 @@ function withAlpha(color: string, alpha: number) {
 }
 
 const semanticColors = {
-  "app-bg-canvas": whiteColors[2],
-  "app-bg-subtle": whiteColors[3],
-  "app-bg-surface": whiteColors[2],
-  "app-bg-surface-strong": whiteColors[0],
-  "app-bg-surface-muted": whiteColors[3],
-  "app-bg-sidebar": whiteColors[1],
-  "app-bg-primary-soft": withAlpha(primaryColors[2], 0.14),
-  "app-bg-code": withAlpha(primaryColors[1], 0.08),
-  "app-bg-overlay-strong": withAlpha(whiteColors[2], 0.48),
-  "app-bg-overlay-soft": withAlpha(whiteColors[2], 0.16),
+  // Background — all large surfaces must be white or palette[8] at very low alpha
+  // canvas: pure white — base document layer; no hue leakage on the widest surface
+  "app-bg-canvas": "#ffffff",
+  // subtle: palette[8] (#ecf9ff) @ 30% — barely-there tint for inset / alternating sections
+  "app-bg-subtle": withAlpha(whiteColors[2], 0.3),
+  // surface: pure white — cards, panels, modals
+  "app-bg-surface": "#ffffff",
+  // surface-strong: pure white — elevation is expressed via shadow, not a different blue shade
+  "app-bg-surface-strong": "#ffffff",
+  // surface-muted: palette[8] (#ecf9ff) @ 40% — de-emphasized surface; never use palette[6/7] solidly
+  "app-bg-surface-muted": withAlpha(whiteColors[2], 0.4),
+  // sidebar: pure white — largest structural chrome; must have no blue saturation
+  "app-bg-sidebar": "#ffffff",
+  // primary-soft bg: palette[5] (#00b0fc) @ 12% — tinted well behind primary badges / selected rows
+  "app-bg-primary-soft": withAlpha(primaryColors[2], 0.12),
+  // code bg: palette[4] (#0286df) @ 6% — faint tint for inline code; subtle, not distracting
+  "app-bg-code": withAlpha(primaryColors[1], 0.06),
+  // overlay-strong: palette[8] (#ecf9ff) @ 80% — frosted-glass backdrop behind drawers / sheets
+  "app-bg-overlay-strong": withAlpha(whiteColors[2], 0.8),
+  // overlay-soft: palette[8] (#ecf9ff) @ 30% — soft hint behind modals; palette[8] is less saturated than palette[7]
+  "app-bg-overlay-soft": withAlpha(whiteColors[2], 0.3),
+  // Text — only the dark end of the ramp; text must never be a mid-tone blue
+  // strong: palette[0] (#09152b) — near-black; headings, primary labels
   "app-text-strong": blackColors[0],
+  // base: palette[1] (#082751) — standard body text
   "app-text-base": blackColors[1],
+  // muted: palette[2] (#063977) — secondary text, captions, metadata
   "app-text-muted": blackColors[2],
-  "app-text-subtle": blackColors[3],
+  // subtle: palette[2] (#063977) @ 70% — placeholders, de-emphasized hints
+  "app-text-subtle": withAlpha(blackColors[2], 0.7),
+  // inverse: palette[8] (#ecf9ff) — near-white text on dark / primary-filled backgrounds
   "app-text-inverse": whiteColors[2],
-  "app-border-soft": withAlpha(blackColors[0], 0.1),
-  "app-border-strong": withAlpha(blackColors[0], 0.16),
-  "app-border-primary-soft": withAlpha(primaryColors[1], 0.16),
-  "app-border-primary-strong": withAlpha(primaryColors[2], 0.24),
+  // Border — palette[6] is the designated border shade; dark-end at low alpha for neutral borders
+  // soft: palette[2] (#063977) @ 14% — hairline dividers, table rows
+  "app-border-soft": withAlpha(blackColors[2], 0.14),
+  // strong: palette[1] (#082751) @ 22% — card strokes, input outlines
+  "app-border-strong": withAlpha(blackColors[1], 0.22),
+  // primary-soft: palette[6] (#76d5fe) @ 35% — border on tinted primary surfaces; lighter than palette[5]
+  "app-border-primary-soft": withAlpha(whiteColors[0], 0.35),
+  // primary-strong: palette[4] (#0286df) @ 34% — border on focused / active primary elements
+  "app-border-primary-strong": withAlpha(primaryColors[1], 0.34),
+  // Primary — restricted to actual accent usage: buttons, links, active nav, focus rings, key icons
+  // deep: palette[3] (#035cc2) — pressed / hover state; darkest accent
   "app-primary-deep": primaryColors[0],
+  // primary: palette[4] (#0286df) — base accent; primary buttons, links, active nav indicator
   "app-primary": primaryColors[1],
-  "app-primary-strong": primaryColors[2],
-  "app-primary-soft": primaryColors[3],
-  "app-primary-faint": primaryColors[4],
-  "app-focus-ring": withAlpha(primaryColors[2], 0.2),
-  "app-shadow-color": withAlpha(blackColors[0], 0.14),
-  "app-shadow-color-strong": withAlpha(blackColors[0], 0.18),
-  "app-shadow-primary-soft": withAlpha(primaryColors[2], 0.18),
-  "app-shadow-primary-faint": withAlpha(primaryColors[1], 0.12),
-  "app-shadow-card-soft": withAlpha(blackColors[0], 0.04),
-  "app-glow-primary-soft": withAlpha(primaryColors[3], 0.32),
-  "app-glow-primary-strong": withAlpha(primaryColors[2], 0.18),
+  // strong: palette[3] (#035cc2) — same as deep; high-contrast accent variant
+  "app-primary-strong": primaryColors[0],
+  // soft: palette[5] (#00b0fc) — lighter accent; icon fills, inline highlights, progress fill
+  "app-primary-soft": primaryColors[2],
+  // faint: palette[5] (#00b0fc) @ 14% — hover-state tint behind primary-adjacent elements
+  "app-primary-faint": withAlpha(primaryColors[2], 0.14),
+  // Focus
+  // focus-ring: palette[4] (#0286df) @ 28% — keyboard focus ring; visible but not glaring
+  "app-focus-ring": withAlpha(primaryColors[1], 0.28),
+  // Shadow — always palette[0] (near-black) or palette[4] at low alpha; color at low alpha reads neutral
+  // shadow-color: palette[0] (#09152b) @ 10% — default drop shadow
+  "app-shadow-color": withAlpha(blackColors[0], 0.1),
+  // shadow-color-strong: palette[0] (#09152b) @ 16% — elevated panel shadow
+  "app-shadow-color-strong": withAlpha(blackColors[0], 0.16),
+  // shadow-primary-soft: palette[4] (#0286df) @ 14% — colored halo on primary buttons
+  "app-shadow-primary-soft": withAlpha(primaryColors[1], 0.14),
+  // shadow-primary-faint: palette[5] (#00b0fc) @ 8% — ambient glow ring; barely perceptible
+  "app-shadow-primary-faint": withAlpha(primaryColors[2], 0.08),
+  // shadow-card-soft: palette[2] (#063977) @ 6% — card resting-state shadow
+  "app-shadow-card-soft": withAlpha(blackColors[2], 0.06),
+  // Glow
+  // glow-primary-soft: palette[5] (#00b0fc) @ 16% — ambient glow on primary elements
+  "app-glow-primary-soft": withAlpha(primaryColors[2], 0.16),
+  // glow-primary-strong: palette[4] (#0286df) @ 22% — stronger glow on hover / focus states
+  "app-glow-primary-strong": withAlpha(primaryColors[1], 0.22),
+  // Error
   "app-error": errorColors[1],
   "app-error-strong": errorColors[0],
   "app-error-soft": errorColors[2],
   "app-error-faint": errorColors[3],
   "app-error-bg": withAlpha(errorColors[2], 0.14),
   "app-error-border": withAlpha(errorColors[1], 0.24),
+  // Warning
   "app-warning": warnColors[2],
   "app-warning-strong": warnColors[3],
   "app-warning-soft": warnColors[1],
   "app-warning-faint": warnColors[0],
   "app-warning-bg": withAlpha(warnColors[0], 0.16),
   "app-warning-border": withAlpha(warnColors[2], 0.24),
+  // Success
   "app-success": successColors[2],
   "app-success-strong": successColors[1],
   "app-success-soft": successColors[3],
