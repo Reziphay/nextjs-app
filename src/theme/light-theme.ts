@@ -1,9 +1,9 @@
 import type { CSSProperties } from "react";
 
 const palette = [
-  "#191923", "#191923", "#191923",
-  "#0e79b2", "#0e79b2", "#0e79b2",
-  "#fbfef9", "#fbfef9", "#fbfef9",
+  "#2e3532", "#2e3532", "#2e3532",
+  "#8b2635", "#8b2635", "#8b2635",
+  "#e0e2db", "#e0e2db", "#e0e2db",
 ]
 
 
@@ -68,7 +68,7 @@ function withAlpha(color: string, alpha: number) {
 const semanticColors = {
   // Background — all large surfaces must be white or palette[8] at very low alpha
   // canvas: pure white — base document layer; no hue leakage on the widest surface
-  "app-bg-canvas": "#ffffff",
+  "app-bg-canvas": whiteColors[1],
   // subtle: palette[8] (#ecf9ff) @ 30% — barely-there tint for inset / alternating sections
   "app-bg-subtle": withAlpha(whiteColors[2], 0.3),
   // surface: pure white — cards, panels, modals
@@ -104,7 +104,7 @@ const semanticColors = {
   // strong: palette[1] (#082751) @ 22% — card strokes, input outlines
   "app-border-strong": withAlpha(blackColors[1], 0.22),
   // primary-soft: palette[6] (#76d5fe) @ 35% — border on tinted primary surfaces; lighter than palette[5]
-  "app-border-primary-soft": withAlpha(whiteColors[0], 0.35),
+  "app-border-primary-soft": withAlpha(primaryColors[0], 0.1),
   // primary-strong: palette[4] (#0286df) @ 34% — border on focused / active primary elements
   "app-border-primary-strong": withAlpha(primaryColors[1], 0.34),
   // Primary — restricted to actual accent usage: buttons, links, active nav, focus rings, key icons
