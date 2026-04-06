@@ -8,8 +8,17 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
   ref,
 ) {
   return (
-    <div className={`${styles.wrapper}${className ? ` ${className}` : ""}`}>
-      <input ref={ref} type="checkbox" className={styles.checkbox} {...props} />
+    <div className={`${styles.toggleWrapper}${className ? ` ${className}` : ""}`}>
+      <input ref={ref} type="checkbox" className={styles.toggleCheckbox} {...props} />
+      <div className={styles.toggleContainer}>
+        <div className={styles.toggleButton}>
+          <div className={styles.toggleButtonCirclesContainer}>
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i} className={styles.toggleButtonCircle} />
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 });
