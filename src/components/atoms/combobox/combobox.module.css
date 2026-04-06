@@ -119,7 +119,7 @@
 }
 
 .option[aria-selected="true"] {
-  background: var(--app-primary-soft);
+  background: var(--app-bg-surface-strong);
 }
 
 .optionContent {
@@ -153,8 +153,9 @@
   border: 1px solid var(--app-border-primary-soft);
   border-radius: var(--general-border-radius-sm);
   background: var(--app-primary-soft);
-  color: var(--app-primary-deep);
+  color: var(--app-text-inverse);
   font-size: var(--font-size-small);
+  font-weight: bold;
   line-height: 1;
 }
 

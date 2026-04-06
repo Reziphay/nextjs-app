@@ -166,7 +166,7 @@
 }
 
 .navItemActive {
-  background: var(--app-bg-surface);
+  background: var(--app-bg-primary-soft);
   font-weight: 600;
 }
 
@@ -184,12 +184,12 @@
 }
 
 .navItem:hover .navIcon {
-  color: var(--app-primary-faint);
+  color: var(--app-primary);
   transform: translateY(-1px);
 }
 
 .navItemActive .navIcon {
-  color: var(--app-primary-faint);
+  color: var(--app-primary);
   font-variation-settings:
     "FILL" 1,
     "wght" 400;
@@ -285,11 +285,10 @@
   white-space: nowrap;
   transition: background-color 120ms ease;
   text-align: left;
-  background: var(--app-bg-primary-soft);
 }
 
 .userBtn:hover {
-  background: var(--app-bg-surface);
+  background: var(--app-bg-primary-soft);
 }
 
 .sidebarCollapsed .userBtn {
@@ -318,7 +317,7 @@
 }
 
 .userName {
-  color: var(--app-primary-faint);
+  color: var(--app-primary);
   font-size: var(--font-size-small);
   font-weight: 600;
   line-height: 1.2;
@@ -328,7 +327,7 @@
 }
 
 .userEmail {
-  color: var(--app-text-subtle);
+  color: var(--app-text-strong);
   font-size: var(--font-size-extra-small);
   line-height: 1.2;
   white-space: nowrap;
