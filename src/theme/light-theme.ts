@@ -1,44 +1,12 @@
 import type { CSSProperties } from "react";
 
-// Midnight Purple Sun
+
+// Mystic Dark Forest
 const palette = [
-  "#000000", "#333333", "#555555",
-  "#1f2041", "#4b3f72", "#ffc857",
-  "#bbbbbb", "#dddddd", "#eeeeee",
-];
-// Blushing Fiery Cinnamon Toast
-const palette5 = [
-  "#8c1c13", "#8c1c13", "#8c1c13",
-  "#bf4342", "#bf4342", "#bf4342",
-  "#e7d7c1", "#e7d7c1", "#e7d7c1",
-];
-// Sweet Peachy Cream
-const palette4 = [
-  "#773344", "#773344", "#773344",
-  "#e3b5a4", "#e3b5a4", "#e3b5a4",
-  "#f5e9e2", "#f5e9e2", "#f5e9e2",
-];
-
-// Ocean Blue Serenity
-const palette3 = [
-  "#000000", "#333333", "#555555",
-  "#427aa1", "#064789", "#ebf2fa",
-  "#bbbbbb", "#dddddd", "#eeeeee",
-];
-
-const palette2 = [
-  "#000000", "#333333", "#555555",
-  "#156064", "#00c49a", "#f8e16c",
-  "#bbbbbb", "#dddddd", "#eeeeee",
-];
-
-const palette1 = [
   "#2e3532", "#2e3532", "#2e3532",
   "#8b2635", "#8b2635", "#8b2635",
   "#e0e2db", "#e0e2db", "#e0e2db",
-]
-
-
+];
 
 // palette[0–2]: near-black → text range (darkest, near-neutral)
 export const blackColors = [palette[0], palette[1], palette[2]] as const;
@@ -133,7 +101,7 @@ const semanticColors = {
   "app-text-inverse": whiteColors[2],
   // Border — palette[6] is the designated border shade; dark-end at low alpha for neutral borders
   // soft: palette[2] (#063977) @ 14% — hairline dividers, table rows
-  "app-border-soft": withAlpha(blackColors[2], 0.14),
+  "app-border-soft": primaryColors[2],
   // strong: palette[1] (#082751) @ 22% — card strokes, input outlines
   "app-border-strong": withAlpha(blackColors[1], 0.22),
   // primary-soft: palette[6] (#76d5fe) @ 35% — border on tinted primary surfaces; lighter than palette[5]

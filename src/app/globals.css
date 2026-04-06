@@ -1,6 +1,6 @@
 :root {
   color-scheme: light;
-  --general-border-radius: 0.6rem;
+  --general-border-radius: 0rem;
   --general-border-radius-2xs: calc(var(--general-border-radius) * 0.286);
   --general-border-radius-xs: calc(var(--general-border-radius) * 0.357);
   --general-border-radius-sm: calc(var(--general-border-radius) * 0.571);
@@ -132,9 +132,7 @@ pre {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  line-height: 1;
   user-select: none;
-  -webkit-font-smoothing: antialiased;
 }
 
 .home {

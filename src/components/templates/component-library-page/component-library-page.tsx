@@ -167,7 +167,6 @@ export function ComponentLibraryPage() {
                     icon={sample.icon}
                     size={32}
                     color={sample.color}
-                    fill={sample.fill}
                   />
                 </div>
                 <div className={styles.iconMeta}>

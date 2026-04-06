@@ -113,9 +113,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
           aria-label={collapsed ? "Sidebar aç" : "Sidebar bağla"}
           className={styles.toggleBtn}
         >
-          <span className={`material-symbols-rounded ${styles.toggleIcon} ${collapsed ? styles.toggleIconCollapsed : ""}`}>
-            left_panel_open
-          </span>
+          <Icon icon="left_panel_open" size={16} color="current" className={`${styles.toggleIcon} ${collapsed ? styles.toggleIconCollapsed : ""}`} />
         </button>
 
         <div className={styles.separator} />
@@ -124,9 +122,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
           {crumbs.map((crumb, i) => (
             <span key={crumb.href} className={styles.crumbItem}>
               {i > 0 && (
-                <span className={`material-symbols-rounded ${styles.crumbSep}`}>
-                  chevron_right
-                </span>
+                <Icon icon="chevron_right" size={14} color="current" className={styles.crumbSep} />
               )}
               {i < crumbs.length - 1 ? (
                 <Link href={crumb.href} className={styles.crumbLink}>
@@ -147,9 +143,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
           title={db.notifications}
           className={`${styles.supportLink} ${notificationsActive ? styles.iconActionActive : ""}`}
         >
-          <span className={`material-symbols-rounded ${styles.supportIcon}`}>
-            notifications
-          </span>
+          <Icon icon="notifications" size={16} color="current" className={styles.supportIcon} />
         </Link>
 
         <div ref={settingsWrapRef} className={styles.settingsWrap}>
@@ -162,9 +156,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
             className={`${styles.settingsTrigger} ${settingsActive || settingsOpen ? styles.iconActionActive : ""}`}
             onClick={() => setSettingsOpen((open) => !open)}
           >
-            <span className={`material-symbols-rounded ${styles.supportIcon}`}>
-              settings
-            </span>
+            <Icon icon="settings" size={16} color="current" className={styles.supportIcon} />
           </button>
 
           {settingsOpen ? (

@@ -50,13 +50,13 @@
 }
 
 .checkbox:checked {
-  border-color: var(--color-black-1);
-  background: var(--color-black-1);
+  border-color: var(--app-primary);
+  background: var(--app-primary);
 }
 
 .checkbox:checked:hover:not(:disabled) {
-  border-color: var(--color-black-2);
-  background: var(--color-black-2);
+  border-color: var(--app-primary-strong);
+  background: var(--app-primary-strong);
 }
 
 .checkbox:checked::after {
@@ -72,8 +72,8 @@
 }
 
 .checkbox:checked:disabled {
-  border-color: var(--color-black-2);
-  background: var(--color-black-2);
+  border-color: var(--app-border-primary-strong);
+  background: var(--app-primary-soft);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -6,11 +6,6 @@ export const fontEmbedMarkup = `
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
 `.trim();
 
-export const iconEmbedMarkup = `
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-`.trim();
 
 type LinkDefinition = {
   href: string;
@@ -117,7 +112,6 @@ const fontSizeScale = {
 
 export const fontLinks = dedupeLinks([
   ...parseLinkTagAttributes(fontEmbedMarkup),
-  ...parseLinkTagAttributes(iconEmbedMarkup),
 ]);
 
 export const typographyTheme = {

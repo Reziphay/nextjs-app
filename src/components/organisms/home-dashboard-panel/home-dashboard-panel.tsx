@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAppSelector } from "@/store/hooks";
 import { selectAuthSession } from "@/store/auth";
 import { useLocale } from "@/components/providers/locale-provider";
+import { Icon } from "@/components/icon";
 import styles from "./home-dashboard-panel.module.css";
 
 export function HomeDashboardPanel() {
@@ -46,9 +47,7 @@ export function HomeDashboardPanel() {
       <div className={styles.cardRow}>
         {quickCards.map((card) => (
           <Link key={card.href} href={card.href} className={styles.card}>
-            <span className={`material-symbols-rounded ${styles.cardIcon}`}>
-              {card.icon}
-            </span>
+            <Icon icon={card.icon} size={16} color="current" className={styles.cardIcon} />
             <div className={styles.cardBody}>
               <p className={styles.cardTitle}>{card.title}</p>
               <p className={styles.cardSub}>{card.description}</p>

@@ -168,16 +168,13 @@
 }
 
 .navIcon {
-  font-size: 0.813rem;
-  min-width: 0.813rem;
+  width: 1rem;
+  height: 1rem;
   flex-shrink: 0;
   color: var(--app-text-strong);
   transition:
     color 120ms ease,
     transform 120ms ease;
-  font-variation-settings:
-    "FILL" 0,
-    "wght" 300;
 }
 
 .navItem:hover .navIcon {
@@ -187,9 +184,6 @@
 
 .navItemActive .navIcon {
   color: var(--app-primary);
-  font-variation-settings:
-    "FILL" 1,
-    "wght" 400;
 }
 
 .navLabel {
@@ -333,9 +327,9 @@
 }
 
 .chevron {
-  font-size: 0.688rem;
+  width: 0.875rem;
+  height: 0.875rem;
   color: var(--app-text-subtle);
-  min-width: 0.688rem;
   flex-shrink: 0;
   opacity: 1;
   transition: opacity 160ms ease;

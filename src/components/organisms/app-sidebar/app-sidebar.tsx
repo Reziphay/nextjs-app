@@ -7,6 +7,7 @@ import { selectAuthSession } from "@/store/auth";
 import { UserAvatar } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import { Logo } from "@/components/logo";
+import { Icon } from "@/components/icon";
 import {
   getDefaultAppRouteForUserType,
   getSidebarRoutesForUserType,
@@ -77,9 +78,7 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
                 className={`${styles.navItem} ${isActive(item.href) ? styles.navItemActive : ""}`}
                 onClick={onClose}
               >
-                <span className={`material-symbols-rounded ${styles.navIcon}`}>
-                  {item.icon}
-                </span>
+                <Icon icon={item.icon} size={16} color="current" className={styles.navIcon} />
                 <span className={styles.navLabel}>{item.label}</span>
               </Link>
             ))}
@@ -113,9 +112,7 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
               </span>
               <span className={styles.userEmail}>{user?.email ?? ""}</span>
             </span>
-            <span className={`material-symbols-rounded ${styles.chevron}`}>
-              unfold_more
-            </span>
+            <Icon icon="unfold_more" size={14} color="current" className={styles.chevron} />
           </button>
         </div>
       </div>

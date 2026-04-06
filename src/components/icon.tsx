@@ -1,4 +1,44 @@
-import type { CSSProperties } from "react";
+import {
+  BadgeCheck,
+  Bell,
+  Bookmark,
+  CalendarCheck,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  ChevronsUpDown,
+  CircleAlert,
+  CircleCheck,
+  CircleHelp,
+  CircleUser,
+  ConciergeBell,
+  Download,
+  GitBranch,
+  Gavel,
+  Heart,
+  Home,
+  LayoutDashboard,
+  LoaderCircle,
+  LogOut,
+  Menu,
+  Minus,
+  PanelLeftOpen,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Save,
+  Scale,
+  Search,
+  Settings,
+  Share2,
+  SquarePen,
+  Tag,
+  Trash2,
+  TriangleAlert,
+  User,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 
 type IconColor =
   | "primary"
@@ -29,28 +69,66 @@ const iconColorMap: Record<IconColor, string> = {
   current: "currentColor",
 };
 
+const iconMap: Record<string, LucideIcon> = {
+  account_circle: CircleUser,
+  account_tree: GitBranch,
+  add: Plus,
+  autorenew: RefreshCw,
+  bookmark: Bookmark,
+  check: Check,
+  check_circle: CircleCheck,
+  chevron_right: ChevronRight,
+  close: X,
+  dashboard: LayoutDashboard,
+  delete: Trash2,
+  download: Download,
+  edit: Pencil,
+  edit_square: SquarePen,
+  error: CircleAlert,
+  event_available: CalendarCheck,
+  expand_more: ChevronDown,
+  favorite: Heart,
+  gavel: Gavel,
+  help: CircleHelp,
+  home: Home,
+  left_panel_open: PanelLeftOpen,
+  logout: LogOut,
+  menu: Menu,
+  notifications: Bell,
+  person: User,
+  progress_activity: LoaderCircle,
+  remove: Minus,
+  room_service: ConciergeBell,
+  save: Save,
+  search: Search,
+  sell: Tag,
+  settings: Settings,
+  share: Share2,
+  unfold_more: ChevronsUpDown,
+  verified: BadgeCheck,
+  warning: TriangleAlert,
+  // aliases
+  scale: Scale,
+};
+
 export function Icon({
   icon,
   size = 16,
   color = "black",
-  fill = false,
   className,
 }: IconProps) {
-  const resolvedSize = Math.max(12, Math.round(size * 0.85));
+  const LucideIconComponent = iconMap[icon];
 
-  const style = {
-    fontSize: `${resolvedSize}px`,
-    color: iconColorMap[color],
-    fontVariationSettings: `'FILL' ${fill ? 1 : 0}, 'wght' 400, 'GRAD' 0, 'opsz' ${Math.max(20, resolvedSize)}`,
-  } satisfies CSSProperties;
+  if (!LucideIconComponent) {
+    return null;
+  }
 
   return (
-    <span
+    <LucideIconComponent
       aria-hidden="true"
-      className={`material-symbols-rounded iconGlyph${className ? ` ${className}` : ""}`}
-      style={style}
-    >
-      {icon}
-    </span>
+      size={size}
+      color={iconColorMap[color]}
+      className={className}
+    />
   );
 }

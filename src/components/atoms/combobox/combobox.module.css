@@ -165,7 +165,7 @@
   justify-content: center;
   padding: 0;
   background: transparent;
-  color: var(--app-text-subtle);
+  color: var(--app-text-inverse);
   cursor: pointer;
 }
 

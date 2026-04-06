@@ -76,7 +76,6 @@ export function Button({
             icon={iconName}
             size={iconSize}
             color="current"
-            fill={isLoading ? false : variant === "icon"}
             className={`${styles.iconGlyph}${isLoading ? ` ${styles.spinning}` : ""}`}
           />
         ) : iconNode ? (

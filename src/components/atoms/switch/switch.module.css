@@ -11,12 +11,13 @@
   position: relative;
   display: inline-flex;
   margin: 0;
-  border: 1px solid var(--app-border-soft);
+  border: 1px solid
+    color-mix(in srgb, var(--color-black-2) 16%, var(--color-white-3) 84%);
   border-radius: var(--general-border-radius-pill);
   background: color-mix(
     in srgb,
-    var(--app-bg-surface-strong) 88%,
-    var(--app-bg-subtle) 12%
+    var(--color-white-3) 94%,
+    var(--color-black-3) 6%
   );
   box-shadow: 0 0 0 0 transparent;
   cursor: pointer;
@@ -34,9 +35,10 @@
   left: var(--switch-padding);
   width: var(--switch-thumb-size);
   height: var(--switch-thumb-size);
-  border: 1px solid var(--app-border-soft);
+  border: 1px solid
+    color-mix(in srgb, var(--color-black-2) 18%, var(--color-white-3) 82%);
   border-radius: var(--general-border-radius-round);
-  background: var(--app-bg-surface-strong);
+  background: var(--color-white-3);
   box-shadow: 0 0.125rem 0.286rem var(--app-shadow-card-soft);
   transform: translate(0, -50%);
   transition:
@@ -47,11 +49,15 @@
 }
 
 .switch:hover:not(:disabled) {
-  border-color: var(--app-border-strong);
+  border-color: color-mix(
+    in srgb,
+    var(--color-black-2) 24%,
+    var(--color-white-3) 76%
+  );
   background: color-mix(
     in srgb,
-    var(--app-bg-surface-strong) 92%,
-    var(--app-bg-subtle) 8%
+    var(--color-white-3) 90%,
+    var(--color-black-3) 10%
   );
 }
 
@@ -66,25 +72,14 @@
 }
 
 .switch:checked {
-  border-color: color-mix(
-    in srgb,
-    var(--app-primary-faint) 56%,
-    var(--app-bg-surface-strong) 44%
-  );
-  background: color-mix(
-    in srgb,
-    var(--app-primary-faint) 24%,
-    var(--app-bg-surface-strong) 76%
-  );
+  border-color: color-mix(in srgb, var(--app-primary) 24%, var(--color-white-3) 76%);
+  background: var(--app-primary-faint);
   box-shadow: 0 0 0 0 transparent;
 }
 
 .switch:checked::after {
-  border-color: color-mix(
-    in srgb,
-    var(--app-primary-faint) 22%,
-    var(--app-border-soft) 78%
-  );
+  border-color: color-mix(in srgb, var(--app-primary) 42%, var(--color-white-3) 58%);
+  background: var(--color-white-3);
   transform: translate(
       calc(var(--switch-width) - var(--switch-thumb-size) - (var(--switch-padding) * 2)),
       -50%
@@ -92,42 +87,46 @@
 }
 
 .switch:checked:hover:not(:disabled) {
-  border-color: color-mix(
-    in srgb,
-    var(--app-primary-faint) 68%,
-    var(--app-bg-surface-strong) 32%
-  );
-  background: color-mix(
-    in srgb,
-    var(--app-primary-faint) 30%,
-    var(--app-bg-surface-strong) 70%
-  );
+  border-color: color-mix(in srgb, var(--app-primary) 34%, var(--color-white-3) 66%);
+  background: var(--app-bg-primary-soft);
 }
 
 .switch:disabled {
-  border-color: var(--app-border-soft);
-  background: var(--app-border-soft);
+  border-color: color-mix(
+    in srgb,
+    var(--color-black-3) 12%,
+    var(--color-white-3) 88%
+  );
+  background: color-mix(
+    in srgb,
+    var(--color-white-2) 92%,
+    var(--color-black-3) 8%
+  );
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 1;
 }
 
 .switch:disabled::after {
-  background: var(--app-bg-surface);
-  border-color: var(--app-border-soft);
+  background: color-mix(
+    in srgb,
+    var(--color-white-3) 94%,
+    var(--color-black-3) 6%
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--color-black-3) 16%,
+    var(--color-white-3) 84%
+  );
   box-shadow: none;
 }
 
 .switch:checked:disabled {
-  border-color: color-mix(
-    in srgb,
-    var(--app-primary-faint) 34%,
-    var(--app-bg-surface-strong) 66%
-  );
-  background: color-mix(
-    in srgb,
-    var(--app-primary-faint) 16%,
-    var(--app-bg-surface-strong) 84%
-  );
+  border-color: color-mix(in srgb, var(--app-primary) 14%, var(--color-white-3) 86%);
+  background: color-mix(in srgb, var(--app-primary-faint) 70%, var(--color-white-3) 30%);
+}
+
+.switch:checked:disabled::after {
+  border-color: color-mix(in srgb, var(--app-primary) 20%, var(--color-white-3) 80%);
 }
 
 .small {

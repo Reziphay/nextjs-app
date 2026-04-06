@@ -59,10 +59,8 @@
   }
 
   .icon {
-    font-size: 0.929rem;
-    font-variation-settings:
-      "FILL" 0,
-      "wght" 300;
+    width: 1.125rem;
+    height: 1.125rem;
   }
 
   .avatar {
@@ -76,9 +74,7 @@
   }
 
   .itemActive .icon {
-    font-variation-settings:
-      "FILL" 1,
-      "wght" 400;
+    color: var(--app-primary);
   }
 
   .itemActive .avatarSurface {

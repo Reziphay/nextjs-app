@@ -7,6 +7,7 @@ import { useLocale } from "@/components/providers/locale-provider";
 import { selectAuthSession } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
 import { getSidebarRoutesForUserType } from "@/lib/app-routes";
+import { Icon } from "@/components/icon";
 import styles from "./dashboard-bottom-nav.module.css";
 
 export function DashboardBottomNav() {
@@ -60,9 +61,7 @@ export function DashboardBottomNav() {
                   surfaceClassName={styles.avatarSurface}
                 />
               ) : (
-                <span className={`material-symbols-rounded ${styles.icon}`}>
-                  {item.icon}
-                </span>
+                <Icon icon={item.icon} size={18} color="current" className={styles.icon} />
               )}
             </Link>
           );

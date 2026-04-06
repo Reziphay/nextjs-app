@@ -2,7 +2,7 @@ import type { HTMLAttributes } from "react";
 import { Icon } from "@/components/icon";
 import styles from "./alert.module.css";
 
-type AlertVariant = "default" | "destructive" | "warning";
+type AlertVariant = "default" | "success" | "destructive" | "warning";
 
 type AlertProps = HTMLAttributes<HTMLDivElement> & {
   icon?: string;
