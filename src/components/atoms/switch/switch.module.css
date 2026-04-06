@@ -1,155 +1,63 @@
-.switch {
-  --switch-width: 2.25rem;
-  --switch-height: 1.25rem;
-  --switch-thumb-size: 0.875rem;
-  --switch-padding: 0.125rem;
-  width: var(--switch-width);
-  height: var(--switch-height);
-  flex-shrink: 0;
-  box-sizing: border-box;
-  appearance: none;
-  position: relative;
-  display: inline-flex;
-  margin: 0;
-  border: 1px solid
-    color-mix(in srgb, var(--color-black-2) 16%, var(--color-white-3) 84%);
-  border-radius: var(--general-border-radius-pill);
-  background: color-mix(
-    in srgb,
-    var(--color-white-3) 94%,
-    var(--color-black-3) 6%
-  );
-  box-shadow: 0 0 0 0 transparent;
-  cursor: pointer;
-  transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease,
-    opacity 160ms ease;
+.wrapper {
+  display: inline-block;
 }
 
-.switch::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: var(--switch-padding);
-  width: var(--switch-thumb-size);
-  height: var(--switch-thumb-size);
-  border: 1px solid
-    color-mix(in srgb, var(--color-black-2) 18%, var(--color-white-3) 82%);
-  border-radius: var(--general-border-radius-round);
-  background: var(--color-white-3);
-  box-shadow: 0 0.125rem 0.286rem var(--app-shadow-card-soft);
-  transform: translate(0, -50%);
-  transition:
-    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease;
-}
-
-.switch:hover:not(:disabled) {
-  border-color: color-mix(
-    in srgb,
-    var(--color-black-2) 24%,
-    var(--color-white-3) 76%
-  );
-  background: color-mix(
-    in srgb,
-    var(--color-white-3) 90%,
-    var(--color-black-3) 10%
-  );
-}
-
-.switch:active:not(:disabled) {
-  box-shadow: 0 0 0 0 transparent;
-}
-
-.switch:focus-visible {
-  outline: none;
-  border-color: var(--app-primary);
-  box-shadow: 0 0 0 0.214rem var(--app-focus-ring);
-}
-
-.switch:checked {
-  border-color: color-mix(in srgb, var(--app-primary) 24%, var(--color-white-3) 76%);
-  background: var(--app-primary-faint);
-  box-shadow: 0 0 0 0 transparent;
-}
-
-.switch:checked::after {
-  border-color: color-mix(in srgb, var(--app-primary) 42%, var(--color-white-3) 58%);
-  background: var(--color-white-3);
-  transform: translate(
-      calc(var(--switch-width) - var(--switch-thumb-size) - (var(--switch-padding) * 2)),
-      -50%
+.checkbox {
+  background-image:
+    linear-gradient(hsla(0, 0%, 0%, 0.1), hsla(0, 0%, 100%, 0.1)),
+    linear-gradient(
+      to right,
+      var(--app-text-strong) 50%,
+      var(--app-primary) 50%
     );
+  background-size:
+    100% 100%,
+    200% 100%;
+  background-position:
+    0 0,
+    15px 0;
+  border-radius: 25px;
+  box-shadow:
+    inset 0 1px 4px hsla(0, 0%, 0%, 0.5),
+    inset 0 0 10px hsla(0, 0%, 0%, 0.5),
+    0 0 0 1px hsla(0, 0%, 0%, 0.1),
+    0 -1px 2px 2px hsla(0, 0%, 0%, 0.25),
+    0 2px 2px 2px hsla(0, 0%, 100%, 0.75);
+  cursor: pointer;
+  height: 25px;
+  padding-right: 25px;
+  width: 75px;
+  appearance: none;
+  transition: 0.25s;
 }
 
-.switch:checked:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--app-primary) 34%, var(--color-white-3) 66%);
-  background: var(--app-bg-primary-soft);
+.checkbox::after {
+  background-color: #eee;
+  background-image: linear-gradient(
+    hsla(0, 0%, 100%, 0.1),
+    hsla(0, 0%, 0%, 0.1)
+  );
+  border-radius: 25px;
+  box-shadow:
+    inset 0 1px 1px 1px hsla(0, 0%, 100%, 1),
+    inset 0 -1px 1px 1px hsla(0, 0%, 0%, 0.25),
+    0 1px 3px 1px hsla(0, 0%, 0%, 0.5),
+    0 0 2px hsla(0, 0%, 0%, 0.25);
+  content: "";
+  display: block;
+  height: 25px;
+  width: 50px;
 }
 
-.switch:disabled {
-  border-color: color-mix(
-    in srgb,
-    var(--color-black-3) 12%,
-    var(--color-white-3) 88%
-  );
-  background: color-mix(
-    in srgb,
-    var(--color-white-2) 92%,
-    var(--color-black-3) 8%
-  );
+.checkbox:disabled {
+  opacity: 0.3;
   cursor: not-allowed;
-  opacity: 1;
 }
 
-.switch:disabled::after {
-  background: color-mix(
-    in srgb,
-    var(--color-white-3) 94%,
-    var(--color-black-3) 6%
-  );
-  border-color: color-mix(
-    in srgb,
-    var(--color-black-3) 16%,
-    var(--color-white-3) 84%
-  );
-  box-shadow: none;
-}
-
-.switch:checked:disabled {
-  border-color: color-mix(in srgb, var(--app-primary) 14%, var(--color-white-3) 86%);
-  background: color-mix(in srgb, var(--app-primary-faint) 70%, var(--color-white-3) 30%);
-}
-
-.switch:checked:disabled::after {
-  border-color: color-mix(in srgb, var(--app-primary) 20%, var(--color-white-3) 80%);
-}
-
-.small {
-  --switch-width: 1.875rem;
-  --switch-height: 1rem;
-  --switch-thumb-size: 0.625rem;
-  --switch-padding: 0.125rem;
-}
-
-.default {
-  --switch-width: 2.25rem;
-  --switch-height: 1.25rem;
-  --switch-thumb-size: 0.875rem;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .switch,
-  .switch::after {
-    transition-duration: 0ms;
-  }
-
-  .switch:hover:not(:disabled),
-  .switch:active:not(:disabled) {
-    box-shadow: 0 0 0 0 transparent;
-  }
+.checkbox:checked {
+  background-position:
+    0 0,
+    35px 0;
+  padding-left: 25px;
+  padding-right: 0;
 }

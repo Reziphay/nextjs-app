@@ -1,28 +1,16 @@
 import { forwardRef, type InputHTMLAttributes } from "react";
 import styles from "./switch.module.css";
 
-type SwitchSize = "small" | "default";
-
-type SwitchProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size"> & {
-  size?: SwitchSize;
-};
-
-function joinClassNames(...classNames: Array<string | undefined>) {
-  return classNames.filter(Boolean).join(" ");
-}
+type SwitchProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type">;
 
 export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
-  { className, size = "default", role = "switch", ...props },
+  { className, ...props },
   ref,
 ) {
   return (
-    <input
-      ref={ref}
-      type="checkbox"
-      role={role}
-      className={joinClassNames(styles.switch, styles[size], className)}
-      {...props}
-    />
+    <div className={`${styles.wrapper}${className ? ` ${className}` : ""}`}>
+      <input ref={ref} type="checkbox" className={styles.checkbox} {...props} />
+    </div>
   );
 });
 
