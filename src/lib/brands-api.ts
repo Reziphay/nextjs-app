@@ -5,11 +5,19 @@ import type { ApiSuccessResponse } from "@/types";
 export type CreateBrandPayload = {
   name: string;
   description?: string;
-  category_ids?: string[];
+  categoryIds?: string[];
+  logo_media_id?: string;
+  gallery_media_ids?: string[];
   branches?: BranchPayload[];
 };
 
-export type UpdateBrandPayload = Partial<CreateBrandPayload>;
+export type UpdateBrandPayload = {
+  name?: string;
+  description?: string;
+  categoryIds?: string[];
+  logo_media_id?: string | null;
+  gallery_media_ids?: string[];
+};
 
 export type BranchPayload = {
   name: string;
@@ -98,6 +106,37 @@ export async function createBrand(
   }
 
   return normalizeBrand(brand);
+}
+
+export async function createBranch(
+  brandId: string,
+  branch: BranchPayload,
+  accessToken: string,
+): Promise<void> {
+  const client = createApiClient({ accessToken });
+  await client.request({
+    url: `/brands/${brandId}/branches`,
+    method: "POST",
+    data: branch,
+  });
+}
+
+export async function uploadBrandMedia(
+  file: File,
+  accessToken: string,
+): Promise<{ media_id: string; url: string }> {
+  const client = createApiClient({ accessToken });
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await client.request<ApiSuccessResponse<{ media_id: string; url: string }>>({
+    url: "/brands/media",
+    method: "POST",
+    data: formData,
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  const data = response.data?.data;
+  if (!data?.media_id) throw new Error("Invalid response from brand media upload API");
+  return data;
 }
 
 export async function updateBrand(

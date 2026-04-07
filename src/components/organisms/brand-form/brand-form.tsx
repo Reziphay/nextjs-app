@@ -15,7 +15,7 @@ import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useAppSelector } from "@/store/hooks";
 import { selectAuthSession } from "@/store/auth";
-import { createBrand, updateBrand } from "@/lib/brands-api";
+import { createBrand, createBranch, updateBrand, uploadBrandMedia } from "@/lib/brands-api";
 import type { Brand, BrandCategory, Branch } from "@/types/brand";
 import { BranchModal } from "./branch-modal";
 import styles from "./brand-form.module.css";
@@ -241,32 +241,55 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
     setFeedback(null);
 
     try {
-      const payload = {
-        name: draft.name.trim(),
-        description: draft.description.trim() || undefined,
-        category_ids: draft.category_ids.length > 0 ? draft.category_ids : undefined,
-        branches: draft.branches.length > 0 ? draft.branches.map((b) => ({
-          name: b.name,
-          description: b.description || undefined,
-          address1: b.address1,
-          address2: b.address2 || undefined,
-          phone: b.phone || undefined,
-          email: b.email || undefined,
-          is_24_7: b.is_24_7,
-          opening: b.opening || undefined,
-          closing: b.closing || undefined,
-          breaks: b.breaks.map((br) => ({ start: br.start, end: br.end })),
-        })) : undefined,
-      };
+      // Upload logo if a new file was selected
+      let logoMediaId: string | undefined;
+      if (draft.logoFile) {
+        const uploaded = await uploadBrandMedia(draft.logoFile, accessToken);
+        logoMediaId = uploaded.media_id;
+      }
+
+      // Upload new gallery files
+      const galleryMediaIds: string[] = [];
+      for (const file of draft.galleryFiles) {
+        const uploaded = await uploadBrandMedia(file, accessToken);
+        galleryMediaIds.push(uploaded.media_id);
+      }
 
       if (mode === "create") {
-        await createBrand(payload, accessToken);
-        setFeedback({
-          type: "success",
-          message: t.createSuccessDescription,
-        });
+        const newBrand = await createBrand({
+          name: draft.name.trim(),
+          description: draft.description.trim() || undefined,
+          categoryIds: draft.category_ids.length > 0 ? draft.category_ids : undefined,
+          logo_media_id: logoMediaId,
+          gallery_media_ids: galleryMediaIds.length > 0 ? galleryMediaIds : undefined,
+        }, accessToken);
+
+        // Create branches sequentially after brand is created
+        for (const b of draft.branches) {
+          await createBranch(newBrand.id, {
+            name: b.name,
+            description: b.description || undefined,
+            address1: b.address1,
+            address2: b.address2 || undefined,
+            phone: b.phone || undefined,
+            email: b.email || undefined,
+            is_24_7: b.is_24_7,
+            opening: b.opening || undefined,
+            closing: b.closing || undefined,
+            breaks: b.breaks.map((br) => ({ start: br.start, end: br.end })),
+          }, accessToken);
+        }
+
+        setFeedback({ type: "success", message: t.createSuccessDescription });
         setDraft(createEmptyDraft());
       } else if (mode === "edit" && brand) {
+        const payload = {
+          name: draft.name.trim(),
+          description: draft.description.trim() || undefined,
+          categoryIds: draft.category_ids.length > 0 ? draft.category_ids : undefined,
+          ...(logoMediaId !== undefined && { logo_media_id: logoMediaId }),
+          ...(galleryMediaIds.length > 0 && { gallery_media_ids: galleryMediaIds }),
+        };
         await updateBrand(brand.id, payload, accessToken);
         setFeedback({ type: "success", message: t.updateSuccessDescription });
       }
