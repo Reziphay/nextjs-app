@@ -9,6 +9,7 @@ import {
   acceptTransfer,
   cancelTransfer,
   rejectTransfer,
+  type AppNotification,
   type BrandTransferListItem,
 } from "@/lib/brands-api";
 import { proxyMediaUrl } from "@/lib/media";
@@ -20,6 +21,7 @@ import styles from "./notification-transfer-page.module.css";
 type NotificationTransferPageProps = {
   initialIncomingTransfers: BrandTransferListItem[];
   initialOutgoingTransfers: BrandTransferListItem[];
+  initialNotifications: AppNotification[];
   userType: UserType;
 };
 
@@ -44,6 +46,7 @@ function getPersonLabel(firstName: string, lastName: string) {
 export function NotificationTransferPage({
   initialIncomingTransfers,
   initialOutgoingTransfers,
+  initialNotifications,
   userType,
 }: NotificationTransferPageProps) {
   const { locale, messages } = useLocale();
@@ -51,6 +54,7 @@ export function NotificationTransferPage({
   const session = useAppSelector(selectAuthSession);
   const [incomingTransfers, setIncomingTransfers] = useState(initialIncomingTransfers);
   const [outgoingTransfers, setOutgoingTransfers] = useState(initialOutgoingTransfers);
+  const [notifications] = useState<AppNotification[]>(initialNotifications);
   const [loadingTransferId, setLoadingTransferId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -119,9 +123,7 @@ export function NotificationTransferPage({
         </div>
       )}
 
-      {!showTransferSections ? (
-        <div className={styles.emptyState}>{t.noTransferNotifications}</div>
-      ) : (
+      {showTransferSections && (
         <>
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
@@ -214,6 +216,13 @@ export function NotificationTransferPage({
                     transfer.to_user.first_name,
                     transfer.to_user.last_name,
                   );
+                  const isPending = transfer.status === "PENDING";
+                  const statusLabel =
+                    transfer.status === "ACCEPTED"
+                      ? t.transferStatusAccepted
+                      : transfer.status === "REJECTED"
+                        ? t.transferStatusRejected
+                        : t.transferStatusPending;
 
                   return (
                     <article key={transfer.id} className={styles.card}>
@@ -229,7 +238,21 @@ export function NotificationTransferPage({
                         </div>
 
                         <div className={styles.cardContent}>
-                          <h3 className={styles.cardTitle}>{transfer.brand.name}</h3>
+                          <div className={styles.cardTitleRow}>
+                            <h3 className={styles.cardTitle}>{transfer.brand.name}</h3>
+                            <span
+                              className={[
+                                styles.statusBadge,
+                                transfer.status === "ACCEPTED"
+                                  ? styles.statusAccepted
+                                  : transfer.status === "REJECTED"
+                                    ? styles.statusRejected
+                                    : styles.statusPending,
+                              ].join(" ")}
+                            >
+                              {statusLabel}
+                            </span>
+                          </div>
                           <p className={styles.cardMeta}>
                             {t.transferRequestedAt}: {requestedDateLabel(transfer.created_at)}
                           </p>
@@ -252,15 +275,17 @@ export function NotificationTransferPage({
                         </div>
                       </div>
 
-                      <div className={styles.actions}>
-                        <Button
-                          variant="outline"
-                          onClick={() => runTransferAction(transfer.id, "cancel")}
-                          isLoading={loadingTransferId === transfer.id}
-                        >
-                          {t.cancelTransfer}
-                        </Button>
-                      </div>
+                      {isPending && (
+                        <div className={styles.actions}>
+                          <Button
+                            variant="outline"
+                            onClick={() => runTransferAction(transfer.id, "cancel")}
+                            isLoading={loadingTransferId === transfer.id}
+                          >
+                            {t.cancelTransfer}
+                          </Button>
+                        </div>
+                      )}
                     </article>
                   );
                 })}
@@ -268,6 +293,39 @@ export function NotificationTransferPage({
             )}
           </section>
         </>
+      )}
+
+      {notifications.length > 0 && (
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>{t.notificationsSection}</h2>
+          </div>
+
+          <div className={styles.notificationList}>
+            {notifications.map((notification) => (
+              <div
+                key={notification.id}
+                className={[
+                  styles.notificationItem,
+                  !notification.read ? styles.notificationUnread : "",
+                ].join(" ")}
+              >
+                <div className={styles.notificationDot} aria-hidden />
+                <div className={styles.notificationBody}>
+                  <p className={styles.notificationTitle}>{notification.title}</p>
+                  <p className={styles.notificationText}>{notification.body}</p>
+                  <p className={styles.notificationDate}>
+                    {requestedDateLabel(notification.created_at)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {notifications.length === 0 && !showTransferSections && (
+        <div className={styles.emptyState}>{t.notificationsEmpty}</div>
       )}
     </div>
   );

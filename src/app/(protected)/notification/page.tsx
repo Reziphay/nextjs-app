@@ -3,6 +3,7 @@ import { NotificationTransferPage } from "@/components/organisms/notification-tr
 import {
   fetchIncomingTransfers,
   fetchOutgoingTransfers,
+  fetchNotifications,
 } from "@/lib/brands-api";
 import { requireProtectedRouteAccess } from "@/lib/protected-route";
 
@@ -11,18 +12,20 @@ export default async function NotificationPage() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("rzp_at")?.value ?? "";
 
-  const [incomingTransfers, outgoingTransfers] =
+  const [incomingTransfers, outgoingTransfers, notifications] =
     user.type === "uso"
       ? await Promise.all([
           fetchIncomingTransfers(accessToken).catch(() => []),
           fetchOutgoingTransfers(accessToken).catch(() => []),
+          fetchNotifications(accessToken).catch(() => []),
         ])
-      : [[], []];
+      : [[], [], await fetchNotifications(accessToken).catch(() => [])];
 
   return (
     <NotificationTransferPage
       initialIncomingTransfers={incomingTransfers}
       initialOutgoingTransfers={outgoingTransfers}
+      initialNotifications={notifications}
       userType={user.type}
     />
   );

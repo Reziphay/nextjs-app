@@ -21,6 +21,7 @@ import {
   AlertDialogCancel,
 } from "@/components/atoms/alert-dialog";
 import { Icon } from "@/components/icon";
+import { Switch } from "@/components/atoms/switch";
 import { useLocale } from "@/components/providers/locale-provider";
 import { proxyMediaUrl } from "@/lib/media";
 import { useAppSelector } from "@/store/hooks";
@@ -37,6 +38,7 @@ import {
   searchUsoUsers,
   fetchBrandById,
   type UserSearchResult,
+  type DeleteBrandPayload,
 } from "@/lib/brands-api";
 import type { Brand, BrandCategory, BrandGalleryItem, Branch } from "@/types/brand";
 import { BranchModal } from "./branch-modal";
@@ -179,15 +181,30 @@ export function BrandForm({
 
   // Transfer modal state
   const [transferModalOpen, setTransferModalOpen] = useState(false);
-  const [transferQuery, setTransferQuery] = useState("");
-  const [transferResults, setTransferResults] = useState<UserSearchResult[]>([]);
-  const [transferSearchLoading, setTransferSearchLoading] = useState(false);
-  const [selectedTransferTarget, setSelectedTransferTarget] = useState<UserSearchResult | null>(null);
   const [transferLoading, setTransferLoading] = useState(false);
+  // Combobox-based async search
+  const [transferComboValue, setTransferComboValue] = useState("");
+  const [transferItems, setTransferItems] = useState<ComboboxOption[]>([]);
+  const [transferItemsMap, setTransferItemsMap] = useState<Map<string, UserSearchResult>>(new Map());
+  const transferSearchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Selection + two-step confirmation
+  const [selectedTransferTarget, setSelectedTransferTarget] = useState<UserSearchResult | null>(null);
+  const [transferConfirmed, setTransferConfirmed] = useState(false);
 
   // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  // Switch: true = also delete services (default); false = keep / transfer services
+  const [deleteAlsoServices, setDeleteAlsoServices] = useState(true);
+  // Which sub-option when switch is OFF
+  const [deleteServiceHandling, setDeleteServiceHandling] = useState<
+    "transfer_services_to_self" | "transfer_services_to_other"
+  >("transfer_services_to_self");
+  // Target user search for "transfer to other" sub-option
+  const [deleteServiceTarget, setDeleteServiceTarget] = useState<UserSearchResult | null>(null);
+  const [deleteServiceQuery, setDeleteServiceQuery] = useState("");
+  const [deleteServiceResults, setDeleteServiceResults] = useState<UserSearchResult[]>([]);
+  const [deleteServiceSearchLoading, setDeleteServiceSearchLoading] = useState(false);
 
   const categoryOptions: ComboboxOption[] = categories.map((c) => ({
     value: c.id,
@@ -510,27 +527,62 @@ export function BrandForm({
 
   // ── Transfer handlers ───────────────────────────────────────────────────────
 
-  async function handleTransferSearch(q: string) {
-    setTransferQuery(q);
+  function resetTransferModalState() {
+    if (transferSearchTimerRef.current) clearTimeout(transferSearchTimerRef.current);
+    setTransferComboValue("");
+    setTransferItems([]);
+    setTransferItemsMap(new Map());
     setSelectedTransferTarget(null);
-    if (q.trim().length < 2) {
-      setTransferResults([]);
+    setTransferConfirmed(false);
+  }
+
+  /** Fires when the user types in the Combobox input (via onInput). Debounced 350ms. */
+  function handleTransferInput(e: React.FormEvent<HTMLInputElement>) {
+    const q = (e.target as HTMLInputElement).value.trim();
+    setSelectedTransferTarget(null);
+    setTransferConfirmed(false);
+
+    if (transferSearchTimerRef.current) clearTimeout(transferSearchTimerRef.current);
+
+    if (q.length < 2) {
+      setTransferItems([]);
+      setTransferItemsMap(new Map());
       return;
     }
-    const accessToken = session.accessToken;
-    if (!accessToken) return;
-    setTransferSearchLoading(true);
-    try {
-      const results = await searchUsoUsers(q, accessToken);
-      setTransferResults(results);
-    } finally {
-      setTransferSearchLoading(false);
-    }
+
+    transferSearchTimerRef.current = setTimeout(async () => {
+      const accessToken = session.accessToken;
+      if (!accessToken) return;
+      try {
+        const results = await searchUsoUsers(q, accessToken);
+        const nextMap = new Map(results.map((u) => [u.id, u]));
+        setTransferItemsMap(nextMap);
+        setTransferItems(
+          results.map((u) => ({
+            value: u.id,
+            label: buildTransferTargetLabel(u),
+            description: u.email,
+            keywords: [u.email ?? "", u.first_name, u.last_name],
+          })),
+        );
+      } catch {
+        /* swallow — user will just see no results */
+      }
+    }, 350);
+  }
+
+  /** Fires when the Combobox selection changes. */
+  function handleTransferValueChange(val: string | string[]) {
+    const id = Array.isArray(val) ? val[0] : val;
+    setTransferComboValue(id ?? "");
+    const user = transferItemsMap.get(id ?? "");
+    setSelectedTransferTarget(user ?? null);
+    setTransferConfirmed(false);
   }
 
   async function handleTransferConfirm() {
     const currentBrand = persistedBrand ?? brand;
-    if (!selectedTransferTarget || !currentBrand) return;
+    if (!selectedTransferTarget || !transferConfirmed || !currentBrand) return;
     const accessToken = session.accessToken;
     if (!accessToken) return;
     setTransferLoading(true);
@@ -538,9 +590,7 @@ export function BrandForm({
       await initiateTransfer(currentBrand.id, selectedTransferTarget.id, accessToken);
       setTransferModalOpen(false);
       setFeedback({ type: "success", message: t.transferSuccessDescription });
-      setSelectedTransferTarget(null);
-      setTransferQuery("");
-      setTransferResults([]);
+      resetTransferModalState();
     } catch (error) {
       setFeedback({ type: "error", message: resolveFeedbackMessage(error) });
     } finally {
@@ -550,16 +600,53 @@ export function BrandForm({
 
   // ── Delete handlers ─────────────────────────────────────────────────────────
 
+  function resetDeleteModalState() {
+    setDeleteAlsoServices(true);
+    setDeleteServiceHandling("transfer_services_to_self");
+    setDeleteServiceTarget(null);
+    setDeleteServiceQuery("");
+    setDeleteServiceResults([]);
+  }
+
+  async function handleDeleteServiceSearch(q: string) {
+    setDeleteServiceQuery(q);
+    setDeleteServiceTarget(null);
+    if (q.trim().length < 2) {
+      setDeleteServiceResults([]);
+      return;
+    }
+    const accessToken = session.accessToken;
+    if (!accessToken) return;
+    setDeleteServiceSearchLoading(true);
+    try {
+      const results = await searchUsoUsers(q, accessToken);
+      setDeleteServiceResults(results);
+    } finally {
+      setDeleteServiceSearchLoading(false);
+    }
+  }
+
   async function handleDeleteConfirm() {
     const currentBrand = persistedBrand ?? brand;
     if (!currentBrand) return;
+    // Guard: "transfer to other" requires a selected recipient
+    if (!deleteAlsoServices && deleteServiceHandling === "transfer_services_to_other" && !deleteServiceTarget) return;
     const accessToken = session.accessToken;
     if (!accessToken) return;
     setDeleteLoading(true);
     try {
-      await deleteBrand(currentBrand.id, {
-        service_handling: "delete",
-      }, accessToken);
+      let payload: DeleteBrandPayload;
+      if (deleteAlsoServices) {
+        payload = { service_handling: "delete_with_services" };
+      } else if (deleteServiceHandling === "transfer_services_to_other") {
+        payload = {
+          service_handling: "transfer_services_to_other",
+          target_user_id: deleteServiceTarget!.id,
+        };
+      } else {
+        payload = { service_handling: "transfer_services_to_self" };
+      }
+      await deleteBrand(currentBrand.id, payload, accessToken);
       setDeleteModalOpen(false);
       router.replace("/brands");
     } catch (error) {
@@ -896,76 +983,191 @@ export function BrandForm({
       )}
 
       {/* Transfer modal */}
-      <AlertDialog open={transferModalOpen} onOpenChange={setTransferModalOpen}>
+      <AlertDialog
+        open={transferModalOpen}
+        onOpenChange={(open) => {
+          setTransferModalOpen(open);
+          if (!open) resetTransferModalState();
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t.transferModalTitle}</AlertDialogTitle>
-            <AlertDialogDescription>{t.transferModalDescription}</AlertDialogDescription>
+            <AlertDialogTitle>
+              {selectedTransferTarget ? t.transferConfirmStepTitle : t.transferModalTitle}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedTransferTarget
+                ? t.transferConfirmStepDescription
+                : t.transferModalDescription}
+            </AlertDialogDescription>
           </AlertDialogHeader>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            <Input
-              value={transferQuery}
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+            {/* Step 1: Combobox search with avatar items */}
+            <Combobox
+              items={transferItems}
+              value={transferComboValue}
               placeholder={t.transferSearchPlaceholder}
-              onChange={(e) => handleTransferSearch(e.target.value)}
+              emptyMessage={
+                transferComboValue.length > 0
+                  ? t.transferNoResults
+                  : t.transferSearchHint
+              }
+              onValueChange={handleTransferValueChange}
+              onInput={handleTransferInput}
+              renderItem={(item) => {
+                const u = transferItemsMap.get(item.value);
+                return (
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <div
+                      style={{
+                        position: "relative",
+                        width: "1.75rem",
+                        height: "1.75rem",
+                        borderRadius: "999px",
+                        overflow: "hidden",
+                        background: "var(--app-bg-surface)",
+                        border: "1px solid var(--app-border)",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Image
+                        src={proxyMediaUrl(u?.avatar_url) ?? "/reziphay-logo.png"}
+                        alt={item.label}
+                        fill
+                        sizes="28px"
+                        style={{ objectFit: "cover" }}
+                      />
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+                      <span style={{ fontSize: "var(--font-size-small)", fontWeight: 600, color: "var(--app-text-strong)" }}>
+                        {item.label}
+                      </span>
+                      {item.description && (
+                        <span style={{ fontSize: "var(--font-size-extra-small)", color: "var(--app-text-muted)" }}>
+                          {item.description}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              }}
             />
-            {transferSearchLoading && (
-              <p style={{ margin: 0, fontSize: "var(--font-size-small)", color: "var(--app-text-muted)" }}>
-                ...
-              </p>
-            )}
-            {transferResults.map((u) => (
-              <button
-                key={u.id}
-                type="button"
-                onClick={() => setSelectedTransferTarget(u)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  padding: "0.5rem",
-                  background: selectedTransferTarget?.id === u.id ? "var(--app-surface-raised)" : "transparent",
-                  border: "1px solid var(--app-border)",
-                  borderRadius: "var(--radius-sm)",
-                  cursor: "pointer",
-                  textAlign: "left",
-                }}
-              >
+
+            {/* Step 2: Confirmation — only shown after a user is selected */}
+            {selectedTransferTarget && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                {/* Selected user summary card */}
                 <div
                   style={{
-                    position: "relative",
-                    width: "2rem",
-                    height: "2rem",
-                    borderRadius: "999px",
-                    overflow: "hidden",
-                    background: "var(--app-bg-surface)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.75rem",
+                    padding: "0.75rem",
+                    background: "var(--app-surface-raised, rgba(0,0,0,0.04))",
+                    borderRadius: "var(--radius-sm)",
                     border: "1px solid var(--app-border)",
-                    flexShrink: 0,
                   }}
                 >
-                  <Image
-                    src={proxyMediaUrl(u.avatar_url) ?? "/reziphay-logo.png"}
-                    alt={buildTransferTargetLabel(u)}
-                    fill
-                    sizes="32px"
-                    style={{ objectFit: "cover" }}
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "2.5rem",
+                      height: "2.5rem",
+                      borderRadius: "999px",
+                      overflow: "hidden",
+                      background: "var(--app-bg-surface)",
+                      border: "1px solid var(--app-border)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Image
+                      src={proxyMediaUrl(selectedTransferTarget.avatar_url) ?? "/reziphay-logo.png"}
+                      alt={buildTransferTargetLabel(selectedTransferTarget)}
+                      fill
+                      sizes="40px"
+                      style={{ objectFit: "cover" }}
+                    />
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.125rem", flex: 1, minWidth: 0 }}>
+                    <span
+                      style={{
+                        fontSize: "var(--font-size-small)",
+                        fontWeight: 700,
+                        color: "var(--app-text-strong)",
+                      }}
+                    >
+                      {t.transferTargetLabel}: {buildTransferTargetLabel(selectedTransferTarget)}
+                    </span>
+                    <span style={{ fontSize: "var(--font-size-extra-small)", color: "var(--app-text-muted)" }}>
+                      {selectedTransferTarget.email}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedTransferTarget(null);
+                      setTransferComboValue("");
+                      setTransferConfirmed(false);
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: "var(--font-size-extra-small)",
+                      color: "var(--app-text-muted)",
+                      flexShrink: 0,
+                      padding: "0.25rem",
+                    }}
+                  >
+                    {t.transferChangeTarget}
+                  </button>
+                </div>
+
+                {/* Brand being transferred */}
+                {(persistedBrand ?? brand) && (
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "var(--font-size-small)",
+                      color: "var(--app-text-muted)",
+                    }}
+                  >
+                    <strong style={{ color: "var(--app-text-strong)" }}>{t.transferBrandLabel}:</strong>{" "}
+                    {(persistedBrand ?? brand)?.name}
+                  </p>
+                )}
+
+                {/* Explicit confirmation checkbox */}
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "0.5rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={transferConfirmed}
+                    onChange={(e) => setTransferConfirmed(e.target.checked)}
+                    style={{ marginTop: "0.125rem", flexShrink: 0, cursor: "pointer" }}
                   />
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.125rem", minWidth: 0 }}>
-                  <span style={{ fontSize: "var(--font-size-small)", fontWeight: 600, color: "var(--app-text-strong)" }}>
-                    {buildTransferTargetLabel(u)}
+                  <span style={{ fontSize: "var(--font-size-small)", color: "var(--app-text-strong)", lineHeight: 1.5 }}>
+                    {t.transferConfirmCheckbox}
                   </span>
-                  <span style={{ fontSize: "var(--font-size-extra-small)", color: "var(--app-text-muted)" }}>
-                    {u.email}
-                  </span>
-                </div>
-              </button>
-            ))}
+                </label>
+              </div>
+            )}
           </div>
+
           <AlertDialogFooter>
-            <AlertDialogCancel>{t.transferCancel}</AlertDialogCancel>
+            <AlertDialogCancel onClick={resetTransferModalState}>
+              {t.transferCancel}
+            </AlertDialogCancel>
             <Button
               variant="primary"
-              disabled={!selectedTransferTarget || transferLoading}
+              disabled={!selectedTransferTarget || !transferConfirmed || transferLoading}
               isLoading={transferLoading}
               onClick={handleTransferConfirm}
             >
@@ -976,17 +1178,199 @@ export function BrandForm({
       </AlertDialog>
 
       {/* Delete modal */}
-      <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+      <AlertDialog
+        open={deleteModalOpen}
+        onOpenChange={(open) => {
+          setDeleteModalOpen(open);
+          if (!open) resetDeleteModalState();
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t.deleteModalTitle}</AlertDialogTitle>
             <AlertDialogDescription>{t.deleteModalDescription}</AlertDialogDescription>
           </AlertDialogHeader>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            {/* Switch: "Also delete all services" */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "0.75rem",
+                padding: "0.625rem 0.75rem",
+                background: "var(--app-surface-raised, rgba(0,0,0,0.04))",
+                borderRadius: "var(--radius-sm)",
+              }}
+            >
+              <span style={{ fontSize: "var(--font-size-small)", fontWeight: 500, color: "var(--app-text-strong)" }}>
+                {t.deleteWithServices}
+              </span>
+              <Switch
+                checked={deleteAlsoServices}
+                onChange={(e) => {
+                  setDeleteAlsoServices(e.target.checked);
+                  if (e.target.checked) {
+                    setDeleteServiceTarget(null);
+                    setDeleteServiceQuery("");
+                    setDeleteServiceResults([]);
+                  }
+                }}
+              />
+            </div>
+
+            {/* Service-handling options — only visible when switch is OFF */}
+            {!deleteAlsoServices && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                {/* Option 1: transfer to self */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeleteServiceHandling("transfer_services_to_self");
+                    setDeleteServiceTarget(null);
+                    setDeleteServiceQuery("");
+                    setDeleteServiceResults([]);
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    padding: "0.5rem 0.75rem",
+                    background: deleteServiceHandling === "transfer_services_to_self"
+                      ? "var(--app-surface-raised)"
+                      : "transparent",
+                    border: `1px solid ${deleteServiceHandling === "transfer_services_to_self" ? "var(--app-accent)" : "var(--app-border)"}`,
+                    borderRadius: "var(--radius-sm)",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    width: "100%",
+                  }}
+                >
+                  <span style={{ fontSize: "var(--font-size-small)", color: "var(--app-text-strong)" }}>
+                    {t.deleteServicesTransferToMe}
+                  </span>
+                </button>
+
+                {/* Option 2: transfer to another USO */}
+                <button
+                  type="button"
+                  onClick={() => setDeleteServiceHandling("transfer_services_to_other")}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    padding: "0.5rem 0.75rem",
+                    background: deleteServiceHandling === "transfer_services_to_other"
+                      ? "var(--app-surface-raised)"
+                      : "transparent",
+                    border: `1px solid ${deleteServiceHandling === "transfer_services_to_other" ? "var(--app-accent)" : "var(--app-border)"}`,
+                    borderRadius: "var(--radius-sm)",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    width: "100%",
+                  }}
+                >
+                  <span style={{ fontSize: "var(--font-size-small)", color: "var(--app-text-strong)" }}>
+                    {t.deleteServicesTransferToOther}
+                  </span>
+                </button>
+
+                {/* User search — only when "transfer to other" is selected */}
+                {deleteServiceHandling === "transfer_services_to_other" && (
+                  <>
+                    <Input
+                      value={deleteServiceQuery}
+                      placeholder={t.transferSearchPlaceholder}
+                      onChange={(e) => handleDeleteServiceSearch(e.target.value)}
+                    />
+                    {deleteServiceSearchLoading && (
+                      <p style={{ margin: 0, fontSize: "var(--font-size-small)", color: "var(--app-text-muted)" }}>
+                        ...
+                      </p>
+                    )}
+                    {deleteServiceResults.map((u) => (
+                      <button
+                        key={u.id}
+                        type="button"
+                        onClick={() => setDeleteServiceTarget(u)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          padding: "0.5rem",
+                          background: deleteServiceTarget?.id === u.id
+                            ? "var(--app-surface-raised)"
+                            : "transparent",
+                          border: `1px solid ${deleteServiceTarget?.id === u.id ? "var(--app-accent)" : "var(--app-border)"}`,
+                          borderRadius: "var(--radius-sm)",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          width: "100%",
+                        }}
+                      >
+                        <div
+                          style={{
+                            position: "relative",
+                            width: "2rem",
+                            height: "2rem",
+                            borderRadius: "999px",
+                            overflow: "hidden",
+                            background: "var(--app-bg-surface)",
+                            border: "1px solid var(--app-border)",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Image
+                            src={proxyMediaUrl(u.avatar_url) ?? "/reziphay-logo.png"}
+                            alt={buildTransferTargetLabel(u)}
+                            fill
+                            sizes="32px"
+                            style={{ objectFit: "cover" }}
+                          />
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.125rem", minWidth: 0 }}>
+                          <span style={{ fontSize: "var(--font-size-small)", fontWeight: 600, color: "var(--app-text-strong)" }}>
+                            {buildTransferTargetLabel(u)}
+                          </span>
+                          <span style={{ fontSize: "var(--font-size-extra-small)", color: "var(--app-text-muted)" }}>
+                            {u.email}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </>
+                )}
+
+                {/* Honest note about service-transfer availability */}
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "var(--font-size-extra-small)",
+                    color: "var(--app-text-muted)",
+                    fontStyle: "italic",
+                  }}
+                >
+                  {t.deleteServiceTransferNote}
+                </p>
+              </div>
+            )}
+          </div>
+
           <AlertDialogFooter>
-            <AlertDialogCancel>{t.deleteCancel}</AlertDialogCancel>
+            <AlertDialogCancel
+              onClick={resetDeleteModalState}
+            >
+              {t.deleteCancel}
+            </AlertDialogCancel>
             <Button
               variant="primary"
-              disabled={deleteLoading}
+              disabled={
+                deleteLoading ||
+                (!deleteAlsoServices &&
+                  deleteServiceHandling === "transfer_services_to_other" &&
+                  !deleteServiceTarget)
+              }
               isLoading={deleteLoading}
               onClick={handleDeleteConfirm}
             >

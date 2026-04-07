@@ -48,7 +48,9 @@ export type UpdateBranchPayload = {
 };
 
 export type DeleteBrandPayload = {
-  service_handling?: "delete";
+  service_handling: "delete_with_services" | "transfer_services_to_self" | "transfer_services_to_other";
+  /** Required when service_handling is "transfer_services_to_other". */
+  target_user_id?: string;
 };
 
 export type BrandMediaUsage = "logo" | "gallery";
@@ -69,6 +71,16 @@ export type BrandTransfer = {
   status: "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED";
   created_at: string;
   updated_at: string;
+};
+
+export type AppNotification = {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  data?: Record<string, unknown> | null;
+  read: boolean;
+  created_at: string;
 };
 
 export type BrandTransferParty = {
@@ -394,4 +406,25 @@ export async function searchUsoUsers(
     params: { q: query },
   });
   return response.data?.data?.users ?? [];
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+export async function fetchNotifications(
+  accessToken: string,
+): Promise<AppNotification[]> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ notifications: AppNotification[] }>>({
+    url: "/notifications",
+    method: "GET",
+  });
+  return response.data?.data?.notifications ?? [];
+}
+
+export async function markNotificationRead(
+  id: string,
+  accessToken: string,
+): Promise<void> {
+  const client = createApiClient({ accessToken });
+  await client.request({ url: `/notifications/${id}/read`, method: "PATCH" });
 }

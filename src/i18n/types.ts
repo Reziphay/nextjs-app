@@ -242,6 +242,15 @@ export type Messages = {
     transferCancel: string;
     transferSuccessTitle: string;
     transferSuccessDescription: string;
+    // Transfer modal — two-step confirmation
+    transferConfirmStepTitle: string;
+    transferConfirmStepDescription: string;
+    transferTargetLabel: string;
+    transferChangeTarget: string;
+    transferBrandLabel: string;
+    transferConfirmCheckbox: string;
+    transferSearchHint: string;
+    transferNoResults: string;
     incomingTransfersTitle: string;
     incomingTransfersDescription: string;
     outgoingTransfersTitle: string;
@@ -258,6 +267,13 @@ export type Messages = {
     transferAcceptedDescription: string;
     transferRejectedDescription: string;
     transferCancelledDescription: string;
+    // Transfer status labels shown on outgoing transfer history cards
+    transferStatusPending: string;
+    transferStatusAccepted: string;
+    transferStatusRejected: string;
+    // Generic notifications section
+    notificationsSection: string;
+    notificationsEmpty: string;
     // Delete
     deleteBrand: string;
     deleteModalTitle: string;
@@ -265,6 +281,8 @@ export type Messages = {
     deleteWithServices: string;
     deleteServicesTransferToMe: string;
     deleteServicesTransferToOther: string;
+    /** Shown below the transfer-to-other and transfer-to-self options while the Service domain is unavailable. */
+    deleteServiceTransferNote: string;
     deleteConfirm: string;
     deleteCancel: string;
     // Feedback messages
