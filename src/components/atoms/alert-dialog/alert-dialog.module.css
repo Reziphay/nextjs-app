@@ -11,7 +11,9 @@
 
 .content {
   width: min(100%, 42rem);
-  display: grid;
+  max-height: calc(100dvh - 3rem);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--app-border-soft);
   border-radius: var(--general-border-radius-5xl);
@@ -25,6 +27,7 @@
 }
 
 .content:has(.media) {
+  display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   grid-template-areas:
     "media header"

@@ -1,6 +1,7 @@
 .layout {
   display: flex;
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
   background: transparent;
   position: relative;
 }
@@ -8,6 +9,8 @@
 /* ── Sidebar wrapper ── */
 .sidebarWrap {
   flex-shrink: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 .body {
@@ -15,12 +18,15 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
 .main {
   flex: 1;
   display: grid;
   justify-items: center;
+  overflow-y: auto;
   background-color: var(--app-background-pattern-base);
   background-image: var(--app-background-pattern-image);
   background-size: var(--app-background-pattern-size)

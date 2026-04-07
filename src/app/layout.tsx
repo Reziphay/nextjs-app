@@ -53,7 +53,7 @@ export default async function RootLayout({
           />
         ))}
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <StoreProvider>{children}</StoreProvider>
       </body>
     </html>

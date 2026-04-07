@@ -1,0 +1,106 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.714rem;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--app-border-soft);
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: var(--font-size-large);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 1.5rem;
+}
+
+/* Card wrapper with overlay actions */
+.cardWrapper {
+  position: relative;
+}
+
+.cardBadge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.editButton {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 1;
+  background: var(--app-bg-surface);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--app-text-muted);
+  transition:
+    color 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.editButton:hover {
+  color: var(--app-primary);
+  border-color: var(--app-primary);
+  background: var(--app-primary-faint);
+}
+
+/* Empty state */
+.empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  border-radius: var(--general-border-radius-card);
+  background: var(--app-bg-surface-strong);
+  border: 1px dashed var(--app-border-soft);
+  text-align: center;
+}
+
+.emptyIcon {
+  color: var(--app-text-muted);
+  opacity: 0.5;
+}
+
+.emptyTitle {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+
+.emptyDescription {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  max-width: 22rem;
+}

@@ -155,6 +155,118 @@ export type Messages = {
     typeUcr: string;
     typeAdmin: string;
   };
+  brands: {
+    // Page titles
+    pageTitle: string;
+    pageDescription: string;
+    // USO view
+    createBrand: string;
+    myBrands: string;
+    noBrandsTitle: string;
+    noBrandsDescription: string;
+    editBrand: string;
+    // UCR view sections
+    topSeller: string;
+    mostRecent: string;
+    bestOfWeek: string;
+    explore: string;
+    noActiveBrands: string;
+    // Status badges
+    statusPending: string;
+    statusActive: string;
+    statusRejected: string;
+    statusClosed: string;
+    // Brand form
+    formCreateTitle: string;
+    formEditTitle: string;
+    formSaveChanges: string;
+    basicInfoSection: string;
+    fieldName: string;
+    fieldNamePlaceholder: string;
+    fieldDescription: string;
+    fieldDescriptionPlaceholder: string;
+    fieldCategories: string;
+    fieldCategoriesPlaceholder: string;
+    noCategoriesFound: string;
+    fieldLogo: string;
+    fieldLogoHint: string;
+    fieldLogoUpload: string;
+    fieldLogoFormatHint: string;
+    fieldGallery: string;
+    fieldGalleryHint: string;
+    fieldGalleryUpload: string;
+    fieldGalleryFormatHint: string;
+    loginRequired: string;
+    errorGeneric: string;
+    // Branches
+    branchesTitle: string;
+    addBranch: string;
+    noBranches: string;
+    branchModalTitle: string;
+    branchModalDescription: string;
+    branchFieldName: string;
+    branchFieldNamePlaceholder: string;
+    branchFieldDescription: string;
+    branchFieldDescriptionPlaceholder: string;
+    branchFieldAddress1: string;
+    branchFieldAddress1Placeholder: string;
+    branchFieldAddress2: string;
+    branchFieldAddress2Placeholder: string;
+    branchFieldPhone: string;
+    branchFieldPhonePlaceholder: string;
+    branchFieldEmail: string;
+    branchFieldEmailPlaceholder: string;
+    branchField247: string;
+    branchFieldOpening: string;
+    branchFieldClosing: string;
+    branchFieldBreaks: string;
+    branchAddBreak: string;
+    branchRemoveBreak: string;
+    branchSave: string;
+    branchCancel: string;
+    deleteBranch: string;
+    // Form actions
+    submit: string;
+    submitting: string;
+    cancelForm: string;
+    // Verification warning
+    verificationRequiredTitle: string;
+    verificationRequiredDescription: string;
+    // Transfer
+    transferBrand: string;
+    transferModalTitle: string;
+    transferModalDescription: string;
+    transferSearchPlaceholder: string;
+    transferConfirm: string;
+    transferCancel: string;
+    transferSuccessTitle: string;
+    transferSuccessDescription: string;
+    // Delete
+    deleteBrand: string;
+    deleteModalTitle: string;
+    deleteModalDescription: string;
+    deleteWithServices: string;
+    deleteServicesTransferToMe: string;
+    deleteServicesTransferToOther: string;
+    deleteConfirm: string;
+    deleteCancel: string;
+    // Feedback messages
+    createSuccessTitle: string;
+    createSuccessDescription: string;
+    updateSuccessTitle: string;
+    updateSuccessDescription: string;
+    deleteSuccessTitle: string;
+    deleteSuccessDescription: string;
+    errorTitle: string;
+    errorDescription: string;
+    networkErrorDescription: string;
+    forbiddenDescription: string;
+    notFoundDescription: string;
+    serverErrorDescription: string;
+    // Validation
+    requiredMessage: string;
+    nameRequiredMessage: string;
+  };
   profile: {
     title: string;
     description: string;

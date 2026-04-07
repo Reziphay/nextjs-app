@@ -34,9 +34,43 @@ function getAllowedDevOrigins() {
   return Array.from(hosts);
 }
 
+function getImageRemotePatterns(): NextConfig["images"]["remotePatterns"] {
+  const apiUrl = resolveEnvValue(
+    process.env.NEXT_PUBLIC_API_URL,
+    process.env.API_URL,
+  );
+
+  const patterns: NextConfig["images"]["remotePatterns"] = [];
+
+  if (apiUrl) {
+    try {
+      const { protocol, hostname, port } = new URL(apiUrl);
+      patterns.push({
+        protocol: protocol.replace(":", "") as "http" | "https",
+        hostname,
+        port: port || undefined,
+        pathname: "/**",
+      });
+    } catch {
+      // invalid URL, skip
+    }
+  }
+
+  // Always allow localhost for local dev
+  patterns.push({ protocol: "http", hostname: "localhost", port: "4027", pathname: "/**" });
+
+  return patterns;
+}
+
 const nextConfig: NextConfig = {
   reactCompiler: true,
   allowedDevOrigins: getAllowedDevOrigins(),
+  images: {
+    localPatterns: [
+      { pathname: "/**" },
+    ],
+    remotePatterns: getImageRemotePatterns(),
+  },
   env: {
     NEXT_PUBLIC_API_URL: resolveEnvValue(
       process.env.NEXT_PUBLIC_API_URL,
