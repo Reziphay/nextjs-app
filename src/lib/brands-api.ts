@@ -1,5 +1,5 @@
 import { createApiClient } from "@/lib/api";
-import type { Brand, BrandCategory } from "@/types/brand";
+import type { Brand, BrandCategory, Branch } from "@/types/brand";
 import type { ApiSuccessResponse } from "@/types";
 
 export type CreateBrandPayload = {
@@ -48,8 +48,7 @@ export type UpdateBranchPayload = {
 };
 
 export type DeleteBrandPayload = {
-  service_handling?: "delete" | "transfer_to_self" | "transfer_to_other";
-  service_target_user_id?: string;
+  service_handling?: "delete";
 };
 
 export type UserSearchResult = {
@@ -70,12 +69,25 @@ export type BrandTransfer = {
   updated_at: string;
 };
 
+function normalizeBranch(branch: Branch): Branch {
+  return {
+    ...branch,
+    description: branch.description ?? undefined,
+    address2: branch.address2 ?? undefined,
+    phone: branch.phone ?? undefined,
+    email: branch.email ?? undefined,
+    opening: branch.opening ?? undefined,
+    closing: branch.closing ?? undefined,
+    breaks: branch.breaks ?? [],
+  };
+}
+
 function normalizeBrand(brand: Brand): Brand {
   return {
     ...brand,
     categories: brand.categories ?? [],
     gallery: brand.gallery ?? [],
-    branches: brand.branches ?? [],
+    branches: (brand.branches ?? []).map(normalizeBranch),
   };
 }
 
@@ -178,13 +190,18 @@ export async function createBranch(
   brandId: string,
   branch: BranchPayload,
   accessToken: string,
-): Promise<void> {
+): Promise<Branch> {
   const client = createApiClient({ accessToken });
-  await client.request({
+  const response = await client.request<ApiSuccessResponse<{ branch: Branch }>>({
     url: `/brands/${brandId}/branches`,
     method: "POST",
     data: branch,
   });
+  const createdBranch = response.data?.data?.branch;
+  if (!createdBranch) {
+    throw new Error("Invalid response from create branch API");
+  }
+  return normalizeBranch(createdBranch);
 }
 
 export async function updateBranch(
@@ -192,13 +209,18 @@ export async function updateBranch(
   branchId: string,
   payload: UpdateBranchPayload,
   accessToken: string,
-): Promise<void> {
+): Promise<Branch> {
   const client = createApiClient({ accessToken });
-  await client.request({
+  const response = await client.request<ApiSuccessResponse<{ branch: Branch }>>({
     url: `/brands/${brandId}/branches/${branchId}`,
     method: "PATCH",
     data: payload,
   });
+  const updatedBranch = response.data?.data?.branch;
+  if (!updatedBranch) {
+    throw new Error("Invalid response from update branch API");
+  }
+  return normalizeBranch(updatedBranch);
 }
 
 export async function deleteBranchApi(

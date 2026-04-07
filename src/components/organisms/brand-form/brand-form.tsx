@@ -34,10 +34,10 @@ import {
   deleteBrand,
   initiateTransfer,
   searchUsoUsers,
+  fetchBrandById,
   type UserSearchResult,
-  type DeleteBrandPayload,
 } from "@/lib/brands-api";
-import type { Brand, BrandCategory, BrandGalleryItem } from "@/types/brand";
+import type { Brand, BrandCategory, BrandGalleryItem, Branch } from "@/types/brand";
 import { BranchModal } from "./branch-modal";
 import styles from "./brand-form.module.css";
 
@@ -120,6 +120,18 @@ function brandToDraft(brand: Brand): BrandFormDraft {
   };
 }
 
+function revokeDraftObjectUrls(draft: BrandFormDraft) {
+  if (draft.logoPreviewUrl?.startsWith("blob:")) {
+    URL.revokeObjectURL(draft.logoPreviewUrl);
+  }
+
+  for (const url of draft.newGalleryPreviewUrls) {
+    if (url.startsWith("blob:")) {
+      URL.revokeObjectURL(url);
+    }
+  }
+}
+
 type CropTarget = {
   file: File;
   aspectRatio: "1:1" | "16:9";
@@ -137,6 +149,9 @@ export function BrandForm({
   const { messages } = useLocale();
   const t = messages.brands;
   const session = useAppSelector(selectAuthSession);
+  const [persistedBrand, setPersistedBrand] = useState<Brand | null>(
+    mode === "edit" ? brand ?? null : null,
+  );
 
   const [draft, setDraft] = useState<BrandFormDraft>(
     mode === "edit" && brand ? brandToDraft(brand) : createEmptyDraft(),
@@ -167,11 +182,6 @@ export function BrandForm({
 
   // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [deleteServiceHandling, setDeleteServiceHandling] = useState<DeleteBrandPayload["service_handling"]>("delete");
-  const [deleteTargetQuery, setDeleteTargetQuery] = useState("");
-  const [deleteTargetResults, setDeleteTargetResults] = useState<UserSearchResult[]>([]);
-  const [deleteTargetSearchLoading, setDeleteTargetSearchLoading] = useState(false);
-  const [selectedDeleteTarget, setSelectedDeleteTarget] = useState<UserSearchResult | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const categoryOptions: ComboboxOption[] = categories.map((c) => ({
@@ -188,6 +198,13 @@ export function BrandForm({
   ) {
     setDraft((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: undefined }));
+  }
+
+  function resetDraft(nextDraft: BrandFormDraft) {
+    setDraft((prev) => {
+      revokeDraftObjectUrls(prev);
+      return nextDraft;
+    });
   }
 
   function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -317,6 +334,8 @@ export function BrandForm({
 
     setIsLoading(true);
     setFeedback(null);
+    const currentBrand = mode === "edit" ? (persistedBrand ?? brand ?? null) : null;
+    let didMutateServerState = false;
 
     try {
       // Upload new logo if selected
@@ -360,21 +379,26 @@ export function BrandForm({
         }
 
         setFeedback({ type: "success", message: t.createSuccessDescription });
-        setDraft(createEmptyDraft());
-      } else if (mode === "edit" && brand) {
+        resetDraft(createEmptyDraft());
+      } else if (mode === "edit" && currentBrand) {
+        const trimmedDescription = draft.description.trim();
+
         // Build full gallery: keep remaining existing items + new uploads
         const existingMediaIds = draft.existingGalleryItems.map((g) => g.media_id);
         const allGalleryIds = [...existingMediaIds, ...newGalleryMediaIds];
 
         // Only include gallery_media_ids in payload if anything changed
         const galleryChanged =
-          existingMediaIds.length !== (brand.gallery ?? []).length ||
+          existingMediaIds.length !== (currentBrand.gallery ?? []).length ||
+          existingMediaIds.some(
+            (mediaId, index) => mediaId !== currentBrand.gallery?.[index]?.media_id,
+          ) ||
           newGalleryMediaIds.length > 0;
 
         const payload = {
           name: draft.name.trim(),
-          description: draft.description.trim() || undefined,
-          categoryIds: draft.category_ids.length > 0 ? draft.category_ids : undefined,
+          description: trimmedDescription.length > 0 ? trimmedDescription : null,
+          categoryIds: draft.category_ids,
           // Logo: new file takes precedence; removal sends null; no change omits field
           ...(logoMediaId !== undefined
             ? { logo_media_id: logoMediaId }
@@ -383,23 +407,26 @@ export function BrandForm({
               : {}),
           ...(galleryChanged ? { gallery_media_ids: allGalleryIds } : {}),
         };
-        await updateBrand(brand.id, payload, accessToken);
+        const updatedBrand = await updateBrand(currentBrand.id, payload, accessToken);
+        didMutateServerState = true;
 
-        // Branch CRUD: diff against original brand branches
-        const originalIds = new Set((brand.branches ?? []).map((b) => b.id));
+        // Branch CRUD: diff against the latest persisted server snapshot
+        const originalIds = new Set((currentBrand.branches ?? []).map((b) => b.id));
         const currentIds = new Set(draft.branches.filter((b) => b.id).map((b) => b.id!));
+        const nextPersistedBranches: Branch[] = [];
 
         // Delete removed branches
         for (const origId of originalIds) {
           if (!currentIds.has(origId)) {
-            await deleteBranchApi(brand.id, origId, accessToken);
+            await deleteBranchApi(currentBrand.id, origId, accessToken);
+            didMutateServerState = true;
           }
         }
 
         // Update existing / create new
         for (const b of draft.branches) {
           if (b.id && originalIds.has(b.id)) {
-            await updateBranch(brand.id, b.id, {
+            const updatedBranchDraft = await updateBranch(currentBrand.id, b.id, {
               name: b.name,
               description: b.description ?? null,
               address1: b.address1,
@@ -411,8 +438,10 @@ export function BrandForm({
               closing: b.is_24_7 ? null : (b.closing ?? null),
               breaks: b.breaks.map((br) => ({ start: br.start, end: br.end })),
             }, accessToken);
+            nextPersistedBranches.push(updatedBranchDraft);
+            didMutateServerState = true;
           } else if (!b.id) {
-            await createBranch(brand.id, {
+            const createdBranch = await createBranch(currentBrand.id, {
               name: b.name,
               description: b.description || undefined,
               address1: b.address1,
@@ -424,12 +453,33 @@ export function BrandForm({
               closing: b.closing || undefined,
               breaks: b.breaks.map((br) => ({ start: br.start, end: br.end })),
             }, accessToken);
+            nextPersistedBranches.push(createdBranch);
+            didMutateServerState = true;
           }
         }
 
+        const nextPersistedBrand: Brand = {
+          ...updatedBrand,
+          branches: nextPersistedBranches,
+        };
+
+        setPersistedBrand(nextPersistedBrand);
+        resetDraft(brandToDraft(nextPersistedBrand));
         setFeedback({ type: "success", message: t.updateSuccessDescription });
       }
     } catch (error) {
+      if (mode === "edit" && currentBrand && didMutateServerState) {
+        try {
+          const refreshedBrand = await fetchBrandById(currentBrand.id, accessToken);
+          if (refreshedBrand) {
+            setPersistedBrand(refreshedBrand);
+            resetDraft(brandToDraft(refreshedBrand));
+          }
+        } catch {
+          // Preserve the current draft when the resync request also fails.
+        }
+      }
+
       const message = isAxiosError(error)
         ? (error.response?.data?.message as string) ?? t.errorGeneric
         : t.errorGeneric;
@@ -487,34 +537,15 @@ export function BrandForm({
 
   // ── Delete handlers ─────────────────────────────────────────────────────────
 
-  async function handleDeleteTargetSearch(q: string) {
-    setDeleteTargetQuery(q);
-    setSelectedDeleteTarget(null);
-    if (q.trim().length < 2) {
-      setDeleteTargetResults([]);
-      return;
-    }
-    const accessToken = session.accessToken;
-    if (!accessToken) return;
-    setDeleteTargetSearchLoading(true);
-    try {
-      const results = await searchUsoUsers(q, accessToken);
-      setDeleteTargetResults(results);
-    } finally {
-      setDeleteTargetSearchLoading(false);
-    }
-  }
-
   async function handleDeleteConfirm() {
-    if (!brand) return;
-    if (deleteServiceHandling === "transfer_to_other" && !selectedDeleteTarget) return;
+    const currentBrand = persistedBrand ?? brand;
+    if (!currentBrand) return;
     const accessToken = session.accessToken;
     if (!accessToken) return;
     setDeleteLoading(true);
     try {
-      await deleteBrand(brand.id, {
-        service_handling: deleteServiceHandling,
-        service_target_user_id: selectedDeleteTarget?.id,
+      await deleteBrand(currentBrand.id, {
+        service_handling: "delete",
       }, accessToken);
       setDeleteModalOpen(false);
       router.replace("/brands");
@@ -795,7 +826,7 @@ export function BrandForm({
             {t.cancelForm}
           </Button>
 
-          {mode === "edit" && brand && (
+          {mode === "edit" && (persistedBrand ?? brand) && (
             <>
               <Button
                 variant="outline"
@@ -916,84 +947,11 @@ export function BrandForm({
             <AlertDialogTitle>{t.deleteModalTitle}</AlertDialogTitle>
             <AlertDialogDescription>{t.deleteModalDescription}</AlertDialogDescription>
           </AlertDialogHeader>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            {(
-              [
-                { value: "delete", label: t.deleteWithServices },
-                { value: "transfer_to_self", label: t.deleteServicesTransferToMe },
-                { value: "transfer_to_other", label: t.deleteServicesTransferToOther },
-              ] as const
-            ).map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => {
-                  setDeleteServiceHandling(opt.value);
-                  setSelectedDeleteTarget(null);
-                  setDeleteTargetQuery("");
-                  setDeleteTargetResults([]);
-                }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  padding: "0.5rem",
-                  background: deleteServiceHandling === opt.value ? "var(--app-surface-raised)" : "transparent",
-                  border: "1px solid var(--app-border)",
-                  borderRadius: "var(--radius-sm)",
-                  cursor: "pointer",
-                  textAlign: "left",
-                }}
-              >
-                <span style={{ fontSize: "var(--font-size-small)" }}>{opt.label}</span>
-              </button>
-            ))}
-
-            {deleteServiceHandling === "transfer_to_other" && (
-              <>
-                <Input
-                  value={deleteTargetQuery}
-                  placeholder={t.transferSearchPlaceholder}
-                  onChange={(e) => handleDeleteTargetSearch(e.target.value)}
-                />
-                {deleteTargetSearchLoading && (
-                  <p style={{ margin: 0, fontSize: "var(--font-size-small)", color: "var(--app-text-muted)" }}>
-                    ...
-                  </p>
-                )}
-                {deleteTargetResults.map((u) => (
-                  <button
-                    key={u.id}
-                    type="button"
-                    onClick={() => setSelectedDeleteTarget(u)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                      padding: "0.5rem",
-                      background: selectedDeleteTarget?.id === u.id ? "var(--app-surface-raised)" : "transparent",
-                      border: "1px solid var(--app-border)",
-                      borderRadius: "var(--radius-sm)",
-                      cursor: "pointer",
-                      textAlign: "left",
-                    }}
-                  >
-                    <span style={{ fontSize: "var(--font-size-small)" }}>
-                      {u.first_name} {u.last_name} — {u.email}
-                    </span>
-                  </button>
-                ))}
-              </>
-            )}
-          </div>
           <AlertDialogFooter>
             <AlertDialogCancel>{t.deleteCancel}</AlertDialogCancel>
             <Button
               variant="primary"
-              disabled={
-                deleteLoading ||
-                (deleteServiceHandling === "transfer_to_other" && !selectedDeleteTarget)
-              }
+              disabled={deleteLoading}
               isLoading={deleteLoading}
               onClick={handleDeleteConfirm}
             >
