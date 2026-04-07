@@ -123,7 +123,8 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
                     name: authorName,
                     avatar: authorAvatar,
                   }}
-                  rating={brand.rating ?? 0}
+                  rating={brand.rating}
+                  ratingCount={brand.rating_count}
                   onClick={() => handleViewBrand(brand.id)}
                 />
               </div>

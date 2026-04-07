@@ -6,7 +6,8 @@ type BrandCardProps = {
   title: string;
   description: string;
   author: { name: string; avatar: string };
-  rating: number;
+  rating: number | null;
+  ratingCount?: number;
   maxRating?: number;
   onClick?: () => void;
 };
@@ -63,6 +64,7 @@ export function BrandCard({
   description,
   author,
   rating,
+  ratingCount = 0,
   maxRating = 5,
   onClick,
 }: BrandCardProps) {
@@ -110,10 +112,12 @@ export function BrandCard({
             />
             <span className={styles.authorName}>{author.name}</span>
           </div>
-          <div className={styles.rating}>
-            <span className={styles.ratingText}>{rating}/{maxRating}</span>
-            <StarRating rating={rating} max={maxRating} />
-          </div>
+          {typeof rating === "number" && ratingCount > 0 && (
+            <div className={styles.rating}>
+              <span className={styles.ratingText}>{rating.toFixed(1)}/{maxRating}</span>
+              <StarRating rating={rating} max={maxRating} />
+            </div>
+          )}
         </div>
       </div>
     </article>

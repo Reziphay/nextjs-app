@@ -49,7 +49,8 @@ function BrandGrid({
             name: brand.name,
             avatar: proxyMediaUrl(brand.logo_url) ?? "/reziphay-logo.png",
           }}
-          rating={brand.rating ?? 0}
+          rating={brand.rating}
+          ratingCount={brand.rating_count}
           onClick={() => onSelect(brand.id)}
         />
       ))}
@@ -57,28 +58,49 @@ function BrandGrid({
   );
 }
 
-function buildSections(brands: Brand[], t: { mostRecent: string; explore: string }): BrandSection[] {
+function buildSections(
+  brands: Brand[],
+  t: { topRated: string; mostRecent: string; explore: string },
+): BrandSection[] {
   const recent = [...brands].sort(
     (a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
+  const topRated = [...brands]
+    .filter((brand) => typeof brand.rating === "number" && brand.rating_count > 0)
+    .sort((a, b) => {
+      const ratingDiff = (b.rating ?? 0) - (a.rating ?? 0);
+      if (ratingDiff !== 0) return ratingDiff;
+      return b.rating_count - a.rating_count;
+    });
 
-  // Rating-based sections (Top Seller, Best of Week) are intentionally omitted until
-  // real rating data is available from user reviews.
-  return [
+  const sections: BrandSection[] = [];
+
+  if (topRated.length > 0) {
+    sections.push({
+      key: "top-rated",
+      title: t.topRated,
+      icon: "verified",
+      brands: topRated.slice(0, 8),
+    });
+  }
+
+  sections.push(
     {
       key: "most-recent",
       title: t.mostRecent,
-      icon: "schedule",
+      icon: "autorenew",
       brands: recent.slice(0, 8),
     },
     {
       key: "explore",
       title: t.explore,
-      icon: "explore",
+      icon: "search",
       brands: brands.slice(0, 16),
     },
-  ];
+  );
+
+  return sections;
 }
 
 export function BrandsUcrPage({ brands }: BrandsUcrPageProps) {

@@ -167,6 +167,7 @@ export type Messages = {
     editBrand: string;
     // UCR view sections
     topSeller: string;
+    topRated: string;
     mostRecent: string;
     bestOfWeek: string;
     explore: string;
@@ -241,6 +242,22 @@ export type Messages = {
     transferCancel: string;
     transferSuccessTitle: string;
     transferSuccessDescription: string;
+    incomingTransfersTitle: string;
+    incomingTransfersDescription: string;
+    outgoingTransfersTitle: string;
+    outgoingTransfersDescription: string;
+    noIncomingTransfers: string;
+    noOutgoingTransfers: string;
+    noTransferNotifications: string;
+    transferFrom: string;
+    transferTo: string;
+    transferRequestedAt: string;
+    acceptTransfer: string;
+    rejectTransfer: string;
+    cancelTransfer: string;
+    transferAcceptedDescription: string;
+    transferRejectedDescription: string;
+    transferCancelledDescription: string;
     // Delete
     deleteBrand: string;
     deleteModalTitle: string;
@@ -263,6 +280,12 @@ export type Messages = {
     forbiddenDescription: string;
     notFoundDescription: string;
     serverErrorDescription: string;
+    logoRatioError: string;
+    galleryRatioError: string;
+    noRatingsYet: string;
+    rateBrand: string;
+    yourRating: string;
+    ratingSavedDescription: string;
     // Validation
     requiredMessage: string;
     nameRequiredMessage: string;

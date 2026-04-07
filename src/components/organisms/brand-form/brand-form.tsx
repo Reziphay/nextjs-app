@@ -22,6 +22,7 @@ import {
 } from "@/components/atoms/alert-dialog";
 import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
+import { proxyMediaUrl } from "@/lib/media";
 import { useAppSelector } from "@/store/hooks";
 import { selectAuthSession } from "@/store/auth";
 import {
@@ -130,6 +131,10 @@ function revokeDraftObjectUrls(draft: BrandFormDraft) {
       URL.revokeObjectURL(url);
     }
   }
+}
+
+function buildTransferTargetLabel(user: UserSearchResult) {
+  return `${user.first_name} ${user.last_name}`.trim();
 }
 
 type CropTarget = {
@@ -322,6 +327,21 @@ export function BrandForm({
     return Object.keys(nextErrors).length === 0;
   }
 
+  function resolveFeedbackMessage(error: unknown): string {
+    const apiMessage = isAxiosError(error)
+      ? (error.response?.data?.message as string | undefined)
+      : undefined;
+
+    switch (apiMessage) {
+      case "media.invalid_logo_ratio":
+        return t.logoRatioError;
+      case "media.invalid_gallery_ratio":
+        return t.galleryRatioError;
+      default:
+        return apiMessage ?? t.errorGeneric;
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
@@ -341,14 +361,14 @@ export function BrandForm({
       // Upload new logo if selected
       let logoMediaId: string | undefined;
       if (draft.logoFile) {
-        const uploaded = await uploadBrandMedia(draft.logoFile, accessToken);
+        const uploaded = await uploadBrandMedia(draft.logoFile, accessToken, "logo");
         logoMediaId = uploaded.media_id;
       }
 
       // Upload new gallery files
       const newGalleryMediaIds: string[] = [];
       for (const file of draft.newGalleryFiles) {
-        const uploaded = await uploadBrandMedia(file, accessToken);
+        const uploaded = await uploadBrandMedia(file, accessToken, "gallery");
         newGalleryMediaIds.push(uploaded.media_id);
       }
 
@@ -358,25 +378,23 @@ export function BrandForm({
         const newBrand = await createBrand({
           name: draft.name.trim(),
           description: draft.description.trim() || undefined,
-          categoryIds: draft.category_ids.length > 0 ? draft.category_ids : undefined,
+          categoryIds: draft.category_ids,
           logo_media_id: logoMediaId,
           gallery_media_ids: allGalleryIds.length > 0 ? allGalleryIds : undefined,
+          branches: draft.branches.map((branch) => ({
+            name: branch.name,
+            description: branch.description || undefined,
+            address1: branch.address1,
+            address2: branch.address2 || undefined,
+            phone: branch.phone || undefined,
+            email: branch.email || undefined,
+            is_24_7: branch.is_24_7,
+            opening: branch.is_24_7 ? undefined : (branch.opening || undefined),
+            closing: branch.is_24_7 ? undefined : (branch.closing || undefined),
+            breaks: branch.breaks.map((item) => ({ start: item.start, end: item.end })),
+          })),
         }, accessToken);
-
-        for (const b of draft.branches) {
-          await createBranch(newBrand.id, {
-            name: b.name,
-            description: b.description || undefined,
-            address1: b.address1,
-            address2: b.address2 || undefined,
-            phone: b.phone || undefined,
-            email: b.email || undefined,
-            is_24_7: b.is_24_7,
-            opening: b.opening || undefined,
-            closing: b.closing || undefined,
-            breaks: b.breaks.map((br) => ({ start: br.start, end: br.end })),
-          }, accessToken);
-        }
+        void newBrand;
 
         setFeedback({ type: "success", message: t.createSuccessDescription });
         resetDraft(createEmptyDraft());
@@ -480,10 +498,7 @@ export function BrandForm({
         }
       }
 
-      const message = isAxiosError(error)
-        ? (error.response?.data?.message as string) ?? t.errorGeneric
-        : t.errorGeneric;
-      setFeedback({ type: "error", message });
+      setFeedback({ type: "error", message: resolveFeedbackMessage(error) });
     } finally {
       setIsLoading(false);
     }
@@ -514,22 +529,20 @@ export function BrandForm({
   }
 
   async function handleTransferConfirm() {
-    if (!selectedTransferTarget || !brand) return;
+    const currentBrand = persistedBrand ?? brand;
+    if (!selectedTransferTarget || !currentBrand) return;
     const accessToken = session.accessToken;
     if (!accessToken) return;
     setTransferLoading(true);
     try {
-      await initiateTransfer(brand.id, selectedTransferTarget.id, accessToken);
+      await initiateTransfer(currentBrand.id, selectedTransferTarget.id, accessToken);
       setTransferModalOpen(false);
       setFeedback({ type: "success", message: t.transferSuccessDescription });
       setSelectedTransferTarget(null);
       setTransferQuery("");
       setTransferResults([]);
     } catch (error) {
-      const message = isAxiosError(error)
-        ? (error.response?.data?.message as string) ?? t.errorGeneric
-        : t.errorGeneric;
-      setFeedback({ type: "error", message });
+      setFeedback({ type: "error", message: resolveFeedbackMessage(error) });
     } finally {
       setTransferLoading(false);
     }
@@ -550,10 +563,7 @@ export function BrandForm({
       setDeleteModalOpen(false);
       router.replace("/brands");
     } catch (error) {
-      const message = isAxiosError(error)
-        ? (error.response?.data?.message as string) ?? t.errorGeneric
-        : t.errorGeneric;
-      setFeedback({ type: "error", message });
+      setFeedback({ type: "error", message: resolveFeedbackMessage(error) });
     } finally {
       setDeleteLoading(false);
     }
@@ -649,7 +659,7 @@ export function BrandForm({
           {draft.logoPreviewUrl ? (
             <div className={styles.logoPreview}>
               <Image
-                src={draft.logoPreviewUrl}
+                src={proxyMediaUrl(draft.logoPreviewUrl) ?? draft.logoPreviewUrl}
                 alt="Logo preview"
                 fill
                 className={styles.previewImage}
@@ -725,7 +735,7 @@ export function BrandForm({
               {allGalleryPreviews.map(({ url, isExisting, index }) => (
                 <div key={url} className={styles.galleryPreviewItem}>
                   <Image
-                    src={url}
+                    src={proxyMediaUrl(url) ?? url}
                     alt={`Gallery ${index + 1}`}
                     fill
                     className={styles.previewImage}
@@ -920,9 +930,34 @@ export function BrandForm({
                   textAlign: "left",
                 }}
               >
-                <span style={{ fontSize: "var(--font-size-small)" }}>
-                  {u.first_name} {u.last_name} — {u.email}
-                </span>
+                <div
+                  style={{
+                    position: "relative",
+                    width: "2rem",
+                    height: "2rem",
+                    borderRadius: "999px",
+                    overflow: "hidden",
+                    background: "var(--app-bg-surface)",
+                    border: "1px solid var(--app-border)",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Image
+                    src={proxyMediaUrl(u.avatar_url) ?? "/reziphay-logo.png"}
+                    alt={buildTransferTargetLabel(u)}
+                    fill
+                    sizes="32px"
+                    style={{ objectFit: "cover" }}
+                  />
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.125rem", minWidth: 0 }}>
+                  <span style={{ fontSize: "var(--font-size-small)", fontWeight: 600, color: "var(--app-text-strong)" }}>
+                    {buildTransferTargetLabel(u)}
+                  </span>
+                  <span style={{ fontSize: "var(--font-size-extra-small)", color: "var(--app-text-muted)" }}>
+                    {u.email}
+                  </span>
+                </div>
               </button>
             ))}
           </div>

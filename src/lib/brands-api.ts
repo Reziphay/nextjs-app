@@ -51,6 +51,8 @@ export type DeleteBrandPayload = {
   service_handling?: "delete";
 };
 
+export type BrandMediaUsage = "logo" | "gallery";
+
 export type UserSearchResult = {
   id: string;
   first_name: string;
@@ -67,6 +69,32 @@ export type BrandTransfer = {
   status: "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED";
   created_at: string;
   updated_at: string;
+};
+
+export type BrandTransferParty = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  avatar_url?: string | null;
+};
+
+export type BrandTransferBrandSummary = {
+  id: string;
+  name: string;
+  logo_url?: string | null;
+};
+
+export type BrandTransferListItem = {
+  id: string;
+  brand_id: string;
+  from_user_id: string;
+  to_user_id: string;
+  status: "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED";
+  created_at: string;
+  updated_at: string;
+  brand: BrandTransferBrandSummary;
+  from_user: BrandTransferParty;
+  to_user: BrandTransferParty;
 };
 
 function normalizeBranch(branch: Branch): Branch {
@@ -88,6 +116,9 @@ function normalizeBrand(brand: Brand): Brand {
     categories: brand.categories ?? [],
     gallery: brand.gallery ?? [],
     branches: (brand.branches ?? []).map(normalizeBranch),
+    rating: brand.rating ?? null,
+    rating_count: brand.rating_count ?? 0,
+    my_rating: brand.my_rating ?? null,
   };
 }
 
@@ -240,10 +271,14 @@ export async function deleteBranchApi(
 export async function uploadBrandMedia(
   file: File,
   accessToken: string,
+  usage?: BrandMediaUsage,
 ): Promise<{ media_id: string; url: string }> {
   const client = createApiClient({ accessToken });
   const formData = new FormData();
   formData.append("file", file);
+  if (usage) {
+    formData.append("usage", usage);
+  }
   const response = await client.request<ApiSuccessResponse<{ media_id: string; url: string }>>({
     url: "/brands/media",
     method: "POST",
@@ -304,6 +339,45 @@ export async function cancelTransfer(
     url: `/brands/transfers/${transferId}/cancel`,
     method: "PATCH",
   });
+}
+
+export async function fetchIncomingTransfers(
+  accessToken: string,
+): Promise<BrandTransferListItem[]> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ transfers: BrandTransferListItem[] }>>({
+    url: "/brands/transfers/incoming",
+    method: "GET",
+  });
+  return response.data?.data?.transfers ?? [];
+}
+
+export async function fetchOutgoingTransfers(
+  accessToken: string,
+): Promise<BrandTransferListItem[]> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ transfers: BrandTransferListItem[] }>>({
+    url: "/brands/transfers/outgoing",
+    method: "GET",
+  });
+  return response.data?.data?.transfers ?? [];
+}
+
+export async function submitBrandRating(
+  brandId: string,
+  value: number,
+  accessToken: string,
+): Promise<Brand> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ brand: Brand }>>({
+    url: `/brands/${brandId}/rating`,
+    method: "PUT",
+    data: { value },
+  });
+
+  const brand = response.data?.data?.brand;
+  if (!brand) throw new Error("Invalid response from brand rating API");
+  return normalizeBrand(brand);
 }
 
 // ─── User search ──────────────────────────────────────────────────────────────

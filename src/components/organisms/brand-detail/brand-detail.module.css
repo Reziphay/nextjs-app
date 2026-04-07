@@ -79,15 +79,85 @@
   flex-shrink: 0;
 }
 
+.ratingBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .ratingRow {
   display: flex;
   align-items: center;
   gap: 0.375rem;
+  flex-wrap: wrap;
 }
 
 .ratingText {
   font-size: var(--font-size-small);
   font-weight: 600;
+  color: var(--app-text-muted);
+}
+
+.ratingEmpty {
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--app-text-muted);
+}
+
+.ratingActionRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.ratingActionLabel {
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  color: var(--app-text-strong);
+}
+
+.ratingButtons {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.ratingButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface);
+  cursor: pointer;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.ratingButton:hover:not(:disabled) {
+  border-color: var(--app-warning, #f59e0b);
+  transform: translateY(-1px);
+}
+
+.ratingButton:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.ratingButtonActive {
+  border-color: color-mix(in srgb, var(--app-warning, #f59e0b) 55%, var(--app-border-soft));
+  background: color-mix(in srgb, var(--app-warning, #f59e0b) 12%, var(--app-bg-surface));
+}
+
+.ratingButtonIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.ratingFeedback {
+  margin: 0;
+  font-size: var(--font-size-extra-small);
   color: var(--app-text-muted);
 }
 

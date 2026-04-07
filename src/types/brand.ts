@@ -43,7 +43,9 @@ export type Brand = {
   gallery?: BrandGalleryItem[];
   branches?: Branch[];
   categories: BrandCategory[];
-  rating?: number;
+  rating: number | null;
+  rating_count: number;
+  my_rating: number | null;
   created_at: string;
   updated_at: string;
 };
