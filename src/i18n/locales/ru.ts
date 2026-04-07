@@ -381,7 +381,7 @@ export const ruMessages: Messages = {
     deleteWithServices: "Удалить все услуги",
     deleteServicesTransferToMe: "Перенести услуги на мой аккаунт",
     deleteServicesTransferToOther: "Перенести услуги другому пользователю",
-    deleteServiceTransferNote: "Передача услуг будет выполнена после запуска модуля услуг. Ваш бренд будет удалён немедленно.",
+    deleteServiceTransferNote: "Опции переноса сервисов пока недоступны — эта функция будет включена после запуска модуля услуг. Чтобы удалить бренд сейчас, включите «Также удалить все сервисы» выше.",
     deleteConfirm: "Удалить",
     deleteCancel: "Отмена",
     createSuccessTitle: "Бренд создан",

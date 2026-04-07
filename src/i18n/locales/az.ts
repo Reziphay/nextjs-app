@@ -283,7 +283,7 @@ export const azMessages: Messages = {
     deleteWithServices: "Bütün xidmətləri də sil",
     deleteServicesTransferToMe: "Xidmətləri öz hesabıma köçür",
     deleteServicesTransferToOther: "Xidmətləri başqa istifadəçiyə köçür",
-    deleteServiceTransferNote: "Xidmət köçürmələri xidmət modulu mövcud olduqdan sonra icra ediləcək. Brendiniz dərhal silinəcək.",
+    deleteServiceTransferNote: "Xidmət köçürmə seçimləri hələlik mövcud deyil — bu funksiya xidmətlər modulu işə düşdükdən sonra aktiv olacaq. Brendi indi silmək üçün yuxarıdakı 'Bütün xidmətləri də sil' düyməsini aktivləşdirin.",
     deleteConfirm: "Sil",
     deleteCancel: "Ləğv et",
     createSuccessTitle: "Brend yaradıldı",

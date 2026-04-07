@@ -194,17 +194,9 @@ export function BrandForm({
   // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  // Switch: true = also delete services (default); false = keep / transfer services
+  // Switch: true = also delete services (default ON); false = keep / transfer services
+  // When false the two transfer-service options are shown as disabled (service domain not built).
   const [deleteAlsoServices, setDeleteAlsoServices] = useState(true);
-  // Which sub-option when switch is OFF
-  const [deleteServiceHandling, setDeleteServiceHandling] = useState<
-    "transfer_services_to_self" | "transfer_services_to_other"
-  >("transfer_services_to_self");
-  // Target user search for "transfer to other" sub-option
-  const [deleteServiceTarget, setDeleteServiceTarget] = useState<UserSearchResult | null>(null);
-  const [deleteServiceQuery, setDeleteServiceQuery] = useState("");
-  const [deleteServiceResults, setDeleteServiceResults] = useState<UserSearchResult[]>([]);
-  const [deleteServiceSearchLoading, setDeleteServiceSearchLoading] = useState(false);
 
   const categoryOptions: ComboboxOption[] = categories.map((c) => ({
     value: c.id,
@@ -602,51 +594,18 @@ export function BrandForm({
 
   function resetDeleteModalState() {
     setDeleteAlsoServices(true);
-    setDeleteServiceHandling("transfer_services_to_self");
-    setDeleteServiceTarget(null);
-    setDeleteServiceQuery("");
-    setDeleteServiceResults([]);
-  }
-
-  async function handleDeleteServiceSearch(q: string) {
-    setDeleteServiceQuery(q);
-    setDeleteServiceTarget(null);
-    if (q.trim().length < 2) {
-      setDeleteServiceResults([]);
-      return;
-    }
-    const accessToken = session.accessToken;
-    if (!accessToken) return;
-    setDeleteServiceSearchLoading(true);
-    try {
-      const results = await searchUsoUsers(q, accessToken);
-      setDeleteServiceResults(results);
-    } finally {
-      setDeleteServiceSearchLoading(false);
-    }
   }
 
   async function handleDeleteConfirm() {
     const currentBrand = persistedBrand ?? brand;
     if (!currentBrand) return;
-    // Guard: "transfer to other" requires a selected recipient
-    if (!deleteAlsoServices && deleteServiceHandling === "transfer_services_to_other" && !deleteServiceTarget) return;
+    // Only delete_with_services is currently supported.
+    if (!deleteAlsoServices) return;
     const accessToken = session.accessToken;
     if (!accessToken) return;
     setDeleteLoading(true);
     try {
-      let payload: DeleteBrandPayload;
-      if (deleteAlsoServices) {
-        payload = { service_handling: "delete_with_services" };
-      } else if (deleteServiceHandling === "transfer_services_to_other") {
-        payload = {
-          service_handling: "transfer_services_to_other",
-          target_user_id: deleteServiceTarget!.id,
-        };
-      } else {
-        payload = { service_handling: "transfer_services_to_self" };
-      }
-      await deleteBrand(currentBrand.id, payload, accessToken);
+      await deleteBrand(currentBrand.id, { service_handling: "delete_with_services" }, accessToken);
       setDeleteModalOpen(false);
       router.replace("/brands");
     } catch (error) {
@@ -1191,186 +1150,141 @@ export function BrandForm({
             <AlertDialogDescription>{t.deleteModalDescription}</AlertDialogDescription>
           </AlertDialogHeader>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            {/* Switch: "Also delete all services" */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+            {/* ── Switch row: "Also delete all services" ─────────────────── */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 gap: "0.75rem",
-                padding: "0.625rem 0.75rem",
-                background: "var(--app-surface-raised, rgba(0,0,0,0.04))",
-                borderRadius: "var(--radius-sm)",
+                padding: "0.75rem 1rem",
+                background: "var(--app-bg-surface-strong)",
+                borderRadius: "var(--general-border-radius-card)",
+                border: "1px solid var(--app-border-soft)",
               }}
             >
-              <span style={{ fontSize: "var(--font-size-small)", fontWeight: 500, color: "var(--app-text-strong)" }}>
+              <span style={{ fontSize: "var(--font-size-small)", fontWeight: 600, color: "var(--app-text-strong)" }}>
                 {t.deleteWithServices}
               </span>
               <Switch
                 checked={deleteAlsoServices}
-                onChange={(e) => {
-                  setDeleteAlsoServices(e.target.checked);
-                  if (e.target.checked) {
-                    setDeleteServiceTarget(null);
-                    setDeleteServiceQuery("");
-                    setDeleteServiceResults([]);
-                  }
-                }}
+                onChange={(e) => setDeleteAlsoServices(e.target.checked)}
               />
             </div>
 
-            {/* Service-handling options — only visible when switch is OFF */}
+            {/* ── Service-handling options (visible when switch is OFF) ───── */}
             {!deleteAlsoServices && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                {/* Option 1: transfer to self */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDeleteServiceHandling("transfer_services_to_self");
-                    setDeleteServiceTarget(null);
-                    setDeleteServiceQuery("");
-                    setDeleteServiceResults([]);
-                  }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    padding: "0.5rem 0.75rem",
-                    background: deleteServiceHandling === "transfer_services_to_self"
-                      ? "var(--app-surface-raised)"
-                      : "transparent",
-                    border: `1px solid ${deleteServiceHandling === "transfer_services_to_self" ? "var(--app-accent)" : "var(--app-border)"}`,
-                    borderRadius: "var(--radius-sm)",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    width: "100%",
-                  }}
+              <>
+                {/* Disabled radio group — Service domain not built yet */}
+                <div
+                  role="radiogroup"
+                  aria-label={t.deleteServicesTransferToMe}
+                  style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
                 >
-                  <span style={{ fontSize: "var(--font-size-small)", color: "var(--app-text-strong)" }}>
-                    {t.deleteServicesTransferToMe}
-                  </span>
-                </button>
-
-                {/* Option 2: transfer to another USO */}
-                <button
-                  type="button"
-                  onClick={() => setDeleteServiceHandling("transfer_services_to_other")}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    padding: "0.5rem 0.75rem",
-                    background: deleteServiceHandling === "transfer_services_to_other"
-                      ? "var(--app-surface-raised)"
-                      : "transparent",
-                    border: `1px solid ${deleteServiceHandling === "transfer_services_to_other" ? "var(--app-accent)" : "var(--app-border)"}`,
-                    borderRadius: "var(--radius-sm)",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    width: "100%",
-                  }}
-                >
-                  <span style={{ fontSize: "var(--font-size-small)", color: "var(--app-text-strong)" }}>
-                    {t.deleteServicesTransferToOther}
-                  </span>
-                </button>
-
-                {/* User search — only when "transfer to other" is selected */}
-                {deleteServiceHandling === "transfer_services_to_other" && (
-                  <>
-                    <Input
-                      value={deleteServiceQuery}
-                      placeholder={t.transferSearchPlaceholder}
-                      onChange={(e) => handleDeleteServiceSearch(e.target.value)}
+                  {/* Option 1: transfer to self (disabled) */}
+                  <div
+                    role="radio"
+                    aria-checked="false"
+                    aria-disabled="true"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.625rem",
+                      padding: "0.625rem 0.875rem",
+                      background: "var(--app-bg-surface-strong)",
+                      border: "1px solid var(--app-border-soft)",
+                      borderRadius: "var(--general-border-radius-card)",
+                      opacity: 0.45,
+                      cursor: "not-allowed",
+                      userSelect: "none",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "1rem",
+                        height: "1rem",
+                        borderRadius: "999px",
+                        border: "2px solid var(--app-border-soft)",
+                        flexShrink: 0,
+                      }}
                     />
-                    {deleteServiceSearchLoading && (
-                      <p style={{ margin: 0, fontSize: "var(--font-size-small)", color: "var(--app-text-muted)" }}>
-                        ...
-                      </p>
-                    )}
-                    {deleteServiceResults.map((u) => (
-                      <button
-                        key={u.id}
-                        type="button"
-                        onClick={() => setDeleteServiceTarget(u)}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                          padding: "0.5rem",
-                          background: deleteServiceTarget?.id === u.id
-                            ? "var(--app-surface-raised)"
-                            : "transparent",
-                          border: `1px solid ${deleteServiceTarget?.id === u.id ? "var(--app-accent)" : "var(--app-border)"}`,
-                          borderRadius: "var(--radius-sm)",
-                          cursor: "pointer",
-                          textAlign: "left",
-                          width: "100%",
-                        }}
-                      >
-                        <div
-                          style={{
-                            position: "relative",
-                            width: "2rem",
-                            height: "2rem",
-                            borderRadius: "999px",
-                            overflow: "hidden",
-                            background: "var(--app-bg-surface)",
-                            border: "1px solid var(--app-border)",
-                            flexShrink: 0,
-                          }}
-                        >
-                          <Image
-                            src={proxyMediaUrl(u.avatar_url) ?? "/reziphay-logo.png"}
-                            alt={buildTransferTargetLabel(u)}
-                            fill
-                            sizes="32px"
-                            style={{ objectFit: "cover" }}
-                          />
-                        </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "0.125rem", minWidth: 0 }}>
-                          <span style={{ fontSize: "var(--font-size-small)", fontWeight: 600, color: "var(--app-text-strong)" }}>
-                            {buildTransferTargetLabel(u)}
-                          </span>
-                          <span style={{ fontSize: "var(--font-size-extra-small)", color: "var(--app-text-muted)" }}>
-                            {u.email}
-                          </span>
-                        </div>
-                      </button>
-                    ))}
-                  </>
-                )}
+                    <span style={{ fontSize: "var(--font-size-small)", color: "var(--app-text-strong)" }}>
+                      {t.deleteServicesTransferToMe}
+                    </span>
+                  </div>
 
-                {/* Honest note about service-transfer availability */}
-                <p
+                  {/* Option 2: transfer to another USO (disabled) */}
+                  <div
+                    role="radio"
+                    aria-checked="false"
+                    aria-disabled="true"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.625rem",
+                      padding: "0.625rem 0.875rem",
+                      background: "var(--app-bg-surface-strong)",
+                      border: "1px solid var(--app-border-soft)",
+                      borderRadius: "var(--general-border-radius-card)",
+                      opacity: 0.45,
+                      cursor: "not-allowed",
+                      userSelect: "none",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "1rem",
+                        height: "1rem",
+                        borderRadius: "999px",
+                        border: "2px solid var(--app-border-soft)",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span style={{ fontSize: "var(--font-size-small)", color: "var(--app-text-strong)" }}>
+                      {t.deleteServicesTransferToOther}
+                    </span>
+                  </div>
+                </div>
+
+                {/* ── Warning banner ──────────────────────────────────────── */}
+                <div
+                  role="alert"
                   style={{
-                    margin: 0,
-                    fontSize: "var(--font-size-extra-small)",
-                    color: "var(--app-text-muted)",
-                    fontStyle: "italic",
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "0.625rem",
+                    padding: "0.75rem 1rem",
+                    background: "color-mix(in srgb, #f59e0b 12%, transparent)",
+                    border: "1px solid color-mix(in srgb, #f59e0b 35%, transparent)",
+                    borderRadius: "var(--general-border-radius-card)",
                   }}
                 >
-                  {t.deleteServiceTransferNote}
-                </p>
-              </div>
+                  <div style={{ flexShrink: 0, marginTop: "0.0625rem", color: "#b45309" }}>
+                    <Icon icon="warning" size={16} color="current" />
+                  </div>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "var(--font-size-small)",
+                      color: "var(--app-text-strong)",
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {t.deleteServiceTransferNote}
+                  </p>
+                </div>
+              </>
             )}
           </div>
 
           <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={resetDeleteModalState}
-            >
+            <AlertDialogCancel onClick={resetDeleteModalState}>
               {t.deleteCancel}
             </AlertDialogCancel>
             <Button
               variant="primary"
-              disabled={
-                deleteLoading ||
-                (!deleteAlsoServices &&
-                  deleteServiceHandling === "transfer_services_to_other" &&
-                  !deleteServiceTarget)
-              }
+              disabled={deleteLoading || !deleteAlsoServices}
               isLoading={deleteLoading}
               onClick={handleDeleteConfirm}
             >

@@ -282,7 +282,7 @@ export const enMessages: Messages = {
     deleteWithServices: "Also delete all services",
     deleteServicesTransferToMe: "Transfer services to my account",
     deleteServicesTransferToOther: "Transfer services to another user",
-    deleteServiceTransferNote: "Service transfers will be processed once the service module is available. Your brand will be deleted immediately.",
+    deleteServiceTransferNote: "Service transfer options are not yet available — this feature will be enabled once the services module launches. To delete this brand now, please turn on 'Also delete all services' above.",
     deleteConfirm: "Delete",
     deleteCancel: "Cancel",
     createSuccessTitle: "Brand created",

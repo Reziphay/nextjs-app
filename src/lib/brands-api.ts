@@ -47,10 +47,10 @@ export type UpdateBranchPayload = {
   breaks?: { start: string; end: string }[];
 };
 
+// Only delete_with_services is accepted by the backend until the Service domain
+// is built. Transfer-service paths are intentionally absent.
 export type DeleteBrandPayload = {
-  service_handling: "delete_with_services" | "transfer_services_to_self" | "transfer_services_to_other";
-  /** Required when service_handling is "transfer_services_to_other". */
-  target_user_id?: string;
+  service_handling: "delete_with_services";
 };
 
 export type BrandMediaUsage = "logo" | "gallery";
