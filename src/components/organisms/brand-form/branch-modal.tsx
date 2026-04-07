@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -18,7 +18,7 @@ import { useLocale } from "@/components/providers/locale-provider";
 import type { Branch } from "@/types/brand";
 import styles from "./branch-modal.module.css";
 
-type BranchDraft = Omit<Branch, "id" | "brand_id">;
+type BranchDraft = Omit<Branch, "id" | "brand_id"> & { id?: string };
 
 type BranchModalProps = {
   open: boolean;
@@ -54,7 +54,15 @@ export function BranchModal({
   const [draft, setDraft] = useState<BranchDraft>(
     initial ?? createEmptyBranch(),
   );
-  const [errors, setErrors] = useState<Partial<Record<keyof BranchDraft, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof BranchDraft | string, string>>>({});
+
+  // Reset draft whenever the modal opens or switches to a different branch
+  useEffect(() => {
+    if (open) {
+      setDraft(initial ?? createEmptyBranch());
+      setErrors({});
+    }
+  }, [open, initial]);
 
   function updateField<K extends keyof BranchDraft>(
     key: K,
@@ -91,7 +99,7 @@ export function BranchModal({
   }
 
   function validate(): boolean {
-    const nextErrors: Partial<Record<keyof BranchDraft, string>> = {};
+    const nextErrors: Partial<Record<string, string>> = {};
 
     if (!draft.name.trim()) {
       nextErrors.name = t.requiredMessage;
@@ -99,6 +107,15 @@ export function BranchModal({
 
     if (!draft.address1.trim()) {
       nextErrors.address1 = t.requiredMessage;
+    }
+
+    if (!draft.is_24_7) {
+      if (!draft.opening?.trim()) {
+        nextErrors.opening = t.openingRequiredMessage;
+      }
+      if (!draft.closing?.trim()) {
+        nextErrors.closing = t.closingRequiredMessage;
+      }
     }
 
     setErrors(nextErrors);
@@ -113,17 +130,19 @@ export function BranchModal({
 
   function handleOpenChange(next: boolean) {
     if (!next) {
-      setDraft(initial ?? createEmptyBranch());
       setErrors({});
     }
     onOpenChange(next);
   }
 
+  const isEditing = !!initial?.id;
+  const modalTitle = isEditing ? t.branchEditModalTitle : t.branchModalTitle;
+
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{t.branchModalTitle}</AlertDialogTitle>
+          <AlertDialogTitle>{modalTitle}</AlertDialogTitle>
           <AlertDialogDescription>
             {t.branchModalDescription}
           </AlertDialogDescription>
@@ -209,7 +228,12 @@ export function BranchModal({
             <span className={styles.switchLabel}>{t.branchField247}</span>
             <Switch
               checked={draft.is_24_7}
-              onChange={(e) => updateField("is_24_7", e.target.checked)}
+              onChange={(e) => {
+                updateField("is_24_7", e.target.checked);
+                if (e.target.checked) {
+                  setErrors((prev) => ({ ...prev, opening: undefined, closing: undefined }));
+                }
+              }}
             />
           </div>
 
@@ -217,24 +241,36 @@ export function BranchModal({
           {!draft.is_24_7 && (
             <div className={styles.row}>
               <Field>
-                <FieldLabel>{t.branchFieldOpening}</FieldLabel>
+                <FieldLabel required>{t.branchFieldOpening}</FieldLabel>
                 <Input
                   type="text"
                   value={draft.opening ?? ""}
                   placeholder="09:00"
                   maxLength={5}
+                  aria-invalid={!!errors.opening}
                   onChange={(e) => updateField("opening", e.target.value)}
                 />
+                {errors.opening && (
+                  <p style={{ margin: 0, fontSize: "var(--font-size-extra-small)", color: "var(--app-error, #ef4444)" }}>
+                    {errors.opening}
+                  </p>
+                )}
               </Field>
               <Field>
-                <FieldLabel>{t.branchFieldClosing}</FieldLabel>
+                <FieldLabel required>{t.branchFieldClosing}</FieldLabel>
                 <Input
                   type="text"
                   value={draft.closing ?? ""}
                   placeholder="18:00"
                   maxLength={5}
+                  aria-invalid={!!errors.closing}
                   onChange={(e) => updateField("closing", e.target.value)}
                 />
+                {errors.closing && (
+                  <p style={{ margin: 0, fontSize: "var(--font-size-extra-small)", color: "var(--app-error, #ef4444)" }}>
+                    {errors.closing}
+                  </p>
+                )}
               </Field>
             </div>
           )}
@@ -255,7 +291,7 @@ export function BranchModal({
               </div>
 
               {draft.breaks.map((br, index) => (
-                <div key={br.id} className={styles.breakRow}>
+                <div key={br.id ?? index} className={styles.breakRow}>
                   <Field>
                     <FieldLabel>Start</FieldLabel>
                     <Input

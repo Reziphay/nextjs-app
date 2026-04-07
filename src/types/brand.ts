@@ -6,7 +6,7 @@ export type BrandCategory = {
 };
 
 export type Break = {
-  id: string;
+  id?: string; // undefined for client-only draft breaks not yet persisted
   start: string;
   end: string;
 };
@@ -28,6 +28,7 @@ export type Branch = {
 
 export type BrandGalleryItem = {
   id: string;
+  media_id: string;
   url: string;
   order: number;
 };

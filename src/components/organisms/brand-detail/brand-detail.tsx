@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/atoms/badge";
 import { Button } from "@/components/atoms/button";
 import { Icon } from "@/components/icon";
+import { useLocale } from "@/components/providers/locale-provider";
 import { proxyMediaUrl } from "@/lib/media";
 import type { Brand, BrandStatus } from "@/types/brand";
 import styles from "./brand-detail.module.css";
@@ -22,13 +23,6 @@ const STATUS_BADGE_VARIANT: Record<
   ACTIVE: "default",
   REJECTED: "destructive",
   CLOSED: "outline",
-};
-
-const STATUS_LABEL: Record<BrandStatus, string> = {
-  PENDING: "Pending review",
-  ACTIVE: "Active",
-  REJECTED: "Rejected",
-  CLOSED: "Closed",
 };
 
 function StarRating({ rating, max = 5 }: { rating: number; max?: number }) {
@@ -82,10 +76,20 @@ function StarRating({ rating, max = 5 }: { rating: number; max?: number }) {
 
 export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
   const router = useRouter();
+  const { messages } = useLocale();
+  const t = messages.brands;
+
   const isOwner = currentUserId && brand.owner_id === currentUserId;
   const categories = brand.categories ?? [];
   const gallery = brand.gallery ?? [];
   const branches = brand.branches ?? [];
+
+  const STATUS_LABEL: Record<BrandStatus, string> = {
+    PENDING: t.statusPending,
+    ACTIVE: t.statusActive,
+    REJECTED: t.statusRejected,
+    CLOSED: t.statusClosed,
+  };
 
   function handleEdit() {
     router.push(`/brands?progress=edit&id=${brand.id}`);
@@ -100,7 +104,7 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
       {/* Back */}
       <div className={styles.backRow}>
         <Button variant="ghost" icon="arrow_back" onClick={handleBack}>
-          Back
+          {t.back}
         </Button>
       </div>
 
@@ -131,13 +135,13 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
             {isOwner && (
               <div className={styles.heroActions}>
                 <Button variant="outline" icon="edit" onClick={handleEdit}>
-                  Edit
+                  {t.editBrand}
                 </Button>
               </div>
             )}
           </div>
 
-          {typeof brand.rating === "number" && (
+          {typeof brand.rating === "number" && brand.rating > 0 && (
             <div className={styles.ratingRow}>
               <span className={styles.ratingText}>{brand.rating.toFixed(1)} / 5</span>
               <StarRating rating={brand.rating} />
@@ -159,7 +163,7 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
       {/* Gallery */}
       {gallery.length > 0 && (
         <div className={styles.gallerySection}>
-          <h2 className={styles.sectionTitle}>Gallery</h2>
+          <h2 className={styles.sectionTitle}>{t.gallery}</h2>
           <div className={styles.galleryScroll}>
             {gallery
               .sort((a, b) => a.order - b.order)
@@ -181,16 +185,16 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
       {/* Description */}
       {brand.description && (
         <div className={styles.descriptionSection}>
-          <h2 className={styles.sectionTitle}>About</h2>
+          <h2 className={styles.sectionTitle}>{t.about}</h2>
           <p className={styles.description}>{brand.description}</p>
         </div>
       )}
 
       {/* Branches */}
       <div className={styles.branchesSection}>
-        <h2 className={styles.sectionTitle}>Branches ({branches.length})</h2>
+        <h2 className={styles.sectionTitle}>{t.branchesTitle} ({branches.length})</h2>
         {branches.length === 0 ? (
-          <div className={styles.emptyState}>No branches added yet.</div>
+          <div className={styles.emptyState}>{t.noBranches}</div>
         ) : (
           <div className={styles.branchesList}>
             {branches.map((branch) => (
@@ -202,7 +206,7 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
                 </p>
                 <div className={styles.branchMeta}>
                   {branch.is_24_7 ? (
-                    <span className={styles.branchHours}>Open 24/7</span>
+                    <span className={styles.branchHours}>{t.branchField247}</span>
                   ) : (
                     branch.opening &&
                     branch.closing && (

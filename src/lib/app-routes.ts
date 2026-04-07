@@ -87,8 +87,10 @@ export function canAccessProtectedRoute({
     case "/notification":
       return true;
     case "/services":
+      return userType === "uso";
     case "/brands":
-      return userType === "uso" || hasEntityId;
+      // UCR can view the gallery and individual brand pages; USO manages their own brands
+      return userType === "uso" || userType === "ucr";
     case "/home":
       return userType === "uso" || userType === "ucr";
     case "/dashboard":

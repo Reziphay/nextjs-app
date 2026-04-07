@@ -266,6 +266,15 @@ export type Messages = {
     // Validation
     requiredMessage: string;
     nameRequiredMessage: string;
+    openingRequiredMessage: string;
+    closingRequiredMessage: string;
+    // Detail page labels
+    back: string;
+    gallery: string;
+    about: string;
+    discoverBrands: string;
+    noSectionBrands: string;
+    branchEditModalTitle: string;
   };
   profile: {
     title: string;

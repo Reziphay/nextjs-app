@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
 import { requireProtectedRouteAccess } from "@/lib/protected-route";
 import {
   fetchMyBrands,
@@ -48,28 +49,41 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
     return <BrandDetail brand={brand} currentUserId={user.id} />;
   }
 
-  // ── Create brand form (?progress=create) ──────────────────────────────────
+  // ── Create brand form (?progress=create) — USO only ──────────────────────
   if (progress === "create") {
+    if (user.type !== "uso") return notFound();
     const categories = await fetchBrandCategories(accessToken).catch(() => []);
-    return <BrandForm mode="create" categories={categories} />;
+    return (
+      <BrandForm
+        mode="create"
+        categories={categories}
+        emailVerified={user.email_verified}
+        phoneVerified={user.phone_verified}
+      />
+    );
   }
 
-  // ── Edit brand form (?progress=edit&id=<id>) ──────────────────────────────
+  // ── Edit brand form (?progress=edit&id=<id>) — USO owner only ────────────
   if (progress === "edit" && brandId) {
+    if (user.type !== "uso") return notFound();
+
     const [brand, categories] = await Promise.all([
       fetchBrandById(brandId, accessToken).catch(() => null),
       fetchBrandCategories(accessToken).catch(() => []),
     ]);
 
-    if (!brand) {
-      return (
-        <div style={{ padding: "2rem", color: "var(--app-text-muted)", fontSize: "var(--font-size-small)" }}>
-          Brand not found.
-        </div>
-      );
-    }
+    if (!brand) return notFound();
+    if (brand.owner_id !== user.id) return notFound();
 
-    return <BrandForm mode="edit" brand={brand} categories={categories} />;
+    return (
+      <BrandForm
+        mode="edit"
+        brand={brand}
+        categories={categories}
+        emailVerified={user.email_verified}
+        phoneVerified={user.phone_verified}
+      />
+    );
   }
 
   // ── USO default view: my brands ───────────────────────────────────────────

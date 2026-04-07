@@ -13,9 +13,11 @@ export type CreateBrandPayload = {
 
 export type UpdateBrandPayload = {
   name?: string;
-  description?: string;
+  description?: string | null;
   categoryIds?: string[];
+  /** Set to null to remove the logo; omit to leave unchanged. */
   logo_media_id?: string | null;
+  /** Full ordered list of media IDs (existing + new). Omit to leave gallery unchanged. */
   gallery_media_ids?: string[];
 };
 
@@ -30,6 +32,42 @@ export type BranchPayload = {
   opening?: string;
   closing?: string;
   breaks?: { start: string; end: string }[];
+};
+
+export type UpdateBranchPayload = {
+  name?: string;
+  description?: string | null;
+  address1?: string;
+  address2?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  is_24_7?: boolean;
+  opening?: string | null;
+  closing?: string | null;
+  breaks?: { start: string; end: string }[];
+};
+
+export type DeleteBrandPayload = {
+  service_handling?: "delete" | "transfer_to_self" | "transfer_to_other";
+  service_target_user_id?: string;
+};
+
+export type UserSearchResult = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  avatar_url?: string | null;
+};
+
+export type BrandTransfer = {
+  id: string;
+  brand_id: string;
+  from_user_id: string;
+  to_user_id: string;
+  status: "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED";
+  created_at: string;
+  updated_at: string;
 };
 
 function normalizeBrand(brand: Brand): Brand {
@@ -100,13 +138,41 @@ export async function createBrand(
   });
 
   const brand = response.data?.data?.brand;
-
-  if (!brand) {
-    throw new Error("Invalid response from create brand API");
-  }
-
+  if (!brand) throw new Error("Invalid response from create brand API");
   return normalizeBrand(brand);
 }
+
+export async function updateBrand(
+  id: string,
+  payload: UpdateBrandPayload,
+  accessToken: string,
+): Promise<Brand> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ brand: Brand }>>({
+    url: `/brands/${id}`,
+    method: "PATCH",
+    data: payload,
+  });
+
+  const brand = response.data?.data?.brand;
+  if (!brand) throw new Error("Invalid response from update brand API");
+  return normalizeBrand(brand);
+}
+
+export async function deleteBrand(
+  id: string,
+  payload: DeleteBrandPayload,
+  accessToken: string,
+): Promise<void> {
+  const client = createApiClient({ accessToken });
+  await client.request({
+    url: `/brands/${id}`,
+    method: "DELETE",
+    data: payload,
+  });
+}
+
+// ─── Branches ─────────────────────────────────────────────────────────────────
 
 export async function createBranch(
   brandId: string,
@@ -120,6 +186,34 @@ export async function createBranch(
     data: branch,
   });
 }
+
+export async function updateBranch(
+  brandId: string,
+  branchId: string,
+  payload: UpdateBranchPayload,
+  accessToken: string,
+): Promise<void> {
+  const client = createApiClient({ accessToken });
+  await client.request({
+    url: `/brands/${brandId}/branches/${branchId}`,
+    method: "PATCH",
+    data: payload,
+  });
+}
+
+export async function deleteBranchApi(
+  brandId: string,
+  branchId: string,
+  accessToken: string,
+): Promise<void> {
+  const client = createApiClient({ accessToken });
+  await client.request({
+    url: `/brands/${brandId}/branches/${branchId}`,
+    method: "DELETE",
+  });
+}
+
+// ─── Media ────────────────────────────────────────────────────────────────────
 
 export async function uploadBrandMedia(
   file: File,
@@ -139,23 +233,69 @@ export async function uploadBrandMedia(
   return data;
 }
 
-export async function updateBrand(
-  id: string,
-  payload: UpdateBrandPayload,
+// ─── Transfer ─────────────────────────────────────────────────────────────────
+
+export async function initiateTransfer(
+  brandId: string,
+  targetUserId: string,
   accessToken: string,
-): Promise<Brand> {
+): Promise<BrandTransfer> {
   const client = createApiClient({ accessToken });
-  const response = await client.request<ApiSuccessResponse<{ brand: Brand }>>({
-    url: `/brands/${id}`,
-    method: "PATCH",
-    data: payload,
+  const response = await client.request<ApiSuccessResponse<{ transfer: BrandTransfer }>>({
+    url: `/brands/${brandId}/transfer`,
+    method: "POST",
+    data: { target_user_id: targetUserId },
   });
+  const transfer = response.data?.data?.transfer;
+  if (!transfer) throw new Error("Invalid response from transfer initiation API");
+  return transfer;
+}
 
-  const brand = response.data?.data?.brand;
+export async function acceptTransfer(
+  transferId: string,
+  accessToken: string,
+): Promise<void> {
+  const client = createApiClient({ accessToken });
+  await client.request({
+    url: `/brands/transfers/${transferId}/accept`,
+    method: "PATCH",
+  });
+}
 
-  if (!brand) {
-    throw new Error("Invalid response from update brand API");
-  }
+export async function rejectTransfer(
+  transferId: string,
+  accessToken: string,
+): Promise<void> {
+  const client = createApiClient({ accessToken });
+  await client.request({
+    url: `/brands/transfers/${transferId}/reject`,
+    method: "PATCH",
+  });
+}
 
-  return normalizeBrand(brand);
+export async function cancelTransfer(
+  transferId: string,
+  accessToken: string,
+): Promise<void> {
+  const client = createApiClient({ accessToken });
+  await client.request({
+    url: `/brands/transfers/${transferId}/cancel`,
+    method: "PATCH",
+  });
+}
+
+// ─── User search ──────────────────────────────────────────────────────────────
+
+export async function searchUsoUsers(
+  query: string,
+  accessToken: string,
+): Promise<UserSearchResult[]> {
+  if (query.trim().length < 2) return [];
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ users: UserSearchResult[] }>>({
+    url: "/users/search",
+    method: "GET",
+    params: { q: query },
+  });
+  return response.data?.data?.users ?? [];
 }

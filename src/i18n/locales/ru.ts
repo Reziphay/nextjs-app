@@ -367,5 +367,13 @@ export const ruMessages: Messages = {
     serverErrorDescription: "Произошла ошибка сервера. Попробуйте позже.",
     requiredMessage: "Это поле обязательно.",
     nameRequiredMessage: "Название бренда обязательно.",
+    openingRequiredMessage: "Время открытия обязательно.",
+    closingRequiredMessage: "Время закрытия обязательно.",
+    back: "Назад",
+    gallery: "Галерея",
+    about: "О бренде",
+    discoverBrands: "Откройте для себя бренды",
+    noSectionBrands: "В этом разделе пока нет брендов.",
+    branchEditModalTitle: "Редактировать филиал",
   },
 };

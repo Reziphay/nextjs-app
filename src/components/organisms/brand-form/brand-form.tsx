@@ -11,25 +11,62 @@ import {
   type ComboboxOption,
 } from "@/components/atoms/combobox";
 import { ImageCropModal } from "@/components/atoms/image-crop-modal/image-crop-modal";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/atoms/alert-dialog";
 import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useAppSelector } from "@/store/hooks";
 import { selectAuthSession } from "@/store/auth";
-import { createBrand, createBranch, updateBrand, uploadBrandMedia } from "@/lib/brands-api";
-import type { Brand, BrandCategory, Branch } from "@/types/brand";
+import {
+  createBrand,
+  createBranch,
+  updateBrand,
+  updateBranch,
+  deleteBranchApi,
+  uploadBrandMedia,
+  deleteBrand,
+  initiateTransfer,
+  searchUsoUsers,
+  type UserSearchResult,
+  type DeleteBrandPayload,
+} from "@/lib/brands-api";
+import type { Brand, BrandCategory, BrandGalleryItem } from "@/types/brand";
 import { BranchModal } from "./branch-modal";
 import styles from "./brand-form.module.css";
 
-type BranchDraft = Omit<Branch, "id" | "brand_id">;
+// Branch draft preserves the server id for persisted branches
+type BranchDraft = {
+  id?: string; // undefined = new (not yet persisted)
+  name: string;
+  description?: string;
+  address1: string;
+  address2?: string;
+  phone?: string;
+  email?: string;
+  is_24_7: boolean;
+  opening?: string;
+  closing?: string;
+  breaks: { id?: string; start: string; end: string }[];
+};
 
 type BrandFormDraft = {
   name: string;
   description: string;
   category_ids: string[];
   logoFile: File | null;
+  /** null  = explicit removal; undefined = unchanged (edit only); string = existing URL */
   logoPreviewUrl: string | null;
-  galleryFiles: File[];
-  galleryPreviewUrls: string[];
+  logoRemoved: boolean; // true when user explicitly removed an existing logo
+  existingGalleryItems: BrandGalleryItem[]; // existing server items to keep
+  newGalleryFiles: File[];
+  newGalleryPreviewUrls: string[];
   branches: BranchDraft[];
 };
 
@@ -37,6 +74,8 @@ type BrandFormProps = {
   mode: "create" | "edit";
   brand?: Brand;
   categories: BrandCategory[];
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
 };
 
 function createEmptyDraft(): BrandFormDraft {
@@ -46,8 +85,10 @@ function createEmptyDraft(): BrandFormDraft {
     category_ids: [],
     logoFile: null,
     logoPreviewUrl: null,
-    galleryFiles: [],
-    galleryPreviewUrls: [],
+    logoRemoved: false,
+    existingGalleryItems: [],
+    newGalleryFiles: [],
+    newGalleryPreviewUrls: [],
     branches: [],
   };
 }
@@ -59,11 +100,12 @@ function brandToDraft(brand: Brand): BrandFormDraft {
     category_ids: brand.categories.map((c) => c.id),
     logoFile: null,
     logoPreviewUrl: brand.logo_url ?? null,
-    galleryFiles: [],
-    galleryPreviewUrls: (brand.gallery ?? [])
-      .sort((a, b) => a.order - b.order)
-      .map((g) => g.url),
+    logoRemoved: false,
+    existingGalleryItems: (brand.gallery ?? []).slice().sort((a, b) => a.order - b.order),
+    newGalleryFiles: [],
+    newGalleryPreviewUrls: [],
     branches: (brand.branches ?? []).map((b) => ({
+      id: b.id,
       name: b.name,
       description: b.description,
       address1: b.address1,
@@ -84,7 +126,13 @@ type CropTarget = {
   onDone: (croppedFile: File) => void;
 };
 
-export function BrandForm({ mode, brand, categories }: BrandFormProps) {
+export function BrandForm({
+  mode,
+  brand,
+  categories,
+  emailVerified,
+  phoneVerified,
+}: BrandFormProps) {
   const router = useRouter();
   const { messages } = useLocale();
   const t = messages.brands;
@@ -109,10 +157,30 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
   const [branchModalOpen, setBranchModalOpen] = useState(false);
   const [editingBranchIndex, setEditingBranchIndex] = useState<number | null>(null);
 
+  // Transfer modal state
+  const [transferModalOpen, setTransferModalOpen] = useState(false);
+  const [transferQuery, setTransferQuery] = useState("");
+  const [transferResults, setTransferResults] = useState<UserSearchResult[]>([]);
+  const [transferSearchLoading, setTransferSearchLoading] = useState(false);
+  const [selectedTransferTarget, setSelectedTransferTarget] = useState<UserSearchResult | null>(null);
+  const [transferLoading, setTransferLoading] = useState(false);
+
+  // Delete modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteServiceHandling, setDeleteServiceHandling] = useState<DeleteBrandPayload["service_handling"]>("delete");
+  const [deleteTargetQuery, setDeleteTargetQuery] = useState("");
+  const [deleteTargetResults, setDeleteTargetResults] = useState<UserSearchResult[]>([]);
+  const [deleteTargetSearchLoading, setDeleteTargetSearchLoading] = useState(false);
+  const [selectedDeleteTarget, setSelectedDeleteTarget] = useState<UserSearchResult | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   const categoryOptions: ComboboxOption[] = categories.map((c) => ({
     value: c.id,
     label: c.name,
   }));
+
+  const verificationMissing =
+    mode === "create" && !emailVerified && !phoneVerified;
 
   function updateField<K extends keyof BrandFormDraft>(
     key: K,
@@ -135,8 +203,12 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
           URL.revokeObjectURL(draft.logoPreviewUrl);
         }
         const url = URL.createObjectURL(croppedFile);
-        updateField("logoFile", croppedFile);
-        updateField("logoPreviewUrl", url);
+        setDraft((prev) => ({
+          ...prev,
+          logoFile: croppedFile,
+          logoPreviewUrl: url,
+          logoRemoved: false,
+        }));
         setCropTarget(null);
       },
     });
@@ -146,8 +218,12 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
     if (draft.logoPreviewUrl?.startsWith("blob:")) {
       URL.revokeObjectURL(draft.logoPreviewUrl);
     }
-    updateField("logoFile", null);
-    updateField("logoPreviewUrl", null);
+    setDraft((prev) => ({
+      ...prev,
+      logoFile: null,
+      logoPreviewUrl: null,
+      logoRemoved: true,
+    }));
   }
 
   function handleGalleryChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -162,21 +238,28 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
         const url = URL.createObjectURL(croppedFile);
         setDraft((prev) => ({
           ...prev,
-          galleryFiles: [...prev.galleryFiles, croppedFile],
-          galleryPreviewUrls: [...prev.galleryPreviewUrls, url],
+          newGalleryFiles: [...prev.newGalleryFiles, croppedFile],
+          newGalleryPreviewUrls: [...prev.newGalleryPreviewUrls, url],
         }));
         setCropTarget(null);
       },
     });
   }
 
-  function handleRemoveGalleryItem(index: number) {
-    const url = draft.galleryPreviewUrls[index];
+  function handleRemoveExistingGalleryItem(index: number) {
+    setDraft((prev) => ({
+      ...prev,
+      existingGalleryItems: prev.existingGalleryItems.filter((_, i) => i !== index),
+    }));
+  }
+
+  function handleRemoveNewGalleryItem(index: number) {
+    const url = draft.newGalleryPreviewUrls[index];
     if (url?.startsWith("blob:")) URL.revokeObjectURL(url);
     setDraft((prev) => ({
       ...prev,
-      galleryFiles: prev.galleryFiles.filter((_, i) => i !== index),
-      galleryPreviewUrls: prev.galleryPreviewUrls.filter((_, i) => i !== index),
+      newGalleryFiles: prev.newGalleryFiles.filter((_, i) => i !== index),
+      newGalleryPreviewUrls: prev.newGalleryPreviewUrls.filter((_, i) => i !== index),
     }));
   }
 
@@ -210,28 +293,23 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
         branches: [...prev.branches, branchDraft],
       }));
     }
-
     setEditingBranchIndex(null);
   }
 
   function validate(): boolean {
     const nextErrors: Partial<Record<string, string>> = {};
-
     if (!draft.name.trim()) {
       nextErrors.name = t.nameRequiredMessage;
     }
-
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
     if (!validate()) return;
 
     const accessToken = session.accessToken;
-
     if (!accessToken) {
       setFeedback({ type: "error", message: t.loginRequired });
       return;
@@ -241,7 +319,7 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
     setFeedback(null);
 
     try {
-      // Upload logo if a new file was selected
+      // Upload new logo if selected
       let logoMediaId: string | undefined;
       if (draft.logoFile) {
         const uploaded = await uploadBrandMedia(draft.logoFile, accessToken);
@@ -249,22 +327,23 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
       }
 
       // Upload new gallery files
-      const galleryMediaIds: string[] = [];
-      for (const file of draft.galleryFiles) {
+      const newGalleryMediaIds: string[] = [];
+      for (const file of draft.newGalleryFiles) {
         const uploaded = await uploadBrandMedia(file, accessToken);
-        galleryMediaIds.push(uploaded.media_id);
+        newGalleryMediaIds.push(uploaded.media_id);
       }
 
       if (mode === "create") {
+        const allGalleryIds = newGalleryMediaIds;
+
         const newBrand = await createBrand({
           name: draft.name.trim(),
           description: draft.description.trim() || undefined,
           categoryIds: draft.category_ids.length > 0 ? draft.category_ids : undefined,
           logo_media_id: logoMediaId,
-          gallery_media_ids: galleryMediaIds.length > 0 ? galleryMediaIds : undefined,
+          gallery_media_ids: allGalleryIds.length > 0 ? allGalleryIds : undefined,
         }, accessToken);
 
-        // Create branches sequentially after brand is created
         for (const b of draft.branches) {
           await createBranch(newBrand.id, {
             name: b.name,
@@ -283,21 +362,77 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
         setFeedback({ type: "success", message: t.createSuccessDescription });
         setDraft(createEmptyDraft());
       } else if (mode === "edit" && brand) {
+        // Build full gallery: keep remaining existing items + new uploads
+        const existingMediaIds = draft.existingGalleryItems.map((g) => g.media_id);
+        const allGalleryIds = [...existingMediaIds, ...newGalleryMediaIds];
+
+        // Only include gallery_media_ids in payload if anything changed
+        const galleryChanged =
+          existingMediaIds.length !== (brand.gallery ?? []).length ||
+          newGalleryMediaIds.length > 0;
+
         const payload = {
           name: draft.name.trim(),
           description: draft.description.trim() || undefined,
           categoryIds: draft.category_ids.length > 0 ? draft.category_ids : undefined,
-          ...(logoMediaId !== undefined && { logo_media_id: logoMediaId }),
-          ...(galleryMediaIds.length > 0 && { gallery_media_ids: galleryMediaIds }),
+          // Logo: new file takes precedence; removal sends null; no change omits field
+          ...(logoMediaId !== undefined
+            ? { logo_media_id: logoMediaId }
+            : draft.logoRemoved
+              ? { logo_media_id: null as null }
+              : {}),
+          ...(galleryChanged ? { gallery_media_ids: allGalleryIds } : {}),
         };
         await updateBrand(brand.id, payload, accessToken);
+
+        // Branch CRUD: diff against original brand branches
+        const originalIds = new Set((brand.branches ?? []).map((b) => b.id));
+        const currentIds = new Set(draft.branches.filter((b) => b.id).map((b) => b.id!));
+
+        // Delete removed branches
+        for (const origId of originalIds) {
+          if (!currentIds.has(origId)) {
+            await deleteBranchApi(brand.id, origId, accessToken);
+          }
+        }
+
+        // Update existing / create new
+        for (const b of draft.branches) {
+          if (b.id && originalIds.has(b.id)) {
+            await updateBranch(brand.id, b.id, {
+              name: b.name,
+              description: b.description ?? null,
+              address1: b.address1,
+              address2: b.address2 ?? null,
+              phone: b.phone ?? null,
+              email: b.email ?? null,
+              is_24_7: b.is_24_7,
+              opening: b.is_24_7 ? null : (b.opening ?? null),
+              closing: b.is_24_7 ? null : (b.closing ?? null),
+              breaks: b.breaks.map((br) => ({ start: br.start, end: br.end })),
+            }, accessToken);
+          } else if (!b.id) {
+            await createBranch(brand.id, {
+              name: b.name,
+              description: b.description || undefined,
+              address1: b.address1,
+              address2: b.address2 || undefined,
+              phone: b.phone || undefined,
+              email: b.email || undefined,
+              is_24_7: b.is_24_7,
+              opening: b.opening || undefined,
+              closing: b.closing || undefined,
+              breaks: b.breaks.map((br) => ({ start: br.start, end: br.end })),
+            }, accessToken);
+          }
+        }
+
         setFeedback({ type: "success", message: t.updateSuccessDescription });
       }
     } catch (error) {
       const message = isAxiosError(error)
         ? (error.response?.data?.message as string) ?? t.errorGeneric
         : t.errorGeneric;
-
       setFeedback({ type: "error", message });
     } finally {
       setIsLoading(false);
@@ -308,8 +443,98 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
     router.back();
   }
 
+  // ── Transfer handlers ───────────────────────────────────────────────────────
+
+  async function handleTransferSearch(q: string) {
+    setTransferQuery(q);
+    setSelectedTransferTarget(null);
+    if (q.trim().length < 2) {
+      setTransferResults([]);
+      return;
+    }
+    const accessToken = session.accessToken;
+    if (!accessToken) return;
+    setTransferSearchLoading(true);
+    try {
+      const results = await searchUsoUsers(q, accessToken);
+      setTransferResults(results);
+    } finally {
+      setTransferSearchLoading(false);
+    }
+  }
+
+  async function handleTransferConfirm() {
+    if (!selectedTransferTarget || !brand) return;
+    const accessToken = session.accessToken;
+    if (!accessToken) return;
+    setTransferLoading(true);
+    try {
+      await initiateTransfer(brand.id, selectedTransferTarget.id, accessToken);
+      setTransferModalOpen(false);
+      setFeedback({ type: "success", message: t.transferSuccessDescription });
+      setSelectedTransferTarget(null);
+      setTransferQuery("");
+      setTransferResults([]);
+    } catch (error) {
+      const message = isAxiosError(error)
+        ? (error.response?.data?.message as string) ?? t.errorGeneric
+        : t.errorGeneric;
+      setFeedback({ type: "error", message });
+    } finally {
+      setTransferLoading(false);
+    }
+  }
+
+  // ── Delete handlers ─────────────────────────────────────────────────────────
+
+  async function handleDeleteTargetSearch(q: string) {
+    setDeleteTargetQuery(q);
+    setSelectedDeleteTarget(null);
+    if (q.trim().length < 2) {
+      setDeleteTargetResults([]);
+      return;
+    }
+    const accessToken = session.accessToken;
+    if (!accessToken) return;
+    setDeleteTargetSearchLoading(true);
+    try {
+      const results = await searchUsoUsers(q, accessToken);
+      setDeleteTargetResults(results);
+    } finally {
+      setDeleteTargetSearchLoading(false);
+    }
+  }
+
+  async function handleDeleteConfirm() {
+    if (!brand) return;
+    if (deleteServiceHandling === "transfer_to_other" && !selectedDeleteTarget) return;
+    const accessToken = session.accessToken;
+    if (!accessToken) return;
+    setDeleteLoading(true);
+    try {
+      await deleteBrand(brand.id, {
+        service_handling: deleteServiceHandling,
+        service_target_user_id: selectedDeleteTarget?.id,
+      }, accessToken);
+      setDeleteModalOpen(false);
+      router.replace("/brands");
+    } catch (error) {
+      const message = isAxiosError(error)
+        ? (error.response?.data?.message as string) ?? t.errorGeneric
+        : t.errorGeneric;
+      setFeedback({ type: "error", message });
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
+
   const editingBranch =
     editingBranchIndex !== null ? draft.branches[editingBranchIndex] : undefined;
+
+  const allGalleryPreviews: { url: string; isExisting: boolean; index: number }[] = [
+    ...draft.existingGalleryItems.map((g, i) => ({ url: g.url, isExisting: true, index: i })),
+    ...draft.newGalleryPreviewUrls.map((url, i) => ({ url, isExisting: false, index: i })),
+  ];
 
   return (
     <div className={styles.wrapper}>
@@ -320,6 +545,15 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
           {mode === "create" ? t.formCreateTitle : t.formEditTitle}
         </h1>
       </div>
+
+      {/* Verification warning (create mode only) */}
+      {verificationMissing && (
+        <div className={`${styles.feedback} ${styles.feedbackError}`}>
+          <strong>{t.verificationRequiredTitle}</strong>
+          {" — "}
+          {t.verificationRequiredDescription}
+        </div>
+      )}
 
       <form className={styles.form} onSubmit={handleSubmit}>
         {/* Basic info */}
@@ -455,9 +689,9 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
             />
           </label>
 
-          {draft.galleryPreviewUrls.length > 0 && (
+          {allGalleryPreviews.length > 0 && (
             <div className={styles.galleryPreviewRow}>
-              {draft.galleryPreviewUrls.map((url, index) => (
+              {allGalleryPreviews.map(({ url, isExisting, index }) => (
                 <div key={url} className={styles.galleryPreviewItem}>
                   <Image
                     src={url}
@@ -470,7 +704,11 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
                     type="button"
                     className={styles.removePreviewBtn}
                     aria-label={`Remove gallery image ${index + 1}`}
-                    onClick={() => handleRemoveGalleryItem(index)}
+                    onClick={() =>
+                      isExisting
+                        ? handleRemoveExistingGalleryItem(index)
+                        : handleRemoveNewGalleryItem(index)
+                    }
                   >
                     <Icon icon="close" size={12} color="current" />
                   </button>
@@ -497,7 +735,7 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
               </p>
             ) : (
               draft.branches.map((branch, index) => (
-                <div key={index} className={styles.branchItem}>
+                <div key={branch.id ?? `new-${index}`} className={styles.branchItem}>
                   <div className={styles.branchItemInfo}>
                     <p className={styles.branchItemName}>{branch.name}</p>
                     <p className={styles.branchItemAddress}>
@@ -556,6 +794,28 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
           <Button variant="outline" type="button" onClick={handleCancel}>
             {t.cancelForm}
           </Button>
+
+          {mode === "edit" && brand && (
+            <>
+              <Button
+                variant="outline"
+                type="button"
+                icon="swap_horiz"
+                onClick={() => setTransferModalOpen(true)}
+              >
+                {t.transferBrand}
+              </Button>
+              <Button
+                variant="outline"
+                type="button"
+                icon="delete"
+                onClick={() => setDeleteModalOpen(true)}
+              >
+                {t.deleteBrand}
+              </Button>
+            </>
+          )}
+
           <Button
             variant="primary"
             type="submit"
@@ -563,6 +823,7 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
             icon={isLoading ? undefined : "check"}
             disabled={
               isLoading ||
+              verificationMissing ||
               (mode === "create" &&
                 (!draft.name.trim() ||
                   !draft.logoFile ||
@@ -574,8 +835,9 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
         </div>
       </form>
 
-      {/* Branch modal */}
+      {/* Branch modal — keyed so it remounts when switching between add and different edits */}
       <BranchModal
+        key={editingBranchIndex === null ? "new" : `edit-${editingBranchIndex}`}
         open={branchModalOpen}
         onOpenChange={setBranchModalOpen}
         initial={editingBranch}
@@ -591,6 +853,155 @@ export function BrandForm({ mode, brand, categories }: BrandFormProps) {
           onCancel={() => setCropTarget(null)}
         />
       )}
+
+      {/* Transfer modal */}
+      <AlertDialog open={transferModalOpen} onOpenChange={setTransferModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.transferModalTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{t.transferModalDescription}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            <Input
+              value={transferQuery}
+              placeholder={t.transferSearchPlaceholder}
+              onChange={(e) => handleTransferSearch(e.target.value)}
+            />
+            {transferSearchLoading && (
+              <p style={{ margin: 0, fontSize: "var(--font-size-small)", color: "var(--app-text-muted)" }}>
+                ...
+              </p>
+            )}
+            {transferResults.map((u) => (
+              <button
+                key={u.id}
+                type="button"
+                onClick={() => setSelectedTransferTarget(u)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.5rem",
+                  background: selectedTransferTarget?.id === u.id ? "var(--app-surface-raised)" : "transparent",
+                  border: "1px solid var(--app-border)",
+                  borderRadius: "var(--radius-sm)",
+                  cursor: "pointer",
+                  textAlign: "left",
+                }}
+              >
+                <span style={{ fontSize: "var(--font-size-small)" }}>
+                  {u.first_name} {u.last_name} — {u.email}
+                </span>
+              </button>
+            ))}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t.transferCancel}</AlertDialogCancel>
+            <Button
+              variant="primary"
+              disabled={!selectedTransferTarget || transferLoading}
+              isLoading={transferLoading}
+              onClick={handleTransferConfirm}
+            >
+              {t.transferConfirm}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete modal */}
+      <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.deleteModalTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{t.deleteModalDescription}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            {(
+              [
+                { value: "delete", label: t.deleteWithServices },
+                { value: "transfer_to_self", label: t.deleteServicesTransferToMe },
+                { value: "transfer_to_other", label: t.deleteServicesTransferToOther },
+              ] as const
+            ).map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  setDeleteServiceHandling(opt.value);
+                  setSelectedDeleteTarget(null);
+                  setDeleteTargetQuery("");
+                  setDeleteTargetResults([]);
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.5rem",
+                  background: deleteServiceHandling === opt.value ? "var(--app-surface-raised)" : "transparent",
+                  border: "1px solid var(--app-border)",
+                  borderRadius: "var(--radius-sm)",
+                  cursor: "pointer",
+                  textAlign: "left",
+                }}
+              >
+                <span style={{ fontSize: "var(--font-size-small)" }}>{opt.label}</span>
+              </button>
+            ))}
+
+            {deleteServiceHandling === "transfer_to_other" && (
+              <>
+                <Input
+                  value={deleteTargetQuery}
+                  placeholder={t.transferSearchPlaceholder}
+                  onChange={(e) => handleDeleteTargetSearch(e.target.value)}
+                />
+                {deleteTargetSearchLoading && (
+                  <p style={{ margin: 0, fontSize: "var(--font-size-small)", color: "var(--app-text-muted)" }}>
+                    ...
+                  </p>
+                )}
+                {deleteTargetResults.map((u) => (
+                  <button
+                    key={u.id}
+                    type="button"
+                    onClick={() => setSelectedDeleteTarget(u)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      padding: "0.5rem",
+                      background: selectedDeleteTarget?.id === u.id ? "var(--app-surface-raised)" : "transparent",
+                      border: "1px solid var(--app-border)",
+                      borderRadius: "var(--radius-sm)",
+                      cursor: "pointer",
+                      textAlign: "left",
+                    }}
+                  >
+                    <span style={{ fontSize: "var(--font-size-small)" }}>
+                      {u.first_name} {u.last_name} — {u.email}
+                    </span>
+                  </button>
+                ))}
+              </>
+            )}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t.deleteCancel}</AlertDialogCancel>
+            <Button
+              variant="primary"
+              disabled={
+                deleteLoading ||
+                (deleteServiceHandling === "transfer_to_other" && !selectedDeleteTarget)
+              }
+              isLoading={deleteLoading}
+              onClick={handleDeleteConfirm}
+            >
+              {t.deleteConfirm}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

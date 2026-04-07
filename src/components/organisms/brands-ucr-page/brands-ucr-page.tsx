@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { BrandCard } from "@/components/molecules/brand-card";
 import { Icon } from "@/components/icon";
+import { useLocale } from "@/components/providers/locale-provider";
 import { proxyMediaUrl } from "@/lib/media";
 import type { Brand } from "@/types/brand";
 import styles from "./brands-ucr-page.module.css";
@@ -22,13 +23,15 @@ const PLACEHOLDER_IMAGE = "/banner1.jpg";
 
 function BrandGrid({
   brands,
+  emptyLabel,
   onSelect,
 }: {
   brands: Brand[];
+  emptyLabel: string;
   onSelect: (id: string) => void;
 }) {
   if (brands.length === 0) {
-    return <div className={styles.empty}>No brands in this section yet.</div>;
+    return <div className={styles.empty}>{emptyLabel}</div>;
   }
 
   return (
@@ -54,42 +57,24 @@ function BrandGrid({
   );
 }
 
-function buildSections(brands: Brand[]): BrandSection[] {
-  const sorted = [...brands].sort(
-    (a, b) => (b.rating ?? 0) - (a.rating ?? 0),
-  );
+function buildSections(brands: Brand[], t: { mostRecent: string; explore: string }): BrandSection[] {
   const recent = [...brands].sort(
     (a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
 
-  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const bestOfWeek = brands
-    .filter((b) => new Date(b.created_at).getTime() >= oneWeekAgo)
-    .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
-
+  // Rating-based sections (Top Seller, Best of Week) are intentionally omitted until
+  // real rating data is available from user reviews.
   return [
     {
-      key: "top-seller",
-      title: "Top Seller",
-      icon: "star",
-      brands: sorted.slice(0, 8),
-    },
-    {
       key: "most-recent",
-      title: "Most Recent",
+      title: t.mostRecent,
       icon: "schedule",
       brands: recent.slice(0, 8),
     },
     {
-      key: "best-of-week",
-      title: "Best of Week",
-      icon: "trending_up",
-      brands: bestOfWeek.slice(0, 8),
-    },
-    {
       key: "explore",
-      title: "Explore",
+      title: t.explore,
       icon: "explore",
       brands: brands.slice(0, 16),
     },
@@ -98,17 +83,19 @@ function buildSections(brands: Brand[]): BrandSection[] {
 
 export function BrandsUcrPage({ brands }: BrandsUcrPageProps) {
   const router = useRouter();
+  const { messages } = useLocale();
+  const t = messages.brands;
 
   function handleSelect(id: string) {
     router.push(`/brands?id=${id}`);
   }
 
-  const sections = buildSections(brands);
+  const sections = buildSections(brands, t);
 
   return (
     <div className={styles.wrapper}>
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Discover Brands</h1>
+        <h1 className={styles.pageTitle}>{t.discoverBrands}</h1>
       </div>
 
       {sections.map((section) => (
@@ -122,7 +109,7 @@ export function BrandsUcrPage({ brands }: BrandsUcrPageProps) {
             />
             <h2 className={styles.sectionTitle}>{section.title}</h2>
           </div>
-          <BrandGrid brands={section.brands} onSelect={handleSelect} />
+          <BrandGrid brands={section.brands} emptyLabel={t.noSectionBrands} onSelect={handleSelect} />
         </section>
       ))}
     </div>

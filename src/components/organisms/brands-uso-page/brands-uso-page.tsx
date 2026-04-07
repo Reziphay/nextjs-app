@@ -5,6 +5,7 @@ import { Badge } from "@/components/atoms/badge";
 import { Button } from "@/components/atoms/button";
 import { BrandCard } from "@/components/molecules/brand-card";
 import { Icon } from "@/components/icon";
+import { useLocale } from "@/components/providers/locale-provider";
 import { useAppSelector } from "@/store/hooks";
 import { selectAuthSession } from "@/store/auth";
 import { proxyMediaUrl } from "@/lib/media";
@@ -26,13 +27,6 @@ const STATUS_BADGE_VARIANT: Record<
   CLOSED: "outline",
 };
 
-const STATUS_LABEL: Record<BrandStatus, string> = {
-  PENDING: "Pending",
-  ACTIVE: "Active",
-  REJECTED: "Rejected",
-  CLOSED: "Closed",
-};
-
 const STATUS_ICON: Record<BrandStatus, string> = {
   PENDING: "schedule",
   ACTIVE: "check_circle",
@@ -42,9 +36,18 @@ const STATUS_ICON: Record<BrandStatus, string> = {
 
 export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
   const router = useRouter();
+  const { messages } = useLocale();
+  const t = messages.brands;
   const { user } = useAppSelector(selectAuthSession);
   const authorName = user ? `${user.first_name} ${user.last_name}`.trim() : "";
   const authorAvatar = proxyMediaUrl(user?.avatar_url) ?? "/reziphay-logo.png";
+
+  const STATUS_LABEL: Record<BrandStatus, string> = {
+    PENDING: t.statusPending,
+    ACTIVE: t.statusActive,
+    REJECTED: t.statusRejected,
+    CLOSED: t.statusClosed,
+  };
 
   function handleCreateBrand() {
     router.push("/brands?progress=create");
@@ -62,13 +65,13 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
   return (
     <div className={styles.wrapper}>
       <div className={styles.pageHeader}>
-        <h1 className={styles.title}>My Brands</h1>
+        <h1 className={styles.title}>{t.myBrands}</h1>
         <Button
           variant="primary"
           icon="add"
           onClick={handleCreateBrand}
         >
-          Create a brand
+          {t.createBrand}
         </Button>
       </div>
 
@@ -76,12 +79,10 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
         {brands.length === 0 ? (
           <div className={styles.empty}>
             <Icon icon="sell" size={40} color="current" className={styles.emptyIcon} />
-            <p className={styles.emptyTitle}>No brands yet</p>
-            <p className={styles.emptyDescription}>
-              Create your first brand to start offering services and connect with customers.
-            </p>
+            <p className={styles.emptyTitle}>{t.noBrandsTitle}</p>
+            <p className={styles.emptyDescription}>{t.noBrandsDescription}</p>
             <Button variant="primary" icon="add" onClick={handleCreateBrand}>
-              Create a brand
+              {t.createBrand}
             </Button>
           </div>
         ) : (
@@ -104,7 +105,7 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
                   <button
                     type="button"
                     className={styles.editButton}
-                    aria-label={`Edit ${brand.name}`}
+                    aria-label={`${t.editBrand}: ${brand.name}`}
                     onClick={(e) => handleEditBrand(e, brand.id)}
                   >
                     <Icon icon="edit" size={14} color="current" />
