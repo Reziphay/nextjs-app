@@ -27,7 +27,7 @@ import {
   Input,
   Switch,
 } from "@/components/atoms";
-import { LanguageSwitcher } from "@/components/molecules";
+import { BrandCard, LanguageSwitcher } from "@/components/molecules";
 import { Icon } from "@/components/icon";
 import { Logo } from "@/components/logo";
 import styles from "./component-library-page.module.css";
@@ -766,6 +766,53 @@ export function ComponentLibraryPage() {
                   Bookmark
                 </Badge>
               </div>
+            </ShowcaseCard>
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionEyebrow}>Molecules</span>
+            <h2>Brand Card</h2>
+            <p>
+              `BrandCard` komponenti şəkil, başlıq, təsvir, müəllif avatarı və
+              yarım ulduz dəstəkli reytinq göstəricisi ilə gəlir. `onClick`
+              prop-u ötürüldükdə hover effekti aktivləşir və kart kliklenebilir
+              olur.
+            </p>
+          </div>
+
+          <div className={styles.cardGrid}>
+            <ShowcaseCard title="Default" description="Bütün prop-larla tam görünüş">
+              <BrandCard
+                image={{ src: "/banner1.jpg", alt: "Brand cover image" }}
+                title="Exploring the Peaks of Kazbegi"
+                description="A journey through the breathtaking highlands of Georgia, where ancient towers meet snow-capped mountains and the air carries stories of centuries past."
+                author={{ name: "Leyla Həsənova", avatar: "/banner1.jpg" }}
+                rating={2.5}
+              />
+            </ShowcaseCard>
+
+            <ShowcaseCard title="Clickable" description="onClick ilə hover lift effekti">
+              <BrandCard
+                image={{ src: "/banner1.jpg", alt: "Brand cover image" }}
+                title="The Hidden Valleys of Şəki"
+                description="Nestled between forested hills and winding rivers, Şəki offers a glimpse into Azerbaijan's rich cultural and architectural heritage."
+                author={{ name: "Anar Quliyev", avatar: "/banner1.jpg" }}
+                rating={4}
+                onClick={() => {}}
+              />
+            </ShowcaseCard>
+
+            <ShowcaseCard title="Full rating" description="5/5 reytinq nümunəsi">
+              <BrandCard
+                image={{ src: "/banner1.jpg", alt: "Brand cover image" }}
+                title="Baku: City of Contrasts"
+                description="Where ancient walls stand beside glass towers and the Caspian breeze carries the scent of saffron rice and pomegranate."
+                author={{ name: "Nigar Əliyeva", avatar: "/banner1.jpg" }}
+                rating={5}
+                onClick={() => {}}
+              />
             </ShowcaseCard>
           </div>
         </section>
