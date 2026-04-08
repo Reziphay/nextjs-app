@@ -160,7 +160,7 @@ export function BranchModal({
               onChange={(e) => updateField("name", e.target.value)}
             />
             {errors.name && (
-              <p style={{ margin: 0, fontSize: "var(--font-size-extra-small)", color: "var(--app-error, #ef4444)" }}>
+              <p style={{ margin: 0, fontSize: "var(--font-size-extra-small)", color: "var(--app-error)" }}>
                 {errors.name}
               </p>
             )}
@@ -186,7 +186,7 @@ export function BranchModal({
               onChange={(e) => updateField("address1", e.target.value)}
             />
             {errors.address1 && (
-              <p style={{ margin: 0, fontSize: "var(--font-size-extra-small)", color: "var(--app-error, #ef4444)" }}>
+              <p style={{ margin: 0, fontSize: "var(--font-size-extra-small)", color: "var(--app-error)" }}>
                 {errors.address1}
               </p>
             )}
@@ -251,7 +251,7 @@ export function BranchModal({
                   onChange={(e) => updateField("opening", e.target.value)}
                 />
                 {errors.opening && (
-                  <p style={{ margin: 0, fontSize: "var(--font-size-extra-small)", color: "var(--app-error, #ef4444)" }}>
+                  <p style={{ margin: 0, fontSize: "var(--font-size-extra-small)", color: "var(--app-error)" }}>
                     {errors.opening}
                   </p>
                 )}
@@ -267,7 +267,7 @@ export function BranchModal({
                   onChange={(e) => updateField("closing", e.target.value)}
                 />
                 {errors.closing && (
-                  <p style={{ margin: 0, fontSize: "var(--font-size-extra-small)", color: "var(--app-error, #ef4444)" }}>
+                  <p style={{ margin: 0, fontSize: "var(--font-size-extra-small)", color: "var(--app-error)" }}>
                     {errors.closing}
                   </p>
                 )}

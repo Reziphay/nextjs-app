@@ -1,4 +1,6 @@
 import {
+  ArrowLeft,
+  ArrowRight,
   BadgeCheck,
   Bell,
   Bookmark,
@@ -73,6 +75,8 @@ const iconMap: Record<string, LucideIcon> = {
   account_circle: CircleUser,
   account_tree: GitBranch,
   add: Plus,
+  arrow_back: ArrowLeft,
+  arrow_forward: ArrowRight,
   autorenew: RefreshCw,
   bookmark: Bookmark,
   check: Check,

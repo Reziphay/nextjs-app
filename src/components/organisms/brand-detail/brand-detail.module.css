@@ -18,10 +18,10 @@
   border: 1px solid var(--app-border-soft);
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.98),
-    rgba(249, 247, 243, 0.98)
+    color-mix(in srgb, var(--brand-surface-base) 98%, transparent),
+    color-mix(in srgb, var(--brand-surface-overlay-soft) 76%, var(--brand-surface-base) 24%)
   );
-  box-shadow: 0 16px 40px rgba(18, 14, 11, 0.08);
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--brand-shadow-base) 64%, transparent);
 }
 
 .heroMain {
@@ -40,7 +40,7 @@
 
 .heroTitle {
   margin: 0;
-  color: #1a1714;
+  color: var(--brand-text-heading);
   font-size: clamp(1.2rem, 2vw, 1.35rem);
   font-weight: 900;
   line-height: 0.96;
@@ -62,23 +62,23 @@
 }
 
 .statusSuccess {
-  background: color-mix(in srgb, var(--app-success-bg) 88%, white 12%);
-  color: var(--app-success);
+  background: color-mix(in srgb, var(--brand-success-bg) 88%, var(--brand-surface-base) 12%);
+  color: var(--brand-success);
 }
 
 .statusWarm {
-  background: color-mix(in srgb, var(--app-warning, #f59e0b) 16%, white 84%);
-  color: var(--app-warning, #f59e0b);
+  background: color-mix(in srgb, var(--brand-warning) 16%, var(--brand-surface-base) 84%);
+  color: var(--brand-warning);
 }
 
 .statusError {
-  background: color-mix(in srgb, var(--app-error-bg) 88%, white 12%);
-  color: var(--app-error);
+  background: color-mix(in srgb, var(--brand-error-bg) 88%, var(--brand-surface-base) 12%);
+  color: var(--brand-error);
 }
 
 .statusClosed {
-  background: color-mix(in srgb, #1f1b18 14%, white 86%);
-  color: color-mix(in srgb, #1f1b18 72%, #6d635d 28%);
+  background: color-mix(in srgb, var(--brand-disabled-bg) 72%, var(--brand-surface-base) 28%);
+  color: var(--brand-disabled-text);
 }
 
 .eyebrow {
@@ -92,7 +92,7 @@
 .heroDescription {
   margin: 0;
   max-width: 46rem;
-  color: #7b6c64;
+  color: var(--brand-text-muted);
   font-size: 1rem;
   line-height: 1.55;
 }
@@ -107,7 +107,7 @@
 .ratingValue {
   font-size: 1rem;
   font-weight: 800;
-  color: #b2852a;
+  color: var(--brand-warning);
 }
 
 .ratingCount {
@@ -124,11 +124,11 @@
   max-width: 28rem;
   border-radius: var(--general-border-radius);
   border: 1px solid
-    color-mix(in srgb, var(--app-primary) 10%, var(--app-border-soft));
+    color-mix(in srgb, var(--brand-accent) 10%, var(--brand-border));
   background: linear-gradient(
     180deg,
-    rgba(255, 250, 245, 0.96),
-    rgba(255, 255, 255, 0.96)
+    color-mix(in srgb, var(--brand-surface-overlay-strong) 32%, var(--brand-surface-base) 68%),
+    color-mix(in srgb, var(--brand-surface-base) 96%, transparent)
   );
 }
 
@@ -168,7 +168,7 @@
 }
 
 .ratingButton:hover:not(:disabled) {
-  border-color: var(--app-warning, #f59e0b);
+  border-color: var(--brand-warning);
   transform: translateY(-1px);
 }
 
@@ -180,10 +180,10 @@
 .ratingButtonActive {
   border-color: color-mix(
     in srgb,
-    var(--app-warning, #f59e0b) 55%,
-    var(--app-border-soft)
+    var(--brand-warning) 55%,
+    var(--brand-border)
   );
-  background: color-mix(in srgb, var(--app-warning, #f59e0b) 10%, white 90%);
+  background: color-mix(in srgb, var(--brand-warning) 10%, var(--brand-surface-base) 90%);
 }
 
 .ratingButtonIcon {
@@ -204,6 +204,22 @@
   gap: 0.5rem;
 }
 
+.ownerRow {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 0.75rem;
+  padding-top: 0;
+}
+
+.ownerProfile {
+  width: fit-content;
+  max-width: min(100%, 22rem);
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--general-border-radius);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 84%, transparent);
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 56%, var(--brand-surface-base) 44%);
+}
+
 .categoryChip {
   display: inline-flex;
   align-items: center;
@@ -211,8 +227,8 @@
   padding: 0.4rem 0.7rem;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--app-primary) 14%, transparent);
-  background: color-mix(in srgb, var(--app-primary-faint) 78%, white 22%);
-  color: var(--app-primary-deep);
+  background: color-mix(in srgb, var(--brand-accent-faint) 78%, var(--brand-surface-base) 22%);
+  color: var(--brand-accent-strong);
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -238,11 +254,11 @@
   gap: 1rem;
   padding: 1rem;
   border-radius: var(--general-border-radius);
-  border: 1px solid color-mix(in srgb, var(--app-border-soft) 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 78%, transparent);
   background: linear-gradient(
     180deg,
-    rgba(247, 244, 240, 0.92),
-    rgba(255, 255, 255, 0.96)
+    color-mix(in srgb, var(--brand-surface-overlay-soft) 66%, var(--brand-surface-base) 34%),
+    color-mix(in srgb, var(--brand-surface-base) 96%, transparent)
   );
 }
 
@@ -253,15 +269,15 @@
   aspect-ratio: 1 / 1;
   border-radius: var(--general-border-radius);
   overflow: hidden;
-  border: 1px solid var(--app-border-soft);
+  border: 1px solid var(--brand-border);
   background: radial-gradient(
     circle at 30% 25%,
-    rgba(255, 255, 255, 0.85),
-    rgba(243, 238, 232, 0.9)
+    color-mix(in srgb, var(--brand-surface-base) 85%, transparent),
+    color-mix(in srgb, var(--brand-surface-overlay-soft) 76%, var(--brand-surface-base) 24%)
   );
   box-shadow:
-    0 18px 36px rgba(18, 14, 11, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    0 18px 36px color-mix(in srgb, var(--brand-shadow-base) 72%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--brand-surface-base) 86%, transparent);
 }
 
 .logoImage {
@@ -332,7 +348,7 @@
   border: none;
   border-bottom: 3px solid transparent;
   background: transparent;
-  color: #aca39d;
+  color: var(--brand-text-subtle);
   font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -347,7 +363,7 @@
 .filterTabActive {
   color: var(--app-text-strong);
   border-bottom-color: var(--app-primary);
-  background: rgba(248, 246, 241, 0.9);
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 72%, var(--brand-surface-base) 28%);
 }
 
 .searchField {
@@ -358,8 +374,8 @@
   min-height: 3.15rem;
   padding: 0 1rem;
   border-radius: var(--general-border-radius);
-  border: 1px solid color-mix(in srgb, var(--app-border-soft) 90%, transparent);
-  background: rgba(245, 244, 241, 0.95);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 90%, transparent);
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 70%, var(--brand-surface-base) 30%);
 }
 
 .searchIcon {
@@ -400,9 +416,9 @@
   gap: 1rem;
   padding: 1rem 1.25rem;
   border-radius: var(--general-border-radius);
-  background: rgba(244, 242, 239, 0.98);
-  border: 1px solid color-mix(in srgb, var(--app-border-soft) 90%, transparent);
-  color: #a79a92;
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 68%, var(--brand-surface-base) 32%);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 90%, transparent);
+  color: var(--brand-text-subtle);
   font-size: 0.88rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -422,15 +438,33 @@
     minmax(10rem, 1fr);
   gap: 1rem;
   align-items: center;
+  width: 100%;
   padding: 1.1rem 1.25rem;
   border-radius: var(--general-border-radius);
-  border: 1px solid color-mix(in srgb, var(--app-border-soft) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 80%, transparent);
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.98),
-    rgba(248, 246, 242, 0.98)
+    color-mix(in srgb, var(--brand-surface-base) 98%, transparent),
+    color-mix(in srgb, var(--brand-surface-overlay-soft) 74%, var(--brand-surface-base) 26%)
   );
-  box-shadow: 0 8px 24px rgba(18, 14, 11, 0.04);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--brand-shadow-base) 40%, transparent);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.branchRow:hover {
+  border-color: color-mix(in srgb, var(--app-primary) 26%, var(--brand-border) 74%);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--brand-shadow-base) 48%, transparent);
+  transform: translateY(-1px);
+}
+
+.branchRow:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
 }
 
 .branchIdentity {
@@ -448,9 +482,9 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--general-border-radius);
-  background: rgba(243, 241, 238, 0.96);
-  color: #8f8882;
-  border: 1px solid color-mix(in srgb, var(--app-border-soft) 88%, transparent);
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 62%, var(--brand-surface-base) 38%);
+  color: var(--brand-text-subtle);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 88%, transparent);
 }
 
 .branchIdentityText {
@@ -467,8 +501,9 @@
 
 .branchNote {
   margin: 0.25rem 0 0;
-  color: #9b9089;
+  color: var(--brand-text-subtle);
   font-size: 0.88rem;
+  font-weight: 600;
   line-height: 1.5;
 }
 
@@ -478,7 +513,7 @@
 
 .branchAddress {
   margin: 0;
-  color: #64564f;
+  color: var(--brand-text-body);
   font-size: 0.92rem;
   font-weight: 600;
   line-height: 1.6;
@@ -496,20 +531,20 @@
 }
 
 .availabilityLive {
-  background: color-mix(in srgb, var(--app-success-bg) 90%, white 10%);
-  color: var(--app-success);
+  background: color-mix(in srgb, var(--brand-success-bg) 90%, var(--brand-surface-base) 10%);
+  color: var(--brand-success);
 }
 
 .availabilityMuted {
-  background: rgba(239, 237, 233, 0.95);
-  color: #776c66;
+  background: color-mix(in srgb, var(--brand-disabled-bg) 78%, var(--brand-surface-base) 22%);
+  color: var(--brand-disabled-text);
 }
 
 .contactStack {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  color: #64564f;
+  color: var(--brand-text-body);
   font-size: 0.88rem;
   font-weight: 600;
   line-height: 1.5;
@@ -521,11 +556,153 @@
   font-weight: 600;
 }
 
+.branchDialogContent {
+  width: min(100%, 46rem);
+}
+
+.branchDialogTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem 1.714rem 1rem;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.branchDialogHero {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.branchDialogIcon {
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--general-border-radius);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 84%, transparent);
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 54%, var(--brand-surface-base) 46%);
+  color: var(--app-primary);
+}
+
+.branchDialogTitleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.branchDialogTitle {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.branchDialogDescription {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.branchDialogClose {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--brand-border) 82%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--app-text-muted);
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.branchDialogClose:hover {
+  color: var(--app-primary);
+  border-color: color-mix(in srgb, var(--app-primary) 30%, var(--brand-border) 70%);
+  background: color-mix(in srgb, var(--app-primary-faint) 54%, var(--brand-surface-base) 46%);
+}
+
+.branchDialogClose:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
+}
+
+.branchDialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem 1.714rem 1.5rem;
+}
+
+.branchDialogSection,
+.branchDialogItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.branchDialogGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.branchDialogLabel {
+  color: var(--app-primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.branchDialogText {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: 0.96rem;
+  font-weight: 600;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.branchDialogList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.branchDialogListItem {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 68%, var(--brand-surface-base) 32%);
+  color: var(--app-text-strong);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
 .emptyState {
   padding: 2.25rem 1.5rem;
   border-radius: var(--general-border-radius);
   border: 1px dashed color-mix(in srgb, var(--app-border-soft) 84%, transparent);
-  background: rgba(250, 249, 246, 0.9);
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 42%, var(--brand-surface-base) 58%);
   color: var(--app-text-muted);
   font-size: 0.95rem;
   font-weight: 600;
@@ -538,8 +715,8 @@
   gap: 0;
   border-radius: var(--general-border-radius);
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--app-border-soft) 88%, transparent);
-  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 88%, transparent);
+  background: color-mix(in srgb, var(--brand-surface-base) 96%, transparent);
 }
 
 .metricCard {
@@ -557,7 +734,7 @@
 }
 
 .metricLabel {
-  color: #a79a92;
+  color: var(--brand-text-subtle);
   font-size: 1rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -572,7 +749,7 @@
 }
 
 .metricValue {
-  color: #1a1714;
+  color: var(--brand-text-heading);
   font-size: clamp(1rem, 1vw, 2rem);
   font-weight: 900;
   line-height: 1;
@@ -598,22 +775,202 @@
   font-weight: 800;
 }
 
-.galleryGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+.galleryCarousel {
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
 }
 
-.galleryCard {
+.galleryStage {
   position: relative;
-  min-height: 14rem;
-  aspect-ratio: 16 / 9;
+  min-height: 20rem;
+  aspect-ratio: 16 / 8;
   overflow: hidden;
   border-radius: var(--general-border-radius);
-  border: 1px solid color-mix(in srgb, var(--app-border-soft) 84%, transparent);
-  background: rgba(245, 243, 239, 0.96);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 84%, transparent);
+  background:
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--brand-accent-soft) 16%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--brand-surface-overlay-soft) 72%, var(--brand-surface-base) 28%),
+      color-mix(in srgb, var(--brand-surface-base) 96%, transparent)
+    );
+  box-shadow: 0 16px 36px color-mix(in srgb, var(--brand-shadow-base) 48%, transparent);
 }
 
+.galleryStage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--brand-text-heading) 16%, transparent),
+      transparent 24%,
+      transparent 68%,
+      color-mix(in srgb, var(--brand-text-heading) 38%, transparent)
+    );
+  pointer-events: none;
+}
+
+.gallerySlide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.04);
+  transition:
+    opacity 520ms ease,
+    transform 5600ms ease;
+  pointer-events: none;
+}
+
+.gallerySlideActive {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.galleryTopBar {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.galleryCounter,
+.galleryAutoplayHint {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.42rem 0.72rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--brand-surface-base) 16%, transparent);
+  background: color-mix(in srgb, var(--brand-text-heading) 46%, transparent);
+  color: var(--brand-text-inverse);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--brand-shadow-strong) 42%, transparent);
+}
+
+.galleryCounter {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.galleryAutoplayHint {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.galleryControls {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.galleryNav {
+  width: 2.8rem;
+  height: 2.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--brand-surface-base) 14%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-text-heading) 44%, transparent);
+  color: var(--brand-text-inverse);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--brand-shadow-strong) 42%, transparent);
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.galleryNav:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--app-primary) 60%, var(--brand-text-heading) 40%);
+}
+
+.galleryNav:focus-visible,
+.galleryDot:focus-visible,
+.galleryThumb:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
+}
+
+.galleryDots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.galleryDot {
+  width: 0.72rem;
+  height: 0.72rem;
+  border: none;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-surface-base) 54%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-text-heading) 10%, transparent);
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    width 200ms ease;
+}
+
+.galleryDotActive {
+  width: 2rem;
+  background: var(--app-primary);
+}
+
+.galleryThumbRail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(4.75rem, 1fr));
+  gap: 0.8rem;
+}
+
+.galleryThumb {
+  position: relative;
+  min-height: 4.75rem;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: var(--general-border-radius);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 84%, transparent);
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 66%, var(--brand-surface-base) 34%);
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.galleryThumb:hover {
+  transform: translateY(-1px);
+}
+
+.galleryThumbActive {
+  border-color: color-mix(in srgb, var(--app-primary) 48%, var(--brand-border) 52%);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--brand-shadow-base) 34%, transparent);
+}
+
+.galleryThumbImage,
 .galleryImage {
   object-fit: cover;
 }
@@ -674,6 +1031,20 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .branchDialogGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .galleryStage {
+    min-height: 18rem;
+    aspect-ratio: 16 / 10;
+  }
+
+  .galleryTopBar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .metricCard:nth-child(2n) {
     border-right: none;
   }
@@ -716,6 +1087,45 @@
 
   .metricsGrid {
     grid-template-columns: 1fr;
+  }
+
+  .branchDialogBody {
+    padding: 1rem 1.429rem 1.25rem;
+  }
+
+  .branchDialogTop {
+    padding: 1.25rem 1.429rem 0.9rem;
+  }
+
+  .branchDialogHero {
+    gap: 0.85rem;
+  }
+
+  .branchDialogIcon {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .galleryStage {
+    min-height: 15rem;
+    aspect-ratio: 4 / 3;
+  }
+
+  .galleryControls {
+    gap: 0.75rem;
+  }
+
+  .galleryNav {
+    width: 2.45rem;
+    height: 2.45rem;
+  }
+
+  .galleryAutoplayHint {
+    display: none;
+  }
+
+  .galleryThumbRail {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .metricCard {

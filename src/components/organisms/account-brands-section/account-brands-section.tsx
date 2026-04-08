@@ -116,6 +116,7 @@ export function AccountBrandsSection({
                       : undefined
                   }
                   author={{
+                    userId: owner.id,
                     name: ownerName,
                     avatar: ownerAvatar,
                     subtitle: owner.email,

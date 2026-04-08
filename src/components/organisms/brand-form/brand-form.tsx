@@ -1022,7 +1022,7 @@ export function BrandForm({
                     alignItems: "center",
                     gap: "0.75rem",
                     padding: "0.75rem",
-                    background: "var(--app-surface-raised, rgba(0,0,0,0.04))",
+                    background: "var(--app-bg-surface-muted)",
                     borderRadius: "var(--radius-sm)",
                     border: "1px solid var(--app-border)",
                   }}
@@ -1254,12 +1254,12 @@ export function BrandForm({
                     alignItems: "flex-start",
                     gap: "0.625rem",
                     padding: "0.75rem 1rem",
-                    background: "color-mix(in srgb, #f59e0b 12%, transparent)",
-                    border: "1px solid color-mix(in srgb, #f59e0b 35%, transparent)",
+                    background: "var(--app-warning-bg)",
+                    border: "1px solid var(--app-warning-border)",
                     borderRadius: "var(--general-border-radius-card)",
                   }}
                 >
-                  <div style={{ flexShrink: 0, marginTop: "0.0625rem", color: "#b45309" }}>
+                  <div style={{ flexShrink: 0, marginTop: "0.0625rem", color: "var(--app-warning-strong)" }}>
                     <Icon icon="warning" size={16} color="current" />
                   </div>
                   <p

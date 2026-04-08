@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ProfileBox } from "@/components/molecules/profile-box";
 import { useLocale } from "@/components/providers/locale-provider";
 import styles from "./BrandCard.module.css";
 
@@ -24,6 +25,7 @@ type BrandCardProps = {
     | "muted";
   badgePlacement?: "header-end" | "below-title";
   author: {
+    userId?: string;
     name: string;
     avatar: string;
     label?: string;
@@ -59,8 +61,8 @@ function StarRating({ rating, max }: { rating: number; max: number }) {
             {isHalf && (
               <defs>
                 <linearGradient id={id}>
-                  <stop offset="50%" stopColor="var(--app-warning, #f59e0b)" />
-                  <stop offset="50%" stopColor="var(--app-border-strong, #d1d5db)" />
+                  <stop offset="50%" stopColor="var(--brand-warning)" />
+                  <stop offset="50%" stopColor="var(--brand-border-strong)" />
                 </linearGradient>
               </defs>
             )}
@@ -68,10 +70,10 @@ function StarRating({ rating, max }: { rating: number; max: number }) {
               d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
               fill={
                 isFull
-                  ? "var(--app-warning, #f59e0b)"
+                  ? "var(--brand-warning)"
                   : isHalf
                     ? `url(#${id})`
-                    : "var(--app-border-strong, #d1d5db)"
+                    : "var(--brand-border-strong)"
               }
             />
           </svg>
@@ -204,24 +206,14 @@ export function BrandCard({
         )}
 
         <div className={styles.footer}>
-          <div className={styles.author}>
-            <Image
-              src={author.avatar}
-              alt={author.name}
-              width={32}
-              height={32}
-              className={styles.avatar}
-            />
-            <div className={styles.authorMeta}>
-              {ownerLabel ? (
-                <span className={styles.authorLabel}>{ownerLabel}</span>
-              ) : null}
-              <span className={styles.authorName}>{author.name}</span>
-              {author.subtitle ? (
-                <span className={styles.authorSubtitle}>{author.subtitle}</span>
-              ) : null}
-            </div>
-          </div>
+          <ProfileBox
+            userId={author.userId}
+            name={author.name}
+            avatar={author.avatar}
+            label={ownerLabel}
+            subtitle={author.subtitle}
+            className={styles.author}
+          />
         </div>
       </div>
     </article>

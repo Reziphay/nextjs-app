@@ -17,6 +17,13 @@ export const protectedAppPaths = [
 
 export type ProtectedAppPath = (typeof protectedAppPaths)[number];
 
+export type DashboardBreadcrumb = {
+  label: string;
+  href?: string;
+  icon?: string;
+  current?: boolean;
+};
+
 type SidebarRouteLabelKey =
   | "home"
   | "search"
@@ -44,6 +51,20 @@ const commonSidebarItems: readonly SidebarRouteItem[] = [
   { href: "/search", icon: "search", labelKey: "search" },
   { href: "/settings", icon: "settings", labelKey: "settings" },
 ] as const;
+
+const protectedPathIcons: Record<ProtectedAppPath, string> = {
+  "/home": "home",
+  "/search": "search",
+  "/dashboard": "dashboard",
+  "/services": "room_service",
+  "/brands": "sell",
+  "/settings": "settings",
+  "/account": "account_circle",
+  "/notification": "notifications",
+  "/rezervations": "event_available",
+  "/favorites": "favorite",
+  "/moderation": "gavel",
+};
 
 const roleSidebarItems: Record<UserType, readonly SidebarRouteItem[]> = {
   uso: [
@@ -124,6 +145,115 @@ export function getProtectedRouteLabel(
   };
 
   return labels[pathname];
+}
+
+export function getProtectedRouteIcon(pathname: ProtectedAppPath) {
+  return protectedPathIcons[pathname];
+}
+
+type GetDashboardBreadcrumbsInput = {
+  messages: Messages;
+  pathname: ProtectedAppPath;
+  searchParams?: URLSearchParams | null;
+  currentUserId?: string | null;
+};
+
+export function getDashboardBreadcrumbs({
+  messages,
+  pathname,
+  searchParams,
+  currentUserId,
+}: GetDashboardBreadcrumbsInput): DashboardBreadcrumb[] {
+  const progress = searchParams?.get("progress")?.trim();
+  const entityId = searchParams?.get("id")?.trim();
+  const accountId = searchParams?.get("account")?.trim();
+  const crumbs: DashboardBreadcrumb[] = [];
+
+  const pushRoute = (
+    href: ProtectedAppPath,
+    options?: {
+      current?: boolean;
+      hrefOverride?: string;
+      labelOverride?: string;
+      iconOverride?: string;
+    },
+  ) => {
+    crumbs.push({
+      label: options?.labelOverride ?? getProtectedRouteLabel(messages, href),
+      href: options?.current ? undefined : (options?.hrefOverride ?? href),
+      icon: options?.iconOverride ?? getProtectedRouteIcon(href),
+      current: options?.current ?? false,
+    });
+  };
+
+  switch (pathname) {
+    case "/brands": {
+      if (accountId && accountId !== currentUserId && !progress && !entityId) {
+        pushRoute("/account", {
+          hrefOverride: `/account?id=${accountId}`,
+          labelOverride: messages.dashboard.profile,
+        });
+        crumbs.push({
+          label: messages.profile.brandsSectionTitle,
+          icon: getProtectedRouteIcon("/brands"),
+          current: true,
+        });
+        return crumbs;
+      }
+
+      if (progress === "create") {
+        pushRoute("/brands");
+        crumbs.push({
+          label: messages.brands.createBrand,
+          icon: "add",
+          current: true,
+        });
+        return crumbs;
+      }
+
+      if (progress === "edit" && entityId) {
+        pushRoute("/brands");
+        crumbs.push({
+          label: messages.brands.editBrand,
+          icon: "edit_square",
+          current: true,
+        });
+        return crumbs;
+      }
+
+      if (entityId) {
+        pushRoute("/brands");
+        crumbs.push({
+          label: messages.brands.detailTitle,
+          icon: "sell",
+          current: true,
+        });
+        return crumbs;
+      }
+
+      pushRoute("/brands", { current: true });
+      return crumbs;
+    }
+
+    case "/account": {
+      if (entityId && entityId !== currentUserId) {
+        crumbs.push({
+          label: messages.dashboard.profile,
+          icon: getProtectedRouteIcon("/account"),
+          current: true,
+        });
+        return crumbs;
+      }
+
+      pushRoute("/account", { current: true });
+      return crumbs;
+    }
+
+    default: {
+      pushRoute(pathname, { current: true });
+      return crumbs;
+    }
+  }
 }
 
 export function getSidebarRoutesForUserType(

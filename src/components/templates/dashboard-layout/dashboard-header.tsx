@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +21,7 @@ import { LanguageSwitcher } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   getDefaultAppRouteForUserType,
-  getProtectedRouteLabel,
+  getDashboardBreadcrumbs,
   isProtectedAppPath,
 } from "@/lib/app-routes";
 import { clearAuthCookies } from "@/lib/auth-cookies";
@@ -36,6 +36,7 @@ type DashboardHeaderProps = {
 
 export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const dispatch = useAppDispatch();
   const session = useAppSelector(selectAuthSession);
@@ -44,19 +45,6 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
   const settingsWrapRef = useRef<HTMLDivElement>(null);
-
-  const segments = pathname.split("/").filter(Boolean);
-  const crumbs: { label: string; href: string }[] = [];
-  let current = "";
-  for (const seg of segments) {
-    current += `/${seg}`;
-    if (isProtectedAppPath(current)) {
-      crumbs.push({
-        label: getProtectedRouteLabel(messages, current),
-        href: current,
-      });
-    }
-  }
 
   useEffect(() => {
     if (!settingsOpen) {
@@ -95,6 +83,14 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
   const notificationsActive = pathname === "/notification";
   const settingsActive = pathname === "/settings";
   const defaultHref = getDefaultAppRouteForUserType(session.user?.type);
+  const crumbs = isProtectedAppPath(pathname)
+    ? getDashboardBreadcrumbs({
+        messages,
+        pathname,
+        searchParams,
+        currentUserId: session.user?.id,
+      })
+    : [];
 
   return (
     <header className={styles.header}>
@@ -120,16 +116,26 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
 
         <nav aria-label="breadcrumb" className={styles.breadcrumb}>
           {crumbs.map((crumb, i) => (
-            <span key={crumb.href} className={styles.crumbItem}>
-              {i > 0 && (
-                <Icon icon="chevron_right" size={14} color="current" className={styles.crumbSep} />
-              )}
-              {i < crumbs.length - 1 ? (
-                <Link href={crumb.href} className={styles.crumbLink}>
-                  {crumb.label}
+            <span key={`${crumb.href ?? "current"}-${crumb.label}-${i}`} className={styles.crumbItem}>
+              {i > 0 ? (
+                <span aria-hidden="true" className={styles.crumbSep}>
+                  /
+                </span>
+              ) : null}
+              {crumb.href && !crumb.current ? (
+                <Link href={crumb.href} className={styles.crumbLink} title={crumb.label}>
+                  {i === 0 && crumb.icon ? (
+                    <Icon icon={crumb.icon} size={14} color="current" className={styles.crumbIcon} />
+                  ) : null}
+                  <span className={styles.crumbText}>{crumb.label}</span>
                 </Link>
               ) : (
-                <span className={styles.crumbCurrent}>{crumb.label}</span>
+                <span className={styles.crumbCurrent}>
+                  {i === 0 && crumb.icon ? (
+                    <Icon icon={crumb.icon} size={14} color="current" className={styles.crumbIcon} />
+                  ) : null}
+                  <span className={styles.crumbText}>{crumb.label}</span>
+                </span>
               )}
             </span>
           ))}

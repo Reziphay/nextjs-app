@@ -191,6 +191,7 @@
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
+  gap: 0.286rem;
   min-width: 0;
   overflow: hidden;
 }
@@ -199,21 +200,31 @@
   display: inline-flex;
   align-items: center;
   min-width: 0;
+  max-width: 100%;
 }
 
 .crumbSep {
-  width: 0.875rem;
-  height: 0.875rem;
-  color: var(--app-primary);
-  margin: 0 0.143rem;
+  color: color-mix(in srgb, var(--app-text-subtle) 78%, transparent);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+  margin: 0 0.1rem;
   flex-shrink: 0;
 }
 
 .crumbLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--general-border-radius-xl);
   color: var(--app-text-muted);
   font-size: var(--font-size-small);
   font-weight: 500;
   text-decoration: none;
+  cursor: pointer;
   transition: color 120ms ease;
 }
 
@@ -222,9 +233,30 @@
 }
 
 .crumbCurrent {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--general-border-radius-xl);
+  background: transparent;
   color: var(--app-text-strong);
   font-size: var(--font-size-small);
   font-weight: 600;
+}
+
+.crumbIcon {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+
+.crumbText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 48rem) {
@@ -251,6 +283,15 @@
   .crumbLink,
   .crumbCurrent {
     font-size: var(--font-size-extra-small);
+  }
+
+  .crumbLink,
+  .crumbCurrent {
+    padding-inline: 0.35rem;
+  }
+
+  .crumbSep {
+    margin-inline: 0;
   }
 
   .settingsPopup {

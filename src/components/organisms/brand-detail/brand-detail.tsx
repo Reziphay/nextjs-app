@@ -1,13 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { isAxiosError } from "axios";
-import { Alert, AlertDescription } from "@/components/atoms";
+import {
+  Alert,
+  AlertDescription,
+  AlertDialog,
+  AlertDialogContent,
+} from "@/components/atoms";
 import { Button } from "@/components/atoms/button";
 import { Input } from "@/components/atoms/input";
 import { Icon } from "@/components/icon";
+import { ProfileBox } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import { submitBrandRating } from "@/lib/brands-api";
 import { proxyMediaUrl } from "@/lib/media";
@@ -47,10 +53,10 @@ function StarRating({ rating, max = 5 }: { rating: number; max?: number }) {
             {isHalf && (
               <defs>
                 <linearGradient id={id}>
-                  <stop offset="50%" stopColor="var(--app-warning, #f59e0b)" />
+                  <stop offset="50%" stopColor="var(--brand-warning)" />
                   <stop
                     offset="50%"
-                    stopColor="var(--app-border-strong, #d1d5db)"
+                    stopColor="var(--brand-border-strong)"
                   />
                 </linearGradient>
               </defs>
@@ -59,10 +65,10 @@ function StarRating({ rating, max = 5 }: { rating: number; max?: number }) {
               d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
               fill={
                 isFull
-                  ? "var(--app-warning, #f59e0b)"
+                  ? "var(--brand-warning)"
                   : isHalf
                     ? `url(#${id})`
-                    : "var(--app-border-strong, #d1d5db)"
+                    : "var(--brand-border-strong)"
               }
             />
           </svg>
@@ -106,8 +112,8 @@ function RatingButtonRow({
                 d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
                 fill={
                   isActive
-                    ? "var(--app-warning, #f59e0b)"
-                    : "var(--app-border-strong, #d1d5db)"
+                    ? "var(--brand-warning)"
+                    : "var(--brand-border-strong)"
                 }
               />
             </svg>
@@ -134,24 +140,35 @@ function hasBranchContact(branch: Branch) {
   return Boolean(branch.phone || branch.email);
 }
 
+function getBranchBreaks(branch: Branch) {
+  return branch.breaks
+    .map((item) => [item.start, item.end].filter(Boolean).join(" – "))
+    .filter(Boolean);
+}
+
 export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { messages } = useLocale();
   const t = messages.brands;
   const session = useAppSelector(selectAuthSession);
+  const currentUser = session.user;
+  const dashboard = messages.dashboard;
   const [brandState, setBrandState] = useState(brand);
   const [ratingLoading, setRatingLoading] = useState(false);
   const [ratingFeedback, setRatingFeedback] = useState<string | null>(null);
   const [branchFilter, setBranchFilter] = useState<BranchFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
+  const [activeGalleryIndex, setActiveGalleryIndex] = useState(0);
+  const [galleryPaused, setGalleryPaused] = useState(false);
 
   const isOwner = Boolean(currentUserId && brandState.owner_id === currentUserId);
   const categories = brandState.categories ?? [];
   const gallery = brandState.gallery ?? [];
   const branches = brandState.branches ?? [];
   const canRate =
-    session.user?.type === "ucr" &&
+    currentUser?.type === "ucr" &&
     brandState.status === "ACTIVE" &&
     !isOwner;
   const normalizedRating =
@@ -170,6 +187,16 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
     REJECTED: styles.statusError,
     CLOSED: styles.statusClosed,
   };
+  const ownerProfileVisible = Boolean(
+    currentUser && currentUser.id === brandState.owner_id,
+  );
+  const ownerDisplayName = ownerProfileVisible
+    ? `${currentUser!.first_name} ${currentUser!.last_name}`.trim()
+    : "";
+  const ownerAvatar = ownerProfileVisible
+    ? proxyMediaUrl(currentUser!.avatar_url) ?? "/reziphay-logo.png"
+    : "";
+  const ownerSubtitle = ownerProfileVisible ? currentUser!.email ?? undefined : undefined;
 
   const filteredBranches = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -195,6 +222,47 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
       return haystack.includes(normalizedQuery);
     });
   }, [branches, branchFilter, searchQuery]);
+
+  const gallerySlides = useMemo(
+    () =>
+      [...gallery]
+        .sort((a, b) => a.order - b.order)
+        .map((item) => ({
+          ...item,
+          imageUrl: proxyMediaUrl(item.url),
+        }))
+        .filter(
+          (
+            item,
+          ): item is typeof item & {
+            imageUrl: string;
+          } => Boolean(item.imageUrl),
+        ),
+    [gallery],
+  );
+
+  useEffect(() => {
+    if (gallerySlides.length === 0) {
+      setActiveGalleryIndex(0);
+      return;
+    }
+
+    setActiveGalleryIndex((current) =>
+      current >= gallerySlides.length ? 0 : current,
+    );
+  }, [gallerySlides.length]);
+
+  useEffect(() => {
+    if (gallerySlides.length <= 1 || galleryPaused) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setActiveGalleryIndex((current) => (current + 1) % gallerySlides.length);
+    }, 4200);
+
+    return () => window.clearInterval(intervalId);
+  }, [galleryPaused, gallerySlides.length]);
 
   const stats = [
     {
@@ -263,6 +331,18 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
     }
   }
 
+  function showNextGallerySlide() {
+    if (gallerySlides.length <= 1) return;
+    setActiveGalleryIndex((current) => (current + 1) % gallerySlides.length);
+  }
+
+  function showPreviousGallerySlide() {
+    if (gallerySlides.length <= 1) return;
+    setActiveGalleryIndex(
+      (current) => (current - 1 + gallerySlides.length) % gallerySlides.length,
+    );
+  }
+
   return (
     <div className={styles.wrapper}>
       {showCreatedAlert ? (
@@ -326,6 +406,19 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
                   {cat.name}
                 </span>
               ))}
+            </div>
+          ) : null}
+
+          {ownerProfileVisible ? (
+            <div className={styles.ownerRow}>
+              <ProfileBox
+                userId={brandState.owner_id}
+                name={ownerDisplayName}
+                avatar={ownerAvatar}
+                label={t.brandCardOwnerLabel}
+                subtitle={ownerSubtitle}
+                className={styles.ownerProfile}
+              />
             </div>
           ) : null}
         </div>
@@ -433,16 +526,20 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
             </div>
           ) : (
             filteredBranches.map((branch) => (
-              <article key={branch.id} className={styles.branchRow}>
+              <button
+                key={branch.id}
+                type="button"
+                className={styles.branchRow}
+                onClick={() => setSelectedBranch(branch)}
+                aria-label={`${branch.name} — ${t.detailBranchOpenDetails}`}
+              >
                 <div className={styles.branchIdentity}>
                   <div className={styles.branchIconBox}>
                     <Icon icon="account_tree" size={24} color="current" />
                   </div>
                   <div className={styles.branchIdentityText}>
                     <p className={styles.branchName}>{branch.name}</p>
-                    {branch.description ? (
-                      <p className={styles.branchNote}>{branch.description}</p>
-                    ) : null}
+                    <p className={styles.branchNote}>{t.detailBranchOpenDetails}</p>
                   </div>
                 </div>
 
@@ -468,7 +565,7 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
                     <span className={styles.branchMuted}>—</span>
                   )}
                 </div>
-              </article>
+              </button>
             ))
           )}
         </div>
@@ -488,35 +585,230 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
 
       <section className={styles.galleryPanel}>
         <div className={styles.galleryHeader}>
-          <span className={styles.eyebrow}>{t.gallery}</span>
           <h2 className={styles.galleryTitle}>{t.gallery}</h2>
         </div>
 
-        {gallery.length === 0 ? (
+        {gallerySlides.length === 0 ? (
           <div className={styles.emptyState}>{t.detailNoGalleryMedia}</div>
         ) : (
-          <div className={styles.galleryGrid}>
-            {gallery
-              .sort((a, b) => a.order - b.order)
-              .map((item) => {
-                const imageUrl = proxyMediaUrl(item.url);
-                if (!imageUrl) return null;
+          <div
+            className={styles.galleryCarousel}
+            onMouseEnter={() => setGalleryPaused(true)}
+            onMouseLeave={() => setGalleryPaused(false)}
+          >
+            <div className={styles.galleryStage}>
+              {gallerySlides.map((item, index) => (
+                <div
+                  key={item.id}
+                  className={`${styles.gallerySlide} ${index === activeGalleryIndex ? styles.gallerySlideActive : ""}`}
+                  aria-hidden={index === activeGalleryIndex ? undefined : true}
+                >
+                  <Image
+                    src={item.imageUrl}
+                    alt={`${brandState.name} gallery`}
+                    fill
+                    className={styles.galleryImage}
+                    sizes="(max-width: 900px) 100vw, 70vw"
+                    priority={index === activeGalleryIndex}
+                  />
+                </div>
+              ))}
 
-                return (
-                  <div key={item.id} className={styles.galleryCard}>
-                    <Image
-                      src={imageUrl}
-                      alt={`${brandState.name} gallery`}
-                      fill
-                      className={styles.galleryImage}
-                      sizes="(max-width: 900px) 100vw, 33vw"
-                    />
+              {gallerySlides.length > 1 ? (
+                <>
+                  <div className={styles.galleryTopBar}>
+                    <span className={styles.galleryCounter}>
+                      {String(activeGalleryIndex + 1).padStart(2, "0")} /{" "}
+                      {String(gallerySlides.length).padStart(2, "0")}
+                    </span>
+                    <span className={styles.galleryAutoplayHint}>
+                      {galleryPaused
+                        ? t.detailGalleryPaused
+                        : t.detailGalleryAutoplay}
+                    </span>
                   </div>
-                );
-              })}
+
+                  <div className={styles.galleryControls}>
+                    <button
+                      type="button"
+                      className={styles.galleryNav}
+                      onClick={showPreviousGallerySlide}
+                      aria-label={t.detailGalleryPrevious}
+                    >
+                      <Icon icon="arrow_back" size={18} color="current" />
+                    </button>
+
+                    <div className={styles.galleryDots}>
+                      {gallerySlides.map((item, index) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          className={`${styles.galleryDot} ${index === activeGalleryIndex ? styles.galleryDotActive : ""}`}
+                          onClick={() => setActiveGalleryIndex(index)}
+                          aria-label={`${t.gallery} ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      className={styles.galleryNav}
+                      onClick={showNextGallerySlide}
+                      aria-label={t.detailGalleryNext}
+                    >
+                      <Icon icon="arrow_forward" size={18} color="current" />
+                    </button>
+                  </div>
+                </>
+              ) : null}
+            </div>
+
+            {gallerySlides.length > 1 ? (
+              <div className={styles.galleryThumbRail}>
+                {gallerySlides.map((item, index) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`${styles.galleryThumb} ${index === activeGalleryIndex ? styles.galleryThumbActive : ""}`}
+                    onClick={() => setActiveGalleryIndex(index)}
+                    aria-label={`${t.gallery} ${index + 1}`}
+                  >
+                    <Image
+                      src={item.imageUrl}
+                      alt={`${brandState.name} gallery thumbnail`}
+                      fill
+                      className={styles.galleryThumbImage}
+                      sizes="88px"
+                    />
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
         )}
       </section>
+
+      <AlertDialog
+        open={Boolean(selectedBranch)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedBranch(null);
+          }
+        }}
+      >
+        <AlertDialogContent className={styles.branchDialogContent}>
+          {selectedBranch ? (
+            <>
+              <div className={styles.branchDialogTop}>
+                <div className={styles.branchDialogHero}>
+                  <div className={styles.branchDialogIcon}>
+                    <Icon icon="account_tree" size={24} color="current" />
+                  </div>
+
+                  <div className={styles.branchDialogTitleGroup}>
+                    <h2 className={styles.branchDialogTitle}>
+                      {selectedBranch.name || t.detailBranchModalTitle}
+                    </h2>
+                    <p className={styles.branchDialogDescription}>
+                      {getBranchAddress(selectedBranch) || t.detailBranchModalDescription}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className={styles.branchDialogClose}
+                  onClick={() => setSelectedBranch(null)}
+                  aria-label={dashboard.cancel}
+                >
+                  <Icon icon="close" size={18} color="current" />
+                </button>
+              </div>
+
+              <div className={styles.branchDialogBody}>
+                {selectedBranch.description?.trim() ? (
+                  <div className={styles.branchDialogSection}>
+                    <span className={styles.branchDialogLabel}>
+                      {t.branchFieldDescription}
+                    </span>
+                    <p className={styles.branchDialogText}>
+                      {selectedBranch.description.trim()}
+                    </p>
+                  </div>
+                ) : null}
+
+                <div className={styles.branchDialogGrid}>
+                  <div className={styles.branchDialogItem}>
+                    <span className={styles.branchDialogLabel}>
+                      {t.branchFieldAddress1}
+                    </span>
+                    <p className={styles.branchDialogText}>
+                      {selectedBranch.address1}
+                    </p>
+                  </div>
+
+                  {selectedBranch.address2?.trim() ? (
+                    <div className={styles.branchDialogItem}>
+                      <span className={styles.branchDialogLabel}>
+                        {t.branchFieldAddress2}
+                      </span>
+                      <p className={styles.branchDialogText}>
+                        {selectedBranch.address2.trim()}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  <div className={styles.branchDialogItem}>
+                    <span className={styles.branchDialogLabel}>
+                      {t.detailTableAvailability}
+                    </span>
+                    <p className={styles.branchDialogText}>
+                      {getBranchAvailability(selectedBranch, t.branchField247)}
+                    </p>
+                  </div>
+
+                  {getBranchBreaks(selectedBranch).length > 0 ? (
+                    <div className={styles.branchDialogItem}>
+                      <span className={styles.branchDialogLabel}>
+                        {t.branchFieldBreaks}
+                      </span>
+                      <div className={styles.branchDialogList}>
+                        {getBranchBreaks(selectedBranch).map((item) => (
+                          <span key={item} className={styles.branchDialogListItem}>
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {selectedBranch.phone?.trim() ? (
+                    <div className={styles.branchDialogItem}>
+                      <span className={styles.branchDialogLabel}>
+                        {t.branchFieldPhone}
+                      </span>
+                      <p className={styles.branchDialogText}>
+                        {selectedBranch.phone.trim()}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  {selectedBranch.email?.trim() ? (
+                    <div className={styles.branchDialogItem}>
+                      <span className={styles.branchDialogLabel}>
+                        {t.branchFieldEmail}
+                      </span>
+                      <p className={styles.branchDialogText}>
+                        {selectedBranch.email.trim()}
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </>
+          ) : null}
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

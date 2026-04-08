@@ -113,6 +113,7 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
                   badgeVariant={isOwner ? STATUS_BADGE_VARIANT[brand.status] : undefined}
                   badgePlacement={isOwner ? "below-title" : undefined}
                   author={{
+                    userId: user?.id,
                     name: authorName,
                     avatar: authorAvatar,
                     subtitle: authorSubtitle,

@@ -166,7 +166,7 @@
 }
 
 .removePreviewBtn:hover {
-  color: var(--app-error, #ef4444);
+  color: var(--app-error);
 }
 
 /* Gallery preview */
@@ -255,7 +255,7 @@
 }
 
 .iconBtnDelete:hover {
-  color: var(--app-error, #ef4444);
+  color: var(--app-error);
   background: var(--app-error-bg);
 }
 
@@ -284,12 +284,12 @@
 
 .feedbackError {
   background: var(--app-error-bg);
-  color: var(--app-error, #ef4444);
+  color: var(--app-error);
   border: 1px solid transparent;
 }
 
 .fieldError {
   margin: 0;
   font-size: var(--font-size-extra-small);
-  color: var(--app-error, #ef4444);
+  color: var(--app-error);
 }

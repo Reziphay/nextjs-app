@@ -59,7 +59,11 @@
   position: absolute;
   inset: 0;
   border-radius: calc(var(--general-border-radius-2xl) + 0.25rem);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(25, 20, 14, 0.14));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand-surface-base) 4%, transparent),
+    color-mix(in srgb, var(--brand-text-heading) 14%, transparent)
+  );
   pointer-events: none;
 }
 
@@ -73,8 +77,8 @@
   gap: 0.35rem;
   padding: 0.45rem 0.65rem;
   border-radius: 999px;
-  background: rgba(24, 18, 13, 0.84);
-  color: #fff5eb;
+  background: color-mix(in srgb, var(--brand-text-heading) 84%, transparent);
+  color: var(--brand-text-inverse);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.02em;

@@ -165,6 +165,7 @@ export type Messages = {
     noBrandsTitle: string;
     noBrandsDescription: string;
     editBrand: string;
+    detailTitle: string;
     // UCR view sections
     topSeller: string;
     topRated: string;
@@ -331,12 +332,19 @@ export type Messages = {
     detailTableAddress: string;
     detailTableAvailability: string;
     detailTableContact: string;
+    detailBranchOpenDetails: string;
+    detailBranchModalTitle: string;
+    detailBranchModalDescription: string;
     detailNoMatchingBranches: string;
     detailMetricCategories: string;
     detailMetricBranches: string;
     detailMetricGallery: string;
     detailMetricRating: string;
     detailNoGalleryMedia: string;
+    detailGalleryPrevious: string;
+    detailGalleryNext: string;
+    detailGalleryAutoplay: string;
+    detailGalleryPaused: string;
   };
   profile: {
     title: string;

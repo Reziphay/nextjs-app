@@ -57,7 +57,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--app-error, #ef4444);
+  color: var(--app-error);
   display: flex;
   align-items: center;
   justify-content: center;

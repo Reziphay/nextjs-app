@@ -3,9 +3,9 @@ import type { CSSProperties } from "react";
 
 // Mystic Dark Forest
 const palette = [
-  "#2e3532", "#2e3532", "#2e3532",
-  "#8b2635", "#8b2635", "#8b2635",
-  "#e0e2db", "#e0e2db", "#e0e2db",
+  "#212529", "#212529", "#212529",
+  "#00111c", "#00111c", "#00111c",
+  "#f8f9fa", "#f8f9fa", "#f8f9fa",
 ];
 
 // palette[0–2]: near-black → text range (darkest, near-neutral)
@@ -26,7 +26,7 @@ export const errorColors = [
 export const warnColors = [
   "#f7b267",
   "#f79d65",
-  "#f4845f",
+  "#ff4000ff",
   "#f27059",
   "#fce3cf",
 ] as const;
@@ -101,7 +101,7 @@ const semanticColors = {
   "app-text-inverse": whiteColors[2],
   // Border — palette[6] is the designated border shade; dark-end at low alpha for neutral borders
   // soft: palette[2] (#063977) @ 14% — hairline dividers, table rows
-  "app-border-soft": "#bdbdbdff",
+  "app-border-soft": withAlpha(blackColors[1], 0.2),
   // strong: palette[1] (#082751) @ 22% — card strokes, input outlines
   "app-border-strong": withAlpha(blackColors[1], 0.22),
   // primary-soft: palette[6] (#76d5fe) @ 35% — border on tinted primary surfaces; lighter than palette[5]
