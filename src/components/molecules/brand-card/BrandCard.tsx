@@ -13,7 +13,15 @@ type BrandCardProps = {
   description: string;
   category?: string;
   badgeText?: string;
-  badgeVariant?: "default" | "secondary" | "destructive" | "outline";
+  badgeVariant?:
+    | "default"
+    | "secondary"
+    | "destructive"
+    | "outline"
+    | "success"
+    | "warm"
+    | "error"
+    | "muted";
   badgePlacement?: "header-end" | "below-title";
   author: {
     name: string;
@@ -96,7 +104,15 @@ export function BrandCard({
   const ownerLabel = author.label ?? t.brandCardOwnerLabel;
   const normalizedRating = typeof rating === "number" ? rating : 0;
   const badgeVariantClassName =
-    badgeVariant === "secondary"
+    badgeVariant === "success"
+      ? styles.badgeSuccess
+      : badgeVariant === "warm"
+        ? styles.badgeWarm
+        : badgeVariant === "error"
+          ? styles.badgeError
+          : badgeVariant === "muted"
+            ? styles.badgeMuted
+            : badgeVariant === "secondary"
       ? styles.badgeSecondary
       : badgeVariant === "destructive"
         ? styles.badgeDestructive

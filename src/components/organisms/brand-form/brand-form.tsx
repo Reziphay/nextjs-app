@@ -403,10 +403,9 @@ export function BrandForm({
             breaks: branch.breaks.map((item) => ({ start: item.start, end: item.end })),
           })),
         }, accessToken);
-        void newBrand;
 
-        setFeedback({ type: "success", message: t.createSuccessDescription });
-        resetDraft(createEmptyDraft());
+        router.push(`/brands?id=${newBrand.id}&created=1`);
+        return;
       } else if (mode === "edit" && currentBrand) {
         const trimmedDescription = draft.description.trim();
 

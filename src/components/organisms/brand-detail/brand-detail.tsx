@@ -2,9 +2,9 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { isAxiosError } from "axios";
-import { Badge } from "@/components/atoms/badge";
+import { Alert, AlertDescription } from "@/components/atoms";
 import { Button } from "@/components/atoms/button";
 import { Input } from "@/components/atoms/input";
 import { Icon } from "@/components/icon";
@@ -22,16 +22,6 @@ type BrandDetailProps = {
 };
 
 type BranchFilter = "all" | "open247" | "withContact";
-
-const STATUS_BADGE_VARIANT: Record<
-  BrandStatus,
-  "default" | "secondary" | "destructive" | "outline"
-> = {
-  PENDING: "secondary",
-  ACTIVE: "default",
-  REJECTED: "destructive",
-  CLOSED: "outline",
-};
 
 function StarRating({ rating, max = 5 }: { rating: number; max?: number }) {
   return (
@@ -146,6 +136,7 @@ function hasBranchContact(branch: Branch) {
 
 export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { messages } = useLocale();
   const t = messages.brands;
   const session = useAppSelector(selectAuthSession);
@@ -166,13 +157,18 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
   const normalizedRating =
     typeof brandState.rating === "number" ? brandState.rating : 0;
   const logoUrl = proxyMediaUrl(brandState.logo_url);
-  const primaryCategory = categories[0]?.name;
-
+  const showCreatedAlert = searchParams.get("created") === "1";
   const STATUS_LABEL: Record<BrandStatus, string> = {
     PENDING: t.statusPending,
     ACTIVE: t.statusActive,
     REJECTED: t.statusRejected,
     CLOSED: t.statusClosed,
+  };
+  const STATUS_CLASSNAME: Record<BrandStatus, string> = {
+    PENDING: styles.statusWarm,
+    ACTIVE: styles.statusSuccess,
+    REJECTED: styles.statusError,
+    CLOSED: styles.statusClosed,
   };
 
   const filteredBranches = useMemo(() => {
@@ -269,16 +265,22 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
 
   return (
     <div className={styles.wrapper}>
+      {showCreatedAlert ? (
+        <Alert variant="success" icon="check_circle" className={styles.pageAlert}>
+          <AlertDescription>{t.createSuccessDescription}</AlertDescription>
+        </Alert>
+      ) : null}
+
       <section className={styles.hero}>
         <div className={styles.heroMain}>
-          <div className={styles.heroTop}>
-            <span className={styles.eyebrow}>{t.detailStatusLabel}</span>
-            <Badge variant={STATUS_BADGE_VARIANT[brandState.status]}>
+          <div className={styles.heroTitleRow}>
+            <span
+              className={`${styles.statusPill} ${STATUS_CLASSNAME[brandState.status]}`}
+            >
               {STATUS_LABEL[brandState.status]}
-            </Badge>
+            </span>
+            <h1 className={styles.heroTitle}>{brandState.name}</h1>
           </div>
-
-          <h1 className={styles.heroTitle}>{brandState.name}</h1>
           <p className={styles.heroDescription}>
             {brandState.description?.trim() || t.detailDefaultDescription}
           </p>
@@ -361,14 +363,6 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
             )}
 
             <div className={styles.logoMeta}>
-              <div className={styles.logoStat}>
-                <span className={styles.logoStatLabel}>
-                  {t.detailMetricCategories}
-                </span>
-                <strong className={styles.logoStatValue}>
-                  {primaryCategory ?? "—"}
-                </strong>
-              </div>
               <div className={styles.logoStatGrid}>
                 <div className={styles.logoStatBox}>
                   <span className={styles.logoStatLabel}>

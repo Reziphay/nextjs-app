@@ -4,12 +4,17 @@
   gap: 1.5rem;
 }
 
+.pageAlert {
+  width: 100%;
+  max-width: none;
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 0.7fr);
   gap: 1.5rem;
   padding: 2rem;
-  border-radius: calc(var(--general-border-radius-2xl) + 0.25rem);
+  border-radius: var(--general-border-radius);
   border: 1px solid var(--app-border-soft);
   background: linear-gradient(
     180deg,
@@ -26,19 +31,11 @@
   min-width: 0;
 }
 
-.heroTop {
+.heroTitleRow {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-}
-
-.eyebrow {
-  color: var(--app-primary);
-  font-size: 0.82rem;
-  font-weight: 800;
-  letter-spacing: 0.34em;
-  text-transform: uppercase;
 }
 
 .heroTitle {
@@ -50,6 +47,46 @@
   letter-spacing: -0.06em;
   text-transform: uppercase;
   text-wrap: balance;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.36rem 0.78rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.statusSuccess {
+  background: color-mix(in srgb, var(--app-success-bg) 88%, white 12%);
+  color: var(--app-success);
+}
+
+.statusWarm {
+  background: color-mix(in srgb, var(--app-warning, #f59e0b) 16%, white 84%);
+  color: var(--app-warning, #f59e0b);
+}
+
+.statusError {
+  background: color-mix(in srgb, var(--app-error-bg) 88%, white 12%);
+  color: var(--app-error);
+}
+
+.statusClosed {
+  background: color-mix(in srgb, #1f1b18 14%, white 86%);
+  color: color-mix(in srgb, #1f1b18 72%, #6d635d 28%);
+}
+
+.eyebrow {
+  color: var(--app-primary);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
 }
 
 .heroDescription {
@@ -85,7 +122,7 @@
   gap: 0.65rem;
   padding: 1rem 1.1rem;
   max-width: 28rem;
-  border-radius: var(--general-border-radius-xl);
+  border-radius: var(--general-border-radius);
   border: 1px solid
     color-mix(in srgb, var(--app-primary) 10%, var(--app-border-soft));
   background: linear-gradient(
@@ -200,7 +237,7 @@
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
-  border-radius: calc(var(--general-border-radius-2xl) - 0.125rem);
+  border-radius: var(--general-border-radius);
   border: 1px solid color-mix(in srgb, var(--app-border-soft) 78%, transparent);
   background: linear-gradient(
     180deg,
@@ -214,7 +251,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: var(--general-border-radius-2xl);
+  border-radius: var(--general-border-radius);
   overflow: hidden;
   border: 1px solid var(--app-border-soft);
   background: radial-gradient(
@@ -244,7 +281,6 @@
   gap: 0.85rem;
 }
 
-.logoStat,
 .logoStatBox {
   display: flex;
   flex-direction: column;
@@ -321,6 +357,7 @@
   width: min(100%, 23rem);
   min-height: 3.15rem;
   padding: 0 1rem;
+  border-radius: var(--general-border-radius);
   border: 1px solid color-mix(in srgb, var(--app-border-soft) 90%, transparent);
   background: rgba(245, 244, 241, 0.95);
 }
@@ -362,6 +399,7 @@
     minmax(10rem, 1fr);
   gap: 1rem;
   padding: 1rem 1.25rem;
+  border-radius: var(--general-border-radius);
   background: rgba(244, 242, 239, 0.98);
   border: 1px solid color-mix(in srgb, var(--app-border-soft) 90%, transparent);
   color: #a79a92;
@@ -385,6 +423,7 @@
   gap: 1rem;
   align-items: center;
   padding: 1.1rem 1.25rem;
+  border-radius: var(--general-border-radius);
   border: 1px solid color-mix(in srgb, var(--app-border-soft) 80%, transparent);
   background: linear-gradient(
     180deg,
@@ -408,6 +447,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: var(--general-border-radius);
   background: rgba(243, 241, 238, 0.96);
   color: #8f8882;
   border: 1px solid color-mix(in srgb, var(--app-border-soft) 88%, transparent);
@@ -483,6 +523,7 @@
 
 .emptyState {
   padding: 2.25rem 1.5rem;
+  border-radius: var(--general-border-radius);
   border: 1px dashed color-mix(in srgb, var(--app-border-soft) 84%, transparent);
   background: rgba(250, 249, 246, 0.9);
   color: var(--app-text-muted);
@@ -495,6 +536,8 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
+  border-radius: var(--general-border-radius);
+  overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--app-border-soft) 88%, transparent);
   background: rgba(255, 255, 255, 0.96);
 }
@@ -566,6 +609,7 @@
   min-height: 14rem;
   aspect-ratio: 16 / 9;
   overflow: hidden;
+  border-radius: var(--general-border-radius);
   border: 1px solid color-mix(in srgb, var(--app-border-soft) 84%, transparent);
   background: rgba(245, 243, 239, 0.96);
 }

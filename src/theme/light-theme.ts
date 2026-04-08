@@ -101,7 +101,7 @@ const semanticColors = {
   "app-text-inverse": whiteColors[2],
   // Border — palette[6] is the designated border shade; dark-end at low alpha for neutral borders
   // soft: palette[2] (#063977) @ 14% — hairline dividers, table rows
-  "app-border-soft": primaryColors[2],
+  "app-border-soft": "#bdbdbdff",
   // strong: palette[1] (#082751) @ 22% — card strokes, input outlines
   "app-border-strong": withAlpha(blackColors[1], 0.22),
   // primary-soft: palette[6] (#76d5fe) @ 35% — border on tinted primary surfaces; lighter than palette[5]

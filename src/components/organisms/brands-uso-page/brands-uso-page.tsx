@@ -18,12 +18,12 @@ type BrandsUsoPageProps = {
 
 const STATUS_BADGE_VARIANT: Record<
   BrandStatus,
-  "default" | "secondary" | "destructive" | "outline"
+  "success" | "warm" | "error" | "muted"
 > = {
-  PENDING: "secondary",
-  ACTIVE: "default",
-  REJECTED: "destructive",
-  CLOSED: "outline",
+  PENDING: "warm",
+  ACTIVE: "success",
+  REJECTED: "error",
+  CLOSED: "muted",
 };
 
 export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
