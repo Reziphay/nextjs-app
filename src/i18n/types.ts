@@ -304,6 +304,11 @@ export type Messages = {
     rateBrand: string;
     yourRating: string;
     ratingSavedDescription: string;
+    brandCardBrandLabel: string;
+    brandCardCategoryLabel: string;
+    brandCardDescriptionLabel: string;
+    brandCardOwnerLabel: string;
+    brandCardReviewsSuffix: string;
     // Validation
     requiredMessage: string;
     nameRequiredMessage: string;

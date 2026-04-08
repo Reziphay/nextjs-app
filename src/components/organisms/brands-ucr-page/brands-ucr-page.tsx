@@ -24,10 +24,12 @@ const PLACEHOLDER_IMAGE = "/banner1.jpg";
 function BrandGrid({
   brands,
   emptyLabel,
+  reviewsSuffix,
   onSelect,
 }: {
   brands: Brand[];
   emptyLabel: string;
+  reviewsSuffix: string;
   onSelect: (id: string) => void;
 }) {
   if (brands.length === 0) {
@@ -39,12 +41,22 @@ function BrandGrid({
       {brands.map((brand) => (
         <BrandCard
           key={brand.id}
-          image={{
+          logo={{
+            src: proxyMediaUrl(brand.logo_url) ?? proxyMediaUrl(brand.gallery?.[0]?.url) ?? PLACEHOLDER_IMAGE,
+            alt: brand.name,
+          }}
+          backgroundImage={{
             src: proxyMediaUrl(brand.gallery?.[0]?.url ?? brand.logo_url) ?? PLACEHOLDER_IMAGE,
             alt: brand.name,
           }}
           title={brand.name}
           description={brand.description ?? ""}
+          category={brand.categories[0]?.name}
+          badgeText={
+            brand.rating_count > 0
+              ? `${brand.rating_count} ${reviewsSuffix}`
+              : undefined
+          }
           author={{
             name: brand.name,
             avatar: proxyMediaUrl(brand.logo_url) ?? "/reziphay-logo.png",
@@ -131,7 +143,12 @@ export function BrandsUcrPage({ brands }: BrandsUcrPageProps) {
             />
             <h2 className={styles.sectionTitle}>{section.title}</h2>
           </div>
-          <BrandGrid brands={section.brands} emptyLabel={t.noSectionBrands} onSelect={handleSelect} />
+          <BrandGrid
+            brands={section.brands}
+            emptyLabel={t.noSectionBrands}
+            reviewsSuffix={t.brandCardReviewsSuffix}
+            onSelect={handleSelect}
+          />
         </section>
       ))}
     </div>

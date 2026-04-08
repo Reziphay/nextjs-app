@@ -1,11 +1,26 @@
+"use client";
+
 import Image from "next/image";
+import { useLocale } from "@/components/providers/locale-provider";
 import styles from "./BrandCard.module.css";
 
+type BrandCardMedia = { src: string; alt: string };
+
 type BrandCardProps = {
-  image: { src: string; alt: string };
+  logo: BrandCardMedia;
+  backgroundImage?: BrandCardMedia;
   title: string;
   description: string;
-  author: { name: string; avatar: string };
+  category?: string;
+  badgeText?: string;
+  badgeVariant?: "default" | "secondary" | "destructive" | "outline";
+  badgePlacement?: "header-end" | "below-title";
+  author: {
+    name: string;
+    avatar: string;
+    label?: string;
+    subtitle?: string;
+  };
   rating: number | null;
   ratingCount?: number;
   maxRating?: number;
@@ -59,16 +74,35 @@ function StarRating({ rating, max }: { rating: number; max: number }) {
 }
 
 export function BrandCard({
-  image,
+  logo,
+  backgroundImage,
   title,
   description,
+  category,
+  badgeText,
+  badgeVariant = "default",
+  badgePlacement = "header-end",
   author,
   rating,
   ratingCount = 0,
   maxRating = 5,
   onClick,
 }: BrandCardProps) {
+  const { messages } = useLocale();
+  const t = messages.brands;
   const isClickable = !!onClick;
+  const hasDescription = description.trim().length > 0;
+  const backdrop = backgroundImage ?? logo;
+  const ownerLabel = author.label ?? t.brandCardOwnerLabel;
+  const normalizedRating = typeof rating === "number" ? rating : 0;
+  const badgeVariantClassName =
+    badgeVariant === "secondary"
+      ? styles.badgeSecondary
+      : badgeVariant === "destructive"
+        ? styles.badgeDestructive
+        : badgeVariant === "outline"
+          ? styles.badgeOutline
+          : styles.badgeDefault;
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (isClickable && (e.key === "Enter" || e.key === " ")) {
@@ -86,20 +120,72 @@ export function BrandCard({
       tabIndex={isClickable ? 0 : undefined}
       aria-label={isClickable ? title : undefined}
     >
-      <div className={styles.imageWrapper}>
-        <Image
-          src={image.src}
-          alt={image.alt}
-          fill
-          className={styles.image}
-          sizes="(max-width: 420px) 100vw, 420px"
-        />
+      <div className={styles.visualPane}>
+        <div className={styles.visualBackdrop}>
+          <Image
+            src={backdrop.src}
+            alt=""
+            fill
+            aria-hidden="true"
+            className={styles.backdropImage}
+            sizes="(max-width: 767px) 100vw, 50vw"
+          />
+        </div>
+
+        {category && (
+          <div className={styles.categoryCard}>
+            <span className={styles.categoryLabel}>{t.brandCardCategoryLabel}</span>
+            <span className={styles.categoryValue}>{category}</span>
+          </div>
+        )}
+
+        <div className={styles.visualStage}>
+          <div className={styles.visualFrame}>
+            <div className={styles.logoOrb}>
+              <Image
+                src={logo.src}
+                alt={logo.alt}
+                fill
+                className={styles.stageImage}
+                sizes="(max-width: 767px) 100vw, 34vw"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className={styles.content}>
-        <span className={styles.label}>BRAND</span>
+        <div className={styles.contentHeader}>
+          <span className={styles.label}>{t.brandCardBrandLabel}</span>
+          {badgeText && badgePlacement === "header-end" ? (
+            <span className={`${styles.badge} ${badgeVariantClassName}`}>
+              {badgeText}
+            </span>
+          ) : null}
+        </div>
         <h3 className={styles.title}>{title}</h3>
-        <p className={styles.description}>{description}</p>
+        {badgeText && badgePlacement === "below-title" ? (
+          <div className={styles.badgeRow}>
+            <span className={`${styles.badge} ${badgeVariantClassName}`}>
+              {badgeText}
+            </span>
+          </div>
+        ) : null}
+
+        <div className={styles.ratingRow}>
+          <StarRating rating={normalizedRating} max={maxRating} />
+          <span className={styles.ratingValue}>{normalizedRating.toFixed(1)}</span>
+          {ratingCount > 0 ? (
+            <span className={styles.ratingCount}>({ratingCount})</span>
+          ) : null}
+        </div>
+
+        {hasDescription && (
+          <div className={styles.descriptionBlock}>
+            <span className={styles.sectionLabel}>{t.brandCardDescriptionLabel}</span>
+            <p className={styles.description}>{description}</p>
+          </div>
+        )}
 
         <div className={styles.footer}>
           <div className={styles.author}>
@@ -110,14 +196,16 @@ export function BrandCard({
               height={32}
               className={styles.avatar}
             />
-            <span className={styles.authorName}>{author.name}</span>
-          </div>
-          {typeof rating === "number" && ratingCount > 0 && (
-            <div className={styles.rating}>
-              <span className={styles.ratingText}>{rating.toFixed(1)}/{maxRating}</span>
-              <StarRating rating={rating} max={maxRating} />
+            <div className={styles.authorMeta}>
+              {ownerLabel ? (
+                <span className={styles.authorLabel}>{ownerLabel}</span>
+              ) : null}
+              <span className={styles.authorName}>{author.name}</span>
+              {author.subtitle ? (
+                <span className={styles.authorSubtitle}>{author.subtitle}</span>
+              ) : null}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </article>

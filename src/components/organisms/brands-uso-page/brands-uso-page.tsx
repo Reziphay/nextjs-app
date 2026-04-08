@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Badge } from "@/components/atoms/badge";
 import { Button } from "@/components/atoms/button";
 import { BrandCard } from "@/components/molecules/brand-card";
 import { Icon } from "@/components/icon";
@@ -27,13 +26,6 @@ const STATUS_BADGE_VARIANT: Record<
   CLOSED: "outline",
 };
 
-const STATUS_ICON: Record<BrandStatus, string> = {
-  PENDING: "schedule",
-  ACTIVE: "check_circle",
-  REJECTED: "cancel",
-  CLOSED: "lock",
-};
-
 export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
   const router = useRouter();
   const { messages } = useLocale();
@@ -41,6 +33,7 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
   const { user } = useAppSelector(selectAuthSession);
   const authorName = user ? `${user.first_name} ${user.last_name}`.trim() : "";
   const authorAvatar = proxyMediaUrl(user?.avatar_url) ?? "/reziphay-logo.png";
+  const authorSubtitle = user?.email ?? "";
 
   const STATUS_LABEL: Record<BrandStatus, string> = {
     PENDING: t.statusPending,
@@ -93,14 +86,6 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
 
             return (
               <div key={brand.id} className={styles.cardWrapper}>
-                <Badge
-                  className={styles.cardBadge}
-                  variant={STATUS_BADGE_VARIANT[brand.status]}
-                  icon={STATUS_ICON[brand.status]}
-                >
-                  {STATUS_LABEL[brand.status]}
-                </Badge>
-
                 {isOwner && (
                   <button
                     type="button"
@@ -113,15 +98,24 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
                 )}
 
                 <BrandCard
-                  image={{
-                    src: firstGalleryImage ?? placeholderImage,
+                  logo={{
+                    src: proxyMediaUrl(brand.logo_url) ?? firstGalleryImage ?? placeholderImage,
+                    alt: brand.name,
+                  }}
+                  backgroundImage={{
+                    src: firstGalleryImage ?? proxyMediaUrl(brand.logo_url) ?? placeholderImage,
                     alt: brand.name,
                   }}
                   title={brand.name}
                   description={brand.description ?? ""}
+                  category={brand.categories[0]?.name}
+                  badgeText={isOwner ? STATUS_LABEL[brand.status] : undefined}
+                  badgeVariant={isOwner ? STATUS_BADGE_VARIANT[brand.status] : undefined}
+                  badgePlacement={isOwner ? "below-title" : undefined}
                   author={{
                     name: authorName,
                     avatar: authorAvatar,
+                    subtitle: authorSubtitle,
                   }}
                   rating={brand.rating}
                   ratingCount={brand.rating_count}
