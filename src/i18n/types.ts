@@ -321,6 +321,22 @@ export type Messages = {
     discoverBrands: string;
     noSectionBrands: string;
     branchEditModalTitle: string;
+    detailStatusLabel: string;
+    detailDefaultDescription: string;
+    detailFilterAllBranches: string;
+    detailFilterOpen247: string;
+    detailFilterWithContact: string;
+    detailSearchPlaceholder: string;
+    detailTableBranch: string;
+    detailTableAddress: string;
+    detailTableAvailability: string;
+    detailTableContact: string;
+    detailNoMatchingBranches: string;
+    detailMetricCategories: string;
+    detailMetricBranches: string;
+    detailMetricGallery: string;
+    detailMetricRating: string;
+    detailNoGalleryMedia: string;
   };
   profile: {
     title: string;
