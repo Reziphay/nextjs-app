@@ -15,7 +15,6 @@ import {
   CircleUser,
   ConciergeBell,
   Download,
-  GitBranch,
   Gavel,
   Heart,
   Home,
@@ -34,6 +33,7 @@ import {
   Settings,
   Share2,
   SquarePen,
+  Store,
   Tag,
   Trash2,
   TriangleAlert,
@@ -73,7 +73,7 @@ const iconColorMap: Record<IconColor, string> = {
 
 const iconMap: Record<string, LucideIcon> = {
   account_circle: CircleUser,
-  account_tree: GitBranch,
+  account_tree: Store,
   add: Plus,
   arrow_back: ArrowLeft,
   arrow_forward: ArrowRight,

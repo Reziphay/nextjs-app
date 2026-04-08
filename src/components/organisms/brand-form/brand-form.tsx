@@ -491,7 +491,8 @@ export function BrandForm({
 
         setPersistedBrand(nextPersistedBrand);
         resetDraft(brandToDraft(nextPersistedBrand));
-        setFeedback({ type: "success", message: t.updateSuccessDescription });
+        router.push(`/brands?id=${nextPersistedBrand.id}&updated=1`);
+        return;
       }
     } catch (error) {
       if (mode === "edit" && currentBrand && didMutateServerState) {
@@ -907,6 +908,7 @@ export function BrandForm({
             type="submit"
             isLoading={isLoading}
             icon={isLoading ? undefined : "check"}
+            className={styles.formFooterPrimary}
             disabled={
               isLoading ||
               verificationMissing ||

@@ -427,16 +427,23 @@
   .categoryCard {
     top: 1rem;
     left: 1rem;
-    right: 1rem;
+    right: auto;
+    width: fit-content;
+    max-width: calc(100% - 5rem);
     min-width: 0;
+    gap: 0.16rem;
+    padding: 0.52rem 0.62rem;
   }
 
   .categoryValue {
-    font-size: 0.95rem;
+    font-size: 0.82rem;
+    line-height: 1.1;
   }
 
   .categoryLabel {
     color: var(--app-primary);
+    font-size: 0.48rem;
+    letter-spacing: 0.18em;
   }
 
   .description {

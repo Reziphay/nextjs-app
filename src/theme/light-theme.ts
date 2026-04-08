@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 // Mystic Dark Forest
 const palette = [
   "#212529", "#212529", "#212529",
-  "#00111c", "#00111c", "#00111c",
+  "#00111c", "#00111c", "#f5b82e",
   "#f8f9fa", "#f8f9fa", "#f8f9fa",
 ];
 

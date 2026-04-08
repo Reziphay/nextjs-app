@@ -175,6 +175,7 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
     typeof brandState.rating === "number" ? brandState.rating : 0;
   const logoUrl = proxyMediaUrl(brandState.logo_url);
   const showCreatedAlert = searchParams.get("created") === "1";
+  const showUpdatedAlert = searchParams.get("updated") === "1";
   const STATUS_LABEL: Record<BrandStatus, string> = {
     PENDING: t.statusPending,
     ACTIVE: t.statusActive,
@@ -348,6 +349,10 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
       {showCreatedAlert ? (
         <Alert variant="success" icon="check_circle" className={styles.pageAlert}>
           <AlertDescription>{t.createSuccessDescription}</AlertDescription>
+        </Alert>
+      ) : showUpdatedAlert ? (
+        <Alert variant="success" icon="check_circle" className={styles.pageAlert}>
+          <AlertDescription>{t.updateSuccessDescription}</AlertDescription>
         </Alert>
       ) : null}
 
@@ -543,11 +548,11 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
                   </div>
                 </div>
 
-                <div className={styles.branchCell}>
+                <div className={`${styles.branchCell} ${styles.branchAddressCell}`}>
                   <p className={styles.branchAddress}>{getBranchAddress(branch)}</p>
                 </div>
 
-                <div className={styles.branchCell}>
+                <div className={`${styles.branchCell} ${styles.branchAvailabilityCell}`}>
                   <span
                     className={`${styles.availabilityBadge} ${branch.is_24_7 ? styles.availabilityLive : styles.availabilityMuted}`}
                   >
@@ -555,7 +560,7 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
                   </span>
                 </div>
 
-                <div className={styles.branchCell}>
+                <div className={`${styles.branchCell} ${styles.branchContactCell}`}>
                   {hasBranchContact(branch) ? (
                     <div className={styles.contactStack}>
                       {branch.phone ? <span>{branch.phone}</span> : null}

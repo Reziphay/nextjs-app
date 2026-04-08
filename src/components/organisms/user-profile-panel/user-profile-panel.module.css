@@ -141,12 +141,15 @@
   display: grid;
   grid-template-columns: 5rem minmax(0, 1fr);
   gap: 0.75rem;
+  align-items: stretch;
+  width: 100%;
 }
 
 .phonePrefix {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 5rem;
   min-width: 5rem;
   min-height: 2.5rem;
   padding: 0 0.875rem;
@@ -308,10 +311,13 @@
   }
 
   .phoneRow {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 5rem minmax(0, 1fr);
+    gap: 0.5rem;
   }
 
   .phonePrefix {
+    width: 5rem;
+    min-width: 5rem;
     min-height: 2.625rem;
   }
 
