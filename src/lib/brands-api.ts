@@ -170,6 +170,24 @@ export async function fetchActiveBrands(accessToken?: string): Promise<Brand[]> 
   return normalizeBrands(response.data?.data?.brands);
 }
 
+export async function fetchAccountBrands(
+  accountUserId: string,
+  accessToken?: string,
+): Promise<Brand[]> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ brands: Brand[] }>>({
+    url: "/brands",
+    method: "GET",
+    params: { account: accountUserId },
+  });
+
+  return normalizeBrands(response.data?.data?.brands).filter(
+    (brand) =>
+      brand.owner_id === accountUserId &&
+      (brand.status === "ACTIVE" || brand.status === "CLOSED"),
+  );
+}
+
 export async function fetchBrandCategories(
   accessToken?: string,
 ): Promise<BrandCategory[]> {

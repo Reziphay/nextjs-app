@@ -4,12 +4,9 @@ import { notFound, redirect } from "next/navigation";
 import { UserProfilePanel } from "@/components/organisms";
 import { getMessages } from "@/i18n/config";
 import { getServerLocale } from "@/i18n/server";
-import { getApiBaseUrl } from "@/lib/api";
+import { fetchAccountBrands } from "@/lib/brands-api";
 import { requireProtectedRouteAccess } from "@/lib/protected-route";
-import type {
-  ApiSuccessResponse,
-  PublicUserProfile,
-} from "@/types";
+import { fetchUserProfileById } from "@/lib/users-api";
 
 type AccountPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -23,43 +20,6 @@ function getSearchParamValue(
   }
 
   return value ?? null;
-}
-
-async function fetchUserProfileById(
-  userId: string,
-  accessToken: string,
-): Promise<PublicUserProfile | null> {
-  try {
-    const response = await fetch(
-      `${getApiBaseUrl()}/users/${encodeURIComponent(userId)}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: "application/json",
-        },
-        cache: "no-store",
-      },
-    );
-
-    if (response.status === 401) {
-      redirect("/auth/login");
-    }
-
-    if (response.status === 404) {
-      return null;
-    }
-
-    if (!response.ok) {
-      return null;
-    }
-
-    const payload: ApiSuccessResponse<{ user: PublicUserProfile }> =
-      await response.json();
-
-    return payload.data?.user ?? null;
-  } catch {
-    return null;
-  }
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -93,5 +53,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
     notFound();
   }
 
-  return <UserProfilePanel user={targetUser} />;
+  const brands = await fetchAccountBrands(requestedUserId, accessToken).catch(() => []);
+
+  return <UserProfilePanel user={targetUser} brands={brands} />;
 }

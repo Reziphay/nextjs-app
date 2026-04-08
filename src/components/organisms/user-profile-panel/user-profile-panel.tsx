@@ -32,6 +32,7 @@ import {
   FeedbackPopup,
   UserAvatar,
 } from "@/components/molecules";
+import { AccountBrandsSection } from "@/components/organisms/account-brands-section/account-brands-section";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   findCountryByValue,
@@ -50,12 +51,13 @@ import {
   removeAccountAvatar,
   uploadAccountAvatar,
 } from "@/store/account";
-import type { AccountUserProfile, UserProfile } from "@/types";
+import type { AccountUserProfile, Brand, UserProfile } from "@/types";
 import styles from "./user-profile-panel.module.css";
 
 type UserProfilePanelProps = {
   user: AccountUserProfile;
   canEdit?: boolean;
+  brands?: Brand[];
 };
 
 type PendingCropImage = {
@@ -96,6 +98,7 @@ function formatPhoneWithPrefix(phone: string | null, prefix?: string | null) {
 export function UserProfilePanel({
   user,
   canEdit = false,
+  brands = [],
 }: UserProfilePanelProps) {
   const dispatch = useAppDispatch();
   const { messages, locale } = useLocale();
@@ -687,6 +690,19 @@ export function UserProfilePanel({
           </dl>
         </section>
       </div>
+
+      {!canEdit && profile.type === "uso" ? (
+        <AccountBrandsSection
+          brands={brands}
+          owner={profile}
+          title={p.brandsSectionTitle}
+          description={p.brandsSectionDescription}
+          emptyTitle={p.brandsEmptyTitle}
+          emptyDescription={p.brandsEmptyDescription}
+          viewMoreHref={`/brands?account=${profile.id}`}
+          maxItems={2}
+        />
+      ) : null}
     </div>
   );
 }

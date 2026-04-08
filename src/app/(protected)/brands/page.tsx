@@ -1,16 +1,21 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import { AccountBrandsSection } from "@/components/organisms/account-brands-section/account-brands-section";
 import { requireProtectedRouteAccess } from "@/lib/protected-route";
 import {
   fetchMyBrands,
   fetchBrandById,
   fetchActiveBrands,
+  fetchAccountBrands,
   fetchBrandCategories,
 } from "@/lib/brands-api";
 import { BrandsUsoPage } from "@/components/organisms/brands-uso-page";
 import { BrandsUcrPage } from "@/components/organisms/brands-ucr-page";
 import { BrandDetail } from "@/components/organisms/brand-detail";
 import { BrandForm } from "@/components/organisms/brand-form";
+import { fetchUserProfileById } from "@/lib/users-api";
+import { getMessages } from "@/i18n/config";
+import { getServerLocale } from "@/i18n/server";
 
 type BrandsPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -30,9 +35,76 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
 
   const progress = getStringParam(resolvedParams, "progress");
   const brandId = getStringParam(resolvedParams, "id");
+  const accountUserId = getStringParam(resolvedParams, "account");
 
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("rzp_at")?.value ?? "";
+
+  if (accountUserId && accountUserId !== user.id && !progress && !brandId) {
+    const [targetUser, brands, locale] = await Promise.all([
+      fetchUserProfileById(accountUserId, accessToken),
+      fetchAccountBrands(accountUserId, accessToken).catch(() => []),
+      getServerLocale(),
+    ]);
+
+    if (!targetUser) {
+      return notFound();
+    }
+
+    const messages = getMessages(locale);
+    const fullName = `${targetUser.first_name} ${targetUser.last_name}`.trim();
+
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "1.5rem",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.35rem",
+            paddingBottom: "1rem",
+            borderBottom: "1px solid var(--app-border-soft)",
+          }}
+        >
+          <h1
+            style={{
+              margin: 0,
+              color: "var(--app-text-strong)",
+              fontSize: "var(--font-size-large)",
+              fontWeight: 700,
+              letterSpacing: "-0.025em",
+              lineHeight: 1.2,
+            }}
+          >
+            {fullName}
+          </h1>
+          <p
+            style={{
+              margin: 0,
+              color: "var(--app-text-muted)",
+              fontSize: "var(--font-size-small)",
+              lineHeight: 1.6,
+            }}
+          >
+            {messages.profile.brandsSectionDescription}
+          </p>
+        </div>
+
+        <AccountBrandsSection
+          brands={brands}
+          owner={targetUser}
+          title={messages.profile.brandsSectionTitle}
+          emptyTitle={messages.profile.brandsEmptyTitle}
+          emptyDescription={messages.profile.brandsEmptyDescription}
+        />
+      </div>
+    );
+  }
 
   // ── Brand detail view (?id=<brand_id>) ────────────────────────────────────
   if (brandId && !progress) {

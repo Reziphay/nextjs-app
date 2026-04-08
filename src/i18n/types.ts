@@ -377,6 +377,11 @@ export type Messages = {
     phoneVerified: string;
     phoneNotVerified: string;
     memberSince: string;
+    brandsSectionTitle: string;
+    brandsSectionDescription: string;
+    brandsEmptyTitle: string;
+    brandsEmptyDescription: string;
+    viewMoreBrands: string;
     editProfile: string;
     cancelEditing: string;
     saveChanges: string;
