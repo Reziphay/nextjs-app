@@ -6,7 +6,7 @@
 
 :root {
   color-scheme: light;
-  --general-border-radius: 0.7rem;
+  --general-border-radius: 0.35rem;
   --general-border-radius-2xs: calc(var(--general-border-radius) * 0.286);
   --general-border-radius-xs: calc(var(--general-border-radius) * 0.357);
   --general-border-radius-sm: calc(var(--general-border-radius) * 0.571);
@@ -75,23 +75,10 @@ body {
 body {
   min-height: 100%;
   --app-background-pattern-size:
-    100% 100%,
-    100% 100%,
-    100% 100%,
-    1.8rem 1.8rem,
-    3.6rem 3.6rem;
-  --app-background-pattern-position:
-    0 0,
-    0 0,
-    0 0,
-    0 0,
-    0.9rem 0.9rem;
+    100% 100%, 100% 100%, 100% 100%, 1.8rem 1.8rem, 3.6rem 3.6rem;
+  --app-background-pattern-position: 0 0, 0 0, 0 0, 0 0, 0.9rem 0.9rem;
   --app-background-pattern-repeat:
-    no-repeat,
-    no-repeat,
-    no-repeat,
-    repeat,
-    repeat;
+    no-repeat, no-repeat, no-repeat, repeat, repeat;
   --app-background-pattern-base: var(--app-bg-canvas);
   --app-background-pattern-line: var(--app-border-primary-soft);
   --app-background-pattern-image:
