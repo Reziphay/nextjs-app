@@ -212,11 +212,1043 @@ pre {
   user-select: none;
 }
 
+/* ─────────────────────────────────────────────────────────
+   Legacy home (kept for reference) — landing page uses .landingPage
+   ───────────────────────────────────────────────────────── */
 .home {
   min-height: 100vh;
   display: grid;
   place-items: center;
   padding: 32px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Landing page
+   ───────────────────────────────────────────────────────── */
+.landingPage {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Shared section rhythm ── */
+.lpSection {
+  width: 100%;
+  padding: 80px 24px;
+}
+
+.lpSectionAlt {
+  background: var(--app-bg-surface-muted);
+  border-radius: var(--general-border-radius-hero);
+}
+
+.lpSectionHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  margin-bottom: 56px;
+}
+
+.lpSectionLabel {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 14px;
+  border: 1px solid var(--app-border-primary-soft);
+  border-radius: var(--general-border-radius-pill);
+  background: var(--app-bg-primary-soft);
+  color: var(--app-primary);
+  font-size: var(--font-size-extra-small);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lpSectionTitle {
+  max-width: 34ch;
+  color: var(--app-text-strong);
+  font-size: clamp(1.6rem, 3.5vw, 2.25rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.lpSectionLead {
+  max-width: 52ch;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-medium);
+  line-height: 1.75;
+}
+
+/* ── Hero section ── */
+.lpHero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 24px;
+  padding: 72px 24px 80px;
+}
+
+.lpEyebrow {
+  display: inline-flex;
+  width: fit-content;
+  padding: 7px 16px;
+  border: 1px solid var(--app-border-primary-soft);
+  border-radius: var(--general-border-radius-pill);
+  background: var(--app-bg-primary-soft);
+  color: var(--app-primary);
+  font-size: var(--font-size-extra-small);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lpHeroTitle {
+  max-width: 18ch;
+  color: var(--app-text-strong);
+  font-size: clamp(2.6rem, 6vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -0.05em;
+}
+
+.lpHeroAccent {
+  color: var(--app-primary);
+}
+
+.lpHeroLead {
+  max-width: 52ch;
+  color: var(--app-text-muted);
+  font-size: clamp(1rem, 2vw, 1.125rem);
+  line-height: 1.75;
+}
+
+.lpHeroCtas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* ── Shared button styles ── */
+.lpCtaPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 28px;
+  border-radius: var(--general-border-radius-pill);
+  background: var(--app-primary);
+  color: #ffffff;
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.lpCtaPrimary:hover {
+  background: var(--app-primary-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px var(--app-shadow-primary-soft);
+}
+
+.lpCtaOutline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  border: 1.5px solid var(--app-border-strong);
+  border-radius: var(--general-border-radius-pill);
+  background: transparent;
+  color: var(--app-text-base);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.lpCtaOutline:hover {
+  border-color: var(--app-primary);
+  color: var(--app-primary);
+  transform: translateY(-2px);
+}
+
+.lpCtaSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 12px 24px;
+  border: 1.5px solid var(--app-border-strong);
+  border-radius: var(--general-border-radius-pill);
+  background: transparent;
+  color: var(--app-text-base);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  margin-top: 8px;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.lpCtaSecondary:hover {
+  border-color: var(--app-primary);
+  color: var(--app-primary);
+  transform: translateY(-2px);
+}
+
+.lpCtaFull {
+  width: 100%;
+  margin-top: auto;
+}
+
+.lpInlineLink {
+  color: var(--app-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── Stats bar ── */
+.lpStatsBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 28px 24px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-hero);
+  background: var(--app-bg-surface);
+  box-shadow: 0 4px 24px var(--app-shadow-card-soft);
+  margin: 0 0 8px;
+}
+
+.lpStatItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 40px;
+}
+
+.lpStatNumber {
+  color: var(--app-text-strong);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.lpStatLabel {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-extra-small);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.lpStatDivider {
+  width: 1px;
+  height: 40px;
+  background: var(--app-border-soft);
+  flex-shrink: 0;
+}
+
+/* ── Features grid ── */
+.lpFeaturesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.lpFeatureCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 28px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-card);
+  background: var(--app-bg-surface);
+  box-shadow: 0 4px 20px var(--app-shadow-card-soft);
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease;
+}
+
+.lpFeatureCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px var(--app-shadow-color);
+  border-color: var(--app-border-primary-strong);
+}
+
+.lpFeatureIcon {
+  font-size: 2rem;
+  line-height: 1;
+  display: block;
+}
+
+.lpFeatureTitle {
+  color: var(--app-text-strong);
+  font-size: var(--font-size-large);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.lpFeatureDesc {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  line-height: 1.7;
+}
+
+/* ── How it works steps ── */
+.lpStepsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  counter-reset: steps;
+}
+
+.lpStep {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0;
+  position: relative;
+}
+
+.lpStep:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 22px;
+  right: -16px;
+  width: 32px;
+  height: 1.5px;
+  background: var(--app-border-soft);
+}
+
+.lpStepNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1.5px solid var(--app-border-primary-soft);
+  border-radius: var(--general-border-radius-round);
+  background: var(--app-bg-primary-soft);
+  color: var(--app-primary);
+  font-size: var(--font-size-small);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.lpStepTitle {
+  color: var(--app-text-strong);
+  font-size: var(--font-size-large);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.lpStepDesc {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  line-height: 1.7;
+}
+
+/* ── Dual value props ── */
+.lpDualGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.lpDualCard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 36px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-hero);
+  background: var(--app-bg-surface);
+  box-shadow: 0 8px 32px var(--app-shadow-card-soft);
+}
+
+.lpDualCardAlt {
+  background: var(--app-bg-subtle);
+}
+
+.lpDualBadge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 14px;
+  border-radius: var(--general-border-radius-pill);
+  font-size: var(--font-size-extra-small);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.lpDualBadgePrimary {
+  background: var(--app-bg-primary-soft);
+  border: 1px solid var(--app-border-primary-soft);
+  color: var(--app-primary);
+}
+
+.lpDualBadgeAccent {
+  background: color-mix(in srgb, #f5b82e 14%, transparent);
+  border: 1px solid color-mix(in srgb, #f5b82e 30%, transparent);
+  color: #7a5800;
+}
+
+.lpDualTitle {
+  color: var(--app-text-strong);
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.lpDualDesc {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  line-height: 1.7;
+}
+
+.lpFeatureList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.lpFeatureListItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--app-text-base);
+  font-size: var(--font-size-small);
+  line-height: 1.5;
+}
+
+.lpFeatureCheck {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: var(--general-border-radius-round);
+  background: var(--app-bg-primary-soft);
+  color: var(--app-primary);
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+
+/* ── Pricing ── */
+.lpPricingGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.lpPricingCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 32px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-hero);
+  background: var(--app-bg-surface);
+  box-shadow: 0 4px 20px var(--app-shadow-card-soft);
+  position: relative;
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.lpPricingCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 48px var(--app-shadow-color);
+}
+
+.lpPricingCardFeatured {
+  border-color: var(--app-primary);
+  background: var(--app-primary);
+  box-shadow: 0 16px 48px var(--app-shadow-primary-soft);
+  color: #ffffff;
+  transform: scale(1.04);
+}
+
+.lpPricingCardFeatured:hover {
+  transform: scale(1.04) translateY(-4px);
+  box-shadow: 0 24px 56px var(--app-shadow-primary-soft);
+}
+
+.lpPricingBadge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 12px;
+  border-radius: var(--general-border-radius-pill);
+  background: color-mix(in srgb, #f5b82e 20%, transparent);
+  border: 1px solid color-mix(in srgb, #f5b82e 40%, transparent);
+  color: #f5b82e;
+  font-size: var(--font-size-extra-small);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.lpPricingHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.lpPricingCardFeatured .lpPricingHeader {
+  border-bottom-color: rgb(255 255 255 / 0.18);
+}
+
+.lpPricingName {
+  color: var(--app-text-strong);
+  font-size: var(--font-size-large);
+  font-weight: 800;
+}
+
+.lpPricingCardFeatured .lpPricingName {
+  color: #ffffff;
+}
+
+.lpPricingPrice {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.lpPricingAmount {
+  color: var(--app-text-strong);
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.lpPricingCardFeatured .lpPricingAmount {
+  color: #ffffff;
+}
+
+.lpPricingPeriod {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  font-weight: 500;
+}
+
+.lpPricingCardFeatured .lpPricingPeriod {
+  color: rgb(255 255 255 / 0.7);
+}
+
+.lpPricingDesc {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  line-height: 1.6;
+}
+
+.lpPricingCardFeatured .lpPricingDesc {
+  color: rgb(255 255 255 / 0.75);
+}
+
+.lpPricingFeatures {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 28px;
+  flex: 1;
+}
+
+.lpPricingFeatureItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--app-text-base);
+  font-size: var(--font-size-small);
+  line-height: 1.5;
+}
+
+.lpPricingCardFeatured .lpPricingFeatureItem {
+  color: rgb(255 255 255 / 0.9);
+}
+
+.lpPricingCheck {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: var(--general-border-radius-round);
+  background: var(--app-bg-primary-soft);
+  color: var(--app-primary);
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+
+.lpPricingCardFeatured .lpPricingCheck {
+  background: rgb(255 255 255 / 0.18);
+  color: #ffffff;
+}
+
+/* Override lpCtaPrimary on featured card to use a light button */
+.lpPricingCardFeatured .lpCtaPrimary {
+  background: #ffffff;
+  color: var(--app-primary);
+}
+
+.lpPricingCardFeatured .lpCtaPrimary:hover {
+  background: var(--app-bg-surface-muted);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.15);
+}
+
+.lpPricingCardFeatured .lpCtaOutline {
+  border-color: rgb(255 255 255 / 0.4);
+  color: #ffffff;
+}
+
+.lpPricingCardFeatured .lpCtaOutline:hover {
+  border-color: #ffffff;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+/* ── FAQ ── */
+.lpFaqList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.lpFaqItem {
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-card);
+  background: var(--app-bg-surface);
+  overflow: hidden;
+  transition: border-color 160ms ease;
+}
+
+.lpFaqItem[open] {
+  border-color: var(--app-border-primary-strong);
+}
+
+.lpFaqQuestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+  color: var(--app-text-strong);
+  font-size: var(--font-size-medium);
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: color 160ms ease;
+}
+
+.lpFaqQuestion::-webkit-details-marker {
+  display: none;
+}
+
+.lpFaqQuestion:hover {
+  color: var(--app-primary);
+}
+
+.lpFaqChevron {
+  flex-shrink: 0;
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: var(--app-text-muted);
+  transition: transform 200ms ease, color 160ms ease;
+  display: inline-block;
+}
+
+.lpFaqItem[open] .lpFaqChevron {
+  transform: rotate(90deg);
+  color: var(--app-primary);
+}
+
+.lpFaqAnswer {
+  padding: 0 22px 18px;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  line-height: 1.75;
+  border-top: 1px solid var(--app-border-soft);
+  padding-top: 16px;
+}
+
+/* ── Final CTA section ── */
+.lpCtaSection {
+  padding: 80px 24px;
+}
+
+.lpCtaSectionInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+  padding: 64px 48px;
+  border: 1px solid var(--app-border-primary-soft);
+  border-radius: var(--general-border-radius-hero);
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--app-primary) 5%, transparent) 0%,
+      color-mix(in srgb, #f5b82e 5%, transparent) 100%
+    ),
+    var(--app-bg-surface);
+  box-shadow: 0 24px 80px var(--app-shadow-color);
+}
+
+.lpCtaSectionTitle {
+  max-width: 24ch;
+  color: var(--app-text-strong);
+  font-size: clamp(1.8rem, 4vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.lpCtaSectionLead {
+  max-width: 48ch;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-medium);
+  line-height: 1.7;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Landing page responsive
+   Breakpoints: 1024 tablet-lg · 900 tablet · 768 tablet-sm · 480 phone-lg · 360 phone-sm
+   ───────────────────────────────────────────────────────── */
+
+/* ── Large tablet  (≤ 1024px) ── */
+@media (max-width: 1024px) {
+  .lpHeroTitle {
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+  }
+
+  .lpFeaturesGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .lpPricingGrid {
+    gap: 16px;
+  }
+
+  .lpStatItem {
+    padding: 12px 28px;
+  }
+}
+
+/* ── Tablet  (≤ 900px) ── */
+@media (max-width: 900px) {
+  .lpHero {
+    padding: 56px 20px 64px;
+  }
+
+  .lpSection {
+    padding: 64px 20px;
+  }
+
+  .lpCtaSection {
+    padding: 64px 20px;
+  }
+
+  .lpFeaturesGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .lpPricingGrid {
+    grid-template-columns: 1fr;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  .lpPricingCardFeatured {
+    transform: none;
+  }
+
+  .lpPricingCardFeatured:hover {
+    transform: translateY(-4px);
+  }
+
+  .lpStepsGrid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .lpStep:not(:last-child)::after {
+    display: none;
+  }
+
+  /* Vertical connector for stacked steps */
+  .lpStep:not(:last-child) {
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--app-border-soft);
+  }
+
+  .lpDualGrid {
+    grid-template-columns: 1fr;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .lpStatsBar {
+    gap: 0;
+  }
+
+  .lpStatItem {
+    padding: 12px 20px;
+  }
+
+  .lpStatDivider {
+    height: 32px;
+  }
+
+  .lpSectionHeader {
+    margin-bottom: 44px;
+  }
+}
+
+/* ── Small tablet / large phone  (≤ 768px) ── */
+@media (max-width: 768px) {
+  .lpHero {
+    padding: 48px 16px 56px;
+    gap: 20px;
+  }
+
+  .lpHeroTitle {
+    font-size: clamp(2rem, 7vw, 2.8rem);
+  }
+
+  .lpHeroLead {
+    font-size: 1rem;
+  }
+
+  .lpSection {
+    padding: 56px 16px;
+  }
+
+  .lpCtaSection {
+    padding: 48px 16px;
+  }
+
+  .lpCtaSectionInner {
+    padding: 40px 28px;
+  }
+
+  .lpCtaSectionTitle {
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+  }
+
+  .lpSectionTitle {
+    font-size: clamp(1.4rem, 4vw, 1.9rem);
+  }
+
+  .lpSectionHeader {
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+
+  .lpStatsBar {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px 16px;
+  }
+
+  /* On small tablet, show stats 2×2 */
+  .lpStatDivider:nth-child(4) {
+    display: none;
+  }
+
+  .lpStatItem {
+    flex: 1 1 calc(50% - 1px);
+    min-width: 140px;
+    padding: 14px 16px;
+  }
+
+  .lpStatDivider {
+    width: 1px;
+    height: 40px;
+  }
+
+  .lpDualCard {
+    padding: 28px 24px;
+  }
+
+  .lpFeaturesGrid {
+    gap: 12px;
+  }
+
+  .lpFeatureCard {
+    padding: 22px 18px;
+  }
+
+  .lpPricingCard {
+    padding: 28px 24px;
+  }
+}
+
+/* ── Large phone  (≤ 480px) ── */
+@media (max-width: 480px) {
+  .lpHero {
+    padding: 40px 16px 48px;
+  }
+
+  .lpHeroTitle {
+    font-size: clamp(1.8rem, 8vw, 2.4rem);
+  }
+
+  .lpHeroCtas {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .lpCtaPrimary,
+  .lpCtaOutline {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .lpSection {
+    padding: 48px 16px;
+  }
+
+  .lpCtaSection {
+    padding: 40px 12px;
+  }
+
+  .lpCtaSectionInner {
+    padding: 36px 20px;
+  }
+
+  .lpFeaturesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .lpStatsBar {
+    flex-direction: column;
+    padding: 8px 16px;
+  }
+
+  .lpStatDivider {
+    width: 48px;
+    height: 1px;
+    margin: 0 auto;
+  }
+
+  .lpStatItem {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 14px 8px;
+    min-width: unset;
+  }
+
+  .lpStatNumber {
+    font-size: 1.5rem;
+  }
+
+  .lpDualCard {
+    padding: 24px 20px;
+    gap: 16px;
+  }
+
+  .lpDualTitle {
+    font-size: 1.2rem;
+  }
+
+  .lpPricingCard {
+    padding: 24px 20px;
+  }
+
+  .lpFaqQuestion {
+    padding: 16px 18px;
+    font-size: 0.9375rem;
+  }
+
+  .lpFaqAnswer {
+    padding: 14px 18px;
+  }
+
+  .lpSectionHeader {
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .lpSectionLead {
+    font-size: 0.9375rem;
+  }
+
+  .lpStepsGrid {
+    max-width: 100%;
+  }
+}
+
+/* ── Small phone  (≤ 360px) ── */
+@media (max-width: 360px) {
+  .lpHeroTitle {
+    font-size: 1.75rem;
+  }
+
+  .lpEyebrow,
+  .lpSectionLabel {
+    font-size: 0.65rem;
+    padding: 5px 12px;
+  }
+
+  .lpCtaSectionInner {
+    padding: 28px 16px;
+  }
+
+  .lpPricingCard {
+    padding: 20px 16px;
+  }
+
+  .lpDualCard {
+    padding: 20px 16px;
+  }
+
+  .lpFeatureCard {
+    padding: 18px 14px;
+  }
 }
 
 .hero {
