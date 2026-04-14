@@ -626,6 +626,57 @@ export function BrandForm({
     ...draft.newGalleryPreviewUrls.map((url, i) => ({ url, isExisting: false, index: i })),
   ];
 
+  function renderFormActions(className?: string) {
+    return (
+      <div className={`${styles.formFooter}${className ? ` ${className}` : ""}`}>
+        <Button
+          variant="primary"
+          type="submit"
+          isLoading={isLoading}
+          icon={isLoading ? undefined : "check"}
+          className={styles.formFooterPrimary}
+          disabled={
+            isLoading ||
+            verificationMissing ||
+            (mode === "create" &&
+              (!draft.name.trim() ||
+                !draft.logoFile ||
+                draft.branches.length === 0))
+          }
+        >
+          {mode === "create" ? t.createBrand : t.formSaveChanges}
+        </Button>
+
+        <Button variant="outline" type="button" onClick={handleCancel}>
+          {t.cancelForm}
+        </Button>
+
+        <div className={styles.formFooterSpacer} />
+
+        {mode === "edit" && (persistedBrand ?? brand) && (
+          <div className={styles.formFooterDanger}>
+            <Button
+              variant="outline"
+              type="button"
+              icon="swap_horiz"
+              onClick={() => setTransferModalOpen(true)}
+            >
+              {t.transferBrand}
+            </Button>
+            <Button
+              variant="outline"
+              type="button"
+              icon="delete"
+              onClick={() => setDeleteModalOpen(true)}
+            >
+              {t.deleteBrand}
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className={styles.wrapper}>
       {/* ── Sticky header ── */}
@@ -651,12 +702,23 @@ export function BrandForm({
       )}
 
       <form className={styles.form} onSubmit={handleSubmit}>
+        {/* ── Feedback ── */}
+        {feedback && (
+          <div
+            className={`${styles.feedback} ${
+              feedback.type === "success"
+                ? styles.feedbackSuccess
+                : styles.feedbackError
+            }`}
+          >
+            {feedback.message}
+          </div>
+        )}
 
-        {/* ── Row 1: Logo (sidebar) + Basic Info (main) ── */}
-        <div className={styles.formHero}>
-
-          {/* Logo — sidebar */}
-          <div className={styles.formSection}>
+        <div className={styles.desktopShell}>
+          <div className={styles.sidebarStack}>
+            {/* Logo — sidebar */}
+            <div className={`${styles.formSection} ${styles.logoSection}`}>
             <div className={styles.sectionHeader}>
               <span className={styles.stepBadge}>1</span>
               <div className={styles.sectionHeaderText}>
@@ -673,7 +735,7 @@ export function BrandForm({
                     alt="Logo preview"
                     fill
                     className={styles.previewImage}
-                    sizes="160px"
+                    sizes="(min-width: 980px) 18rem, 120px"
                   />
                   <button
                     type="button"
@@ -708,243 +770,192 @@ export function BrandForm({
             )}
           </div>
 
-          {/* Basic info — main */}
-          <div className={styles.formSection}>
-            <div className={styles.sectionHeader}>
-              <span className={styles.stepBadge}>2</span>
-              <div className={styles.sectionHeaderText}>
-                <h2 className={styles.sectionTitle}>{t.basicInfoSection}</h2>
+            <div className={styles.desktopAside}>
+              {renderFormActions(styles.formFooterAside)}
+            </div>
+          </div>
+
+          <div className={styles.mainStack}>
+            {/* Basic info — main */}
+            <div className={styles.formSection}>
+              <div className={styles.sectionHeader}>
+                <span className={styles.stepBadge}>2</span>
+                <div className={styles.sectionHeaderText}>
+                  <h2 className={styles.sectionTitle}>{t.basicInfoSection}</h2>
+                </div>
               </div>
-            </div>
 
-            <div className={styles.fieldRow}>
-              <Field>
-                <FieldLabel required>{t.fieldName}</FieldLabel>
-                <Input
-                  value={draft.name}
-                  placeholder={t.fieldNamePlaceholder}
-                  aria-invalid={!!errors.name}
-                  onChange={(e) => updateField("name", e.target.value)}
-                />
-                {errors.name && (
-                  <p className={styles.fieldError}>{errors.name}</p>
-                )}
-              </Field>
-            </div>
-
-            <div className={styles.fieldRow}>
-              <Field>
-                <FieldLabel>{t.fieldDescription}</FieldLabel>
-                <textarea
-                  className={styles.textarea}
-                  value={draft.description}
-                  placeholder={t.fieldDescriptionPlaceholder}
-                  rows={4}
-                  onChange={(e) => updateField("description", e.target.value)}
-                />
-              </Field>
-            </div>
-
-            <div className={styles.fieldRow}>
-              <Field>
-                <FieldLabel>{t.fieldCategories}</FieldLabel>
-                <Combobox
-                  items={categoryOptions}
-                  value={draft.category_ids}
-                  multiple
-                  placeholder={t.fieldCategoriesPlaceholder}
-                  emptyMessage={t.noCategoriesFound}
-                  onValueChange={(val) =>
-                    updateField(
-                      "category_ids",
-                      Array.isArray(val) ? val : val ? [val] : [],
-                    )
-                  }
-                />
-              </Field>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Row 2: Gallery ── */}
-        <div className={styles.formSection}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.stepBadge}>3</span>
-            <div className={styles.sectionHeaderText}>
-              <h2 className={styles.sectionTitle}>{t.fieldGallery}</h2>
-              <p className={styles.sectionHint}>{t.fieldGalleryHint}</p>
-            </div>
-          </div>
-
-          <label className={`${styles.uploadArea} ${styles.uploadAreaWide}`}>
-            <div className={styles.uploadContent}>
-              <Icon
-                icon="add_photo_alternate"
-                size={28}
-                color="current"
-                className={styles.uploadIcon}
-              />
-              <p className={styles.uploadLabel}>{t.fieldGalleryUpload}</p>
-              <p className={styles.uploadHint}>{t.fieldGalleryFormatHint}</p>
-            </div>
-            <input
-              ref={galleryInputRef}
-              type="file"
-              accept="image/*"
-              className={styles.hiddenInput}
-              onChange={handleGalleryChange}
-            />
-          </label>
-
-          {allGalleryPreviews.length > 0 && (
-            <div className={styles.galleryPreviewGrid}>
-              {allGalleryPreviews.map(({ url, isExisting, index }) => (
-                <div key={url} className={styles.galleryPreviewItem}>
-                  <Image
-                    src={proxyMediaUrl(url) ?? url}
-                    alt={`Gallery ${index + 1}`}
-                    fill
-                    className={styles.previewImage}
-                    sizes="200px"
+              <div className={styles.fieldRow}>
+                <Field>
+                  <FieldLabel required>{t.fieldName}</FieldLabel>
+                  <Input
+                    value={draft.name}
+                    placeholder={t.fieldNamePlaceholder}
+                    aria-invalid={!!errors.name}
+                    onChange={(e) => updateField("name", e.target.value)}
                   />
-                  <button
-                    type="button"
-                    className={styles.removePreviewBtn}
-                    aria-label={`Remove gallery image ${index + 1}`}
-                    onClick={() =>
-                      isExisting
-                        ? handleRemoveExistingGalleryItem(index)
-                        : handleRemoveNewGalleryItem(index)
-                    }
-                  >
-                    <Icon icon="close" size={12} color="current" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* ── Row 3: Branches ── */}
-        <div className={styles.formSection}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.stepBadge}>4</span>
-            <div className={styles.sectionHeaderText}>
-              <h2 className={styles.sectionTitle}>{t.branchesTitle}</h2>
-            </div>
-          </div>
-
-          <div className={styles.branchesList}>
-            {draft.branches.length === 0 ? (
-              <div className={styles.branchesEmpty}>
-                <Icon icon="location_off" size={16} color="current" />
-                <span>{t.noBranches}</span>
+                  {errors.name && (
+                    <p className={styles.fieldError}>{errors.name}</p>
+                  )}
+                </Field>
               </div>
-            ) : (
-              draft.branches.map((branch, index) => (
-                <div key={branch.id ?? `new-${index}`} className={styles.branchItem}>
-                  <div className={styles.branchItemLeft}>
-                    <span className={styles.branchIndex}>{index + 1}</span>
-                    <div className={styles.branchItemInfo}>
-                      <p className={styles.branchItemName}>{branch.name}</p>
-                      <p className={styles.branchItemAddress}>
-                        {branch.address1}
-                        {branch.address2 ? `, ${branch.address2}` : ""}
-                      </p>
-                    </div>
-                  </div>
-                  <div className={styles.branchItemActions}>
-                    <button
-                      type="button"
-                      className={styles.iconBtn}
-                      aria-label={`Edit ${branch.name}`}
-                      onClick={() => handleEditBranch(index)}
-                    >
-                      <Icon icon="edit" size={14} color="current" />
-                    </button>
-                    <button
-                      type="button"
-                      className={`${styles.iconBtn} ${styles.iconBtnDelete}`}
-                      aria-label={`Delete ${branch.name}`}
-                      onClick={() => handleDeleteBranch(index)}
-                    >
-                      <Icon icon="delete" size={14} color="current" />
-                    </button>
-                  </div>
+
+              <div className={styles.fieldRow}>
+                <Field>
+                  <FieldLabel>{t.fieldDescription}</FieldLabel>
+                  <textarea
+                    className={styles.textarea}
+                    value={draft.description}
+                    placeholder={t.fieldDescriptionPlaceholder}
+                    rows={4}
+                    onChange={(e) => updateField("description", e.target.value)}
+                  />
+                </Field>
+              </div>
+
+              <div className={styles.fieldRow}>
+                <Field>
+                  <FieldLabel>{t.fieldCategories}</FieldLabel>
+                  <Combobox
+                    items={categoryOptions}
+                    value={draft.category_ids}
+                    multiple
+                    placeholder={t.fieldCategoriesPlaceholder}
+                    emptyMessage={t.noCategoriesFound}
+                    onValueChange={(val) =>
+                      updateField(
+                        "category_ids",
+                        Array.isArray(val) ? val : val ? [val] : [],
+                      )
+                    }
+                  />
+                </Field>
+              </div>
+            </div>
+
+            {/* ── Row 2: Gallery ── */}
+            <div className={styles.formSection}>
+              <div className={styles.sectionHeader}>
+                <span className={styles.stepBadge}>3</span>
+                <div className={styles.sectionHeaderText}>
+                  <h2 className={styles.sectionTitle}>{t.fieldGallery}</h2>
+                  <p className={styles.sectionHint}>{t.fieldGalleryHint}</p>
                 </div>
-              ))
-            )}
-          </div>
+              </div>
 
-          <Button
-            variant="outline"
-            icon="add"
-            type="button"
-            onClick={handleAddBranch}
-          >
-            {t.addBranch}
-          </Button>
-        </div>
+              <label className={`${styles.uploadArea} ${styles.uploadAreaWide}`}>
+                <div className={styles.uploadContent}>
+                  <Icon
+                    icon="add_photo_alternate"
+                    size={28}
+                    color="current"
+                    className={styles.uploadIcon}
+                  />
+                  <p className={styles.uploadLabel}>{t.fieldGalleryUpload}</p>
+                  <p className={styles.uploadHint}>{t.fieldGalleryFormatHint}</p>
+                </div>
+                <input
+                  ref={galleryInputRef}
+                  type="file"
+                  accept="image/*"
+                  className={styles.hiddenInput}
+                  onChange={handleGalleryChange}
+                />
+              </label>
 
-        {/* ── Feedback ── */}
-        {feedback && (
-          <div
-            className={`${styles.feedback} ${
-              feedback.type === "success"
-                ? styles.feedbackSuccess
-                : styles.feedbackError
-            }`}
-          >
-            {feedback.message}
-          </div>
-        )}
+              {allGalleryPreviews.length > 0 && (
+                <div className={styles.galleryPreviewGrid}>
+                  {allGalleryPreviews.map(({ url, isExisting, index }) => (
+                    <div key={url} className={styles.galleryPreviewItem}>
+                      <Image
+                        src={proxyMediaUrl(url) ?? url}
+                        alt={`Gallery ${index + 1}`}
+                        fill
+                        className={styles.previewImage}
+                        sizes="200px"
+                      />
+                      <button
+                        type="button"
+                        className={styles.removePreviewBtn}
+                        aria-label={`Remove gallery image ${index + 1}`}
+                        onClick={() =>
+                          isExisting
+                            ? handleRemoveExistingGalleryItem(index)
+                            : handleRemoveNewGalleryItem(index)
+                        }
+                      >
+                        <Icon icon="close" size={12} color="current" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-        {/* ── Footer actions ── */}
-        <div className={styles.formFooter}>
-          <Button
-            variant="primary"
-            type="submit"
-            isLoading={isLoading}
-            icon={isLoading ? undefined : "check"}
-            className={styles.formFooterPrimary}
-            disabled={
-              isLoading ||
-              verificationMissing ||
-              (mode === "create" &&
-                (!draft.name.trim() ||
-                  !draft.logoFile ||
-                  draft.branches.length === 0))
-            }
-          >
-            {mode === "create" ? t.createBrand : t.formSaveChanges}
-          </Button>
+            {/* ── Row 3: Branches ── */}
+            <div className={styles.formSection}>
+              <div className={styles.sectionHeader}>
+                <span className={styles.stepBadge}>4</span>
+                <div className={styles.sectionHeaderText}>
+                  <h2 className={styles.sectionTitle}>{t.branchesTitle}</h2>
+                </div>
+              </div>
 
-          <Button variant="outline" type="button" onClick={handleCancel}>
-            {t.cancelForm}
-          </Button>
+              <div className={styles.branchesList}>
+                {draft.branches.length === 0 ? (
+                  <div className={styles.branchesEmpty}>
+                    <Icon icon="location_off" size={16} color="current" />
+                    <span>{t.noBranches}</span>
+                  </div>
+                ) : (
+                  draft.branches.map((branch, index) => (
+                    <div key={branch.id ?? `new-${index}`} className={styles.branchItem}>
+                      <div className={styles.branchItemLeft}>
+                        <span className={styles.branchIndex}>{index + 1}</span>
+                        <div className={styles.branchItemInfo}>
+                          <p className={styles.branchItemName}>{branch.name}</p>
+                          <p className={styles.branchItemAddress}>
+                            {branch.address1}
+                            {branch.address2 ? `, ${branch.address2}` : ""}
+                          </p>
+                        </div>
+                      </div>
+                      <div className={styles.branchItemActions}>
+                        <button
+                          type="button"
+                          className={styles.iconBtn}
+                          aria-label={`Edit ${branch.name}`}
+                          onClick={() => handleEditBranch(index)}
+                        >
+                          <Icon icon="edit" size={14} color="current" />
+                        </button>
+                        <button
+                          type="button"
+                          className={`${styles.iconBtn} ${styles.iconBtnDelete}`}
+                          aria-label={`Delete ${branch.name}`}
+                          onClick={() => handleDeleteBranch(index)}
+                        >
+                          <Icon icon="delete" size={14} color="current" />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
 
-          <div className={styles.formFooterSpacer} />
-
-          {mode === "edit" && (persistedBrand ?? brand) && (
-            <div className={styles.formFooterDanger}>
               <Button
                 variant="outline"
+                icon="add"
                 type="button"
-                icon="swap_horiz"
-                onClick={() => setTransferModalOpen(true)}
+                onClick={handleAddBranch}
               >
-                {t.transferBrand}
-              </Button>
-              <Button
-                variant="outline"
-                type="button"
-                icon="delete"
-                onClick={() => setDeleteModalOpen(true)}
-              >
-                {t.deleteBrand}
+                {t.addBranch}
               </Button>
             </div>
-          )}
+          </div>
+        </div>
+        <div className={styles.mobileFooter}>
+          {renderFormActions()}
         </div>
       </form>
 

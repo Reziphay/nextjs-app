@@ -74,6 +74,30 @@
   min-width: 0;
 }
 
+.desktopShell {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.sidebarStack,
+.mainStack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.desktopAside {
+  display: none;
+}
+
+.mobileFooter {
+  width: 100%;
+}
+
 /* ── Two-column hero row: logo + basic info ── */
 .formHero {
   display: grid;
@@ -219,7 +243,6 @@
 .uploadAreaSquare {
   aspect-ratio: 1 / 1;
   width: 100%;
-  max-width: 160px;
 }
 
 .uploadAreaWide {
@@ -272,14 +295,13 @@
 .logoPreviewWrap {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.625rem;
 }
 
 .logoPreview {
   position: relative;
   width: 100%;
-  max-width: 160px;
   aspect-ratio: 1 / 1;
   border-radius: var(--general-border-radius-card);
   overflow: hidden;
@@ -531,6 +553,63 @@
 
   .logoPreview {
     max-width: 120px;
+  }
+}
+
+@media (min-width: 980px) {
+  .desktopShell {
+    display: grid;
+    grid-template-columns: minmax(17rem, 20rem) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .desktopAside {
+    display: block;
+  }
+
+  .mobileFooter {
+    display: none;
+  }
+
+  .logoSection {
+    position: sticky;
+    top: 5rem;
+  }
+
+  .uploadAreaSquare,
+  .logoPreview {
+    width: 100%;
+    max-width: none;
+  }
+
+  .formFooterAside {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 1.125rem 1.25rem;
+  }
+
+  .formFooterAside > *:not(.formFooterSpacer):not(.formFooterDanger) {
+    width: 100%;
+  }
+
+  .formFooterAside .formFooterSpacer {
+    display: none;
+  }
+
+  .formFooterAside .formFooterDanger {
+    width: 100%;
+    padding-top: 0.75rem;
+    padding-left: 0;
+    border-top: 1px solid var(--app-border-soft);
+    border-left: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .formFooterAside .formFooterDanger > * {
+    width: 100%;
   }
 }
 
