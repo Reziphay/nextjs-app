@@ -625,15 +625,20 @@ export function BrandForm({
 
   return (
     <div className={styles.wrapper}>
-      {/* Header */}
+      {/* ── Sticky header ── */}
       <div className={styles.pageHeader}>
         <Button variant="ghost" icon="arrow_back" onClick={handleCancel} />
-        <h1 className={styles.title}>
-          {mode === "create" ? t.formCreateTitle : t.formEditTitle}
-        </h1>
+        <div className={styles.headerMeta}>
+          <h1 className={styles.title}>
+            {mode === "create" ? t.formCreateTitle : t.formEditTitle}
+          </h1>
+          <span className={styles.modeBadge}>
+            {mode === "create" ? t.formCreateTitle : t.formEditTitle}
+          </span>
+        </div>
       </div>
 
-      {/* Verification warning (create mode only) */}
+      {/* ── Verification warning ── */}
       {verificationMissing && (
         <div className={`${styles.feedback} ${styles.feedbackError}`}>
           <strong>{t.verificationRequiredTitle}</strong>
@@ -643,118 +648,130 @@ export function BrandForm({
       )}
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        {/* Basic info */}
-        <div className={styles.formCard}>
-          <h2 className={styles.cardTitle}>{t.basicInfoSection}</h2>
 
-          <Field>
-            <FieldLabel required>{t.fieldName}</FieldLabel>
-            <Input
-              value={draft.name}
-              placeholder={t.fieldNamePlaceholder}
-              aria-invalid={!!errors.name}
-              onChange={(e) => updateField("name", e.target.value)}
-            />
-            {errors.name && (
-              <p className={styles.fieldError}>{errors.name}</p>
-            )}
-          </Field>
+        {/* ── Row 1: Logo (sidebar) + Basic Info (main) ── */}
+        <div className={styles.formHero}>
 
-          <Field>
-            <FieldLabel>{t.fieldDescription}</FieldLabel>
-            <textarea
-              className={styles.textarea}
-              value={draft.description}
-              placeholder={t.fieldDescriptionPlaceholder}
-              rows={4}
-              onChange={(e) => updateField("description", e.target.value)}
-            />
-          </Field>
-
-          <Field>
-            <FieldLabel>{t.fieldCategories}</FieldLabel>
-            <Combobox
-              items={categoryOptions}
-              value={draft.category_ids}
-              multiple
-              placeholder={t.fieldCategoriesPlaceholder}
-              emptyMessage={t.noCategoriesFound}
-              onValueChange={(val) =>
-                updateField(
-                  "category_ids",
-                  Array.isArray(val) ? val : val ? [val] : [],
-                )
-              }
-            />
-          </Field>
-        </div>
-
-        {/* Logo */}
-        <div className={styles.formCard}>
-          <h2 className={styles.cardTitle}>{t.fieldLogo}</h2>
-          <p
-            style={{
-              margin: 0,
-              fontSize: "var(--font-size-small)",
-              color: "var(--app-text-muted)",
-            }}
-          >
-            {t.fieldLogoHint}
-          </p>
-
-          {draft.logoPreviewUrl ? (
-            <div className={styles.logoPreview}>
-              <Image
-                src={proxyMediaUrl(draft.logoPreviewUrl) ?? draft.logoPreviewUrl}
-                alt="Logo preview"
-                fill
-                className={styles.previewImage}
-                sizes="160px"
-              />
-              <button
-                type="button"
-                className={styles.removePreviewBtn}
-                aria-label="Remove logo"
-                onClick={handleRemoveLogo}
-              >
-                <Icon icon="close" size={12} color="current" />
-              </button>
-            </div>
-          ) : (
-            <label className={`${styles.uploadArea} ${styles.uploadAreaSquare}`}>
-              <div className={styles.uploadContent}>
-                <Icon
-                  icon="add_photo_alternate"
-                  size={28}
-                  color="current"
-                  className={styles.uploadIcon}
-                />
-                <p className={styles.uploadLabel}>{t.fieldLogoUpload}</p>
-                <p className={styles.uploadHint}>{t.fieldLogoFormatHint}</p>
+          {/* Logo — sidebar */}
+          <div className={styles.formSection}>
+            <div className={styles.sectionHeader}>
+              <span className={styles.stepBadge}>1</span>
+              <div className={styles.sectionHeaderText}>
+                <h2 className={styles.sectionTitle}>{t.fieldLogo}</h2>
+                <p className={styles.sectionHint}>{t.fieldLogoHint}</p>
               </div>
-              <input
-                ref={logoInputRef}
-                type="file"
-                accept="image/*"
-                className={styles.hiddenInput}
-                onChange={handleLogoChange}
-              />
-            </label>
-          )}
+            </div>
+
+            {draft.logoPreviewUrl ? (
+              <div className={styles.logoPreviewWrap}>
+                <div className={styles.logoPreview}>
+                  <Image
+                    src={proxyMediaUrl(draft.logoPreviewUrl) ?? draft.logoPreviewUrl}
+                    alt="Logo preview"
+                    fill
+                    className={styles.previewImage}
+                    sizes="160px"
+                  />
+                  <button
+                    type="button"
+                    className={styles.removePreviewBtn}
+                    aria-label="Remove logo"
+                    onClick={handleRemoveLogo}
+                  >
+                    <Icon icon="close" size={12} color="current" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <label className={`${styles.uploadArea} ${styles.uploadAreaSquare}`}>
+                <div className={styles.uploadContent}>
+                  <Icon
+                    icon="add_photo_alternate"
+                    size={28}
+                    color="current"
+                    className={styles.uploadIcon}
+                  />
+                  <p className={styles.uploadLabel}>{t.fieldLogoUpload}</p>
+                  <p className={styles.uploadHint}>{t.fieldLogoFormatHint}</p>
+                </div>
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className={styles.hiddenInput}
+                  onChange={handleLogoChange}
+                />
+              </label>
+            )}
+          </div>
+
+          {/* Basic info — main */}
+          <div className={styles.formSection}>
+            <div className={styles.sectionHeader}>
+              <span className={styles.stepBadge}>2</span>
+              <div className={styles.sectionHeaderText}>
+                <h2 className={styles.sectionTitle}>{t.basicInfoSection}</h2>
+              </div>
+            </div>
+
+            <div className={styles.fieldRow}>
+              <Field>
+                <FieldLabel required>{t.fieldName}</FieldLabel>
+                <Input
+                  value={draft.name}
+                  placeholder={t.fieldNamePlaceholder}
+                  aria-invalid={!!errors.name}
+                  onChange={(e) => updateField("name", e.target.value)}
+                />
+                {errors.name && (
+                  <p className={styles.fieldError}>{errors.name}</p>
+                )}
+              </Field>
+            </div>
+
+            <div className={styles.fieldRow}>
+              <Field>
+                <FieldLabel>{t.fieldDescription}</FieldLabel>
+                <textarea
+                  className={styles.textarea}
+                  value={draft.description}
+                  placeholder={t.fieldDescriptionPlaceholder}
+                  rows={4}
+                  onChange={(e) => updateField("description", e.target.value)}
+                />
+              </Field>
+            </div>
+
+            <div className={styles.fieldRow}>
+              <Field>
+                <FieldLabel>{t.fieldCategories}</FieldLabel>
+                <Combobox
+                  items={categoryOptions}
+                  value={draft.category_ids}
+                  multiple
+                  placeholder={t.fieldCategoriesPlaceholder}
+                  emptyMessage={t.noCategoriesFound}
+                  onValueChange={(val) =>
+                    updateField(
+                      "category_ids",
+                      Array.isArray(val) ? val : val ? [val] : [],
+                    )
+                  }
+                />
+              </Field>
+            </div>
+          </div>
         </div>
 
-        {/* Gallery */}
-        <div className={styles.formCard}>
-          <h2 className={styles.cardTitle}>{t.fieldGallery}</h2>
-          <p
-            style={{
-              margin: 0,
-              fontSize: "var(--font-size-small)",
-              color: "var(--app-text-muted)",
-            }}
-          >
-            {t.fieldGalleryHint}
-          </p>
+        {/* ── Row 2: Gallery ── */}
+        <div className={styles.formSection}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.stepBadge}>3</span>
+            <div className={styles.sectionHeaderText}>
+              <h2 className={styles.sectionTitle}>{t.fieldGallery}</h2>
+              <p className={styles.sectionHint}>{t.fieldGalleryHint}</p>
+            </div>
+          </div>
 
           <label className={`${styles.uploadArea} ${styles.uploadAreaWide}`}>
             <div className={styles.uploadContent}>
@@ -777,7 +794,7 @@ export function BrandForm({
           </label>
 
           {allGalleryPreviews.length > 0 && (
-            <div className={styles.galleryPreviewRow}>
+            <div className={styles.galleryPreviewGrid}>
               {allGalleryPreviews.map(({ url, isExisting, index }) => (
                 <div key={url} className={styles.galleryPreviewItem}>
                   <Image
@@ -785,7 +802,7 @@ export function BrandForm({
                     alt={`Gallery ${index + 1}`}
                     fill
                     className={styles.previewImage}
-                    sizes="128px"
+                    sizes="200px"
                   />
                   <button
                     type="button"
@@ -805,30 +822,33 @@ export function BrandForm({
           )}
         </div>
 
-        {/* Branches */}
-        <div className={styles.formCard}>
-          <h2 className={styles.cardTitle}>{t.branchesTitle}</h2>
+        {/* ── Row 3: Branches ── */}
+        <div className={styles.formSection}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.stepBadge}>4</span>
+            <div className={styles.sectionHeaderText}>
+              <h2 className={styles.sectionTitle}>{t.branchesTitle}</h2>
+            </div>
+          </div>
 
           <div className={styles.branchesList}>
             {draft.branches.length === 0 ? (
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "var(--font-size-small)",
-                  color: "var(--app-text-muted)",
-                }}
-              >
-                {t.noBranches}
-              </p>
+              <div className={styles.branchesEmpty}>
+                <Icon icon="location_off" size={16} color="current" />
+                <span>{t.noBranches}</span>
+              </div>
             ) : (
               draft.branches.map((branch, index) => (
                 <div key={branch.id ?? `new-${index}`} className={styles.branchItem}>
-                  <div className={styles.branchItemInfo}>
-                    <p className={styles.branchItemName}>{branch.name}</p>
-                    <p className={styles.branchItemAddress}>
-                      {branch.address1}
-                      {branch.address2 ? `, ${branch.address2}` : ""}
-                    </p>
+                  <div className={styles.branchItemLeft}>
+                    <span className={styles.branchIndex}>{index + 1}</span>
+                    <div className={styles.branchItemInfo}>
+                      <p className={styles.branchItemName}>{branch.name}</p>
+                      <p className={styles.branchItemAddress}>
+                        {branch.address1}
+                        {branch.address2 ? `, ${branch.address2}` : ""}
+                      </p>
+                    </div>
                   </div>
                   <div className={styles.branchItemActions}>
                     <button
@@ -863,7 +883,7 @@ export function BrandForm({
           </Button>
         </div>
 
-        {/* Feedback */}
+        {/* ── Feedback ── */}
         {feedback && (
           <div
             className={`${styles.feedback} ${
@@ -876,33 +896,8 @@ export function BrandForm({
           </div>
         )}
 
-        {/* Submit */}
+        {/* ── Footer actions ── */}
         <div className={styles.formFooter}>
-          <Button variant="outline" type="button" onClick={handleCancel}>
-            {t.cancelForm}
-          </Button>
-
-          {mode === "edit" && (persistedBrand ?? brand) && (
-            <>
-              <Button
-                variant="outline"
-                type="button"
-                icon="swap_horiz"
-                onClick={() => setTransferModalOpen(true)}
-              >
-                {t.transferBrand}
-              </Button>
-              <Button
-                variant="outline"
-                type="button"
-                icon="delete"
-                onClick={() => setDeleteModalOpen(true)}
-              >
-                {t.deleteBrand}
-              </Button>
-            </>
-          )}
-
           <Button
             variant="primary"
             type="submit"
@@ -920,6 +915,33 @@ export function BrandForm({
           >
             {mode === "create" ? t.createBrand : t.formSaveChanges}
           </Button>
+
+          <Button variant="outline" type="button" onClick={handleCancel}>
+            {t.cancelForm}
+          </Button>
+
+          <div className={styles.formFooterSpacer} />
+
+          {mode === "edit" && (persistedBrand ?? brand) && (
+            <div className={styles.formFooterDanger}>
+              <Button
+                variant="outline"
+                type="button"
+                icon="swap_horiz"
+                onClick={() => setTransferModalOpen(true)}
+              >
+                {t.transferBrand}
+              </Button>
+              <Button
+                variant="outline"
+                type="button"
+                icon="delete"
+                onClick={() => setDeleteModalOpen(true)}
+              >
+                {t.deleteBrand}
+              </Button>
+            </div>
+          )}
         </div>
       </form>
 
