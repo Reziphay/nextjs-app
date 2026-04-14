@@ -7,6 +7,7 @@ export const azMessages: Messages = {
       "Azərbaycan dili default olan, çoxdilli və Axios ilə hazır Next.js başlanğıc layihəsi.",
   },
   languageSwitcherAriaLabel: "Dil seçimi",
+  languageSwitcherDisplayLabel: "Göstərilən dil",
   navigationAriaLabel: "Əsas naviqasiya",
   navigation: {
     home: "Ana səhifə",

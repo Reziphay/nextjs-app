@@ -4,6 +4,7 @@ export type Messages = {
     description: string;
   };
   languageSwitcherAriaLabel: string;
+  languageSwitcherDisplayLabel: string;
   navigationAriaLabel: string;
   navigation: {
     home: string;

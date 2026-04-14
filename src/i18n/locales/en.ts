@@ -7,6 +7,7 @@ export const enMessages: Messages = {
       "A multilingual Next.js starter with Azerbaijani as the default language and Axios ready for API requests.",
   },
   languageSwitcherAriaLabel: "Language switcher",
+  languageSwitcherDisplayLabel: "Display language",
   navigationAriaLabel: "Primary navigation",
   navigation: {
     home: "Home",

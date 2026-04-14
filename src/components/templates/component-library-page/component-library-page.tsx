@@ -294,6 +294,10 @@ export function ComponentLibraryPage() {
             <ShowcaseCard title="Compact" description="Header və popup üçün istifadə olunan yığcam variant">
               <LanguageSwitcher />
             </ShowcaseCard>
+
+            <ShowcaseCard title="Panel" description="Settings və mobil panel üçün trigger + seçim siyahısı variantı">
+              <LanguageSwitcher variant="panel" />
+            </ShowcaseCard>
           </div>
         </section>
 

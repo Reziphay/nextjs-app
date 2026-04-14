@@ -176,10 +176,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
               </div>
 
               <div className={styles.settingsSection}>
-                <span className={styles.settingsLabel}>
-                  {messages.languageSwitcherAriaLabel}
-                </span>
-                <LanguageSwitcher />
+                <LanguageSwitcher variant="panel" />
               </div>
 
               <div className={styles.settingsDivider} />
