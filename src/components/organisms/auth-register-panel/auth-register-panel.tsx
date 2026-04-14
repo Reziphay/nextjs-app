@@ -12,6 +12,7 @@ import {
   FieldDescription,
   FieldLabel,
   Input,
+  PasswordInput,
   type ComboboxOption,
 } from "@/components/atoms";
 import { useLocale } from "@/components/providers/locale-provider";
@@ -280,12 +281,13 @@ export function AuthRegisterPanel() {
             <FieldLabel htmlFor="register_password" required>
               {register.passwordLabel}
             </FieldLabel>
-            <Input
+            <PasswordInput
               id="register_password"
-              type="password"
               value={values.password}
               placeholder={register.passwordPlaceholder}
               aria-invalid={errors.password ? "true" : undefined}
+              showPasswordLabel={register.showPasswordLabel}
+              hidePasswordLabel={register.hidePasswordLabel}
               onChange={(event) => {
                 dispatch(
                   setRegisterField({

@@ -65,6 +65,8 @@ export const enMessages: Messages = {
       requiredMessage: "This field is required.",
       emailInvalidMessage: "Please enter a valid email address.",
       passwordRequiredMessage: "Please enter your password.",
+      showPasswordLabel: "Show password",
+      hidePasswordLabel: "Hide password",
     },
     register: {
       title: "Create your account",
@@ -121,7 +123,33 @@ export const enMessages: Messages = {
       passwordInvalidMessage:
         "Password must be at least 8 characters and include uppercase, lowercase, and a number.",
       typeRequiredMessage: "Please select a user type.",
+      showPasswordLabel: "Show password",
+      hidePasswordLabel: "Hide password",
     },
+  },
+  backendErrors: {
+    "auth.invalid_credentials": "Invalid email or password.",
+    "errors.validation_error": "The submitted data failed validation.",
+    "errors.missing_token": "Authentication token is missing.",
+    "errors.invalid_token": "Authentication token is invalid.",
+    "errors.forbidden": "You do not have permission to perform this action.",
+    "user.not_found": "User not found.",
+    "user.email_change_not_allowed":
+      "This email address can no longer be changed.",
+    "user.phone_change_not_allowed":
+      "This phone number can no longer be changed.",
+    "user.email_already_in_use": "This email address is already in use.",
+    "user.phone_already_in_use": "This phone number is already in use.",
+    "media.invalid_file_type": "The selected file type is not supported.",
+    "media.file_too_large": "The selected file is too large.",
+    "media.invalid_logo_ratio":
+      "Logo image must use the required aspect ratio.",
+    "media.invalid_gallery_ratio":
+      "Gallery image must use the required aspect ratio.",
+    "brand.not_found": "Brand not found.",
+    "brand.transfer_not_found": "Brand transfer not found.",
+    "brand.transfer_not_pending":
+      "This brand transfer is no longer pending.",
   },
   hero: {
     eyebrow: "Multilingual Next.js starter",

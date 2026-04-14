@@ -13,6 +13,7 @@ import {
   FieldLabel,
   GoogleIcon,
   Input,
+  PasswordInput,
 } from "@/components/atoms";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
@@ -169,12 +170,13 @@ export function AuthLoginPanel() {
                 {login.forgotPassword}
               </Button>
             </div>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               value={values.password}
               placeholder={login.passwordPlaceholder}
               aria-invalid={errors.password ? "true" : undefined}
+              showPasswordLabel={login.showPasswordLabel}
+              hidePasswordLabel={login.hidePasswordLabel}
               onChange={(event) => {
                 dispatch(
                   setLoginField({

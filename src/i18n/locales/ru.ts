@@ -65,6 +65,8 @@ export const ruMessages: Messages = {
       requiredMessage: "Это поле обязательно.",
       emailInvalidMessage: "Введите корректный email.",
       passwordRequiredMessage: "Введите пароль.",
+      showPasswordLabel: "Показать пароль",
+      hidePasswordLabel: "Скрыть пароль",
     },
     register: {
       title: "Создайте аккаунт",
@@ -121,7 +123,33 @@ export const ruMessages: Messages = {
       passwordInvalidMessage:
         "Пароль должен содержать не менее 8 символов, а также заглавную, строчную букву и цифру.",
       typeRequiredMessage: "Выберите тип пользователя.",
+      showPasswordLabel: "Показать пароль",
+      hidePasswordLabel: "Скрыть пароль",
     },
+  },
+  backendErrors: {
+    "auth.invalid_credentials": "Неверный email или пароль.",
+    "errors.validation_error": "Отправленные данные не прошли валидацию.",
+    "errors.missing_token": "Токен авторизации отсутствует.",
+    "errors.invalid_token": "Токен авторизации недействителен.",
+    "errors.forbidden": "У вас нет прав для выполнения этого действия.",
+    "user.not_found": "Пользователь не найден.",
+    "user.email_change_not_allowed":
+      "Этот email больше нельзя изменить.",
+    "user.phone_change_not_allowed":
+      "Этот номер телефона больше нельзя изменить.",
+    "user.email_already_in_use": "Этот email уже используется.",
+    "user.phone_already_in_use": "Этот номер телефона уже используется.",
+    "media.invalid_file_type": "Выбранный тип файла не поддерживается.",
+    "media.file_too_large": "Выбранный файл слишком большой.",
+    "media.invalid_logo_ratio":
+      "Изображение логотипа должно соответствовать требуемому соотношению сторон.",
+    "media.invalid_gallery_ratio":
+      "Изображение галереи должно соответствовать требуемому соотношению сторон.",
+    "brand.not_found": "Бренд не найден.",
+    "brand.transfer_not_found": "Передача бренда не найдена.",
+    "brand.transfer_not_pending":
+      "Эта передача бренда больше не ожидает обработки.",
   },
   hero: {
     eyebrow: "Мультиязычный Next.js starter",

@@ -12,6 +12,7 @@ import {
   type AppNotification,
   type BrandTransferListItem,
 } from "@/lib/brands-api";
+import { translateBackendErrorMessage } from "@/lib/backend-errors";
 import { proxyMediaUrl } from "@/lib/media";
 import { selectAuthSession } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
@@ -96,6 +97,10 @@ export function NotificationTransferPage({
       const message = isAxiosError(error)
         ? (error.response?.data?.message as string | undefined)
         : undefined;
+      const translatedMessage = translateBackendErrorMessage(
+        message,
+        messages.backendErrors,
+      );
 
       if (message === "brand.transfer_not_found") {
         setFeedback(t.notFoundDescription);
@@ -104,7 +109,7 @@ export function NotificationTransferPage({
       } else if (message === "errors.forbidden") {
         setFeedback(t.forbiddenDescription);
       } else {
-        setFeedback(t.errorGeneric);
+        setFeedback(translatedMessage ?? t.errorGeneric);
       }
     } finally {
       setLoadingTransferId(null);

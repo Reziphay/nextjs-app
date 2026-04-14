@@ -38,8 +38,8 @@ import {
   searchUsoUsers,
   fetchBrandById,
   type UserSearchResult,
-  type DeleteBrandPayload,
 } from "@/lib/brands-api";
+import { translateBackendErrorMessage } from "@/lib/backend-errors";
 import type { Brand, BrandCategory, BrandGalleryItem, Branch } from "@/types/brand";
 import { BranchModal } from "./branch-modal";
 import styles from "./brand-form.module.css";
@@ -347,7 +347,10 @@ export function BrandForm({
       case "media.invalid_gallery_ratio":
         return t.galleryRatioError;
       default:
-        return apiMessage ?? t.errorGeneric;
+        return (
+          translateBackendErrorMessage(apiMessage, messages.backendErrors) ??
+          t.errorGeneric
+        );
     }
   }
 

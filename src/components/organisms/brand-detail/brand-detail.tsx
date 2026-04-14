@@ -16,6 +16,7 @@ import { Icon } from "@/components/icon";
 import { ProfileBox } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import { submitBrandRating } from "@/lib/brands-api";
+import { translateBackendErrorMessage } from "@/lib/backend-errors";
 import { proxyMediaUrl } from "@/lib/media";
 import { selectAuthSession } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
@@ -319,13 +320,17 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
       const apiMessage = isAxiosError(error)
         ? (error.response?.data?.message as string | undefined)
         : undefined;
+      const translatedApiMessage = translateBackendErrorMessage(
+        apiMessage,
+        messages.backendErrors,
+      );
 
       if (apiMessage === "errors.forbidden") {
         setRatingFeedback(t.forbiddenDescription);
       } else if (apiMessage === "brand.not_found") {
         setRatingFeedback(t.notFoundDescription);
       } else {
-        setRatingFeedback(t.errorGeneric);
+        setRatingFeedback(translatedApiMessage ?? t.errorGeneric);
       }
     } finally {
       setRatingLoading(false);

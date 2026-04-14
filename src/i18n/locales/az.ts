@@ -66,6 +66,8 @@ export const azMessages: Messages = {
       requiredMessage: "Bu sahə mütləqdir.",
       emailInvalidMessage: "Düzgün email ünvanı daxil edin.",
       passwordRequiredMessage: "Şifrəni daxil edin.",
+      showPasswordLabel: "Şifrəni göstər",
+      hidePasswordLabel: "Şifrəni gizlət",
     },
     register: {
       title: "Yeni hesab yaradın",
@@ -122,7 +124,32 @@ export const azMessages: Messages = {
       passwordInvalidMessage:
         "Şifrə ən azı 8 simvol olmalı, böyük hərf, kiçik hərf və rəqəm içərməlidir.",
       typeRequiredMessage: "İstifadəçi tipini seçin.",
+      showPasswordLabel: "Şifrəni göstər",
+      hidePasswordLabel: "Şifrəni gizlət",
     },
+  },
+  backendErrors: {
+    "auth.invalid_credentials": "Email və ya şifrə yanlışdır.",
+    "errors.validation_error": "Məlumatlar yoxlamadan keçmədi.",
+    "errors.missing_token": "Giriş məlumatı tapılmadı.",
+    "errors.invalid_token": "Giriş məlumatı etibarsızdır.",
+    "errors.forbidden": "Bu əməliyyatı etməyə icazəniz yoxdur.",
+    "user.not_found": "İstifadəçi tapılmadı.",
+    "user.email_change_not_allowed": "Bu email artıq dəyişdirilə bilməz.",
+    "user.phone_change_not_allowed":
+      "Bu telefon nömrəsi artıq dəyişdirilə bilməz.",
+    "user.email_already_in_use": "Bu email artıq istifadə olunur.",
+    "user.phone_already_in_use": "Bu telefon nömrəsi artıq istifadə olunur.",
+    "media.invalid_file_type": "Seçilən fayl formatı dəstəklənmir.",
+    "media.file_too_large": "Seçilən fayl həddindən artıq böyükdür.",
+    "media.invalid_logo_ratio":
+      "Loqo şəkli tələb olunan nisbətdə olmalıdır.",
+    "media.invalid_gallery_ratio":
+      "Qalereya şəkli tələb olunan nisbətdə olmalıdır.",
+    "brand.not_found": "Brend tapılmadı.",
+    "brand.transfer_not_found": "Brend köçürməsi tapılmadı.",
+    "brand.transfer_not_pending":
+      "Bu brend köçürməsi artıq gözləmə vəziyyətində deyil.",
   },
   hero: {
     eyebrow: "Çoxdilli Next.js starter",

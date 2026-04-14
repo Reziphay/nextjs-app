@@ -27,5 +27,6 @@ export {
   FieldDescription,
   FieldLabel,
   Input,
+  PasswordInput,
 } from "./input";
 export { Switch } from "./switch";

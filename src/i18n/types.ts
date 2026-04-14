@@ -57,6 +57,8 @@ export type Messages = {
       requiredMessage: string;
       emailInvalidMessage: string;
       passwordRequiredMessage: string;
+      showPasswordLabel: string;
+      hidePasswordLabel: string;
     };
     register: {
       title: string;
@@ -111,8 +113,11 @@ export type Messages = {
       emailInvalidMessage: string;
       passwordInvalidMessage: string;
       typeRequiredMessage: string;
+      showPasswordLabel: string;
+      hidePasswordLabel: string;
     };
   };
+  backendErrors: Record<string, string>;
   hero: {
     eyebrow: string;
     title: string;
