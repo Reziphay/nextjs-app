@@ -17,7 +17,7 @@ import {
 } from "@/components/atoms";
 import { Icon } from "@/components/icon";
 import { Logo } from "@/components/logo";
-import { LanguageSwitcher } from "@/components/molecules";
+import { LanguageSwitcher } from "@/components/molecules/language-switcher/language-switcher";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   getDefaultAppRouteForUserType,

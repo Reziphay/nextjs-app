@@ -9,6 +9,10 @@
   font-size: 1rem;
 }
 
+.toggleWrapper[data-size="small"] {
+  font-size: 0.875rem;
+}
+
 .toggleCheckbox {
   appearance: none;
   position: absolute;

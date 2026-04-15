@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 import { networkInterfaces } from "node:os";
 
+type ImageRemotePattern = NonNullable<
+  NonNullable<NextConfig["images"]>["remotePatterns"]
+>[number];
+
+const projectRoot = process.cwd();
+
 function resolveEnvValue(value?: string | null, fallback?: string | null) {
   const normalizedValue = value?.trim();
 
@@ -34,13 +40,13 @@ function getAllowedDevOrigins() {
   return Array.from(hosts);
 }
 
-function getImageRemotePatterns(): NextConfig["images"]["remotePatterns"] {
+function getImageRemotePatterns(): ImageRemotePattern[] {
   const apiUrl = resolveEnvValue(
     process.env.NEXT_PUBLIC_API_URL,
     process.env.API_URL,
   );
 
-  const patterns: NextConfig["images"]["remotePatterns"] = [];
+  const patterns: ImageRemotePattern[] = [];
 
   if (apiUrl) {
     try {
@@ -64,6 +70,9 @@ function getImageRemotePatterns(): NextConfig["images"]["remotePatterns"] {
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  turbopack: {
+    root: projectRoot,
+  },
   allowedDevOrigins: getAllowedDevOrigins(),
   images: {
     localPatterns: [
