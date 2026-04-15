@@ -6,10 +6,12 @@ import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
 import { proxyMediaUrl } from "@/lib/media";
 import type { Brand } from "@/types/brand";
+import type { PublicUserProfile } from "@/types";
 import styles from "./brands-ucr-page.module.css";
 
 type BrandsUcrPageProps = {
   brands: Brand[];
+  ownersById: Record<string, PublicUserProfile>;
 };
 
 type BrandSection = {
@@ -20,14 +22,24 @@ type BrandSection = {
 };
 
 const PLACEHOLDER_IMAGE = "/banner1.jpg";
+const PLACEHOLDER_AVATAR = "/reziphay-logo.png";
+
+function getOwnerDisplayName(owner?: PublicUserProfile) {
+  if (!owner) return "";
+
+  const fullName = `${owner.first_name} ${owner.last_name}`.trim();
+  return fullName || owner.email || "";
+}
 
 function BrandGrid({
   brands,
+  ownersById,
   emptyLabel,
   reviewsSuffix,
   onSelect,
 }: {
   brands: Brand[];
+  ownersById: Record<string, PublicUserProfile>;
   emptyLabel: string;
   reviewsSuffix: string;
   onSelect: (id: string) => void;
@@ -38,34 +50,46 @@ function BrandGrid({
 
   return (
     <div className={styles.grid}>
-      {brands.map((brand) => (
-        <BrandCard
-          key={brand.id}
-          logo={{
-            src: proxyMediaUrl(brand.logo_url) ?? proxyMediaUrl(brand.gallery?.[0]?.url) ?? PLACEHOLDER_IMAGE,
-            alt: brand.name,
-          }}
-          backgroundImage={{
-            src: proxyMediaUrl(brand.gallery?.[0]?.url ?? brand.logo_url) ?? PLACEHOLDER_IMAGE,
-            alt: brand.name,
-          }}
-          title={brand.name}
-          description={brand.description ?? ""}
-          category={brand.categories[0]?.name}
-          badgeText={
-            brand.rating_count > 0
-              ? `${brand.rating_count} ${reviewsSuffix}`
-              : undefined
-          }
-          author={{
-            name: brand.name,
-            avatar: proxyMediaUrl(brand.logo_url) ?? "/reziphay-logo.png",
-          }}
-          rating={brand.rating}
-          ratingCount={brand.rating_count}
-          onClick={() => onSelect(brand.id)}
-        />
-      ))}
+      {brands.map((brand) => {
+        const owner = ownersById[brand.owner_id];
+        const ownerName = getOwnerDisplayName(owner);
+
+        return (
+          <BrandCard
+            key={brand.id}
+            logo={{
+              src:
+                proxyMediaUrl(brand.logo_url) ??
+                proxyMediaUrl(brand.gallery?.[0]?.url) ??
+                PLACEHOLDER_IMAGE,
+              alt: brand.name,
+            }}
+            backgroundImage={{
+              src:
+                proxyMediaUrl(brand.gallery?.[0]?.url ?? brand.logo_url) ??
+                PLACEHOLDER_IMAGE,
+              alt: brand.name,
+            }}
+            title={brand.name}
+            description={brand.description ?? ""}
+            category={brand.categories[0]?.name}
+            badgeText={
+              brand.rating_count > 0
+                ? `${brand.rating_count} ${reviewsSuffix}`
+                : undefined
+            }
+            author={{
+              userId: owner?.id,
+              name: ownerName || brand.name,
+              avatar: proxyMediaUrl(owner?.avatar_url) ?? PLACEHOLDER_AVATAR,
+              subtitle: owner?.email,
+            }}
+            rating={brand.rating}
+            ratingCount={brand.rating_count}
+            onClick={() => onSelect(brand.id)}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -115,7 +139,7 @@ function buildSections(
   return sections;
 }
 
-export function BrandsUcrPage({ brands }: BrandsUcrPageProps) {
+export function BrandsUcrPage({ brands, ownersById }: BrandsUcrPageProps) {
   const router = useRouter();
   const { messages } = useLocale();
   const t = messages.brands;
@@ -145,6 +169,7 @@ export function BrandsUcrPage({ brands }: BrandsUcrPageProps) {
           </div>
           <BrandGrid
             brands={section.brands}
+            ownersById={ownersById}
             emptyLabel={t.noSectionBrands}
             reviewsSuffix={t.brandCardReviewsSuffix}
             onSelect={handleSelect}

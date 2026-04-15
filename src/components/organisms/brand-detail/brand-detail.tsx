@@ -21,11 +21,13 @@ import { proxyMediaUrl } from "@/lib/media";
 import { selectAuthSession } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
 import type { Brand, Branch, BrandStatus } from "@/types/brand";
+import type { PublicUserProfile } from "@/types";
 import styles from "./brand-detail.module.css";
 
 type BrandDetailProps = {
   brand: Brand;
   currentUserId?: string;
+  owner?: PublicUserProfile | null;
 };
 
 type BranchFilter = "all" | "open247" | "withContact";
@@ -147,7 +149,11 @@ function getBranchBreaks(branch: Branch) {
     .filter(Boolean);
 }
 
-export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
+export function BrandDetail({
+  brand,
+  currentUserId,
+  owner,
+}: BrandDetailProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { messages } = useLocale();
@@ -165,9 +171,15 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
   const [galleryPaused, setGalleryPaused] = useState(false);
 
   const isOwner = Boolean(currentUserId && brandState.owner_id === currentUserId);
-  const categories = brandState.categories ?? [];
-  const gallery = brandState.gallery ?? [];
-  const branches = brandState.branches ?? [];
+  const categories = useMemo(
+    () => brandState.categories ?? [],
+    [brandState.categories],
+  );
+  const gallery = useMemo(() => brandState.gallery ?? [], [brandState.gallery]);
+  const branches = useMemo(
+    () => brandState.branches ?? [],
+    [brandState.branches],
+  );
   const canRate =
     currentUser?.type === "ucr" &&
     brandState.status === "ACTIVE" &&
@@ -189,16 +201,28 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
     REJECTED: styles.statusError,
     CLOSED: styles.statusClosed,
   };
-  const ownerProfileVisible = Boolean(
-    currentUser && currentUser.id === brandState.owner_id,
-  );
-  const ownerDisplayName = ownerProfileVisible
-    ? `${currentUser!.first_name} ${currentUser!.last_name}`.trim()
-    : "";
-  const ownerAvatar = ownerProfileVisible
-    ? proxyMediaUrl(currentUser!.avatar_url) ?? "/reziphay-logo.png"
-    : "";
-  const ownerSubtitle = ownerProfileVisible ? currentUser!.email ?? undefined : undefined;
+  const ownerDisplayName = owner
+    ? `${owner.first_name} ${owner.last_name}`.trim() || owner.email
+    : currentUser && currentUser.id === brandState.owner_id
+      ? `${currentUser.first_name} ${currentUser.last_name}`.trim() ||
+        currentUser.email
+      : "";
+  const ownerAvatar = owner
+    ? proxyMediaUrl(owner.avatar_url) ?? "/reziphay-logo.png"
+    : currentUser && currentUser.id === brandState.owner_id
+      ? proxyMediaUrl(currentUser.avatar_url) ?? "/reziphay-logo.png"
+      : "";
+  const ownerSubtitle = owner?.email
+    ? owner.email
+    : currentUser && currentUser.id === brandState.owner_id
+      ? currentUser.email ?? undefined
+      : undefined;
+  const ownerUserId = owner?.id
+    ? owner.id
+    : currentUser && currentUser.id === brandState.owner_id
+      ? currentUser.id
+      : undefined;
+  const ownerProfileVisible = Boolean(ownerUserId && ownerDisplayName);
 
   const filteredBranches = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -422,7 +446,7 @@ export function BrandDetail({ brand, currentUserId }: BrandDetailProps) {
           {ownerProfileVisible ? (
             <div className={styles.ownerRow}>
               <ProfileBox
-                userId={brandState.owner_id}
+                userId={ownerUserId}
                 name={ownerDisplayName}
                 avatar={ownerAvatar}
                 label={t.brandCardOwnerLabel}

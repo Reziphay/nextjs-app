@@ -16,6 +16,7 @@ import { BrandForm } from "@/components/organisms/brand-form";
 import { fetchUserProfileById } from "@/lib/users-api";
 import { getMessages } from "@/i18n/config";
 import { getServerLocale } from "@/i18n/server";
+import type { Brand, PublicUserProfile } from "@/types";
 
 type BrandsPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -27,6 +28,32 @@ function getStringParam(
 ): string | undefined {
   const val = params[key];
   return Array.isArray(val) ? val[0] : val;
+}
+
+async function fetchBrandOwnersById(
+  brands: Brand[],
+  accessToken: string,
+): Promise<Record<string, PublicUserProfile>> {
+  const ownerIds = [...new Set(brands.map((brand) => brand.owner_id).filter(Boolean))];
+
+  if (ownerIds.length === 0) {
+    return {};
+  }
+
+  const ownerEntries = await Promise.all(
+    ownerIds.map(async (ownerId) => {
+      const owner = await fetchUserProfileById(ownerId, accessToken);
+      return owner ? ([ownerId, owner] as const) : null;
+    }),
+  );
+
+  return Object.fromEntries(
+    ownerEntries.filter(
+      (
+        entry,
+      ): entry is readonly [string, PublicUserProfile] => entry !== null,
+    ),
+  );
 }
 
 export default async function BrandsPage({ searchParams }: BrandsPageProps) {
@@ -118,7 +145,9 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
       );
     }
 
-    return <BrandDetail brand={brand} currentUserId={user.id} />;
+    const owner = await fetchUserProfileById(brand.owner_id, accessToken);
+
+    return <BrandDetail brand={brand} currentUserId={user.id} owner={owner} />;
   }
 
   // ── Create brand form (?progress=create) — USO only ──────────────────────
@@ -167,5 +196,7 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
   // ── UCR default view (should only land here with ?id, handled above) ───────
   // Fallback: show the active brands gallery
   const brands = await fetchActiveBrands(accessToken).catch(() => []);
-  return <BrandsUcrPage brands={brands} />;
+  const ownersById = await fetchBrandOwnersById(brands, accessToken);
+
+  return <BrandsUcrPage brands={brands} ownersById={ownersById} />;
 }
