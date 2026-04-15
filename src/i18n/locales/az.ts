@@ -151,6 +151,15 @@ export const azMessages: Messages = {
     "brand.transfer_not_found": "Brend köçürməsi tapılmadı.",
     "brand.transfer_not_pending":
       "Bu brend köçürməsi artıq gözləmə vəziyyətində deyil.",
+    "team.not_found": "Komanda tapılmadı.",
+    "team.invite_self": "Özünü bu filial komandasına dəvət edə bilməzsən.",
+    "team.invite_non_uso": "Filial komandasına yalnız xidmət sahibi hesabları dəvət edilə bilər.",
+    "team.invite_already_pending": "Bu istifadəçi üçün artıq gözləyən komanda dəvəti var.",
+    "team.invite_already_member": "Bu istifadəçi artıq filial komandasının qəbul olunmuş üzvüdür.",
+    "team.membership_not_found": "Komanda üzvlüyü tapılmadı.",
+    "team.invite_not_pending": "Bu dəvət artıq gözləmə vəziyyətində deyil.",
+    "team.cannot_remove_owner": "Filial sahibinin komanda üzvlüyü silinə bilməz.",
+    "team.already_removed": "Bu üzvlük artıq silinib.",
   },
   hero: {
     eyebrow: "Çoxdilli Next.js starter",

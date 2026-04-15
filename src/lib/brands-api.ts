@@ -109,6 +109,75 @@ export type BrandTransferListItem = {
   to_user: BrandTransferParty;
 };
 
+export type TeamMemberRole = "OWNER" | "MEMBER";
+
+export type TeamMemberStatus =
+  | "PENDING"
+  | "ACCEPTED"
+  | "REJECTED"
+  | "REMOVED";
+
+export type TeamWorkspaceMember = {
+  membership_id: string;
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  avatar_url?: string | null;
+  role: TeamMemberRole;
+  status: TeamMemberStatus;
+  invited_by_user_id: string;
+  invited_at: string;
+  updated_at: string;
+};
+
+export type TeamWorkspaceBranch = {
+  branch_id: string;
+  branch_name: string;
+  address: {
+    address1: string;
+    address2: string | null;
+  };
+  availability: {
+    is_24_7: boolean;
+    opening: string | null;
+    closing: string | null;
+  };
+  team_id: string | null;
+  team_created_at: string | null;
+  members: {
+    accepted: TeamWorkspaceMember[];
+    pending: TeamWorkspaceMember[];
+    rejected: TeamWorkspaceMember[];
+    removed: TeamWorkspaceMember[];
+  };
+};
+
+export type BrandTeamWorkspace = {
+  brand_id: string;
+  brand_name: string;
+  brand_status: Brand["status"];
+  brand_logo_url?: string | null;
+  branches: TeamWorkspaceBranch[];
+};
+
+export type TeamInvitation = {
+  membership_id: string;
+  status: TeamMemberStatus;
+  role: TeamMemberRole;
+  invited_at: string;
+  team_id: string;
+  branch: {
+    id: string;
+    name: string;
+  };
+  brand: {
+    id: string;
+    name: string;
+    logo_url?: string | null;
+  };
+};
+
 function normalizeBranch(branch: Branch): Branch {
   return {
     ...branch,
@@ -424,6 +493,115 @@ export async function searchUsoUsers(
     params: { q: query },
   });
   return response.data?.data?.users ?? [];
+}
+
+// ─── Team ────────────────────────────────────────────────────────────────────
+
+export async function fetchBrandTeamWorkspace(
+  brandId: string,
+  accessToken: string,
+): Promise<BrandTeamWorkspace> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ workspace: BrandTeamWorkspace }>>({
+    url: `/brands/${brandId}/team-workspace`,
+    method: "GET",
+  });
+
+  const workspace = response.data?.data?.workspace;
+  if (!workspace) {
+    throw new Error("Invalid response from team workspace API");
+  }
+
+  return workspace;
+}
+
+export async function inviteBranchTeamMember(
+  brandId: string,
+  branchId: string,
+  targetUserId: string,
+  accessToken: string,
+): Promise<TeamWorkspaceMember> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ membership: TeamWorkspaceMember }>>({
+    url: `/brands/${brandId}/branches/${branchId}/team/invitations`,
+    method: "POST",
+    data: { target_user_id: targetUserId },
+  });
+
+  const membership = response.data?.data?.membership;
+  if (!membership) {
+    throw new Error("Invalid response from team invite API");
+  }
+
+  return membership;
+}
+
+export async function removeBranchTeamMember(
+  brandId: string,
+  branchId: string,
+  teamMemberId: string,
+  accessToken: string,
+): Promise<TeamWorkspaceMember> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ membership: TeamWorkspaceMember }>>({
+    url: `/brands/${brandId}/branches/${branchId}/team/members/${teamMemberId}/remove`,
+    method: "PATCH",
+  });
+
+  const membership = response.data?.data?.membership;
+  if (!membership) {
+    throw new Error("Invalid response from team member removal API");
+  }
+
+  return membership;
+}
+
+export async function fetchMyTeamInvitations(
+  accessToken: string,
+): Promise<TeamInvitation[]> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ invitations: TeamInvitation[] }>>({
+    url: "/team-members/my-invitations",
+    method: "GET",
+  });
+
+  return response.data?.data?.invitations ?? [];
+}
+
+export async function acceptTeamInvitation(
+  teamMemberId: string,
+  accessToken: string,
+): Promise<TeamWorkspaceMember> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ membership: TeamWorkspaceMember }>>({
+    url: `/team-members/${teamMemberId}/accept`,
+    method: "PATCH",
+  });
+
+  const membership = response.data?.data?.membership;
+  if (!membership) {
+    throw new Error("Invalid response from team invitation accept API");
+  }
+
+  return membership;
+}
+
+export async function rejectTeamInvitation(
+  teamMemberId: string,
+  accessToken: string,
+): Promise<TeamWorkspaceMember> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ membership: TeamWorkspaceMember }>>({
+    url: `/team-members/${teamMemberId}/reject`,
+    method: "PATCH",
+  });
+
+  const membership = response.data?.data?.membership;
+  if (!membership) {
+    throw new Error("Invalid response from team invitation reject API");
+  }
+
+  return membership;
 }
 
 // ─── Notifications ────────────────────────────────────────────────────────────

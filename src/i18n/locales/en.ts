@@ -151,6 +151,15 @@ export const enMessages: Messages = {
     "brand.transfer_not_found": "Brand transfer not found.",
     "brand.transfer_not_pending":
       "This brand transfer is no longer pending.",
+    "team.not_found": "Team not found.",
+    "team.invite_self": "You cannot invite yourself into this branch team.",
+    "team.invite_non_uso": "Only service owner accounts can be invited into a branch team.",
+    "team.invite_already_pending": "This user already has a pending invitation for the branch team.",
+    "team.invite_already_member": "This user is already an accepted member of the branch team.",
+    "team.membership_not_found": "Team membership not found.",
+    "team.invite_not_pending": "This invitation is no longer pending.",
+    "team.cannot_remove_owner": "The branch owner membership cannot be removed from the team.",
+    "team.already_removed": "This membership was already removed.",
   },
   hero: {
     eyebrow: "Multilingual Next.js starter",

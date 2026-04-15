@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NotificationTransferPage } from "@/components/organisms/notification-transfer-page/notification-transfer-page";
 import {
+  fetchMyTeamInvitations,
   fetchIncomingTransfers,
   fetchOutgoingTransfers,
   fetchNotifications,
@@ -12,19 +13,21 @@ export default async function NotificationPage() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("rzp_at")?.value ?? "";
 
-  const [incomingTransfers, outgoingTransfers, notifications] =
+  const [incomingTransfers, outgoingTransfers, teamInvitations, notifications] =
     user.type === "uso"
       ? await Promise.all([
           fetchIncomingTransfers(accessToken).catch(() => []),
           fetchOutgoingTransfers(accessToken).catch(() => []),
+          fetchMyTeamInvitations(accessToken).catch(() => []),
           fetchNotifications(accessToken).catch(() => []),
         ])
-      : [[], [], await fetchNotifications(accessToken).catch(() => [])];
+      : [[], [], [], await fetchNotifications(accessToken).catch(() => [])];
 
   return (
     <NotificationTransferPage
       initialIncomingTransfers={incomingTransfers}
       initialOutgoingTransfers={outgoingTransfers}
+      initialTeamInvitations={teamInvitations}
       initialNotifications={notifications}
       userType={user.type}
     />

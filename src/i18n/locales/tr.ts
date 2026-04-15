@@ -188,6 +188,15 @@ export const trMessages: Messages = {
       "Marka transferi bulunamadı.",
     "brand.transfer_not_pending":
       "Bu marka transferi artık beklemede değil.",
+    "team.not_found": "Takım bulunamadı.",
+    "team.invite_self": "Kendinizi bu şube takımına davet edemezsiniz.",
+    "team.invite_non_uso": "Şube takımına yalnızca hizmet sahibi hesaplar davet edilebilir.",
+    "team.invite_already_pending": "Bu kullanıcı için zaten bekleyen bir takım daveti var.",
+    "team.invite_already_member": "Bu kullanıcı zaten şube takımının kabul edilmiş bir üyesi.",
+    "team.membership_not_found": "Takım üyeliği bulunamadı.",
+    "team.invite_not_pending": "Bu davet artık beklemede değil.",
+    "team.cannot_remove_owner": "Şube sahibinin takım üyeliği kaldırılamaz.",
+    "team.already_removed": "Bu üyelik zaten kaldırılmış.",
   },
   hero: {
     eyebrow: "Çok dilli Next.js başlangıcı",

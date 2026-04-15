@@ -1,5 +1,6 @@
 "use client";
 
+import { isAxiosError } from "axios";
 import {
   startTransition,
   useDeferredValue,
@@ -14,16 +15,17 @@ import { Field, FieldDescription, FieldLabel, Input } from "@/components/atoms/i
 import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
+  fetchBrandTeamWorkspace,
+  inviteBranchTeamMember,
+  removeBranchTeamMember,
   searchUsoUsers,
+  type BrandTeamWorkspace as BrandTeamWorkspaceData,
+  type TeamMemberStatus,
+  type TeamWorkspaceBranch,
+  type TeamWorkspaceMember,
   type UserSearchResult,
 } from "@/lib/brands-api";
-import {
-  readBrandTeamWorkspace,
-  writeBrandTeamWorkspace,
-  type BrandTeamWorkspaceState,
-  type TeamMemberRecord,
-  type TeamMemberStatus,
-} from "@/lib/team-workspace-storage";
+import { translateBackendErrorMessage } from "@/lib/backend-errors";
 import { proxyMediaUrl } from "@/lib/media";
 import { selectAuthSession } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
@@ -32,18 +34,19 @@ import type { AuthenticatedUser } from "@/types";
 import styles from "./brand-team-workspace.module.css";
 
 type BrandTeamWorkspaceProps = {
-  brand: Brand;
+  brand: Pick<Brand, "id" | "branches">;
   currentUser: Pick<
     AuthenticatedUser,
     "id" | "first_name" | "last_name" | "email" | "avatar_url"
   >;
+  initialWorkspace: BrandTeamWorkspaceData;
 };
 
 type WorkspaceCopy = {
   badge: string;
   title: string;
   description: string;
-  browserState: string;
+  liveState: string;
   noBranchesTitle: string;
   noBranchesDescription: string;
   addBranch: string;
@@ -71,10 +74,13 @@ type WorkspaceCopy = {
   inviteSearchPlaceholder: string;
   searchIdle: string;
   searchLoading: string;
+  searchReady: string;
   searchEmpty: string;
+  searchError: string;
   inviteAction: string;
   inviteSuccess: string;
-  inviteReadonly: string;
+  removeSuccess: string;
+  reinviteSuccess: string;
   acceptedTitle: string;
   pendingTitle: string;
   archiveTitle: string;
@@ -87,12 +93,12 @@ type WorkspaceCopy = {
   statusPending: string;
   statusRejected: string;
   statusRemoved: string;
-  previewAccept: string;
-  previewReject: string;
   cancelInvite: string;
   removeMember: string;
   restoreInvite: string;
   reinviteMember: string;
+  liveApiBadge: string;
+  workspaceRefreshError: string;
   futureTitle: string;
   futureDescription: string;
   futureListOne: string;
@@ -102,11 +108,11 @@ type WorkspaceCopy = {
 
 const EN_COPY: WorkspaceCopy = {
   badge: "Branch team workspace",
-  title: "Shape the team before services go live",
+  title: "Build the branch roster before services launch",
   description:
-    "Each branch will eventually host service owners, not just services. Use this workspace to decide who belongs in each branch before the service module lands.",
-  browserState:
-    "Until the backend endpoints are ready, invite state is saved only in this browser for planning and UI validation.",
+    "Each branch already has its own team shell in the backend. Use this workspace to invite service owners into the right branch before the future service domain starts attaching ownership to them.",
+  liveState:
+    "This screen now reflects the real backend team state. Pending invitations are actionable from the invited USO's notification page.",
   noBranchesTitle: "This brand has no branches yet",
   noBranchesDescription:
     "The team layer sits on top of branches. Add at least one branch first, then return here to shape the branch roster.",
@@ -115,15 +121,15 @@ const EN_COPY: WorkspaceCopy = {
   openBrand: "Open brand profile",
   branchesRailTitle: "Branch lanes",
   branchesRailLead:
-    "Teams are attached to branches, not directly to the brand. Pick a branch and prepare the people who will eventually publish services there.",
+    "Teams are attached to branches, not directly to the brand. Pick a branch and decide which accepted USO members will eventually publish services there.",
   branchCountLabel: "Branches",
   branchMemberCount: "accepted",
   branchPendingCount: "pending",
   acceptedMetric: "Accepted members",
   pendingMetric: "Pending invites",
   laneMetric: "Future service lanes",
-  laneMetricHint: "Each accepted USO may later publish multiple services in this branch.",
-  branchLeadLabel: "Default lead",
+  laneMetricHint: "Each accepted USO may later own multiple services inside the same branch.",
+  branchLeadLabel: "Branch owner",
   availabilityLabel: "Availability",
   addressLabel: "Address",
   contactLabel: "Contact",
@@ -131,39 +137,41 @@ const EN_COPY: WorkspaceCopy = {
   allDay: "24/7",
   inviteTitle: "Invite a USO into this branch",
   inviteDescription:
-    "Search existing service owners and prepare the branch team now. Backend ownership, notifications, and accept/reject flows will connect in the next step.",
+    "Search existing service owners and send a real team invitation. They will see the invite in Notifications and can accept or reject it there.",
   inviteSearchLabel: "Find a service owner",
   inviteSearchDescription:
-    "Search by name, email, or phone. Users already accepted or already pending for this branch are hidden from the result list.",
+    "Search by name, email, or phone. Users already accepted or already pending in this branch are hidden from the results.",
   inviteSearchPlaceholder: "Search by name, email, or phone",
   searchIdle: "Start typing to search service owners.",
   searchLoading: "Searching service owners...",
+  searchReady: "Select a service owner to send a real invitation.",
   searchEmpty: "No matching service owners were found for this branch.",
-  inviteAction: "Add to team plan",
-  inviteSuccess: "The service owner was added to the local team plan.",
-  inviteReadonly:
-    "Invite actions will become real API mutations after the backend team module is connected.",
+  searchError: "The search request could not be completed.",
+  inviteAction: "Send invite",
+  inviteSuccess: "Invitation sent successfully.",
+  removeSuccess: "Team member status updated successfully.",
+  reinviteSuccess: "Invitation was sent again.",
   acceptedTitle: "Accepted roster",
   pendingTitle: "Pending invitations",
   archiveTitle: "Archived states",
-  noAccepted: "Only the branch owner is attached right now.",
+  noAccepted: "Only the branch owner is accepted right now.",
   noPending: "No pending invitations yet.",
-  noArchive: "Rejected or removed invites will appear here.",
+  noArchive: "Rejected or removed invitations will appear here.",
   ownerRole: "Owner",
   memberRole: "Member",
   statusAccepted: "Accepted",
   statusPending: "Pending",
   statusRejected: "Rejected",
   statusRemoved: "Removed",
-  previewAccept: "Preview accept",
-  previewReject: "Preview reject",
-  cancelInvite: "Cancel",
-  removeMember: "Remove",
-  restoreInvite: "Restore",
+  cancelInvite: "Cancel invite",
+  removeMember: "Remove member",
+  restoreInvite: "Restore invite",
   reinviteMember: "Re-invite",
+  liveApiBadge: "Live API",
+  workspaceRefreshError: "The latest team state could not be loaded.",
   futureTitle: "Service module will attach here next",
   futureDescription:
-    "This page does not create services yet. It only prepares the people and branch boundaries that the future service domain will depend on.",
+    "This page still does not create services. It prepares the people and branch boundaries that the future service ownership model will depend on.",
   futureListOne: "Individual services will stay outside the brand model and attach directly to an address.",
   futureListTwo: "Brand services will attach to a branch, not directly to the brand shell.",
   futureListThree: "Team services will belong to accepted branch members once the service module is launched.",
@@ -172,11 +180,11 @@ const EN_COPY: WorkspaceCopy = {
 const TR_COPY: WorkspaceCopy = {
   ...EN_COPY,
   badge: "Şube ekip alanı",
-  title: "Hizmetler canlıya çıkmadan önce ekibi kur",
+  title: "Servisler açılmadan önce şube kadrosunu kur",
   description:
-    "Her şube sonunda yalnızca hizmet değil, hizmet sahibi de barındıracak. Bu alanı, servis modülü gelmeden önce her şubede kimlerin yer alacağını netleştirmek için kullan.",
-  browserState:
-    "Backend endpoint'leri hazır olana kadar davet durumları yalnızca bu tarayıcıda saklanır; amaç planlama ve UI doğrulamasıdır.",
+    "Her şubenin backend içinde artık kendi team kabuğu var. Bu alanı, gelecekte servis sahipliğinin bağlanacağı USO üyelerini doğru şubelere yerleştirmek için kullan.",
+  liveState:
+    "Bu ekran artık gerçek backend team durumunu gösterir. Bekleyen davetler, davet edilen USO'nun Bildirimler ekranında aksiyon alabilir.",
   noBranchesTitle: "Bu markada henüz şube yok",
   noBranchesDescription:
     "Ekip katmanı şubelerin üstüne oturur. Önce en az bir şube ekleyin, sonra buraya dönüp ekip yapısını kurun.",
@@ -185,7 +193,7 @@ const TR_COPY: WorkspaceCopy = {
   openBrand: "Marka profilini aç",
   branchesRailTitle: "Şube alanları",
   branchesRailLead:
-    "Takımlar doğrudan markaya değil, şubelere bağlanır. Bir şube seç ve ileride orada hizmet yayınlayacak kişileri hazırla.",
+    "Takımlar doğrudan markaya değil, şubelere bağlanır. Bir şube seç ve ileride orada servis yayınlayacak kabul edilmiş USO üyelerini netleştir.",
   branchCountLabel: "Şube",
   branchMemberCount: "kabul edildi",
   branchPendingCount: "beklemede",
@@ -193,8 +201,8 @@ const TR_COPY: WorkspaceCopy = {
   pendingMetric: "Bekleyen davetler",
   laneMetric: "Gelecek servis kanalları",
   laneMetricHint:
-    "Kabul edilen her USO ileride bu şube içinde birden fazla hizmet yayınlayabilir.",
-  branchLeadLabel: "Varsayılan lider",
+    "Kabul edilen her USO ileride aynı şube içinde birden fazla servisin sahibi olabilir.",
+  branchLeadLabel: "Şube sahibi",
   availabilityLabel: "Çalışma durumu",
   addressLabel: "Adres",
   contactLabel: "İletişim",
@@ -202,22 +210,24 @@ const TR_COPY: WorkspaceCopy = {
   allDay: "7/24",
   inviteTitle: "Bu şubeye bir USO davet et",
   inviteDescription:
-    "Mevcut service owner'ları ara ve şube takımını şimdiden hazırla. Sahiplik, bildirim ve kabul/red akışı backend bağlandığında gerçek hale gelecek.",
+    "Mevcut service owner'ları ara ve gerçek team daveti gönder. Kullanıcı bu daveti Bildirimler ekranında görüp kabul ya da red verebilir.",
   inviteSearchLabel: "Bir service owner bul",
   inviteSearchDescription:
     "İsim, email veya telefonla ara. Bu şubede zaten kabul edilmiş ya da bekleyen kullanıcılar sonuçlarda gizlenir.",
   inviteSearchPlaceholder: "İsim, email veya telefon ara",
   searchIdle: "Service owner aramak için yazmaya başlayın.",
   searchLoading: "Service owner aranıyor...",
+  searchReady: "Gerçek bir davet göndermek için bir service owner seçin.",
   searchEmpty: "Bu şube için eşleşen bir service owner bulunamadı.",
-  inviteAction: "Takım planına ekle",
-  inviteSuccess: "Service owner yerel takım planına eklendi.",
-  inviteReadonly:
-    "Davet işlemleri backend team modülü bağlandıktan sonra gerçek API isteğine dönüşecek.",
+  searchError: "Arama isteği tamamlanamadı.",
+  inviteAction: "Davet gönder",
+  inviteSuccess: "Davet başarıyla gönderildi.",
+  removeSuccess: "Takım üyesi durumu güncellendi.",
+  reinviteSuccess: "Davet yeniden gönderildi.",
   acceptedTitle: "Kabul edilen kadro",
   pendingTitle: "Bekleyen davetler",
   archiveTitle: "Arşiv durumları",
-  noAccepted: "Şu an yalnızca şube sahibi bağlı.",
+  noAccepted: "Şu an yalnızca şube sahibi kabul edilmiş durumda.",
   noPending: "Henüz bekleyen davet yok.",
   noArchive: "Reddedilen veya kaldırılan davetler burada görünür.",
   ownerRole: "Sahip",
@@ -226,31 +236,31 @@ const TR_COPY: WorkspaceCopy = {
   statusPending: "Beklemede",
   statusRejected: "Reddedildi",
   statusRemoved: "Kaldırıldı",
-  previewAccept: "Kabulü önizle",
-  previewReject: "Reddi önizle",
-  cancelInvite: "İptal et",
-  removeMember: "Kaldır",
-  restoreInvite: "Geri al",
+  cancelInvite: "Daveti iptal et",
+  removeMember: "Üyeyi kaldır",
+  restoreInvite: "Daveti geri aç",
   reinviteMember: "Tekrar davet et",
+  liveApiBadge: "Canlı API",
+  workspaceRefreshError: "Güncel takım durumu yüklenemedi.",
   futureTitle: "Servis modülü bir sonraki adımda buraya bağlanacak",
   futureDescription:
-    "Bu sayfa henüz servis oluşturmaz. Sadece gelecekteki service domain'inin dayanacağı kişi ve şube sınırlarını hazırlar.",
+    "Bu sayfa hâlâ servis oluşturmaz. Sadece gelecekteki service ownership yapısının dayanacağı kişi ve şube sınırlarını hazırlar.",
   futureListOne:
-    "Bireysel hizmetler brand dışında kalacak ve doğrudan adrese bağlanacak.",
+    "Bireysel servisler brand dışında kalacak ve doğrudan bir adrese bağlanacak.",
   futureListTwo:
-    "Brand altındaki hizmetler doğrudan brand'e değil, bir şubeye bağlanacak.",
+    "Brand servisleri doğrudan brand kabuğuna değil, bir şubeye bağlanacak.",
   futureListThree:
-    "Team hizmetleri, servis modülü açıldığında kabul edilmiş şube üyelerine ait olacak.",
+    "Team servisleri, servis modülü açıldığında kabul edilmiş şube üyelerine ait olacak.",
 };
 
 const AZ_COPY: WorkspaceCopy = {
   ...EN_COPY,
   badge: "Filial komanda sahəsi",
-  title: "Servislər açılmadan əvvəl komandanı qur",
+  title: "Servislər açılmadan əvvəl filial heyətini qur",
   description:
-    "Hər filial gələcəkdə yalnız service deyil, service owner-ları da daşıyacaq. Bu sahəni service modulu gəlməzdən əvvəl hansı şəxslərin hansı filialda olacağını hazırlamaq üçün istifadə et.",
-  browserState:
-    "Backend endpoint-ləri hazır olana qədər dəvət vəziyyətləri yalnız bu brauzerdə saxlanılır; məqsəd planlama və UI doğrulamasıdır.",
+    "Hər filial üçün backend daxilində artıq real team quruluşu var. Bu sahəni, gələcəkdə service sahibliyinin bağlanacağı USO üzvlərini doğru filiallara toplamaq üçün istifadə et.",
+  liveState:
+    "Bu ekran artıq backenddəki real team vəziyyətini göstərir. Gözləyən dəvətlər dəvət olunan USO-nun Bildirişlər səhifəsində cavablandırılır.",
   noBranchesTitle: "Bu brenddə hələ filial yoxdur",
   noBranchesDescription:
     "Komanda qatını filialların üzərinə qururuq. Əvvəl ən azı bir filial əlavə et, sonra bura qayıdıb komanda quruluşunu hazırla.",
@@ -259,7 +269,7 @@ const AZ_COPY: WorkspaceCopy = {
   openBrand: "Brend profilini aç",
   branchesRailTitle: "Filial xətləri",
   branchesRailLead:
-    "Komandalar birbaşa brendə yox, filiala bağlanır. Bir filial seç və gələcəkdə orada service yaradacaq insanları hazırla.",
+    "Komandalar birbaşa brendə yox, filiala bağlanır. Bir filial seç və gələcəkdə orada service yaradacaq qəbul olunmuş USO üzvlərini müəyyən et.",
   branchCountLabel: "Filial",
   branchMemberCount: "qəbul edilib",
   branchPendingCount: "gözləyir",
@@ -267,8 +277,8 @@ const AZ_COPY: WorkspaceCopy = {
   pendingMetric: "Gözləyən dəvətlər",
   laneMetric: "Gələcək service xətləri",
   laneMetricHint:
-    "Qəbul olunan hər USO sonradan bu filial daxilində bir neçə service yarada bilər.",
-  branchLeadLabel: "Varsayılan lider",
+    "Qəbul olunan hər USO sonradan eyni filial daxilində bir neçə service sahibi ola bilər.",
+  branchLeadLabel: "Filial sahibi",
   availabilityLabel: "İş rejimi",
   addressLabel: "Ünvan",
   contactLabel: "Əlaqə",
@@ -276,43 +286,45 @@ const AZ_COPY: WorkspaceCopy = {
   allDay: "24/7",
   inviteTitle: "Bu filiala bir USO dəvət et",
   inviteDescription:
-    "Mövcud service owner-ları axtar və filial komandasını indidən qur. Sahibliyin, bildirişin və qəbul/rədd axınının real hissəsi backend bağlananda tamamlanacaq.",
+    "Mövcud service owner-ları axtar və real team dəvəti göndər. İstifadəçi bu dəvəti Bildirişlər səhifəsində qəbul və ya rədd edə bilər.",
   inviteSearchLabel: "Bir service owner tap",
   inviteSearchDescription:
-    "Ad, email və ya telefon ilə axtar. Bu filialda artıq qəbul olunmuş və ya gözləyən istifadəçilər nəticələrdə gizlədilir.",
+    "Ad, email və ya telefon ilə axtar. Bu filialda artıq qəbul olunmuş və ya gözləyən istifadəçilər nəticələrdə gizlənir.",
   inviteSearchPlaceholder: "Ad, email və ya telefon axtar",
   searchIdle: "Service owner axtarmaq üçün yazmağa başla.",
   searchLoading: "Service owner axtarılır...",
+  searchReady: "Real dəvət göndərmək üçün bir service owner seç.",
   searchEmpty: "Bu filial üçün uyğun service owner tapılmadı.",
-  inviteAction: "Komanda planına əlavə et",
-  inviteSuccess: "Service owner lokal komanda planına əlavə olundu.",
-  inviteReadonly:
-    "Dəvət əməliyyatları backend team modulu bağlandıqdan sonra real API sorğusuna çevriləcək.",
+  searchError: "Axtarış sorğusu tamamlanmadı.",
+  inviteAction: "Dəvət göndər",
+  inviteSuccess: "Dəvət uğurla göndərildi.",
+  removeSuccess: "Komanda üzvünün vəziyyəti yeniləndi.",
+  reinviteSuccess: "Dəvət yenidən göndərildi.",
   acceptedTitle: "Qəbul olunmuş heyət",
   pendingTitle: "Gözləyən dəvətlər",
   archiveTitle: "Arxiv vəziyyətləri",
-  noAccepted: "Hazırda yalnız filial sahibi qoşulub.",
+  noAccepted: "Hazırda yalnız filial sahibi qəbul olunub.",
   noPending: "Hələ gözləyən dəvət yoxdur.",
-  noArchive: "Rədd olunan və ya silinən dəvətlər burada görünəcək.",
+  noArchive: "Rədd olunan və ya silinən dəvətlər burada görünür.",
   ownerRole: "Sahib",
   memberRole: "Üzv",
   statusAccepted: "Qəbul edildi",
   statusPending: "Gözləyir",
   statusRejected: "Rədd edildi",
   statusRemoved: "Silindi",
-  previewAccept: "Qəbulu önizlə",
-  previewReject: "Rəddi önizlə",
-  cancelInvite: "Ləğv et",
-  removeMember: "Sil",
-  restoreInvite: "Geri qaytar",
+  cancelInvite: "Dəvəti ləğv et",
+  removeMember: "Üzvü sil",
+  restoreInvite: "Dəvəti bərpa et",
   reinviteMember: "Yenidən dəvət et",
+  liveApiBadge: "Canlı API",
+  workspaceRefreshError: "Aktual komanda vəziyyəti yüklənmədi.",
   futureTitle: "Service modulu növbəti addımda bura bağlanacaq",
   futureDescription:
-    "Bu səhifə hələ service yaratmır. Sadəcə gələcək service domain-in əsaslanacağı insanlar və filial sərhədlərini hazırlayır.",
+    "Bu səhifə hələ service yaratmır. Sadəcə gələcək service ownership məntiqinin əsaslanacağı insanları və filial sərhədlərini hazırlayır.",
   futureListOne:
     "Fərdi servicelər brenddən kənarda qalacaq və birbaşa address-ə bağlanacaq.",
   futureListTwo:
-    "Brend altındakı servicelər birbaşa brendə yox, konkret filiala bağlanacaq.",
+    "Brend serviceləri birbaşa brend qabığına yox, konkret filiala bağlanacaq.",
   futureListThree:
     "Team serviceləri service modulu açıldıqda qəbul olunmuş filial üzvlərinə məxsus olacaq.",
 };
@@ -333,69 +345,97 @@ function formatName(firstName: string, lastName: string) {
   return `${firstName} ${lastName}`.trim();
 }
 
-function formatAvailability(
-  branch: NonNullable<Brand["branches"]>[number],
-  copy: WorkspaceCopy,
-) {
-  if (branch.is_24_7) {
+function formatAvailability(branch: TeamWorkspaceBranch, copy: WorkspaceCopy) {
+  if (branch.availability.is_24_7) {
     return copy.allDay;
   }
 
-  if (branch.opening && branch.closing) {
-    return `${branch.opening} - ${branch.closing}`;
+  if (branch.availability.opening && branch.availability.closing) {
+    return `${branch.availability.opening} - ${branch.availability.closing}`;
   }
 
   return "—";
 }
 
-function formatAddress(branch: NonNullable<Brand["branches"]>[number]) {
-  return [branch.address1, branch.address2].filter(Boolean).join(", ");
+function formatAddress(branch: TeamWorkspaceBranch) {
+  return [branch.address.address1, branch.address.address2].filter(Boolean).join(", ");
 }
 
 function getStatusLabel(status: TeamMemberStatus, copy: WorkspaceCopy) {
   switch (status) {
-    case "accepted":
+    case "ACCEPTED":
       return copy.statusAccepted;
-    case "pending":
+    case "PENDING":
       return copy.statusPending;
-    case "rejected":
+    case "REJECTED":
       return copy.statusRejected;
-    case "removed":
+    case "REMOVED":
       return copy.statusRemoved;
     default:
       return status;
   }
 }
 
-function getInitials(member: Pick<TeamMemberRecord, "first_name" | "last_name">) {
+function getInitials(
+  member: Pick<TeamWorkspaceMember, "first_name" | "last_name">,
+) {
   return `${member.first_name[0] ?? ""}${member.last_name[0] ?? ""}`.toUpperCase();
 }
 
-function sortMembers(members: TeamMemberRecord[]) {
+function sortMembers(members: TeamWorkspaceMember[]) {
   return [...members].sort((left, right) => {
     if (left.role !== right.role) {
-      return left.role === "owner" ? -1 : 1;
+      return left.role === "OWNER" ? -1 : 1;
     }
 
-    return left.first_name.localeCompare(right.first_name);
+    const leftName = formatName(left.first_name, left.last_name);
+    const rightName = formatName(right.first_name, right.last_name);
+
+    return leftName.localeCompare(rightName);
   });
+}
+
+function flattenBranchMembers(branch: TeamWorkspaceBranch) {
+  return [
+    ...branch.members.accepted,
+    ...branch.members.pending,
+    ...branch.members.rejected,
+    ...branch.members.removed,
+  ];
+}
+
+function getApiErrorMessage(
+  error: unknown,
+  fallback: string,
+  translations: Record<string, string>,
+) {
+  if (isAxiosError(error)) {
+    const translatedMessage = translateBackendErrorMessage(
+      error.response?.data?.message,
+      translations,
+    );
+
+    if (translatedMessage) {
+      return translatedMessage;
+    }
+  }
+
+  return fallback;
 }
 
 export function BrandTeamWorkspace({
   brand,
   currentUser,
+  initialWorkspace,
 }: BrandTeamWorkspaceProps) {
   const router = useRouter();
-  const { locale } = useLocale();
+  const { locale, messages } = useLocale();
   const copy = useMemo(() => getCopy(locale), [locale]);
   const session = useAppSelector(selectAuthSession);
   const accessToken = session.accessToken;
-  const branches = useMemo(() => brand.branches ?? [], [brand.branches]);
-  const [workspace, setWorkspace] = useState<BrandTeamWorkspaceState>(() =>
-    readBrandTeamWorkspace(brand, currentUser),
-  );
+  const [workspace, setWorkspace] = useState(initialWorkspace);
   const [activeBranchId, setActiveBranchId] = useState<string>(
-    branches[0]?.id ?? "",
+    initialWorkspace.branches[0]?.branch_id ?? "",
   );
   const [searchQuery, setSearchQuery] = useState("");
   const deferredQuery = useDeferredValue(searchQuery.trim());
@@ -407,45 +447,67 @@ export function BrandTeamWorkspace({
     tone: "success" | "error";
     message: string;
   } | null>(null);
+  const [inviteUserId, setInviteUserId] = useState<string | null>(null);
+  const [memberActionId, setMemberActionId] = useState<string | null>(null);
+
+  const branches = useMemo(() => workspace.branches ?? [], [workspace.branches]);
 
   useEffect(() => {
-    writeBrandTeamWorkspace(brand.id, workspace);
-  }, [brand.id, workspace]);
+    if (!branches.some((branchItem) => branchItem.branch_id === activeBranchId)) {
+      setActiveBranchId(branches[0]?.branch_id ?? "");
+    }
+  }, [activeBranchId, branches]);
 
   const activeBranch = useMemo(
-    () => branches.find((branch) => branch.id === activeBranchId) ?? null,
+    () =>
+      branches.find((branchItem) => branchItem.branch_id === activeBranchId) ?? null,
     [activeBranchId, branches],
   );
 
+  const brandBranchMap = useMemo(
+    () => new Map((brand.branches ?? []).map((branchItem) => [branchItem.id, branchItem])),
+    [brand.branches],
+  );
+
+  const activeBrandBranch = activeBranch
+    ? (brandBranchMap.get(activeBranch.branch_id) ?? null)
+    : null;
+
   const activeBranchMembers = useMemo(
-    () =>
-      sortMembers(workspace.branches[activeBranchId]?.members ?? []),
-    [activeBranchId, workspace.branches],
+    () => (activeBranch ? sortMembers(flattenBranchMembers(activeBranch)) : []),
+    [activeBranch],
   );
 
   const acceptedMembers = useMemo(
-    () =>
-      activeBranchMembers.filter((member) => member.status === "accepted"),
+    () => activeBranchMembers.filter((member) => member.status === "ACCEPTED"),
     [activeBranchMembers],
   );
 
   const pendingMembers = useMemo(
-    () =>
-      activeBranchMembers.filter((member) => member.status === "pending"),
+    () => activeBranchMembers.filter((member) => member.status === "PENDING"),
     [activeBranchMembers],
   );
 
   const archivedMembers = useMemo(
     () =>
       activeBranchMembers.filter(
-        (member) =>
-          member.status === "rejected" || member.status === "removed",
+        (member) => member.status === "REJECTED" || member.status === "REMOVED",
       ),
     [activeBranchMembers],
   );
 
+  const globalMetrics = useMemo(() => {
+    return branches.reduce(
+      (summary, branchItem) => ({
+        accepted: summary.accepted + branchItem.members.accepted.length,
+        pending: summary.pending + branchItem.members.pending.length,
+      }),
+      { accepted: 0, pending: 0 },
+    );
+  }, [branches]);
+
   useEffect(() => {
-    if (!accessToken || deferredQuery.length < 2 || !activeBranchId) {
+    if (!accessToken || deferredQuery.length < 2 || !activeBranch) {
       return;
     }
 
@@ -453,11 +515,11 @@ export function BrandTeamWorkspace({
 
     const timeoutId = window.setTimeout(async () => {
       try {
-        const membersByUserId = new Set(
-          activeBranchMembers
+        const memberIds = new Set(
+          flattenBranchMembers(activeBranch)
             .filter(
               (member) =>
-                member.status === "accepted" || member.status === "pending",
+                member.status === "ACCEPTED" || member.status === "PENDING",
             )
             .map((member) => member.user_id),
         );
@@ -468,14 +530,14 @@ export function BrandTeamWorkspace({
         }
 
         const filtered = results.filter(
-          (user) => !membersByUserId.has(user.id),
+          (user) => !memberIds.has(user.id) && user.id !== currentUser.id,
         );
 
         startTransition(() => {
           setSearchResults(filtered);
           setSearchState("done");
         });
-      } catch {
+      } catch (error) {
         if (!active) {
           return;
         }
@@ -484,7 +546,11 @@ export function BrandTeamWorkspace({
         setSearchState("error");
         setFeedback({
           tone: "error",
-          message: copy.inviteReadonly,
+          message: getApiErrorMessage(
+            error,
+            copy.searchError,
+            messages.backendErrors,
+          ),
         });
       }
     }, 280);
@@ -493,98 +559,133 @@ export function BrandTeamWorkspace({
       active = false;
       window.clearTimeout(timeoutId);
     };
-  }, [accessToken, activeBranchId, activeBranchMembers, copy, deferredQuery]);
+  }, [accessToken, activeBranch, copy.searchError, currentUser.id, deferredQuery, messages.backendErrors]);
 
-  function updateBranchMembers(
-    branchId: string,
-    updater: (members: TeamMemberRecord[]) => TeamMemberRecord[],
-  ) {
-    setWorkspace((current) => {
-      const branchTeam = current.branches[branchId] ?? {
-        branch_id: branchId,
-        members: [],
-      };
+  async function refreshWorkspace() {
+    if (!accessToken) {
+      throw new Error(copy.workspaceRefreshError);
+    }
 
-      return {
-        ...current,
-        updated_at: new Date().toISOString(),
-        branches: {
-          ...current.branches,
-          [branchId]: {
-            branch_id: branchId,
-            members: updater(branchTeam.members),
-          },
-        },
-      };
-    });
+    const nextWorkspace = await fetchBrandTeamWorkspace(brand.id, accessToken);
+    setWorkspace(nextWorkspace);
+    return nextWorkspace;
   }
 
-  function handleInvite(user: UserSearchResult) {
-    if (!activeBranchId) {
+  async function handleInvite(user: UserSearchResult) {
+    if (!accessToken || !activeBranch) {
+      setFeedback({
+        tone: "error",
+        message: copy.workspaceRefreshError,
+      });
       return;
     }
 
-    updateBranchMembers(activeBranchId, (members) => {
-      const existing = members.find((member) => member.user_id === user.id);
+    setInviteUserId(user.id);
+    setFeedback(null);
 
-      if (existing) {
-        return members.map((member) =>
-          member.user_id === user.id
-            ? {
-                ...member,
-                status: "pending",
-                invited_at: new Date().toISOString(),
-              }
-            : member,
-        );
-      }
-
-      return [
-        ...members,
-        {
-          id:
-            globalThis.crypto?.randomUUID?.() ??
-            `${activeBranchId}:${user.id}:${Date.now()}`,
-          user_id: user.id,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          email: user.email,
-          avatar_url: user.avatar_url ?? null,
-          role: "member",
-          status: "pending",
-          invited_at: new Date().toISOString(),
-          invited_by_user_id: currentUser.id,
-        },
-      ];
-    });
-
-    setSearchQuery("");
-    setSearchResults([]);
-    setSearchState("idle");
-    setFeedback({
-      tone: "success",
-      message: copy.inviteSuccess,
-    });
+    try {
+      await inviteBranchTeamMember(
+        brand.id,
+        activeBranch.branch_id,
+        user.id,
+        accessToken,
+      );
+      await refreshWorkspace();
+      setSearchQuery("");
+      setSearchResults([]);
+      setSearchState("idle");
+      setFeedback({
+        tone: "success",
+        message: copy.inviteSuccess,
+      });
+    } catch (error) {
+      setFeedback({
+        tone: "error",
+        message: getApiErrorMessage(
+          error,
+          copy.workspaceRefreshError,
+          messages.backendErrors,
+        ),
+      });
+    } finally {
+      setInviteUserId(null);
+    }
   }
 
-  function handleMemberStatusChange(
-    memberId: string,
-    nextStatus: TeamMemberStatus,
-  ) {
-    if (!activeBranchId) {
+  async function handleRemove(memberId: string) {
+    if (!accessToken || !activeBranch) {
+      setFeedback({
+        tone: "error",
+        message: copy.workspaceRefreshError,
+      });
       return;
     }
 
-    updateBranchMembers(activeBranchId, (members) =>
-      members.map((member) =>
-        member.id === memberId
-          ? {
-              ...member,
-              status: nextStatus,
-            }
-          : member,
-      ),
-    );
+    setMemberActionId(memberId);
+    setFeedback(null);
+
+    try {
+      await removeBranchTeamMember(
+        brand.id,
+        activeBranch.branch_id,
+        memberId,
+        accessToken,
+      );
+      await refreshWorkspace();
+      setFeedback({
+        tone: "success",
+        message: copy.removeSuccess,
+      });
+    } catch (error) {
+      setFeedback({
+        tone: "error",
+        message: getApiErrorMessage(
+          error,
+          copy.workspaceRefreshError,
+          messages.backendErrors,
+        ),
+      });
+    } finally {
+      setMemberActionId(null);
+    }
+  }
+
+  async function handleReinvite(member: TeamWorkspaceMember) {
+    if (!accessToken || !activeBranch) {
+      setFeedback({
+        tone: "error",
+        message: copy.workspaceRefreshError,
+      });
+      return;
+    }
+
+    setMemberActionId(member.membership_id);
+    setFeedback(null);
+
+    try {
+      await inviteBranchTeamMember(
+        brand.id,
+        activeBranch.branch_id,
+        member.user_id,
+        accessToken,
+      );
+      await refreshWorkspace();
+      setFeedback({
+        tone: "success",
+        message: copy.reinviteSuccess,
+      });
+    } catch (error) {
+      setFeedback({
+        tone: "error",
+        message: getApiErrorMessage(
+          error,
+          copy.workspaceRefreshError,
+          messages.backendErrors,
+        ),
+      });
+    } finally {
+      setMemberActionId(null);
+    }
   }
 
   if (branches.length === 0) {
@@ -651,15 +752,15 @@ export function BrandTeamWorkspace({
         </article>
         <article className={styles.metaCard}>
           <span className={styles.metaLabel}>{copy.acceptedMetric}</span>
-          <strong className={styles.metaValue}>{acceptedMembers.length}</strong>
+          <strong className={styles.metaValue}>{globalMetrics.accepted}</strong>
         </article>
         <article className={styles.metaCard}>
           <span className={styles.metaLabel}>{copy.pendingMetric}</span>
-          <strong className={styles.metaValue}>{pendingMembers.length}</strong>
+          <strong className={styles.metaValue}>{globalMetrics.pending}</strong>
         </article>
         <article className={styles.metaCard}>
           <span className={styles.metaLabel}>{copy.laneMetric}</span>
-          <strong className={styles.metaValue}>{acceptedMembers.length}</strong>
+          <strong className={styles.metaValue}>{globalMetrics.accepted}</strong>
           <p className={styles.metaHint}>{copy.laneMetricHint}</p>
         </article>
       </section>
@@ -672,25 +773,19 @@ export function BrandTeamWorkspace({
           </div>
 
           <div className={styles.branchList}>
-            {branches.map((branch) => {
-              const branchMembers =
-                workspace.branches[branch.id]?.members ?? [];
-              const acceptedCount = branchMembers.filter(
-                (member) => member.status === "accepted",
-              ).length;
-              const pendingCount = branchMembers.filter(
-                (member) => member.status === "pending",
-              ).length;
+            {branches.map((branchItem) => {
+              const acceptedCount = branchItem.members.accepted.length;
+              const pendingCount = branchItem.members.pending.length;
 
               return (
                 <button
-                  key={branch.id}
+                  key={branchItem.branch_id}
                   type="button"
                   className={`${styles.branchButton} ${
-                    branch.id === activeBranchId ? styles.branchButtonActive : ""
+                    branchItem.branch_id === activeBranchId ? styles.branchButtonActive : ""
                   }`}
                   onClick={() => {
-                    setActiveBranchId(branch.id);
+                    setActiveBranchId(branchItem.branch_id);
                     setSearchQuery("");
                     setSearchResults([]);
                     setSearchState("idle");
@@ -698,7 +793,7 @@ export function BrandTeamWorkspace({
                   }}
                 >
                   <div className={styles.branchButtonTop}>
-                    <span className={styles.branchName}>{branch.name}</span>
+                    <span className={styles.branchName}>{branchItem.branch_name}</span>
                     <Badge
                       variant="outline"
                       icon="groups"
@@ -707,7 +802,7 @@ export function BrandTeamWorkspace({
                       {acceptedCount}
                     </Badge>
                   </div>
-                  <p className={styles.branchAddress}>{formatAddress(branch)}</p>
+                  <p className={styles.branchAddress}>{formatAddress(branchItem)}</p>
                   <div className={styles.branchStats}>
                     <span>{acceptedCount} {copy.branchMemberCount}</span>
                     <span>{pendingCount} {copy.branchPendingCount}</span>
@@ -724,7 +819,7 @@ export function BrandTeamWorkspace({
               <section className={styles.branchHero}>
                 <div className={styles.branchHeroHeader}>
                   <div>
-                    <h2 className={styles.branchHeroTitle}>{activeBranch.name}</h2>
+                    <h2 className={styles.branchHeroTitle}>{activeBranch.branch_name}</h2>
                     <p className={styles.branchHeroLead}>
                       {formatAddress(activeBranch)}
                     </p>
@@ -750,7 +845,7 @@ export function BrandTeamWorkspace({
                   <div className={styles.branchFact}>
                     <span className={styles.branchFactLabel}>{copy.contactLabel}</span>
                     <strong className={styles.branchFactValue}>
-                      {activeBranch.phone || activeBranch.email || copy.noContact}
+                      {activeBrandBranch?.phone || activeBrandBranch?.email || copy.noContact}
                     </strong>
                   </div>
                 </div>
@@ -758,7 +853,7 @@ export function BrandTeamWorkspace({
 
               <section className={styles.banner}>
                 <Icon icon="lan" size={16} color="current" />
-                <p>{copy.browserState}</p>
+                <p>{copy.liveState}</p>
               </section>
 
               <section className={styles.section}>
@@ -767,8 +862,8 @@ export function BrandTeamWorkspace({
                     <h3 className={styles.sectionTitle}>{copy.inviteTitle}</h3>
                     <p className={styles.sectionLead}>{copy.inviteDescription}</p>
                   </div>
-                  <Badge variant="outline" icon="memory">
-                    UI sandbox
+                  <Badge variant="outline" icon="lan">
+                    {copy.liveApiBadge}
                   </Badge>
                 </div>
 
@@ -810,56 +905,63 @@ export function BrandTeamWorkspace({
                   <div className={styles.searchState}>
                     {searchState === "loading"
                       ? copy.searchLoading
-                      : deferredQuery.length < 2
-                        ? copy.searchIdle
-                        : searchResults.length === 0
-                          ? copy.searchEmpty
-                          : copy.inviteReadonly}
+                      : searchState === "error"
+                        ? copy.searchError
+                        : deferredQuery.length < 2
+                          ? copy.searchIdle
+                          : searchResults.length === 0
+                            ? copy.searchEmpty
+                            : copy.searchReady}
                   </div>
 
                   {searchResults.length > 0 ? (
                     <div className={styles.searchList}>
-                      {searchResults.map((result) => (
-                        <article key={result.id} className={styles.searchCard}>
-                          <div className={styles.memberIdentity}>
-                            <div
-                              className={styles.avatar}
-                              style={
-                                proxyMediaUrl(result.avatar_url)
-                                  ? {
-                                      backgroundImage: `url(${proxyMediaUrl(result.avatar_url)})`,
-                                    }
-                                  : undefined
-                              }
-                              data-has-image={proxyMediaUrl(result.avatar_url) ? "true" : "false"}
-                            >
-                              {!proxyMediaUrl(result.avatar_url)
-                                ? getInitials({
-                                    first_name: result.first_name,
-                                    last_name: result.last_name,
-                                  } as TeamMemberRecord)
-                                : null}
-                            </div>
-                            <div className={styles.memberMeta}>
-                              <strong className={styles.memberName}>
-                                {formatName(result.first_name, result.last_name)}
-                              </strong>
-                              <span className={styles.memberEmail}>
-                                {result.email}
-                              </span>
-                            </div>
-                          </div>
+                      {searchResults.map((result) => {
+                        const avatarUrl = proxyMediaUrl(result.avatar_url);
 
-                          <Button
-                            variant="primary"
-                            size="small"
-                            icon="person_add"
-                            onClick={() => handleInvite(result)}
-                          >
-                            {copy.inviteAction}
-                          </Button>
-                        </article>
-                      ))}
+                        return (
+                          <article key={result.id} className={styles.searchCard}>
+                            <div className={styles.memberIdentity}>
+                              <div
+                                className={styles.avatar}
+                                style={
+                                  avatarUrl
+                                    ? {
+                                        backgroundImage: `url(${avatarUrl})`,
+                                      }
+                                    : undefined
+                                }
+                                data-has-image={avatarUrl ? "true" : "false"}
+                              >
+                                {!avatarUrl
+                                  ? getInitials({
+                                      first_name: result.first_name,
+                                      last_name: result.last_name,
+                                    } as TeamWorkspaceMember)
+                                  : null}
+                              </div>
+                              <div className={styles.memberMeta}>
+                                <strong className={styles.memberName}>
+                                  {formatName(result.first_name, result.last_name)}
+                                </strong>
+                                <span className={styles.memberEmail}>
+                                  {result.email}
+                                </span>
+                              </div>
+                            </div>
+
+                            <Button
+                              variant="primary"
+                              size="small"
+                              icon="person_add"
+                              isLoading={inviteUserId === result.id}
+                              onClick={() => handleInvite(result)}
+                            >
+                              {copy.inviteAction}
+                            </Button>
+                          </article>
+                        );
+                      })}
                     </div>
                   ) : null}
                 </div>
@@ -874,63 +976,64 @@ export function BrandTeamWorkspace({
                   <div className={styles.emptyCard}>{copy.noAccepted}</div>
                 ) : (
                   <div className={styles.memberGrid}>
-                    {acceptedMembers.map((member) => (
-                      <article key={member.id} className={styles.memberCard}>
-                        <div className={styles.memberHeader}>
-                          <div className={styles.memberIdentity}>
-                            <div
-                              className={styles.avatar}
-                              style={
-                                proxyMediaUrl(member.avatar_url)
-                                  ? {
-                                      backgroundImage: `url(${proxyMediaUrl(member.avatar_url)})`,
-                                    }
-                                  : undefined
-                              }
-                              data-has-image={proxyMediaUrl(member.avatar_url) ? "true" : "false"}
-                            >
-                              {!proxyMediaUrl(member.avatar_url)
-                                ? getInitials(member)
-                                : null}
+                    {acceptedMembers.map((member) => {
+                      const avatarUrl = proxyMediaUrl(member.avatar_url);
+
+                      return (
+                        <article key={member.membership_id} className={styles.memberCard}>
+                          <div className={styles.memberHeader}>
+                            <div className={styles.memberIdentity}>
+                              <div
+                                className={styles.avatar}
+                                style={
+                                  avatarUrl
+                                    ? {
+                                        backgroundImage: `url(${avatarUrl})`,
+                                      }
+                                    : undefined
+                                }
+                                data-has-image={avatarUrl ? "true" : "false"}
+                              >
+                                {!avatarUrl ? getInitials(member) : null}
+                              </div>
+                              <div className={styles.memberMeta}>
+                                <strong className={styles.memberName}>
+                                  {formatName(member.first_name, member.last_name)}
+                                </strong>
+                                <span className={styles.memberEmail}>
+                                  {member.email}
+                                </span>
+                              </div>
                             </div>
-                            <div className={styles.memberMeta}>
-                              <strong className={styles.memberName}>
-                                {formatName(member.first_name, member.last_name)}
-                              </strong>
-                              <span className={styles.memberEmail}>
-                                {member.email}
-                              </span>
+
+                            <div className={styles.memberPills}>
+                              <Badge variant="outline">
+                                {member.role === "OWNER"
+                                  ? copy.ownerRole
+                                  : copy.memberRole}
+                              </Badge>
+                              <Badge variant="outline">
+                                {copy.statusAccepted}
+                              </Badge>
                             </div>
                           </div>
 
-                          <div className={styles.memberPills}>
-                            <Badge variant="outline">
-                              {member.role === "owner"
-                                ? copy.ownerRole
-                                : copy.memberRole}
-                            </Badge>
-                            <Badge variant="outline">
-                              {copy.statusAccepted}
-                            </Badge>
-                          </div>
-                        </div>
-
-                        {member.role !== "owner" ? (
-                          <div className={styles.memberActions}>
-                            <Button
-                              variant="outline"
-                              size="small"
-                              icon="person_remove"
-                              onClick={() =>
-                                handleMemberStatusChange(member.id, "removed")
-                              }
-                            >
-                              {copy.removeMember}
-                            </Button>
-                          </div>
-                        ) : null}
-                      </article>
-                    ))}
+                          {member.role !== "OWNER" ? (
+                            <div className={styles.memberActions}>
+                              <Button
+                                variant="outline"
+                                size="small"
+                                icon="person_remove"
+                                isLoading={memberActionId === member.membership_id}
+                                onClick={() => handleRemove(member.membership_id)}
+                              >
+                                {copy.removeMember}
+                              </Button>
+                            </div>
+                          ) : null}
+                        </article>
+                      );
+                    })}
                   </div>
                 )}
               </section>
@@ -944,79 +1047,60 @@ export function BrandTeamWorkspace({
                   <div className={styles.emptyCard}>{copy.noPending}</div>
                 ) : (
                   <div className={styles.memberGrid}>
-                    {pendingMembers.map((member) => (
-                      <article key={member.id} className={styles.memberCard}>
-                        <div className={styles.memberHeader}>
-                          <div className={styles.memberIdentity}>
-                            <div
-                              className={styles.avatar}
-                              style={
-                                proxyMediaUrl(member.avatar_url)
-                                  ? {
-                                      backgroundImage: `url(${proxyMediaUrl(member.avatar_url)})`,
-                                    }
-                                  : undefined
-                              }
-                              data-has-image={proxyMediaUrl(member.avatar_url) ? "true" : "false"}
+                    {pendingMembers.map((member) => {
+                      const avatarUrl = proxyMediaUrl(member.avatar_url);
+
+                      return (
+                        <article key={member.membership_id} className={styles.memberCard}>
+                          <div className={styles.memberHeader}>
+                            <div className={styles.memberIdentity}>
+                              <div
+                                className={styles.avatar}
+                                style={
+                                  avatarUrl
+                                    ? {
+                                        backgroundImage: `url(${avatarUrl})`,
+                                      }
+                                    : undefined
+                                }
+                                data-has-image={avatarUrl ? "true" : "false"}
+                              >
+                                {!avatarUrl ? getInitials(member) : null}
+                              </div>
+                              <div className={styles.memberMeta}>
+                                <strong className={styles.memberName}>
+                                  {formatName(member.first_name, member.last_name)}
+                                </strong>
+                                <span className={styles.memberEmail}>
+                                  {member.email}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className={styles.memberPills}>
+                              <Badge variant="outline">
+                                {copy.memberRole}
+                              </Badge>
+                              <Badge variant="outline">
+                                {copy.statusPending}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          <div className={styles.memberActions}>
+                            <Button
+                              variant="ghost"
+                              size="small"
+                              icon="close"
+                              isLoading={memberActionId === member.membership_id}
+                              onClick={() => handleRemove(member.membership_id)}
                             >
-                              {!proxyMediaUrl(member.avatar_url)
-                                ? getInitials(member)
-                                : null}
-                            </div>
-                            <div className={styles.memberMeta}>
-                              <strong className={styles.memberName}>
-                                {formatName(member.first_name, member.last_name)}
-                              </strong>
-                              <span className={styles.memberEmail}>
-                                {member.email}
-                              </span>
-                            </div>
+                              {copy.cancelInvite}
+                            </Button>
                           </div>
-
-                          <div className={styles.memberPills}>
-                            <Badge variant="outline">
-                              {copy.memberRole}
-                            </Badge>
-                            <Badge variant="outline">
-                              {copy.statusPending}
-                            </Badge>
-                          </div>
-                        </div>
-
-                        <div className={styles.memberActions}>
-                          <Button
-                            variant="outline"
-                            size="small"
-                            icon="check_circle"
-                            onClick={() =>
-                              handleMemberStatusChange(member.id, "accepted")
-                            }
-                          >
-                            {copy.previewAccept}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="small"
-                            icon="cancel"
-                            onClick={() =>
-                              handleMemberStatusChange(member.id, "rejected")
-                            }
-                          >
-                            {copy.previewReject}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="small"
-                            icon="close"
-                            onClick={() =>
-                              handleMemberStatusChange(member.id, "removed")
-                            }
-                          >
-                            {copy.cancelInvite}
-                          </Button>
-                        </div>
-                      </article>
-                    ))}
+                        </article>
+                      );
+                    })}
                   </div>
                 )}
               </section>
@@ -1030,58 +1114,59 @@ export function BrandTeamWorkspace({
                   <div className={styles.emptyCard}>{copy.noArchive}</div>
                 ) : (
                   <div className={styles.memberGrid}>
-                    {archivedMembers.map((member) => (
-                      <article key={member.id} className={styles.memberCard}>
-                        <div className={styles.memberHeader}>
-                          <div className={styles.memberIdentity}>
-                            <div
-                              className={styles.avatar}
-                              style={
-                                proxyMediaUrl(member.avatar_url)
-                                  ? {
-                                      backgroundImage: `url(${proxyMediaUrl(member.avatar_url)})`,
-                                    }
-                                  : undefined
-                              }
-                              data-has-image={proxyMediaUrl(member.avatar_url) ? "true" : "false"}
+                    {archivedMembers.map((member) => {
+                      const avatarUrl = proxyMediaUrl(member.avatar_url);
+
+                      return (
+                        <article key={member.membership_id} className={styles.memberCard}>
+                          <div className={styles.memberHeader}>
+                            <div className={styles.memberIdentity}>
+                              <div
+                                className={styles.avatar}
+                                style={
+                                  avatarUrl
+                                    ? {
+                                        backgroundImage: `url(${avatarUrl})`,
+                                      }
+                                    : undefined
+                                }
+                                data-has-image={avatarUrl ? "true" : "false"}
+                              >
+                                {!avatarUrl ? getInitials(member) : null}
+                              </div>
+                              <div className={styles.memberMeta}>
+                                <strong className={styles.memberName}>
+                                  {formatName(member.first_name, member.last_name)}
+                                </strong>
+                                <span className={styles.memberEmail}>
+                                  {member.email}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className={styles.memberPills}>
+                              <Badge variant="outline">
+                                {getStatusLabel(member.status, copy)}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          <div className={styles.memberActions}>
+                            <Button
+                              variant="outline"
+                              size="small"
+                              icon="refresh"
+                              isLoading={memberActionId === member.membership_id}
+                              onClick={() => handleReinvite(member)}
                             >
-                              {!proxyMediaUrl(member.avatar_url)
-                                ? getInitials(member)
-                                : null}
-                            </div>
-                            <div className={styles.memberMeta}>
-                              <strong className={styles.memberName}>
-                                {formatName(member.first_name, member.last_name)}
-                              </strong>
-                              <span className={styles.memberEmail}>
-                                {member.email}
-                              </span>
-                            </div>
+                              {member.status === "REMOVED"
+                                ? copy.restoreInvite
+                                : copy.reinviteMember}
+                            </Button>
                           </div>
-
-                          <div className={styles.memberPills}>
-                            <Badge variant="outline">
-                              {getStatusLabel(member.status, copy)}
-                            </Badge>
-                          </div>
-                        </div>
-
-                        <div className={styles.memberActions}>
-                          <Button
-                            variant="outline"
-                            size="small"
-                            icon="refresh"
-                            onClick={() =>
-                              handleMemberStatusChange(member.id, "pending")
-                            }
-                          >
-                            {member.status === "removed"
-                              ? copy.restoreInvite
-                              : copy.reinviteMember}
-                          </Button>
-                        </div>
-                      </article>
-                    ))}
+                        </article>
+                      );
+                    })}
                   </div>
                 )}
               </section>

@@ -6,11 +6,14 @@ import { isAxiosError } from "axios";
 import { Button } from "@/components/atoms/button";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
+  acceptTeamInvitation,
   acceptTransfer,
   cancelTransfer,
+  rejectTeamInvitation,
   rejectTransfer,
   type AppNotification,
   type BrandTransferListItem,
+  type TeamInvitation,
 } from "@/lib/brands-api";
 import { translateBackendErrorMessage } from "@/lib/backend-errors";
 import { proxyMediaUrl } from "@/lib/media";
@@ -22,9 +25,73 @@ import styles from "./notification-transfer-page.module.css";
 type NotificationTransferPageProps = {
   initialIncomingTransfers: BrandTransferListItem[];
   initialOutgoingTransfers: BrandTransferListItem[];
+  initialTeamInvitations: TeamInvitation[];
   initialNotifications: AppNotification[];
   userType: UserType;
 };
+
+type TeamInvitationCopy = {
+  title: string;
+  description: string;
+  empty: string;
+  branchLabel: string;
+  acceptAction: string;
+  rejectAction: string;
+  acceptedDescription: string;
+  rejectedDescription: string;
+  pendingLabel: string;
+};
+
+const EN_TEAM_COPY: TeamInvitationCopy = {
+  title: "Branch team invitations",
+  description:
+    "These invitations are waiting for your answer. Accepting joins that branch team so the future service module can attach ownership to you there.",
+  empty: "No pending branch team invitations.",
+  branchLabel: "Branch",
+  acceptAction: "Accept invite",
+  rejectAction: "Reject invite",
+  acceptedDescription: "Team invitation accepted.",
+  rejectedDescription: "Team invitation rejected.",
+  pendingLabel: "Pending invite",
+};
+
+const TR_TEAM_COPY: TeamInvitationCopy = {
+  title: "Şube ekip davetleri",
+  description:
+    "Bu davetler senin cevabını bekliyor. Kabul ettiğinde ilgili şubenin takımına katılırsın ve gelecekteki service modülü sahipliği sana burada bağlanabilir.",
+  empty: "Bekleyen şube ekip daveti yok.",
+  branchLabel: "Şube",
+  acceptAction: "Daveti kabul et",
+  rejectAction: "Daveti reddet",
+  acceptedDescription: "Takım daveti kabul edildi.",
+  rejectedDescription: "Takım daveti reddedildi.",
+  pendingLabel: "Bekleyen davet",
+};
+
+const AZ_TEAM_COPY: TeamInvitationCopy = {
+  title: "Filial komanda dəvətləri",
+  description:
+    "Bu dəvətlər sənin cavabını gözləyir. Qəbul etdikdə həmin filialın komandasına qoşulursan və gələcək service ownership məntiqi burada sənə bağlana bilər.",
+  empty: "Gözləyən filial komanda dəvəti yoxdur.",
+  branchLabel: "Filial",
+  acceptAction: "Dəvəti qəbul et",
+  rejectAction: "Dəvəti rədd et",
+  acceptedDescription: "Komanda dəvəti qəbul edildi.",
+  rejectedDescription: "Komanda dəvəti rədd edildi.",
+  pendingLabel: "Gözləyən dəvət",
+};
+
+function getTeamInvitationCopy(locale: string) {
+  if (locale.startsWith("az")) {
+    return AZ_TEAM_COPY;
+  }
+
+  if (locale.startsWith("tr")) {
+    return TR_TEAM_COPY;
+  }
+
+  return EN_TEAM_COPY;
+}
 
 function formatTransferDate(value: string, locale: string) {
   const date = new Date(value);
@@ -47,19 +114,26 @@ function getPersonLabel(firstName: string, lastName: string) {
 export function NotificationTransferPage({
   initialIncomingTransfers,
   initialOutgoingTransfers,
+  initialTeamInvitations,
   initialNotifications,
   userType,
 }: NotificationTransferPageProps) {
   const { locale, messages } = useLocale();
   const t = messages.brands;
+  const teamCopy = useMemo(() => getTeamInvitationCopy(locale), [locale]);
   const session = useAppSelector(selectAuthSession);
   const [incomingTransfers, setIncomingTransfers] = useState(initialIncomingTransfers);
   const [outgoingTransfers, setOutgoingTransfers] = useState(initialOutgoingTransfers);
-  const [notifications] = useState<AppNotification[]>(initialNotifications);
+  const [teamInvitations, setTeamInvitations] = useState(initialTeamInvitations);
+  const [notifications] = useState<AppNotification[]>(
+    initialNotifications.filter((notification) => notification.type !== "team_invite_request"),
+  );
   const [loadingTransferId, setLoadingTransferId] = useState<string | null>(null);
+  const [loadingInvitationId, setLoadingInvitationId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const showTransferSections = userType === "uso";
+  const showTeamInvitationSection = userType === "uso";
 
   const requestedDateLabel = useMemo(
     () => (value: string) => formatTransferDate(value, locale),
@@ -116,6 +190,44 @@ export function NotificationTransferPage({
     }
   }
 
+  async function runInvitationAction(
+    membershipId: string,
+    action: "accept" | "reject",
+  ) {
+    const accessToken = session.accessToken;
+    if (!accessToken) {
+      setFeedback(t.loginRequired);
+      return;
+    }
+
+    setLoadingInvitationId(membershipId);
+    setFeedback(null);
+
+    try {
+      if (action === "accept") {
+        await acceptTeamInvitation(membershipId, accessToken);
+        setTeamInvitations((prev) =>
+          prev.filter((invitation) => invitation.membership_id !== membershipId),
+        );
+        setFeedback(teamCopy.acceptedDescription);
+      } else {
+        await rejectTeamInvitation(membershipId, accessToken);
+        setTeamInvitations((prev) =>
+          prev.filter((invitation) => invitation.membership_id !== membershipId),
+        );
+        setFeedback(teamCopy.rejectedDescription);
+      }
+    } catch (error) {
+      const translatedMessage = isAxiosError(error)
+        ? translateBackendErrorMessage(error.response?.data?.message, messages.backendErrors)
+        : undefined;
+
+      setFeedback(translatedMessage ?? t.errorGeneric);
+    } finally {
+      setLoadingInvitationId(null);
+    }
+  }
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.pageHeader}>
@@ -126,6 +238,69 @@ export function NotificationTransferPage({
         <div className={styles.feedback}>
           {feedback}
         </div>
+      )}
+
+      {showTeamInvitationSection && (
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>{teamCopy.title}</h2>
+            <p className={styles.sectionDescription}>{teamCopy.description}</p>
+          </div>
+
+          {teamInvitations.length === 0 ? (
+            <div className={styles.emptyState}>{teamCopy.empty}</div>
+          ) : (
+            <div className={styles.list}>
+              {teamInvitations.map((invitation) => (
+                <article key={invitation.membership_id} className={styles.card}>
+                  <div className={styles.cardTop}>
+                    <div className={styles.brandLogoWrap}>
+                      <Image
+                        src={proxyMediaUrl(invitation.brand.logo_url) ?? "/reziphay-logo.png"}
+                        alt={invitation.brand.name}
+                        fill
+                        sizes="56px"
+                        className={styles.brandLogo}
+                      />
+                    </div>
+
+                    <div className={styles.cardContent}>
+                      <div className={styles.cardTitleRow}>
+                        <h3 className={styles.cardTitle}>{invitation.brand.name}</h3>
+                        <span className={`${styles.statusBadge} ${styles.statusPending}`}>
+                          {teamCopy.pendingLabel}
+                        </span>
+                      </div>
+                      <p className={styles.cardMeta}>
+                        {teamCopy.branchLabel}: {invitation.branch.name}
+                      </p>
+                      <p className={styles.cardMeta}>
+                        {t.transferRequestedAt}: {requestedDateLabel(invitation.invited_at)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className={styles.actions}>
+                    <Button
+                      variant="outline"
+                      onClick={() => runInvitationAction(invitation.membership_id, "reject")}
+                      disabled={loadingInvitationId === invitation.membership_id}
+                    >
+                      {teamCopy.rejectAction}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      isLoading={loadingInvitationId === invitation.membership_id}
+                      onClick={() => runInvitationAction(invitation.membership_id, "accept")}
+                    >
+                      {teamCopy.acceptAction}
+                    </Button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
       )}
 
       {showTransferSections && (

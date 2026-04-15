@@ -8,6 +8,7 @@ import {
   fetchActiveBrands,
   fetchAccountBrands,
   fetchBrandCategories,
+  fetchBrandTeamWorkspace,
 } from "@/lib/brands-api";
 import { BrandsUsoPage } from "@/components/organisms/brands-uso-page";
 import { BrandsUcrPage } from "@/components/organisms/brands-ucr-page";
@@ -192,15 +193,20 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
   if (progress === "team" && brandId) {
     if (user.type !== "uso") return notFound();
 
-    const brand = await fetchBrandById(brandId, accessToken).catch(() => null);
+    const [brand, workspace] = await Promise.all([
+      fetchBrandById(brandId, accessToken).catch(() => null),
+      fetchBrandTeamWorkspace(brandId, accessToken).catch(() => null),
+    ]);
 
     if (!brand) return notFound();
     if (brand.owner_id !== user.id) return notFound();
+    if (!workspace) return notFound();
 
     return (
       <BrandTeamWorkspace
         key={brand.id}
         brand={brand}
+        initialWorkspace={workspace}
         currentUser={{
           id: user.id,
           first_name: user.first_name,
