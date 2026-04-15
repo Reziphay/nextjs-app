@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { isAxiosError } from "axios";
 import { Button } from "@/components/atoms/button";
 import { Field, FieldLabel, Input } from "@/components/atoms/input";
@@ -49,6 +49,8 @@ type BranchDraft = {
   id?: string; // undefined = new (not yet persisted)
   name: string;
   description?: string;
+  cover_media_id?: string | null;
+  cover_url?: string | null;
   address1: string;
   address2?: string;
   phone?: string;
@@ -57,6 +59,9 @@ type BranchDraft = {
   opening?: string;
   closing?: string;
   breaks: { id?: string; start: string; end: string }[];
+  photoFile?: File | null;
+  photoPreviewUrl?: string | null;
+  photoRemoved?: boolean;
 };
 
 type BrandFormDraft = {
@@ -119,6 +124,11 @@ function brandToDraft(brand: Brand): BrandFormDraft {
       opening: b.opening,
       closing: b.closing,
       breaks: b.breaks,
+      cover_media_id: b.cover_media_id ?? null,
+      cover_url: b.cover_url ?? null,
+      photoFile: null,
+      photoPreviewUrl: proxyMediaUrl(b.cover_url) ?? null,
+      photoRemoved: false,
     })),
   };
 }
@@ -133,10 +143,20 @@ function revokeDraftObjectUrls(draft: BrandFormDraft) {
       URL.revokeObjectURL(url);
     }
   }
+
+  for (const branch of draft.branches) {
+    if (branch.photoPreviewUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(branch.photoPreviewUrl);
+    }
+  }
 }
 
 function buildTransferTargetLabel(user: UserSearchResult) {
   return `${user.first_name} ${user.last_name}`.trim();
+}
+
+function getBranchUploadKey(branch: BranchDraft, index: number) {
+  return branch.id ?? `new-${index}`;
 }
 
 type CropTarget = {
@@ -153,9 +173,11 @@ export function BrandForm({
   phoneVerified,
 }: BrandFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { messages } = useLocale();
   const t = messages.brands;
   const session = useAppSelector(selectAuthSession);
+  const branchQueryId = searchParams.get("branch");
   const [persistedBrand, setPersistedBrand] = useState<Brand | null>(
     mode === "edit" ? brand ?? null : null,
   );
@@ -178,6 +200,7 @@ export function BrandForm({
   // Branch modal state
   const [branchModalOpen, setBranchModalOpen] = useState(false);
   const [editingBranchIndex, setEditingBranchIndex] = useState<number | null>(null);
+  const [branchQueryHandled, setBranchQueryHandled] = useState(false);
 
   // Transfer modal state
   const [transferModalOpen, setTransferModalOpen] = useState(false);
@@ -305,6 +328,11 @@ export function BrandForm({
   }
 
   function handleDeleteBranch(index: number) {
+    const branch = draft.branches[index];
+    if (branch?.photoPreviewUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(branch.photoPreviewUrl);
+    }
+
     setDraft((prev) => ({
       ...prev,
       branches: prev.branches.filter((_, i) => i !== index),
@@ -315,6 +343,15 @@ export function BrandForm({
     if (editingBranchIndex !== null) {
       setDraft((prev) => {
         const next = [...prev.branches];
+        const previousBranch = next[editingBranchIndex];
+
+        if (
+          previousBranch?.photoPreviewUrl?.startsWith("blob:") &&
+          previousBranch.photoPreviewUrl !== branchDraft.photoPreviewUrl
+        ) {
+          URL.revokeObjectURL(previousBranch.photoPreviewUrl);
+        }
+
         next[editingBranchIndex] = branchDraft;
         return { ...prev, branches: next };
       });
@@ -326,6 +363,25 @@ export function BrandForm({
     }
     setEditingBranchIndex(null);
   }
+
+  useEffect(() => {
+    if (
+      mode !== "edit" ||
+      !branchQueryId ||
+      branchQueryHandled ||
+      draft.branches.length === 0
+    ) {
+      return;
+    }
+
+    const branchIndex = draft.branches.findIndex((branchItem) => branchItem.id === branchQueryId);
+    setBranchQueryHandled(true);
+
+    if (branchIndex >= 0) {
+      setEditingBranchIndex(branchIndex);
+      setBranchModalOpen(true);
+    }
+  }, [branchQueryHandled, branchQueryId, draft.branches, mode]);
 
   function validate(): boolean {
     const nextErrors: Partial<Record<string, string>> = {};
@@ -345,6 +401,7 @@ export function BrandForm({
       case "media.invalid_logo_ratio":
         return t.logoRatioError;
       case "media.invalid_gallery_ratio":
+      case "media.invalid_cover_ratio":
         return t.galleryRatioError;
       default:
         return (
@@ -384,6 +441,20 @@ export function BrandForm({
         newGalleryMediaIds.push(uploaded.media_id);
       }
 
+      const branchCoverMediaIds = new Map<string, string>();
+      for (const [index, branch] of draft.branches.entries()) {
+        if (!branch.photoFile) {
+          continue;
+        }
+
+        const uploaded = await uploadBrandMedia(
+          branch.photoFile,
+          accessToken,
+          "branch_cover",
+        );
+        branchCoverMediaIds.set(getBranchUploadKey(branch, index), uploaded.media_id);
+      }
+
       if (mode === "create") {
         const allGalleryIds = newGalleryMediaIds;
 
@@ -393,9 +464,12 @@ export function BrandForm({
           categoryIds: draft.category_ids,
           logo_media_id: logoMediaId,
           gallery_media_ids: allGalleryIds.length > 0 ? allGalleryIds : undefined,
-          branches: draft.branches.map((branch) => ({
+          branches: draft.branches.map((branch, index) => ({
             name: branch.name,
             description: branch.description || undefined,
+            cover_media_id: branchCoverMediaIds.get(
+              getBranchUploadKey(branch, index),
+            ),
             address1: branch.address1,
             address2: branch.address2 || undefined,
             phone: branch.phone || undefined,
@@ -453,11 +527,17 @@ export function BrandForm({
         }
 
         // Update existing / create new
-        for (const b of draft.branches) {
+        for (const [index, b] of draft.branches.entries()) {
           if (b.id && originalIds.has(b.id)) {
+            const uploadedCoverMediaId = branchCoverMediaIds.get(b.id);
             const updatedBranchDraft = await updateBranch(currentBrand.id, b.id, {
               name: b.name,
               description: b.description ?? null,
+              ...(uploadedCoverMediaId !== undefined
+                ? { cover_media_id: uploadedCoverMediaId }
+                : b.photoRemoved
+                  ? { cover_media_id: null as null }
+                  : {}),
               address1: b.address1,
               address2: b.address2 ?? null,
               phone: b.phone ?? null,
@@ -470,9 +550,15 @@ export function BrandForm({
             nextPersistedBranches.push(updatedBranchDraft);
             didMutateServerState = true;
           } else if (!b.id) {
+            const uploadedCoverMediaId = branchCoverMediaIds.get(
+              getBranchUploadKey(b, index),
+            );
             const createdBranch = await createBranch(currentBrand.id, {
               name: b.name,
               description: b.description || undefined,
+              ...(uploadedCoverMediaId !== undefined
+                ? { cover_media_id: uploadedCoverMediaId }
+                : {}),
               address1: b.address1,
               address2: b.address2 || undefined,
               phone: b.phone || undefined,
@@ -964,8 +1050,14 @@ export function BrandForm({
         <BranchModal
           key={editingBranchIndex === null ? "new" : `edit-${editingBranchIndex}`}
           open={branchModalOpen}
-          onOpenChange={setBranchModalOpen}
+          onOpenChange={(open) => {
+            setBranchModalOpen(open);
+            if (!open) {
+              setEditingBranchIndex(null);
+            }
+          }}
           initial={editingBranch}
+          brandId={mode === "edit" ? (persistedBrand?.id ?? brand?.id ?? null) : null}
           onSave={handleBranchSave}
         />
       ) : null}

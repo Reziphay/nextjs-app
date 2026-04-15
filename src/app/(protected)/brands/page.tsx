@@ -200,7 +200,6 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
 
     if (!brand) return notFound();
     if (brand.owner_id !== user.id) return notFound();
-    if (!workspace) return notFound();
 
     return (
       <BrandTeamWorkspace

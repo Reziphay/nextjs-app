@@ -39,7 +39,7 @@ type BrandTeamWorkspaceProps = {
     AuthenticatedUser,
     "id" | "first_name" | "last_name" | "email" | "avatar_url"
   >;
-  initialWorkspace: BrandTeamWorkspaceData;
+  initialWorkspace?: BrandTeamWorkspaceData | null;
 };
 
 type WorkspaceCopy = {
@@ -99,6 +99,11 @@ type WorkspaceCopy = {
   reinviteMember: string;
   liveApiBadge: string;
   workspaceRefreshError: string;
+  workspaceLoadingTitle: string;
+  workspaceLoadingDescription: string;
+  workspaceErrorTitle: string;
+  workspaceErrorDescription: string;
+  retryWorkspace: string;
   futureTitle: string;
   futureDescription: string;
   futureListOne: string;
@@ -169,6 +174,13 @@ const EN_COPY: WorkspaceCopy = {
   reinviteMember: "Re-invite",
   liveApiBadge: "Live API",
   workspaceRefreshError: "The latest team state could not be loaded.",
+  workspaceLoadingTitle: "Loading team workspace",
+  workspaceLoadingDescription:
+    "The page is waiting for the branch team state from the backend.",
+  workspaceErrorTitle: "Team workspace could not be loaded",
+  workspaceErrorDescription:
+    "The brand exists, but the branch team data could not be loaded right now. You can retry without leaving the page.",
+  retryWorkspace: "Retry workspace",
   futureTitle: "Service module will attach here next",
   futureDescription:
     "This page still does not create services. It prepares the people and branch boundaries that the future service ownership model will depend on.",
@@ -242,6 +254,13 @@ const TR_COPY: WorkspaceCopy = {
   reinviteMember: "Tekrar davet et",
   liveApiBadge: "Canlı API",
   workspaceRefreshError: "Güncel takım durumu yüklenemedi.",
+  workspaceLoadingTitle: "Takım alanı yükleniyor",
+  workspaceLoadingDescription:
+    "Sayfa backend'den şube takım durumunu bekliyor.",
+  workspaceErrorTitle: "Takım alanı yüklenemedi",
+  workspaceErrorDescription:
+    "Brand mevcut, ancak şube takım verisi şu anda alınamadı. Sayfadan çıkmadan yeniden deneyebilirsin.",
+  retryWorkspace: "Tekrar dene",
   futureTitle: "Servis modülü bir sonraki adımda buraya bağlanacak",
   futureDescription:
     "Bu sayfa hâlâ servis oluşturmaz. Sadece gelecekteki service ownership yapısının dayanacağı kişi ve şube sınırlarını hazırlar.",
@@ -318,6 +337,13 @@ const AZ_COPY: WorkspaceCopy = {
   reinviteMember: "Yenidən dəvət et",
   liveApiBadge: "Canlı API",
   workspaceRefreshError: "Aktual komanda vəziyyəti yüklənmədi.",
+  workspaceLoadingTitle: "Komanda sahəsi yüklənir",
+  workspaceLoadingDescription:
+    "Səhifə backenddən filial komanda vəziyyətini gözləyir.",
+  workspaceErrorTitle: "Komanda sahəsi yüklənmədi",
+  workspaceErrorDescription:
+    "Brend mövcuddur, amma filial komanda datası hazırda alına bilmədi. Səhifədən çıxmadan yenidən yoxlaya bilərsən.",
+  retryWorkspace: "Yenidən yoxla",
   futureTitle: "Service modulu növbəti addımda bura bağlanacaq",
   futureDescription:
     "Bu səhifə hələ service yaratmır. Sadəcə gələcək service ownership məntiqinin əsaslanacağı insanları və filial sərhədlərini hazırlayır.",
@@ -433,9 +459,11 @@ export function BrandTeamWorkspace({
   const copy = useMemo(() => getCopy(locale), [locale]);
   const session = useAppSelector(selectAuthSession);
   const accessToken = session.accessToken;
-  const [workspace, setWorkspace] = useState(initialWorkspace);
+  const [workspace, setWorkspace] = useState<BrandTeamWorkspaceData | null>(
+    initialWorkspace ?? null,
+  );
   const [activeBranchId, setActiveBranchId] = useState<string>(
-    initialWorkspace.branches[0]?.branch_id ?? "",
+    initialWorkspace?.branches[0]?.branch_id ?? "",
   );
   const [searchQuery, setSearchQuery] = useState("");
   const deferredQuery = useDeferredValue(searchQuery.trim());
@@ -449,14 +477,56 @@ export function BrandTeamWorkspace({
   } | null>(null);
   const [inviteUserId, setInviteUserId] = useState<string | null>(null);
   const [memberActionId, setMemberActionId] = useState<string | null>(null);
+  const [workspaceState, setWorkspaceState] = useState<
+    "ready" | "loading" | "error"
+  >(initialWorkspace ? "ready" : "loading");
 
-  const branches = useMemo(() => workspace.branches ?? [], [workspace.branches]);
+  const branches = useMemo(() => workspace?.branches ?? [], [workspace]);
+  const brandBranches = useMemo(() => brand.branches ?? [], [brand.branches]);
 
   useEffect(() => {
     if (!branches.some((branchItem) => branchItem.branch_id === activeBranchId)) {
       setActiveBranchId(branches[0]?.branch_id ?? "");
     }
   }, [activeBranchId, branches]);
+
+  useEffect(() => {
+    const token = accessToken;
+
+    if (initialWorkspace || !token) {
+      return;
+    }
+
+    const authToken = token;
+
+    let active = true;
+
+    async function loadWorkspace() {
+      try {
+        const nextWorkspace = await fetchBrandTeamWorkspace(brand.id, authToken);
+
+        if (!active) {
+          return;
+        }
+
+        setWorkspace(nextWorkspace);
+        setActiveBranchId((current) => current || nextWorkspace.branches[0]?.branch_id || "");
+        setWorkspaceState("ready");
+      } catch {
+        if (!active) {
+          return;
+        }
+
+        setWorkspaceState("error");
+      }
+    }
+
+    void loadWorkspace();
+
+    return () => {
+      active = false;
+    };
+  }, [accessToken, brand.id, initialWorkspace]);
 
   const activeBranch = useMemo(
     () =>
@@ -561,14 +631,38 @@ export function BrandTeamWorkspace({
     };
   }, [accessToken, activeBranch, copy.searchError, currentUser.id, deferredQuery, messages.backendErrors]);
 
-  async function refreshWorkspace() {
+  async function refreshWorkspace(options?: { showLoadingState?: boolean }) {
     if (!accessToken) {
       throw new Error(copy.workspaceRefreshError);
     }
 
+    if (options?.showLoadingState) {
+      setWorkspaceState("loading");
+    }
+
     const nextWorkspace = await fetchBrandTeamWorkspace(brand.id, accessToken);
     setWorkspace(nextWorkspace);
+    setActiveBranchId((current) => current || nextWorkspace.branches[0]?.branch_id || "");
+    setWorkspaceState("ready");
     return nextWorkspace;
+  }
+
+  async function handleRetryWorkspace() {
+    setFeedback(null);
+
+    try {
+      await refreshWorkspace({ showLoadingState: true });
+    } catch (error) {
+      setWorkspaceState("error");
+      setFeedback({
+        tone: "error",
+        message: getApiErrorMessage(
+          error,
+          copy.workspaceRefreshError,
+          messages.backendErrors,
+        ),
+      });
+    }
   }
 
   async function handleInvite(user: UserSearchResult) {
@@ -688,7 +782,7 @@ export function BrandTeamWorkspace({
     }
   }
 
-  if (branches.length === 0) {
+  if (brandBranches.length === 0) {
     return (
       <div className={styles.emptyShell}>
         <Badge icon="hub" variant="outline" className={styles.heroBadge}>
@@ -703,6 +797,63 @@ export function BrandTeamWorkspace({
             onClick={() => router.push(`/brands?progress=edit&id=${brand.id}`)}
           >
             {copy.addBranch}
+          </Button>
+          <Button
+            variant="outline"
+            icon="sell"
+            onClick={() => router.push(`/brands?id=${brand.id}`)}
+          >
+            {copy.openBrand}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!workspace || workspaceState !== "ready") {
+    const isLoading = workspaceState === "loading";
+
+    return (
+      <div className={styles.emptyShell}>
+        <Badge icon="hub" variant="outline" className={styles.heroBadge}>
+          {copy.badge}
+        </Badge>
+        <h1 className={styles.emptyTitle}>
+          {isLoading ? copy.workspaceLoadingTitle : copy.workspaceErrorTitle}
+        </h1>
+        <p className={styles.emptyDescription}>
+          {isLoading ? copy.workspaceLoadingDescription : copy.workspaceErrorDescription}
+        </p>
+
+        {feedback ? (
+          <div
+            className={`${styles.feedback} ${
+              feedback.tone === "success"
+                ? styles.feedbackSuccess
+                : styles.feedbackError
+            }`}
+          >
+            {feedback.message}
+          </div>
+        ) : null}
+
+        <div className={styles.emptyActions}>
+          <Button
+            variant="primary"
+            icon="refresh"
+            isLoading={isLoading}
+            onClick={() => {
+              void handleRetryWorkspace();
+            }}
+          >
+            {copy.retryWorkspace}
+          </Button>
+          <Button
+            variant="outline"
+            icon="edit_square"
+            onClick={() => router.push(`/brands?progress=edit&id=${brand.id}`)}
+          >
+            {copy.editBrand}
           </Button>
           <Button
             variant="outline"

@@ -8,6 +8,7 @@ import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 
+const FAVICON_URL = "/reziphay-logo-default.svg";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 
@@ -23,6 +24,10 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: messages.metadata.description,
     authors: [{ name: "Vugar Safarzada" }],
+    icons: {
+      icon: [{ url: FAVICON_URL, type: "image/svg+xml", sizes: "any" }],
+      shortcut: FAVICON_URL,
+    },
   };
 }
 

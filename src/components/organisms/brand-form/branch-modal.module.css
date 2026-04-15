@@ -1,14 +1,329 @@
+.dialogContent {
+  width: min(100%, 72rem);
+  max-height: min(92vh, 64rem);
+  padding: 0;
+  overflow: hidden;
+}
+
+.header {
+  padding: 1.5rem 1.75rem 1rem;
+  border-bottom: 1px solid var(--app-border-soft);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-bg-surface-strong) 92%, white 8%),
+      color-mix(in srgb, var(--app-bg-canvas) 96%, white 4%)
+    );
+}
+
+.headerTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.headerIcon {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--general-border-radius);
+  border: 1px solid color-mix(in srgb, var(--app-primary) 20%, transparent);
+  background: color-mix(in srgb, var(--app-primary-faint) 72%, white 28%);
+  color: var(--app-primary);
+}
+
+.headerText {
+  min-width: 0;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  overflow-y: auto;
+  padding: 1.5rem 1.75rem;
+}
+
+.stageGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.stageCard,
+.formSection,
+.teamSection {
+  border-radius: var(--general-border-radius);
+  border: 1px solid color-mix(in srgb, var(--app-border-soft) 88%, transparent);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-bg-surface-strong) 92%, white 8%),
+      color-mix(in srgb, var(--app-bg-canvas) 96%, white 4%)
+    );
+  box-shadow: 0 18px 36px color-mix(in srgb, var(--app-shadow-color) 10%, transparent);
+}
+
+.stageCard {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.1rem;
+}
+
+.stageCardHeader,
+.formSectionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.stageTitle,
+.sectionTitle {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.stageLead,
+.sectionLead {
+  margin: 0.35rem 0 0;
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.stageBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--app-primary) 18%, transparent);
+  background: color-mix(in srgb, var(--app-primary-faint) 68%, white 32%);
+  color: var(--app-primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.identityPreview {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.identityIcon {
+  width: 4rem;
+  height: 4rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: calc(var(--general-border-radius) + 0.1rem);
+  background:
+    radial-gradient(
+      circle at 30% 20%,
+      color-mix(in srgb, white 88%, transparent),
+      color-mix(in srgb, var(--app-primary-faint) 74%, white 26%)
+    );
+  color: var(--app-primary);
+  border: 1px solid color-mix(in srgb, var(--app-primary) 18%, transparent);
+}
+
+.identityMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.identityMeta strong {
+  color: var(--app-text-strong);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.identityMeta span {
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.identityFacts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.identityFact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: calc(var(--general-border-radius) - 0.1rem);
+  background: color-mix(in srgb, var(--app-bg-canvas) 92%, white 8%);
+  border: 1px solid color-mix(in srgb, var(--app-border-soft) 80%, transparent);
+}
+
+.identityFact span {
+  color: var(--app-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.identityFact strong {
+  color: var(--app-text-strong);
+  font-size: 0.94rem;
+  font-weight: 800;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.visualFrame {
+  position: relative;
+  min-height: 16rem;
+  border-radius: calc(var(--general-border-radius) + 0.1rem);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--app-border-soft) 82%, transparent);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-primary-faint) 46%, white 54%),
+      color-mix(in srgb, var(--app-bg-canvas) 94%, white 6%)
+    );
+  background-size: cover;
+  background-position: center;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 82%, transparent),
+    0 16px 30px color-mix(in srgb, var(--app-shadow-color) 10%, transparent);
+}
+
+.visualOverlay,
+.visualEmpty {
+  position: absolute;
+  inset: 0;
+}
+
+.visualOverlay {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  padding: 1rem;
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      color-mix(in srgb, black 56%, transparent) 100%
+    );
+}
+
+.visualOverlay strong,
+.visualOverlay span {
+  color: white;
+}
+
+.visualOverlay strong {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.visualOverlay span {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.visualEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.visualEmptyIcon {
+  width: 3.2rem;
+  height: 3.2rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, white 72%, transparent);
+  color: var(--app-primary);
+  border: 1px solid color-mix(in srgb, var(--app-primary) 18%, transparent);
+}
+
+.visualEmptyText {
+  max-width: 22rem;
+}
+
+.visualEmptyText strong {
+  display: block;
+  color: var(--app-text-strong);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.visualEmptyText p {
+  margin: 0.4rem 0 0;
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.visualActions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.visualNote,
+.visualFrontendOnly {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.visualNote {
+  color: var(--app-primary);
+  font-weight: 700;
+}
+
+.visualFrontendOnly {
+  color: var(--app-text-muted);
+}
+
+.formSection,
+.teamSection {
+  padding: 1.1rem 1.1rem 1.2rem;
+}
+
 .form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  overflow-y: auto;
-  padding: 0 1.714rem 1.714rem;
+  margin-top: 1rem;
 }
 
 .row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -17,13 +332,23 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.75rem 0;
+  padding: 0.9rem 1rem;
+  border-radius: calc(var(--general-border-radius) - 0.1rem);
+  border: 1px solid color-mix(in srgb, var(--app-border-soft) 80%, transparent);
+  background: color-mix(in srgb, var(--app-bg-canvas) 92%, white 8%);
 }
 
 .switchLabel {
+  display: block;
   color: var(--app-text-strong);
-  font-size: var(--font-size-small);
-  font-weight: 500;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.switchHint {
+  margin: 0.2rem 0 0;
+  color: var(--app-text-muted);
+  font-size: 0.8rem;
 }
 
 .breaksSection {
@@ -36,38 +361,323 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .breaksSectionTitle {
   margin: 0;
   color: var(--app-text-strong);
-  font-size: var(--font-size-small);
-  font-weight: 600;
+  font-size: 0.92rem;
+  font-weight: 700;
 }
 
 .breakRow {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 0.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+  gap: 0.65rem;
   align-items: end;
 }
 
 .removeBreakBtn {
+  width: 2.4rem;
+  height: 2.4rem;
   padding: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--app-error);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 2.25rem;
-  width: 2.25rem;
-  border-radius: var(--general-border-radius);
-  transition: background 140ms ease;
-  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--app-error) 18%, transparent);
+  border-radius: calc(var(--general-border-radius) - 0.1rem);
+  background: color-mix(in srgb, var(--app-error-bg) 70%, white 30%);
+  color: var(--app-error);
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
 }
 
 .removeBreakBtn:hover {
-  background: var(--app-error-bg);
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--app-error) 34%, transparent);
+  background: color-mix(in srgb, var(--app-error-bg) 84%, white 16%);
+}
+
+.errorText {
+  margin: 0.4rem 0 0;
+  color: var(--app-error);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.teamLocked,
+.teamStateCard {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: calc(var(--general-border-radius) - 0.1rem);
+  border: 1px solid color-mix(in srgb, var(--app-border-soft) 82%, transparent);
+  background: color-mix(in srgb, var(--app-bg-canvas) 92%, white 8%);
+}
+
+.teamLockedIcon {
+  width: 2.4rem;
+  height: 2.4rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--app-primary-faint) 70%, white 30%);
+  color: var(--app-primary);
+}
+
+.teamLockedText strong {
+  display: block;
+  color: var(--app-text-strong);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.teamLockedText p,
+.teamLockedText span {
+  margin: 0.4rem 0 0;
+  color: var(--app-text-muted);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.teamPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.feedback {
+  padding: 0.8rem 0.9rem;
+  border-radius: calc(var(--general-border-radius) - 0.1rem);
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.feedbackSuccess {
+  background: color-mix(in srgb, var(--app-success-bg, #dff7e9) 78%, white 22%);
+  color: var(--app-success, #0f8b4c);
+}
+
+.feedbackError {
+  background: color-mix(in srgb, var(--app-error-bg) 78%, white 22%);
+  color: var(--app-error);
+}
+
+.searchState {
+  color: var(--app-text-muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.searchList,
+.memberGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.teamGroups {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.teamGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.teamGroup h4 {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.emptyCard {
+  padding: 0.9rem 1rem;
+  border-radius: calc(var(--general-border-radius) - 0.1rem);
+  border: 1px dashed color-mix(in srgb, var(--app-border-soft) 90%, transparent);
+  background: color-mix(in srgb, var(--app-bg-canvas) 92%, white 8%);
+  color: var(--app-text-muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.memberCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 0.95rem;
+  border-radius: calc(var(--general-border-radius) - 0.1rem);
+  border: 1px solid color-mix(in srgb, var(--app-border-soft) 84%, transparent);
+  background: color-mix(in srgb, var(--app-bg-canvas) 94%, white 6%);
+}
+
+.memberIdentity {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.avatar {
+  width: 2.7rem;
+  height: 2.7rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background:
+    radial-gradient(
+      circle at 30% 20%,
+      color-mix(in srgb, white 82%, transparent),
+      color-mix(in srgb, var(--app-primary-faint) 72%, white 28%)
+    );
+  border: 1px solid color-mix(in srgb, var(--app-primary) 18%, transparent);
+  background-size: cover;
+  background-position: center;
+  color: var(--app-primary);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.avatar[data-has-image="true"] {
+  color: transparent;
+}
+
+.memberMeta {
+  min-width: 0;
+}
+
+.memberMeta strong {
+  display: block;
+  color: var(--app-text-strong);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.memberMeta span {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--app-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.memberPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.roleBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.9rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--app-primary-faint) 68%, white 32%);
+  color: var(--app-primary);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.footer {
+  padding: 1rem 1.75rem 1.5rem;
+  border-top: 1px solid var(--app-border-soft);
+  background: color-mix(in srgb, var(--app-bg-canvas) 96%, white 4%);
+}
+
+@media (max-width: 960px) {
+  .dialogContent {
+    width: min(100%, 100vw - 1rem);
+    max-height: 94vh;
+  }
+
+  .body {
+    padding: 1rem;
+  }
+
+  .header {
+    padding: 1rem 1rem 0.85rem;
+  }
+
+  .stageGrid,
+  .row,
+  .searchList,
+  .memberGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .identityFacts {
+    grid-template-columns: 1fr;
+  }
+
+  .breakRow {
+    grid-template-columns: 1fr;
+  }
+
+  .removeBreakBtn {
+    width: 100%;
+  }
+
+  .footer {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .headerTop {
+    gap: 0.75rem;
+  }
+
+  .headerIcon {
+    width: 2.4rem;
+    height: 2.4rem;
+  }
+
+  .stageCard,
+  .formSection,
+  .teamSection {
+    padding: 0.95rem;
+  }
+
+  .visualFrame {
+    min-height: 13.5rem;
+  }
+
+  .visualEmpty {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .switchRow,
+  .teamLocked,
+  .teamStateCard {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .visualActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }

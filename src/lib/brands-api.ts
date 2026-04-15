@@ -24,6 +24,7 @@ export type UpdateBrandPayload = {
 export type BranchPayload = {
   name: string;
   description?: string;
+  cover_media_id?: string;
   address1: string;
   address2?: string;
   phone?: string;
@@ -37,6 +38,7 @@ export type BranchPayload = {
 export type UpdateBranchPayload = {
   name?: string;
   description?: string | null;
+  cover_media_id?: string | null;
   address1?: string;
   address2?: string | null;
   phone?: string | null;
@@ -53,7 +55,7 @@ export type DeleteBrandPayload = {
   service_handling: "delete_with_services";
 };
 
-export type BrandMediaUsage = "logo" | "gallery";
+export type BrandMediaUsage = "logo" | "gallery" | "branch_cover";
 
 export type UserSearchResult = {
   id: string;
@@ -134,6 +136,8 @@ export type TeamWorkspaceMember = {
 export type TeamWorkspaceBranch = {
   branch_id: string;
   branch_name: string;
+  cover_media_id?: string | null;
+  cover_url?: string | null;
   address: {
     address1: string;
     address2: string | null;
@@ -145,6 +149,29 @@ export type TeamWorkspaceBranch = {
   };
   team_id: string | null;
   team_created_at: string | null;
+  members: {
+    accepted: TeamWorkspaceMember[];
+    pending: TeamWorkspaceMember[];
+    rejected: TeamWorkspaceMember[];
+    removed: TeamWorkspaceMember[];
+  };
+};
+
+export type BranchTeamDetail = {
+  team_id: string | null;
+  branch_id: string;
+  branch_name: string;
+  cover_media_id?: string | null;
+  cover_url?: string | null;
+  address: {
+    address1: string;
+    address2: string | null;
+  };
+  availability: {
+    is_24_7: boolean;
+    opening: string | null;
+    closing: string | null;
+  };
   members: {
     accepted: TeamWorkspaceMember[];
     pending: TeamWorkspaceMember[];
@@ -182,6 +209,8 @@ function normalizeBranch(branch: Branch): Branch {
   return {
     ...branch,
     description: branch.description ?? undefined,
+    cover_media_id: branch.cover_media_id ?? null,
+    cover_url: branch.cover_url ?? null,
     address2: branch.address2 ?? undefined,
     phone: branch.phone ?? undefined,
     email: branch.email ?? undefined,
@@ -534,6 +563,25 @@ export async function inviteBranchTeamMember(
   }
 
   return membership;
+}
+
+export async function fetchBranchTeamDetail(
+  brandId: string,
+  branchId: string,
+  accessToken: string,
+): Promise<BranchTeamDetail> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ team: BranchTeamDetail }>>({
+    url: `/brands/${brandId}/branches/${branchId}/team`,
+    method: "GET",
+  });
+
+  const team = response.data?.data?.team;
+  if (!team) {
+    throw new Error("Invalid response from branch team detail API");
+  }
+
+  return team;
 }
 
 export async function removeBranchTeamMember(
