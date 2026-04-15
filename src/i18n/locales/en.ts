@@ -206,6 +206,7 @@ export const enMessages: Messages = {
     noBrandsTitle: "No brands yet",
     noBrandsDescription: "You haven't created any brands yet. Start by creating your first brand.",
     editBrand: "Edit brand",
+    teamWorkspace: "Team workspace",
     detailTitle: "Brand details",
     topSeller: "Top Sellers",
     topRated: "Top Rated",

@@ -317,6 +317,10 @@ export function BrandDetail({
     router.push(`/brands?progress=edit&id=${brandState.id}`);
   }
 
+  function handleTeamWorkspace() {
+    router.push(`/brands?progress=team&id=${brandState.id}`);
+  }
+
   async function handleRate(value: number) {
     const accessToken = session.accessToken;
     if (!accessToken) {
@@ -460,6 +464,15 @@ export function BrandDetail({
         <aside className={styles.heroAside}>
           {isOwner ? (
             <div className={styles.editRow}>
+              <Button
+                variant="outline"
+                size="large"
+                icon="groups"
+                onClick={handleTeamWorkspace}
+                className={styles.teamButton}
+              >
+                {t.teamWorkspace}
+              </Button>
               <Button
                 variant="primary"
                 size="large"

@@ -461,6 +461,7 @@ export const ruMessages: Messages = {
     noBrandsTitle: "Брендов пока нет",
     noBrandsDescription: "Вы ещё не создали ни одного бренда. Начните с создания первого.",
     editBrand: "Редактировать бренд",
+    teamWorkspace: "Командное пространство",
     detailTitle: "Детали бренда",
     topSeller: "Топ продаж",
     topRated: "Лучшие по рейтингу",

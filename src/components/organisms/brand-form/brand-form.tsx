@@ -960,13 +960,15 @@ export function BrandForm({
       </form>
 
       {/* Branch modal — keyed so it remounts when switching between add and different edits */}
-      <BranchModal
-        key={editingBranchIndex === null ? "new" : `edit-${editingBranchIndex}`}
-        open={branchModalOpen}
-        onOpenChange={setBranchModalOpen}
-        initial={editingBranch}
-        onSave={handleBranchSave}
-      />
+      {branchModalOpen ? (
+        <BranchModal
+          key={editingBranchIndex === null ? "new" : `edit-${editingBranchIndex}`}
+          open={branchModalOpen}
+          onOpenChange={setBranchModalOpen}
+          initial={editingBranch}
+          onSave={handleBranchSave}
+        />
+      ) : null}
 
       {/* Image crop modal */}
       {cropTarget && (

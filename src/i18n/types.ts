@@ -171,6 +171,7 @@ export type Messages = {
     noBrandsTitle: string;
     noBrandsDescription: string;
     editBrand: string;
+    teamWorkspace: string;
     detailTitle: string;
     // UCR view sections
     topSeller: string;

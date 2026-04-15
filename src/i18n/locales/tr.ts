@@ -245,6 +245,7 @@ export const trMessages: Messages = {
     noBrandsDescription:
       "Henüz bir marka oluşturmadınız. İlk markanızı oluşturarak başlayın.",
     editBrand: "Markayı düzenle",
+    teamWorkspace: "Takım alanı",
     detailTitle: "Marka detayları",
     topRated: "En yüksek puanlılar",
     mostRecent: "En yeniler",

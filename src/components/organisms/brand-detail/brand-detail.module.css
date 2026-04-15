@@ -241,10 +241,16 @@
 
 .editRow {
   display: flex;
+  gap: 0.65rem;
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .editButton {
+  min-width: 13rem;
+}
+
+.teamButton {
   min-width: 13rem;
 }
 

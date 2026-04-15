@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -52,17 +52,11 @@ export function BranchModal({
   const t = messages.brands;
 
   const [draft, setDraft] = useState<BranchDraft>(
-    initial ?? createEmptyBranch(),
+    () => initial ?? createEmptyBranch(),
   );
-  const [errors, setErrors] = useState<Partial<Record<keyof BranchDraft | string, string>>>({});
-
-  // Reset draft whenever the modal opens or switches to a different branch
-  useEffect(() => {
-    if (open) {
-      setDraft(initial ?? createEmptyBranch());
-      setErrors({});
-    }
-  }, [open, initial]);
+  const [errors, setErrors] = useState<Partial<Record<keyof BranchDraft | string, string>>>(
+    {},
+  );
 
   function updateField<K extends keyof BranchDraft>(
     key: K,

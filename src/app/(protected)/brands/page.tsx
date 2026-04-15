@@ -13,6 +13,7 @@ import { BrandsUsoPage } from "@/components/organisms/brands-uso-page";
 import { BrandsUcrPage } from "@/components/organisms/brands-ucr-page";
 import { BrandDetail } from "@/components/organisms/brand-detail";
 import { BrandForm } from "@/components/organisms/brand-form";
+import { BrandTeamWorkspace } from "@/components/organisms/brand-team-workspace";
 import { fetchUserProfileById } from "@/lib/users-api";
 import { getMessages } from "@/i18n/config";
 import { getServerLocale } from "@/i18n/server";
@@ -183,6 +184,30 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
         categories={categories}
         emailVerified={user.email_verified}
         phoneVerified={user.phone_verified}
+      />
+    );
+  }
+
+  // ── Team workspace (?progress=team&id=<id>) — USO owner only ─────────────
+  if (progress === "team" && brandId) {
+    if (user.type !== "uso") return notFound();
+
+    const brand = await fetchBrandById(brandId, accessToken).catch(() => null);
+
+    if (!brand) return notFound();
+    if (brand.owner_id !== user.id) return notFound();
+
+    return (
+      <BrandTeamWorkspace
+        key={brand.id}
+        brand={brand}
+        currentUser={{
+          id: user.id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          email: user.email,
+          avatar_url: user.avatar_url ?? null,
+        }}
       />
     );
   }

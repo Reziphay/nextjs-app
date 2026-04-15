@@ -206,6 +206,7 @@ export const azMessages: Messages = {
     noBrandsTitle: "Hələ brend yoxdur",
     noBrandsDescription: "Hələ heç bir brend yaratmamısınız. İlk brendinizi yaradaraq başlayın.",
     editBrand: "Brendi redaktə et",
+    teamWorkspace: "Komanda sahəsi",
     detailTitle: "Brend detalları",
     topSeller: "Ən çox satanlar",
     topRated: "Ən yüksək qiymətləndirilənlər",
