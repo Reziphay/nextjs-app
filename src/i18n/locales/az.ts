@@ -156,7 +156,7 @@ export const azMessages: Messages = {
     eyebrow: "Çoxdilli Next.js starter",
     title: "Reziphay Next App",
     description:
-      "Layihə artıq Azərbaycan, English və Русский dilləri ilə işləyir. Default dil Azərbaycan dilidir və locale olmayan route-lar avtomatik olaraq /az prefiksinə yönləndirilir.",
+      "Layihə artıq 18 dili dəstəkləyir. Default dil Azərbaycan dilidir.",
   },
   api: {
     badge: "API",
@@ -383,7 +383,7 @@ export const azMessages: Messages = {
       ctaSecondary: "Daxil olun",
     },
     stats: {
-      languagesNumber: "3",
+      languagesNumber: "18",
       languagesLabel: "Dəstəklənən dil",
       accountTypesNumber: "2",
       accountTypesLabel: "Hesab növü",
@@ -408,7 +408,7 @@ export const azMessages: Messages = {
         "Müştərilərin 24/7 xidmətlərinizi sifariş etməsinə imkan verin. Vahid idarə panelindən gələn rezervasiyaları izləyin və idarə edin.",
       multilingualTitle: "Çoxdilli platforma",
       multilingualDesc:
-        "İlk gündən qlobal əhatə üçün qurulmuşdur. İngilis, Azərbaycan və Rus dillərinə tam dəstək, daha çox dil yolda.",
+        "İlk gündən qlobal əhatə üçün qurulub. Public və protected təcrübələr boyunca 18 dilə dəstək verir.",
       rolesTitle: "Rol əsaslı giriş",
       rolesDesc:
         "Xidmət sahibi və müştəri hesabları arasında aydın ayrılma. Hər istifadəçi öz rolu üçün hazırlanmış xüsusi bir təcrübə alır.",
@@ -457,7 +457,7 @@ export const azMessages: Messages = {
       customerF3: "Bütün rezervasiyalarınızı idarə edin",
       customerF4: "Reytinq və rəy bildirin",
       customerF5: "Sevdiyiniz brendləri saxlayın",
-      customerF6: "3 dildə dəstək",
+      customerF6: "18 dildə dəstək",
     },
     pricing: {
       sectionLabel: "Qiymətlər",
@@ -508,7 +508,7 @@ export const azMessages: Messages = {
       q3: "Bir hesabdan bir neçə brend idarə etmək olarmı?",
       a3: "Bəli. Pro və ya Korporativ plan ilə bir hesabdan bir neçə brend idarə edə bilərsiniz. Hər brendin öz profili, qalereyası, filialları və rezervasiya axını var.",
       q4: "Reziphay hansı dilləri dəstəkləyir?",
-      a4: "Platforma tam olaraq İngilis, Azərbaycan və Rus dillərindən istifadə edir. Azərbaycan dili standart dil kimi seçilib. Əlavə dil dəstəyi yolda.",
+      a4: "Platforma hazırda 18 dili dəstəkləyir. Default dil Azərbaycan dilidir.",
       q5: "Məlumatlarım təhlükəsizdirmi?",
       a5: "Bəli. Bütün məlumatlar HTTPS üzərindən ötürülür və etibarlı şəkildə saxlanılır. Hesab girişi seans əsaslı autentifikasiya ilə qorunur. Şəxsi məlumatlarınızı heç vaxt üçüncü tərəflərlə paylaşmırıq.",
       q6: "Planımı istənilən vaxt dəyişdirə və ya ləğv edə bilərəmmi?",

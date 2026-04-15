@@ -156,7 +156,7 @@ export const enMessages: Messages = {
     eyebrow: "Multilingual Next.js starter",
     title: "Reziphay Next App",
     description:
-      "The project now supports Azerbaijani, English, and Russian. Azerbaijani is the default locale, and non-localized routes automatically redirect to the /az prefix.",
+      "The project now supports 18 languages. Azerbaijani remains the default locale.",
   },
   api: {
     badge: "API",
@@ -383,7 +383,7 @@ export const enMessages: Messages = {
       ctaSecondary: "Sign in",
     },
     stats: {
-      languagesNumber: "3",
+      languagesNumber: "18",
       languagesLabel: "Languages supported",
       accountTypesNumber: "2",
       accountTypesLabel: "Account types",
@@ -408,7 +408,7 @@ export const enMessages: Messages = {
         "Let customers book your services 24/7. Manage, track, and organise incoming reservations from a clean unified dashboard.",
       multilingualTitle: "Multilingual platform",
       multilingualDesc:
-        "Built for global reach from day one. Full support for English, Azerbaijani, and Russian with more languages on the way.",
+        "Built for global reach from day one. Full support for 18 languages across public and protected experiences.",
       rolesTitle: "Role-based access",
       rolesDesc:
         "Clear separation between Service Owner and Customer accounts. Every user gets a tailored experience built for their role.",
@@ -457,7 +457,7 @@ export const enMessages: Messages = {
       customerF3: "Manage all your reservations",
       customerF4: "Leave ratings and reviews",
       customerF5: "Save your favourite brands",
-      customerF6: "Support in 3 languages",
+      customerF6: "Support in 18 languages",
     },
     pricing: {
       sectionLabel: "Pricing",
@@ -508,7 +508,7 @@ export const enMessages: Messages = {
       q3: "Can I manage multiple brands from one account?",
       a3: "Yes. With a Pro or Enterprise plan you can manage multiple brands from a single account. Each brand has its own profile, gallery, branches, and reservation stream.",
       q4: "What languages does Reziphay support?",
-      a4: "The platform is fully available in English, Azerbaijani, and Russian. Azerbaijani is the default locale. Additional language support is on the roadmap.",
+      a4: "The platform currently supports 18 languages. Azerbaijani is the default locale.",
       q5: "Is my data secure?",
       a5: "Yes. All data is transmitted over HTTPS and stored securely. Account access is protected with session-based authentication. We never share your personal data with third parties.",
       q6: "Can I cancel or change my plan at any time?",

@@ -1,7 +1,9 @@
 import type { Locale } from "@/i18n/config";
 
+type CountryLabelLocale = "az" | "en" | "ru";
+
 type CountryDirectoryItem = {
-  labels: Record<Locale, string>;
+  labels: Record<CountryLabelLocale, string>;
   prefix: string;
   value: string;
 };
@@ -281,11 +283,19 @@ export const countryDirectory = [
 
 export type CountryDirectoryValue = (typeof countryDirectory)[number]["value"];
 
-const collatorLocales: Record<Locale, string> = {
+const collatorLocales: Record<CountryLabelLocale, string> = {
   az: "az-AZ",
-  en: "en-US",
+  en: "en",
   ru: "ru-RU",
 };
+
+function resolveCountryLabelLocale(locale: Locale): CountryLabelLocale {
+  if (locale === "az" || locale === "ru") {
+    return locale;
+  }
+
+  return "en";
+}
 
 function normalizeLookupValue(value: string) {
   return value.trim().toLocaleLowerCase();
@@ -314,18 +324,21 @@ export function normalizeCountryValue(value: string) {
 }
 
 export function getCountryLabel(value: string, locale: Locale) {
-  return findCountryByValue(value)?.labels[locale] ?? value;
+  const countryLocale = resolveCountryLabelLocale(locale);
+
+  return findCountryByValue(value)?.labels[countryLocale] ?? value;
 }
 
 export function getCountryOptions(locale: Locale) {
-  const collator = new Intl.Collator(collatorLocales[locale], {
+  const countryLocale = resolveCountryLabelLocale(locale);
+  const collator = new Intl.Collator(collatorLocales[countryLocale], {
     sensitivity: "base",
   });
 
   return countryDirectory
     .map((country) => ({
       value: country.value,
-      label: country.labels[locale],
+      label: country.labels[countryLocale],
       keywords: [...Object.values(country.labels), country.prefix],
     }))
     .sort((left, right) => collator.compare(left.label, right.label));

@@ -10,9 +10,10 @@ import {
 } from "react";
 import {
   getMessages,
-  isLocale,
+  getLocaleDirection,
   localeCookieName,
   localeStorageKey,
+  resolveLocale,
   type Locale,
 } from "@/i18n/config";
 import type { Messages } from "@/i18n/types";
@@ -40,16 +41,20 @@ export function LocaleProvider({
 
   useEffect(() => {
     const storedLocale = window.localStorage.getItem(localeStorageKey);
-
-    if (storedLocale && isLocale(storedLocale)) {
-      startTransition(() => {
-        setLocale(storedLocale);
-      });
+    if (!storedLocale) {
+      return;
     }
+
+    const resolvedLocale = resolveLocale(storedLocale);
+
+    startTransition(() => {
+      setLocale(resolvedLocale);
+    });
   }, []);
 
   useEffect(() => {
     document.documentElement.lang = locale;
+    document.documentElement.dir = getLocaleDirection(locale);
     window.localStorage.setItem(localeStorageKey, locale);
     document.cookie = `${localeCookieName}=${locale}; path=/; max-age=${ONE_YEAR_IN_SECONDS}; samesite=lax`;
   }, [locale]);

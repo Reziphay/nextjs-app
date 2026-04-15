@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { getMessages } from "@/i18n/config";
+import { getLocaleDirection, getMessages } from "@/i18n/config";
 import { StoreProvider } from "@/components/providers/store-provider";
 import { getServerLocale } from "@/i18n/server";
 import { lightThemeStyle } from "@/theme/light-theme";
@@ -44,6 +44,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
+      dir={getLocaleDirection(locale)}
       data-theme="light"
       style={{ ...lightThemeStyle, ...typographyStyle }}
       suppressHydrationWarning className={cn("font-sans", geist.variable)}

@@ -6,6 +6,20 @@
   position: relative;
 }
 
+.layout[data-content-direction="rtl"] .content {
+  text-align: right;
+}
+
+.layout[data-content-direction="rtl"] .content :is(input, textarea) {
+  direction: rtl;
+  text-align: right;
+}
+
+.layout[data-content-direction="rtl"] .content :is(input[type="email"], input[type="tel"], input[type="url"], input[type="number"]) {
+  direction: ltr;
+  text-align: left;
+}
+
 /* ── Sidebar wrapper ── */
 .sidebarWrap {
   flex-shrink: 0;

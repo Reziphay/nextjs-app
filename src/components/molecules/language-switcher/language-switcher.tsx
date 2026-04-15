@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Languages } from "lucide-react";
 import { useLocale } from "@/components/providers/locale-provider";
-import { localeLabels, localeNames, locales } from "@/i18n/config";
+import {
+  getLocaleNames,
+  localeLabels,
+  locales,
+} from "@/i18n/config";
 import styles from "./language-switcher.module.css";
 
 type LanguageSwitcherProps = {
@@ -22,9 +26,10 @@ export function LanguageSwitcher({
   const { locale, messages, setLocale } = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const localeNames = getLocaleNames(locale);
 
   useEffect(() => {
-    if (variant !== "panel" || !isOpen) {
+    if (!isOpen) {
       return undefined;
     }
 
@@ -47,7 +52,7 @@ export function LanguageSwitcher({
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, variant]);
+  }, [isOpen]);
 
   if (variant === "panel") {
     return (
@@ -129,29 +134,68 @@ export function LanguageSwitcher({
 
   return (
     <div
+      ref={rootRef}
       className={joinClassNames(styles.compact, className)}
-      role="group"
-      aria-label={messages.languageSwitcherAriaLabel}
+      data-open={isOpen ? "" : undefined}
     >
-      {locales.map((entry) => {
-        const isActive = entry === locale;
+      <button
+        type="button"
+        className={styles.compactTrigger}
+        aria-label={`${messages.languageSwitcherAriaLabel}: ${localeNames[locale]}`}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        title={localeNames[locale]}
+        onClick={() => setIsOpen((open) => !open)}
+      >
+        <span className={styles.compactValue}>
+          {localeLabels[locale]}
+        </span>
+        <ChevronDown
+          aria-hidden="true"
+          size={16}
+          className={`${styles.compactChevron} ${
+            isOpen ? styles.compactChevronOpen : ""
+          }`}
+        />
+      </button>
 
-        return (
-          <button
-            key={entry}
-            type="button"
-            className={`${styles.compactButton} ${
-              isActive ? styles.compactButtonActive : ""
-            }`}
-            aria-label={`${messages.languageSwitcherAriaLabel}: ${localeNames[entry]}`}
-            aria-pressed={isActive}
-            title={localeNames[entry]}
-            onClick={() => setLocale(entry)}
-          >
-            {localeLabels[entry]}
-          </button>
-        );
-      })}
+      {isOpen ? (
+        <div
+          className={styles.compactMenu}
+          role="listbox"
+          aria-label={messages.languageSwitcherAriaLabel}
+        >
+          {locales.map((entry) => {
+            const isActive = entry === locale;
+
+            return (
+              <button
+                key={entry}
+                type="button"
+                role="option"
+                aria-selected={isActive}
+                className={`${styles.compactOption} ${
+                  isActive ? styles.compactOptionActive : ""
+                }`}
+                onClick={() => {
+                  setLocale(entry);
+                  setIsOpen(false);
+                }}
+              >
+                <span className={styles.compactOptionCode}>
+                  {localeLabels[entry]}
+                </span>
+                <span className={styles.compactOptionName}>
+                  {localeNames[entry]}
+                </span>
+                <span className={styles.compactOptionCheck} aria-hidden="true">
+                  {isActive ? <Check size={15} /> : null}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }
