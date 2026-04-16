@@ -19,7 +19,6 @@ import {
   fetchBrandTeamWorkspace,
   submitBrandRating,
   type BrandTeamWorkspace,
-  type TeamWorkspaceBranch,
   type TeamWorkspaceMember,
 } from "@/lib/brands-api";
 import { translateBackendErrorMessage } from "@/lib/backend-errors";
@@ -764,16 +763,7 @@ export function BrandDetail({
             </div>
           ) : (
             filteredBranches.map((branch) => {
-              const branchTeam: TeamWorkspaceBranch | null =
-                branchTeamMap.get(branch.id) ?? null;
-              const branchCoverUrl = proxyMediaUrl(
-                branch.cover_url ?? branchTeam?.cover_url ?? null,
-              );
-              const acceptedCount = branchTeam?.members.accepted.length ?? 0;
-              const pendingCount = branchTeam?.members.pending.length ?? 0;
-              const archivedCount =
-                (branchTeam?.members.rejected.length ?? 0) +
-                (branchTeam?.members.removed.length ?? 0);
+              const branchCoverUrl = proxyMediaUrl(branch.cover_url ?? null);
 
               return (
                 <button
@@ -826,37 +816,6 @@ export function BrandDetail({
                     ) : (
                       <span className={styles.branchMuted}>—</span>
                     )}
-
-                    {isOwner ? (
-                      <div className={styles.branchTeamMini}>
-                        <span className={styles.branchTeamMiniLabel}>
-                          {studioCopy.branchTeamBadge}
-                        </span>
-                        <div className={styles.branchTeamMiniPills}>
-                          {teamWorkspaceState === "loading" ? (
-                            <span className={styles.branchTeamMiniPill}>
-                              {studioCopy.branchTeamLoading}
-                            </span>
-                          ) : teamWorkspaceState === "error" ? (
-                            <span className={styles.branchTeamMiniPill}>
-                              {studioCopy.branchTeamError}
-                            </span>
-                          ) : (
-                            <>
-                              <span className={styles.branchTeamMiniPill}>
-                                {studioCopy.acceptedShort}: {acceptedCount}
-                              </span>
-                              <span className={styles.branchTeamMiniPill}>
-                                {studioCopy.pendingShort}: {pendingCount}
-                              </span>
-                              <span className={styles.branchTeamMiniPill}>
-                                {studioCopy.archivedShort}: {archivedCount}
-                              </span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ) : null}
                   </div>
                 </button>
               );

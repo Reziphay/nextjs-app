@@ -586,39 +586,6 @@
   font-weight: 600;
 }
 
-.branchTeamMini {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.branchTeamMiniLabel {
-  color: var(--app-primary);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.branchTeamMiniPills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-}
-
-.branchTeamMiniPill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.9rem;
-  padding: 0.3rem 0.65rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 72%, var(--brand-surface-base) 28%);
-  color: var(--app-text-strong);
-  font-size: 0.74rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
 .branchDialogContent {
   width: min(100%, 60rem);
 }
