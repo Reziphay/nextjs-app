@@ -2,11 +2,9 @@
 
 import {
   createContext,
-  startTransition,
   useContext,
   useEffect,
-  useEffectEvent,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import {
@@ -31,6 +29,20 @@ type ThemeProviderProps = {
   children: ReactNode;
 };
 
+type ThemeSnapshot = {
+  theme: ThemePreference;
+  resolvedTheme: ResolvedTheme;
+};
+
+const defaultResolvedTheme = getResolvedTheme(defaultThemePreference, false);
+const defaultThemeSnapshot: ThemeSnapshot = {
+  theme: defaultThemePreference,
+  resolvedTheme: defaultResolvedTheme,
+};
+
+let themeSnapshot = defaultThemeSnapshot;
+const themeStoreListeners = new Set<() => void>();
+
 function getSystemPrefersDark() {
   if (typeof window === "undefined") {
     return false;
@@ -39,47 +51,77 @@ function getSystemPrefersDark() {
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
-function getInitialThemePreference(): ThemePreference {
-  if (typeof document !== "undefined") {
-    return resolveThemePreference(document.documentElement.dataset.themePreference);
+function getDocumentThemeSnapshot() {
+  if (typeof document === "undefined") {
+    return defaultThemeSnapshot;
   }
 
-  return defaultThemePreference;
+  const nextSnapshot: ThemeSnapshot = {
+    theme: resolveThemePreference(document.documentElement.dataset.themePreference),
+    resolvedTheme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
+  };
+
+  if (
+    nextSnapshot.theme !== themeSnapshot.theme ||
+    nextSnapshot.resolvedTheme !== themeSnapshot.resolvedTheme
+  ) {
+    themeSnapshot = nextSnapshot;
+  }
+
+  return themeSnapshot;
 }
 
-function getInitialResolvedTheme(): ResolvedTheme {
-  if (typeof document !== "undefined") {
-    return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
-  }
+function getServerThemeSnapshot() {
+  return defaultThemeSnapshot;
+}
 
-  return getResolvedTheme(defaultThemePreference, false);
+function subscribeToThemeStore(listener: () => void) {
+  themeStoreListeners.add(listener);
+
+  return () => {
+    themeStoreListeners.delete(listener);
+  };
+}
+
+function notifyThemeStoreListeners() {
+  themeStoreListeners.forEach((listener) => {
+    listener();
+  });
+}
+
+function persistThemePreference(preference: ThemePreference) {
+  try {
+    window.localStorage.setItem(themeStorageKey, preference);
+  } catch {}
+}
+
+function applyThemePreference(preference: ThemePreference) {
+  const resolvedTheme = getResolvedTheme(preference, getSystemPrefersDark());
+
+  themeSnapshot = {
+    theme: preference,
+    resolvedTheme,
+  };
+  applyThemeToDocument(document.documentElement, preference, resolvedTheme);
+  persistThemePreference(preference);
+  notifyThemeStoreListeners();
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<ThemePreference>(getInitialThemePreference);
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(getInitialResolvedTheme);
-
-  const syncThemeToDocument = useEffectEvent((preference: ThemePreference) => {
-    const resolved = getResolvedTheme(preference, getSystemPrefersDark());
-
-    setResolvedTheme(resolved);
-    applyThemeToDocument(document.documentElement, preference, resolved);
-  });
+  const { theme, resolvedTheme } = useSyncExternalStore(
+    subscribeToThemeStore,
+    getDocumentThemeSnapshot,
+    getServerThemeSnapshot,
+  );
 
   useEffect(() => {
-    syncThemeToDocument(theme);
-
-    try {
-      window.localStorage.setItem(themeStorageKey, theme);
-    } catch {}
-
     if (theme !== "system") {
       return undefined;
     }
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
-      syncThemeToDocument("system");
+      applyThemePreference("system");
     };
 
     mediaQuery.addEventListener("change", handleChange);
@@ -90,9 +132,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   }, [theme]);
 
   function setTheme(nextTheme: ThemePreference) {
-    startTransition(() => {
-      setThemeState(nextTheme);
-    });
+    applyThemePreference(nextTheme);
   }
 
   return (

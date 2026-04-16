@@ -14,7 +14,7 @@
 /* ── Sticky page header ── */
 .pageHeader {
   position: sticky;
-  top: 0;
+  top: 0.875rem;
   z-index: 20;
   display: flex;
   align-items: center;
