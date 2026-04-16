@@ -1035,10 +1035,10 @@ export function BranchModal({
                     <Field>
                       <FieldLabel required>{t.branchFieldOpening}</FieldLabel>
                       <Input
-                        type="text"
+                        type="time"
                         value={draft.opening ?? ""}
                         placeholder="09:00"
-                        maxLength={5}
+                        step={60}
                         aria-invalid={Boolean(errors.opening)}
                         onChange={(event) =>
                           updateField("opening", event.target.value)
@@ -1052,10 +1052,10 @@ export function BranchModal({
                     <Field>
                       <FieldLabel required>{t.branchFieldClosing}</FieldLabel>
                       <Input
-                        type="text"
+                        type="time"
                         value={draft.closing ?? ""}
                         placeholder="18:00"
-                        maxLength={5}
+                        step={60}
                         aria-invalid={Boolean(errors.closing)}
                         onChange={(event) =>
                           updateField("closing", event.target.value)
@@ -1087,10 +1087,10 @@ export function BranchModal({
                         <Field>
                           <FieldLabel>Start</FieldLabel>
                           <Input
-                            type="text"
+                            type="time"
                             value={branchBreak.start}
                             placeholder="12:00"
-                            maxLength={5}
+                            step={60}
                             onChange={(event) =>
                               updateBreak(index, "start", event.target.value)
                             }
@@ -1099,10 +1099,10 @@ export function BranchModal({
                         <Field>
                           <FieldLabel>End</FieldLabel>
                           <Input
-                            type="text"
+                            type="time"
                             value={branchBreak.end}
                             placeholder="13:00"
-                            maxLength={5}
+                            step={60}
                             onChange={(event) =>
                               updateBreak(index, "end", event.target.value)
                             }
