@@ -1,35 +1,23 @@
 import { cookies } from "next/headers";
 import { NotificationTransferPage } from "@/components/organisms/notification-transfer-page/notification-transfer-page";
-import {
-  fetchMyTeamInvitations,
-  fetchIncomingTransfers,
-  fetchOutgoingTransfers,
-  fetchNotifications,
-} from "@/lib/brands-api";
+import { fetchNotificationFeed } from "@/lib/brands-api";
 import { requireProtectedRouteAccess } from "@/lib/protected-route";
 
 export default async function NotificationPage() {
-  const user = await requireProtectedRouteAccess("/notification");
+  await requireProtectedRouteAccess("/notification");
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("rzp_at")?.value ?? "";
-
-  const [incomingTransfers, outgoingTransfers, teamInvitations, notifications] =
-    user.type === "uso"
-      ? await Promise.all([
-          fetchIncomingTransfers(accessToken).catch(() => []),
-          fetchOutgoingTransfers(accessToken).catch(() => []),
-          fetchMyTeamInvitations(accessToken).catch(() => []),
-          fetchNotifications(accessToken).catch(() => []),
-        ])
-      : [[], [], [], await fetchNotifications(accessToken).catch(() => [])];
+  const initialFeed = await fetchNotificationFeed(accessToken).catch(() => ({
+    items: [],
+    meta: {
+      total_count: 0,
+      unread_count: 0,
+    },
+  }));
 
   return (
     <NotificationTransferPage
-      initialIncomingTransfers={incomingTransfers}
-      initialOutgoingTransfers={outgoingTransfers}
-      initialTeamInvitations={teamInvitations}
-      initialNotifications={notifications}
-      userType={user.type}
+      initialFeed={initialFeed}
     />
   );
 }

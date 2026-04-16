@@ -85,6 +85,97 @@ export type AppNotification = {
   created_at: string;
 };
 
+export type NotificationFeedSourceType =
+  | "notification"
+  | "team_invitation"
+  | "incoming_transfer"
+  | "outgoing_transfer";
+
+export type NotificationFeedNotificationData = Record<string, unknown> & {
+  notification_type?: string;
+  read?: boolean;
+};
+
+export type NotificationFeedPerson = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  avatar_url?: string | null;
+};
+
+export type NotificationFeedTeamInvitationData = {
+  team_member_id: string;
+  team_id: string;
+  branch_id: string;
+  branch_name: string;
+  brand_id: string;
+  brand_name: string;
+  role: TeamMemberRole;
+  invited_by?: NotificationFeedPerson | null;
+};
+
+export type NotificationFeedIncomingTransferData = {
+  transfer_id: string;
+  brand_id: string;
+  brand_name: string;
+  from_user?: NotificationFeedPerson | null;
+};
+
+export type NotificationFeedOutgoingTransferData = {
+  transfer_id: string;
+  brand_id: string;
+  brand_name: string;
+  to_user?: NotificationFeedPerson | null;
+};
+
+export type NotificationFeedItem =
+  | {
+      feed_id: string;
+      type: "notification";
+      source_id: string;
+      title: string;
+      body: string;
+      created_at: string;
+      data: NotificationFeedNotificationData;
+    }
+  | {
+      feed_id: string;
+      type: "team_invitation";
+      source_id: string;
+      title: string;
+      body: string;
+      created_at: string;
+      data: NotificationFeedTeamInvitationData;
+    }
+  | {
+      feed_id: string;
+      type: "incoming_transfer";
+      source_id: string;
+      title: string;
+      body: string;
+      created_at: string;
+      data: NotificationFeedIncomingTransferData;
+    }
+  | {
+      feed_id: string;
+      type: "outgoing_transfer";
+      source_id: string;
+      title: string;
+      body: string;
+      created_at: string;
+      data: NotificationFeedOutgoingTransferData;
+    };
+
+export type NotificationFeedMeta = {
+  total_count: number;
+  unread_count: number;
+};
+
+export type NotificationFeed = {
+  items: NotificationFeedItem[];
+  meta: NotificationFeedMeta;
+};
+
 export type BrandTransferParty = {
   id: string;
   first_name: string;
@@ -671,4 +762,44 @@ export async function markNotificationRead(
 ): Promise<void> {
   const client = createApiClient({ accessToken });
   await client.request({ url: `/notifications/${id}/read`, method: "PATCH" });
+}
+
+export async function fetchNotificationFeed(
+  accessToken: string,
+): Promise<NotificationFeed> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<NotificationFeed>>({
+    url: "/notifications/feed",
+    method: "GET",
+  });
+
+  return {
+    items: response.data?.data?.items ?? [],
+    meta: response.data?.data?.meta ?? {
+      total_count: 0,
+      unread_count: 0,
+    },
+  };
+}
+
+export async function dismissNotificationFeedItem(
+  sourceType: NotificationFeedSourceType,
+  sourceId: string,
+  accessToken: string,
+): Promise<void> {
+  const client = createApiClient({ accessToken });
+  await client.request({
+    url: `/notifications/feed/items/${sourceType}/${sourceId}`,
+    method: "DELETE",
+  });
+}
+
+export async function clearNotificationFeed(
+  accessToken: string,
+): Promise<void> {
+  const client = createApiClient({ accessToken });
+  await client.request({
+    url: "/notifications/feed/clear",
+    method: "POST",
+  });
 }

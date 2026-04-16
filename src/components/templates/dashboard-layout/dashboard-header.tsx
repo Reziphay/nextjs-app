@@ -25,10 +25,7 @@ import {
   isProtectedAppPath,
 } from "@/lib/app-routes";
 import {
-  fetchIncomingTransfers,
-  fetchMyTeamInvitations,
-  fetchNotifications,
-  fetchOutgoingTransfers,
+  fetchNotificationFeed,
 } from "@/lib/brands-api";
 import { clearAuthCookies } from "@/lib/auth-cookies";
 import { selectAuthSession, signOut } from "@/store/auth";
@@ -86,44 +83,25 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
       return undefined;
     }
 
+    const activeAccessToken = accessToken;
+
     let cancelled = false;
 
     async function loadNotificationSignal() {
       try {
-        if (session.user?.type === "uso") {
-          const [incomingTransfers, outgoingTransfers, teamInvitations, notifications] =
-            await Promise.all([
-              fetchIncomingTransfers(accessToken).catch(() => []),
-              fetchOutgoingTransfers(accessToken).catch(() => []),
-              fetchMyTeamInvitations(accessToken).catch(() => []),
-              fetchNotifications(accessToken).catch(() => []),
-            ]);
-
-          if (cancelled) {
-            return;
-          }
-
-          const visibleNotifications = notifications.filter(
-            (notification) => notification.type !== "team_invite_request",
-          );
-
-          setHasNotificationSignal(
-            incomingTransfers.length > 0 ||
-              outgoingTransfers.length > 0 ||
-              teamInvitations.length > 0 ||
-              visibleNotifications.length > 0,
-          );
-
-          return;
-        }
-
-        const notifications = await fetchNotifications(accessToken).catch(() => []);
+        const feed = await fetchNotificationFeed(activeAccessToken).catch(() => ({
+          items: [],
+          meta: {
+            total_count: 0,
+            unread_count: 0,
+          },
+        }));
 
         if (cancelled) {
           return;
         }
 
-        setHasNotificationSignal(notifications.length > 0);
+        setHasNotificationSignal(feed.meta.total_count > 0);
       } catch {
         if (!cancelled) {
           setHasNotificationSignal(false);
@@ -136,7 +114,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
     return () => {
       cancelled = true;
     };
-  }, [pathname, session.accessToken, session.user?.type]);
+  }, [pathname, session.accessToken]);
 
   function handleConfirmSignOut() {
     clearAuthCookies();
