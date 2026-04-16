@@ -255,6 +255,36 @@
   min-width: 0;
 }
 
+.textarea {
+  width: 100%;
+  min-height: 6.5rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--general-border-radius);
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface);
+  color: var(--app-text-strong);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-small);
+  line-height: 1.6;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+  outline: none;
+}
+
+.textarea:hover {
+  border-color: var(--app-border-strong);
+}
+
+.textarea:focus {
+  border-color: var(--app-primary);
+  box-shadow: 0 0 0 3px var(--app-primary-faint);
+}
+
+.textarea::placeholder {
+  color: var(--app-text-subtle);
+}
+
 /* ── Error text ── */
 .fieldError {
   margin: 0;

@@ -676,9 +676,11 @@ export function BranchPage({
                     <div className={styles.fieldRow}>
                       <Field>
                         <FieldLabel>{t.branchFieldDescription}</FieldLabel>
-                        <Input
+                        <textarea
+                          className={styles.textarea}
                           value={draft.description ?? ""}
                           placeholder={t.branchFieldDescriptionPlaceholder}
+                          rows={4}
                           onChange={(e) => updateField("description", e.target.value)}
                         />
                       </Field>

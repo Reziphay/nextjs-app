@@ -479,6 +479,21 @@ export function BrandForm({
     }
   }, [branchQueryHandled, branchQueryId, draft.branches, mode]);
 
+  useEffect(() => {
+    if (!branchModalOpen) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "auto" });
+      document.querySelector("main")?.scrollTo({ top: 0, behavior: "auto" });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [branchModalOpen]);
+
   function validate(): boolean {
     const nextErrors: Partial<Record<string, string>> = {};
     if (!draft.name.trim()) {
