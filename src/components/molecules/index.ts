@@ -3,4 +3,5 @@ export { BrandCard } from "./brand-card";
 export { FeedbackPopup } from "./feedback-popup/feedback-popup";
 export { LanguageSwitcher } from "./language-switcher";
 export { ProfileBox } from "./profile-box";
+export { ThemeSwitcher } from "./theme-switcher";
 export { UserAvatar } from "./user-avatar/user-avatar";

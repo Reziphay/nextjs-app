@@ -2,7 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { getLocaleDirection, getMessages } from "@/i18n/config";
 import { StoreProvider } from "@/components/providers/store-provider";
 import { getServerLocale } from "@/i18n/server";
-import { lightThemeStyle } from "@/theme/light-theme";
+import {
+  themeInitializationScript,
+  themeStylesheet,
+} from "@/theme/theme-config";
 import { fontLinks, typographyStyle } from "@/theme/typography";
 import "./globals.css";
 import { Geist } from "next/font/google";
@@ -51,10 +54,16 @@ export default async function RootLayout({
       lang={locale}
       dir={getLocaleDirection(locale)}
       data-theme="light"
-      style={{ ...lightThemeStyle, ...typographyStyle }}
-      suppressHydrationWarning className={cn("font-sans", geist.variable)}
+      data-theme-preference="system"
+      style={typographyStyle}
+      suppressHydrationWarning
+      className={cn("font-sans", geist.variable)}
     >
       <head>
+        <script
+          dangerouslySetInnerHTML={{ __html: themeInitializationScript }}
+        />
+        <style>{themeStylesheet}</style>
         {fontLinks.map((link) => (
           <link
             key={`${link.rel}-${link.href}`}

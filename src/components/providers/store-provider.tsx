@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { Provider } from "react-redux";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { makeStore, type AppStore } from "@/store";
 import { setStoreRef } from "@/store/store-ref";
@@ -125,8 +126,10 @@ export function StoreProvider({ children }: StoreProviderProps) {
 
   return (
     <Provider store={store}>
-      <AuthStoreSync />
-      {children}
+      <ThemeProvider>
+        <AuthStoreSync />
+        {children}
+      </ThemeProvider>
     </Provider>
   );
 }

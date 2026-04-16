@@ -18,6 +18,7 @@ import {
 import { Icon } from "@/components/icon";
 import { Logo } from "@/components/logo";
 import { LanguageSwitcher } from "@/components/molecules/language-switcher/language-switcher";
+import { ThemeSwitcher } from "@/components/molecules/theme-switcher/theme-switcher";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   getDefaultAppRouteForUserType,
@@ -228,6 +229,10 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
 
               <div className={styles.settingsSection}>
                 <LanguageSwitcher variant="panel" />
+              </div>
+
+              <div className={styles.settingsSection}>
+                <ThemeSwitcher variant="panel" />
               </div>
 
               <div className={styles.settingsDivider} />

@@ -5,7 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/atoms";
 import { Logo } from "@/components/logo";
-import { LanguageSwitcher, UserAvatar } from "@/components/molecules";
+import {
+  LanguageSwitcher,
+  ThemeSwitcher,
+  UserAvatar,
+} from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   getDefaultAppRouteForUserType,
@@ -85,6 +89,7 @@ export function AuthHeader() {
       </nav>
 
       <div className={styles.actions}>
+        <ThemeSwitcher className={styles.switcher} />
         <LanguageSwitcher className={styles.switcher} />
 
         <div className={styles.authActions}>
@@ -180,6 +185,7 @@ export function AuthHeader() {
         </div>
 
         <div className={styles.mobilePanelContent}>
+          <ThemeSwitcher className={styles.mobileSwitcher} variant="panel" />
           <LanguageSwitcher className={styles.mobileSwitcher} variant="panel" />
 
           <nav

@@ -41,7 +41,7 @@ import {
 } from "@/lib/brands-api";
 import { translateBackendErrorMessage } from "@/lib/backend-errors";
 import type { Brand, BrandCategory, BrandGalleryItem, Branch } from "@/types/brand";
-import { BranchModal } from "./branch-modal";
+import { BranchPage } from "./branch-page";
 import styles from "./brand-form.module.css";
 
 // Branch draft preserves the server id for persisted branches
@@ -861,6 +861,24 @@ export function BrandForm({
     );
   }
 
+  if (branchModalOpen) {
+    return (
+      <BranchPage
+        key={editingBranchIndex === null ? "new" : `edit-${editingBranchIndex}`}
+        open={branchModalOpen}
+        onOpenChange={(open) => {
+          setBranchModalOpen(open);
+          if (!open) {
+            setEditingBranchIndex(null);
+          }
+        }}
+        initial={editingBranch}
+        brandId={mode === "edit" ? (persistedBrand?.id ?? brand?.id ?? null) : null}
+        onSave={handleBranchSave}
+      />
+    );
+  }
+
   return (
     <div className={styles.wrapper}>
       {/* ── Sticky header ── */}
@@ -1142,23 +1160,6 @@ export function BrandForm({
           {renderFormActions()}
         </div>
       </form>
-
-      {/* Branch modal — keyed so it remounts when switching between add and different edits */}
-      {branchModalOpen ? (
-        <BranchModal
-          key={editingBranchIndex === null ? "new" : `edit-${editingBranchIndex}`}
-          open={branchModalOpen}
-          onOpenChange={(open) => {
-            setBranchModalOpen(open);
-            if (!open) {
-              setEditingBranchIndex(null);
-            }
-          }}
-          initial={editingBranch}
-          brandId={mode === "edit" ? (persistedBrand?.id ?? brand?.id ?? null) : null}
-          onSave={handleBranchSave}
-        />
-      ) : null}
 
       {/* Image crop modal */}
       {cropTarget && (
