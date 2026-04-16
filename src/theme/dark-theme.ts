@@ -1,8 +1,8 @@
 import type { CSSProperties } from "react";
 
 const palette = [
-  "#00111c", "#212529", "#212529",
-  "#f5b82e", "#f5b82e", "#f5b82e",
+  "#00111c", "hsla(210, 11%, 14%, 1.00)", "#212529",
+  "#eff6ff", "#f5b82e", "#f5b82e",
   "#dbeafe", "#eff6ff", "#f8fbff",
 ];
 
