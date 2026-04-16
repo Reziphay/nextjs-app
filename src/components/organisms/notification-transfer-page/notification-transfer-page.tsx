@@ -2,9 +2,11 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { isAxiosError } from "axios";
 import { Button } from "@/components/atoms/button";
 import { Icon } from "@/components/icon";
+import { ProfileBox } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   acceptTeamInvitation,
@@ -26,6 +28,20 @@ import styles from "./notification-transfer-page.module.css";
 
 type NotificationTransferPageProps = {
   initialFeed: NotificationFeed;
+  teamInvitationDetails?: Record<string, TeamInvitationDetail>;
+};
+
+export type TeamInvitationDetail = {
+  brand_name: string;
+  brand_logo_url?: string | null;
+  brand_gallery_url?: string | null;
+  brand_categories?: string[];
+  brand_description?: string | null;
+  branch_name: string;
+  branch_cover_url?: string | null;
+  branch_description?: string | null;
+  branch_address?: string | null;
+  branch_availability?: string | null;
 };
 
 type TeamInvitationCopy = {
@@ -49,6 +65,8 @@ type NotificationCenterCopy = {
   transferFromLabel: string;
   transferToLabel: string;
   inviterLabel: string;
+  brandLabel: string;
+  branchLabel: string;
 };
 
 const EN_TEAM_COPY: TeamInvitationCopy = {
@@ -89,6 +107,8 @@ const EN_CENTER_COPY: NotificationCenterCopy = {
   transferFromLabel: "From",
   transferToLabel: "To",
   inviterLabel: "Invited by",
+  brandLabel: "Brand",
+  branchLabel: "Branch",
 };
 
 const TR_CENTER_COPY: NotificationCenterCopy = {
@@ -105,6 +125,8 @@ const TR_CENTER_COPY: NotificationCenterCopy = {
   transferFromLabel: "Gönderen",
   transferToLabel: "Alıcı",
   inviterLabel: "Davet eden",
+  brandLabel: "Marka",
+  branchLabel: "Şube",
 };
 
 const AZ_CENTER_COPY: NotificationCenterCopy = {
@@ -121,6 +143,8 @@ const AZ_CENTER_COPY: NotificationCenterCopy = {
   transferFromLabel: "Göndərən",
   transferToLabel: "Alan",
   inviterLabel: "Dəvət edən",
+  brandLabel: "Brend",
+  branchLabel: "Filial",
 };
 
 function getTeamInvitationCopy(locale: string) {
@@ -213,6 +237,7 @@ function getFeedImageUrl(item: NotificationFeedItem) {
 
 export function NotificationTransferPage({
   initialFeed,
+  teamInvitationDetails = {},
 }: NotificationTransferPageProps) {
   const { locale, messages } = useLocale();
   const t = messages.brands;
@@ -424,6 +449,43 @@ export function NotificationTransferPage({
                     : null;
             const personName = getPersonLabel(person);
             const imageUrl = getFeedImageUrl(item);
+            const teamInvitationBrandHref =
+              item.type === "team_invitation"
+                ? `/brands?id=${item.data.brand_id}`
+                : null;
+            const teamInvitationInviterHref =
+              item.type === "team_invitation" && item.data.invited_by?.id
+                ? `/account?id=${item.data.invited_by.id}`
+                : null;
+            const invitationDetail =
+              item.type === "team_invitation"
+                ? teamInvitationDetails[item.feed_id]
+                : undefined;
+            const brandPreviewUrl =
+              item.type === "team_invitation"
+                ? proxyMediaUrl(
+                    invitationDetail?.brand_logo_url ??
+                      invitationDetail?.brand_gallery_url ??
+                      null,
+                  )
+                : undefined;
+            const branchPreviewUrl =
+              item.type === "team_invitation"
+                ? proxyMediaUrl(
+                    invitationDetail?.branch_cover_url ??
+                      invitationDetail?.brand_gallery_url ??
+                      invitationDetail?.brand_logo_url ??
+                      null,
+                  )
+                : undefined;
+            const brandSummary =
+              invitationDetail?.brand_categories?.filter(Boolean).join(" · ") ||
+              invitationDetail?.brand_description ||
+              null;
+            const branchSummary =
+              invitationDetail?.branch_address ||
+              invitationDetail?.branch_description ||
+              null;
 
             return (
               <article
@@ -431,32 +493,28 @@ export function NotificationTransferPage({
                 className={`${styles.streamCard} ${item.type === "notification" && item.data.read === false ? styles.streamCardUnread : ""}`}
               >
                 <div className={styles.streamCardTop}>
-                  <div
-                    className={`${styles.streamMedia} ${!imageUrl ? styles.streamMediaNeutral : ""}`}
-                  >
-                    {imageUrl ? (
-                      <Image
-                        src={imageUrl}
-                        alt={personName || item.title}
-                        fill
-                        sizes="64px"
-                        className={styles.streamMediaImage}
-                      />
-                    ) : (
-                      <Icon
-                        icon={
-                          item.type === "team_invitation"
-                            ? "account_tree"
-                            : item.type === "notification"
-                              ? "notifications"
-                              : "sell"
-                        }
-                        size={20}
-                        color="current"
-                        className={styles.streamMediaIcon}
-                      />
-                    )}
-                  </div>
+                  {item.type !== "team_invitation" ? (
+                    <div
+                      className={`${styles.streamMedia} ${!imageUrl ? styles.streamMediaNeutral : ""}`}
+                    >
+                      {imageUrl ? (
+                        <Image
+                          src={imageUrl}
+                          alt={personName || item.title}
+                          fill
+                          sizes="64px"
+                          className={styles.streamMediaImage}
+                        />
+                      ) : (
+                        <Icon
+                          icon={item.type === "notification" ? "notifications" : "sell"}
+                          size={20}
+                          color="current"
+                          className={styles.streamMediaIcon}
+                        />
+                      )}
+                    </div>
+                  ) : null}
 
                   <div className={styles.streamContent}>
                     <div className={styles.streamMetaRow}>
@@ -490,29 +548,144 @@ export function NotificationTransferPage({
 
                     <p className={styles.streamBody}>{item.body}</p>
 
-                    {item.type === "team_invitation" && personName ? (
-                      <div className={styles.personRow}>
-                        <div className={styles.personAvatarWrap}>
-                          {imageUrl ? (
-                            <Image
-                              src={imageUrl}
-                              alt={personName}
-                              fill
-                              sizes="40px"
-                              className={styles.personAvatar}
+                    {item.type === "team_invitation" ? (
+                      <div className={styles.detailGrid}>
+                        <div className={styles.detailBlock}>
+                          {teamInvitationInviterHref && personName ? (
+                            <ProfileBox
+                              userId={item.data.invited_by?.id}
+                              name={personName}
+                              avatar={imageUrl ?? "/reziphay-logo.png"}
+                              label={centerCopy.inviterLabel}
+                              className={styles.detailProfileBox}
                             />
+                          ) : personName ? (
+                            <ProfileBox
+                              name={personName}
+                              avatar={imageUrl ?? "/reziphay-logo.png"}
+                              label={centerCopy.inviterLabel}
+                              className={styles.detailProfileBox}
+                            />
+                          ) : null}
+                        </div>
+
+                        <div className={styles.detailBlock}>
+                          <span className={styles.detailLabel}>
+                            {centerCopy.brandLabel}
+                          </span>
+                          {teamInvitationBrandHref ? (
+                            <Link
+                              href={teamInvitationBrandHref}
+                              className={styles.detailPreviewCard}
+                            >
+                              <div
+                                className={`${styles.detailPreviewMedia} ${!brandPreviewUrl ? styles.detailPreviewMediaNeutral : ""}`}
+                              >
+                                {brandPreviewUrl ? (
+                                  <Image
+                                    src={brandPreviewUrl}
+                                    alt={invitationDetail?.brand_name ?? item.data.brand_name}
+                                    fill
+                                    sizes="88px"
+                                    className={styles.detailPreviewImage}
+                                  />
+                                ) : (
+                                  <Icon
+                                    icon="storefront"
+                                    size={22}
+                                    color="current"
+                                    className={styles.detailPreviewIcon}
+                                  />
+                                )}
+                              </div>
+                              <div className={styles.detailPreviewContent}>
+                                <span className={styles.detailLink}>
+                                  {invitationDetail?.brand_name ?? item.data.brand_name}
+                                </span>
+                                {brandSummary ? (
+                                  <span className={styles.detailSubline}>
+                                    {brandSummary}
+                                  </span>
+                                ) : null}
+                              </div>
+                            </Link>
                           ) : (
-                            <Icon
-                              icon="person"
-                              size={18}
-                              color="current"
-                              className={styles.personAvatarFallback}
-                            />
+                            <div className={styles.detailPreviewCard}>
+                              <div
+                                className={`${styles.detailPreviewMedia} ${!brandPreviewUrl ? styles.detailPreviewMediaNeutral : ""}`}
+                              >
+                                {brandPreviewUrl ? (
+                                  <Image
+                                    src={brandPreviewUrl}
+                                    alt={invitationDetail?.brand_name ?? item.data.brand_name}
+                                    fill
+                                    sizes="88px"
+                                    className={styles.detailPreviewImage}
+                                  />
+                                ) : (
+                                  <Icon
+                                    icon="storefront"
+                                    size={22}
+                                    color="current"
+                                    className={styles.detailPreviewIcon}
+                                  />
+                                )}
+                              </div>
+                              <div className={styles.detailPreviewContent}>
+                                <span className={styles.detailValue}>
+                                  {invitationDetail?.brand_name ?? item.data.brand_name}
+                                </span>
+                                {brandSummary ? (
+                                  <span className={styles.detailSubline}>
+                                    {brandSummary}
+                                  </span>
+                                ) : null}
+                              </div>
+                            </div>
                           )}
                         </div>
-                        <div className={styles.personContent}>
-                          <span className={styles.personLabel}>{centerCopy.inviterLabel}</span>
-                          <span className={styles.personName}>{personName}</span>
+
+                        <div className={styles.detailBlock}>
+                          <span className={styles.detailLabel}>
+                            {centerCopy.branchLabel}
+                          </span>
+                          <div className={styles.detailPreviewCard}>
+                            <div
+                              className={`${styles.detailPreviewMedia} ${!branchPreviewUrl ? styles.detailPreviewMediaNeutral : ""}`}
+                            >
+                              {branchPreviewUrl ? (
+                                <Image
+                                  src={branchPreviewUrl}
+                                  alt={invitationDetail?.branch_name ?? item.data.branch_name}
+                                  fill
+                                  sizes="88px"
+                                  className={styles.detailPreviewImage}
+                                />
+                              ) : (
+                                <Icon
+                                  icon="home_work"
+                                  size={22}
+                                  color="current"
+                                  className={styles.detailPreviewIcon}
+                                />
+                              )}
+                            </div>
+                            <div className={styles.detailPreviewContent}>
+                              <span className={styles.detailValue}>
+                                {invitationDetail?.branch_name ?? item.data.branch_name}
+                              </span>
+                              {branchSummary ? (
+                                <span className={styles.detailSubline}>
+                                  {branchSummary}
+                                </span>
+                              ) : null}
+                              {invitationDetail?.branch_availability ? (
+                                <span className={styles.detailHint}>
+                                  {invitationDetail.branch_availability}
+                                </span>
+                              ) : null}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ) : null}

@@ -228,10 +228,136 @@
   line-height: 1.65;
 }
 
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.detailBlock {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.85rem;
+  border-radius: 1rem;
+  border: 1px solid var(--app-border-soft);
+  background: color-mix(in srgb, var(--app-bg-surface) 78%, transparent);
+}
+
+.detailProfileBox {
+  width: 100%;
+}
+
+.detailLabel {
+  color: var(--app-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.detailValue {
+  color: var(--app-text-strong);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.detailLink,
+.personLink {
+  text-decoration: none;
+}
+
+.detailPreviewCard {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.detailPreviewMedia {
+  position: relative;
+  width: 5.5rem;
+  height: 5.5rem;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface);
+  color: var(--app-primary);
+}
+
+.detailPreviewMediaNeutral {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detailPreviewImage {
+  object-fit: cover;
+}
+
+.detailPreviewIcon {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+}
+
+.detailPreviewContent {
+  min-width: 0;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.detailLink {
+  color: var(--app-primary-deep);
+  font-size: var(--font-size-small);
+  font-weight: 800;
+  line-height: 1.45;
+  transition: color 140ms ease;
+}
+
+.detailLink:hover,
+.detailPreviewCard:hover .detailLink {
+  color: var(--app-primary);
+}
+
+.detailSubline {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-extra-small);
+  line-height: 1.5;
+}
+
+.detailHint {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--app-primary) 10%, transparent);
+  color: var(--app-primary-deep);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
 .personRow {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.personLink {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  color: inherit;
+}
+
+.personLink:hover .personName {
+  color: var(--app-primary-deep);
 }
 
 .personAvatarWrap {
@@ -317,5 +443,18 @@
 
   .actions :global(button) {
     width: 100%;
+  }
+
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .detailPreviewCard {
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+  }
+
+  .detailPreviewMedia {
+    width: 4.5rem;
+    height: 4.5rem;
   }
 }
