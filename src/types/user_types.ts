@@ -13,7 +13,6 @@ type UserProfileFields = {
   last_name: string;
   birthday: Date;
   country: string;
-  country_prefix: string | null;
   email: string;
 };
 
@@ -43,10 +42,7 @@ export type User = UserIdentityFields &
 
 export type Users = User[];
 
-export type RegisterRequestBody = Omit<
-  UserProfileFields,
-  "birthday" | "country_prefix"
-> & {
+export type RegisterRequestBody = Omit<UserProfileFields, "birthday"> & {
   birthday: string;
   password: string;
   type: RegisterUserType;
@@ -54,17 +50,14 @@ export type RegisterRequestBody = Omit<
 
 export type RegisterFormValues = RegisterRequestBody;
 
-export type AccountProfileDraft = Omit<
-  UserProfileFields,
-  "birthday" | "country_prefix"
-> & {
+export type AccountProfileDraft = Omit<UserProfileFields, "birthday"> & {
   birthday: string;
+  // Full E.164 phone number, e.g. "+9941234567". Empty string means no phone.
   phone: string;
 };
 
 export type UpdateMyAccountRequestBody = Omit<AccountProfileDraft, "phone"> & {
   phone: string | null;
-  country_prefix: string | null;
 };
 
 export type LoginRequestBody = {

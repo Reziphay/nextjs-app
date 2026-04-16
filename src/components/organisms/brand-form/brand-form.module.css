@@ -519,6 +519,10 @@
   line-height: 1.5;
 }
 
+.wrapper > .feedback {
+  margin-bottom: 1.25rem;
+}
+
 .feedbackSuccess {
   background: var(--app-success-bg);
   color: var(--app-success-strong);
