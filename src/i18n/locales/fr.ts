@@ -416,6 +416,7 @@ export const frMessages: Messages = {
     detailMetricCategories: "Catégories",
     detailMetricBranches: "Succursales",
     detailMetricGallery: "Éléments de galerie",
+    detailMetricTeamMembers: "Membres de l’équipe",
     detailMetricRating: "Note",
     detailNoGalleryMedia:
       "Aucune image de galerie n’a encore été ajoutée pour cette marque.",

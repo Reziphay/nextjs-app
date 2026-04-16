@@ -621,6 +621,7 @@ export const ruMessages: Messages = {
     detailMetricCategories: "Категории",
     detailMetricBranches: "Филиалы",
     detailMetricGallery: "Изображения галереи",
+    detailMetricTeamMembers: "Участники команды",
     detailMetricRating: "Рейтинг",
     detailNoGalleryMedia: "Для этого бренда пока не добавлены изображения в галерею.",
     detailGalleryPrevious: "Предыдущее изображение",

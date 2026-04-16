@@ -444,6 +444,7 @@
     minmax(10rem, 1fr);
   gap: 1rem;
   align-items: center;
+  width: 100%;
   padding: 1.1rem 1.25rem;
   border-radius: var(--general-border-radius);
   border: 1px solid color-mix(in srgb, var(--brand-border) 80%, transparent);
@@ -453,6 +454,8 @@
     color-mix(in srgb, var(--brand-surface-overlay-soft) 74%, var(--brand-surface-base) 26%)
   );
   box-shadow: 0 8px 24px color-mix(in srgb, var(--brand-shadow-base) 40%, transparent);
+  text-align: left;
+  cursor: pointer;
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease,
@@ -463,6 +466,11 @@
   border-color: color-mix(in srgb, var(--app-primary) 26%, var(--brand-border) 74%);
   box-shadow: 0 12px 30px color-mix(in srgb, var(--brand-shadow-base) 48%, transparent);
   transform: translateY(-1px);
+}
+
+.branchRow:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
 }
 
 .branchIdentity {
@@ -521,21 +529,6 @@
   font-size: 0.88rem;
   font-weight: 600;
   line-height: 1.5;
-}
-
-.branchInlineActions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.branchActionLink {
-  padding-inline: 0;
-}
-
-.branchEditIcon {
-  flex-shrink: 0;
 }
 
 .branchCell {
@@ -929,10 +922,6 @@
   margin-top: 0.2rem;
   color: var(--app-text-muted);
   font-size: 0.82rem;
-}
-
-.branchStudioEditButton {
-  align-self: flex-start;
 }
 
 .branchDialogSection,

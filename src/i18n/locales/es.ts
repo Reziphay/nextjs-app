@@ -410,6 +410,7 @@ export const esMessages: Messages = {
     detailMetricCategories: "Categorías",
     detailMetricBranches: "Sucursales",
     detailMetricGallery: "Elementos de galería",
+    detailMetricTeamMembers: "Miembros del equipo",
     detailMetricRating: "Valoración",
     detailNoGalleryMedia:
       "Aún no se han añadido imágenes de galería para esta marca.",

@@ -2,8 +2,6 @@
 
 import { isAxiosError } from "axios";
 import {
-  startTransition,
-  useDeferredValue,
   useEffect,
   useMemo,
   useRef,
@@ -19,6 +17,11 @@ import {
   AlertDialogTitle,
 } from "@/components/atoms/alert-dialog";
 import { Button } from "@/components/atoms/button";
+import { ImageCropModal } from "@/components/atoms/image-crop-modal/image-crop-modal";
+import {
+  Combobox,
+  type ComboboxOption,
+} from "@/components/atoms/combobox";
 import {
   Field,
   FieldDescription,
@@ -59,6 +62,11 @@ type BranchModalProps = {
   onSave: (branch: BranchDraft) => void;
 };
 
+type CropTarget = {
+  file: File;
+  aspectRatio: "1:1";
+};
+
 type StudioCopy = {
   subtitleNew: string;
   subtitleEdit: string;
@@ -66,11 +74,9 @@ type StudioCopy = {
   visualDescription: string;
   visualPendingTitle: string;
   visualPendingBody: string;
-  visualPromptHint: string;
   visualAddAction: string;
   visualReplaceAction: string;
   visualRemoveAction: string;
-  visualFrontendOnly: string;
   visualReadyBadge: string;
   visualEmptyBadge: string;
   teamTitle: string;
@@ -113,30 +119,26 @@ type StudioCopy = {
 
 const EN_COPY: StudioCopy = {
   subtitleNew:
-    "Create the branch foundation first, then attach the future media and team layer.",
+    "Fill in the branch details and save when ready.",
   subtitleEdit:
-    "Edit this branch as an operational unit with its own visual identity and team logic.",
+    "Update this branch's details, photo, and team from here.",
   visualTitle: "Branch visual identity",
   visualDescription:
-    "Each branch now supports its own dedicated cover photo, separate from the brand shell.",
-  visualPendingTitle: "Add a branch cover",
+    "This photo is optional. If you add one, it replaces the default icon in the branch list.",
+  visualPendingTitle: "Add a branch photo",
   visualPendingBody:
-    "Upload a 16:9 cover to make this branch feel like its own operational space.",
-  visualPromptHint:
-    "Covers are now saved to the backend with `branch_cover` media usage.",
+    "Choose one photo, crop it in a square frame, and we will use it as the branch image.",
   visualAddAction: "Add branch photo",
   visualReplaceAction: "Replace photo",
   visualRemoveAction: "Remove photo",
-  visualFrontendOnly:
-    "This cover will persist with the branch. Removing it sends `cover_media_id: null` to the backend.",
-  visualReadyBadge: "Cover ready",
-  visualEmptyBadge: "No cover yet",
+  visualReadyBadge: "Photo ready",
+  visualEmptyBadge: "No photo",
   teamTitle: "Branch team",
   teamDescription:
-    "Team ownership belongs to the branch itself. Invite and manage USO members directly from this modal.",
-  teamUnlockedTitle: "Team activates after the branch exists",
+    "Manage the people working in this branch.",
+  teamUnlockedTitle: "Team becomes available after the branch is saved",
   teamUnlockedBody:
-    "Save the branch first. The brand owner becomes the default team owner automatically, then you can invite other USO users.",
+    "Save the branch first, then you can invite people here.",
   teamLoading: "Loading branch team...",
   teamError: "Branch team could not be loaded.",
   retryTeam: "Retry team",
@@ -167,37 +169,33 @@ const EN_COPY: StudioCopy = {
   rejectedStatus: "Rejected",
   removedStatus: "Removed",
   branchIdentityTitle: "Branch identity",
-  teamCreatedAfterSave: "Team is created automatically after the branch is saved.",
-  coverPlannedBadge: "Media next",
-  teamLiveBadge: "Team live",
+  teamCreatedAfterSave: "The team section opens after the branch is saved.",
+  coverPlannedBadge: "Photo",
+  teamLiveBadge: "Active",
 };
 
 const TR_COPY: StudioCopy = {
   subtitleNew:
-    "Önce şube temelini kur, sonra gelecekteki medya ve takım katmanını bunun üstüne ekle.",
+    "Şube bilgilerini doldur ve hazır olduğunda kaydet.",
   subtitleEdit:
-    "Bu şubeyi artık kendi görsel kimliği ve takım mantığı olan operasyonel bir birim gibi düzenle.",
+    "Bu şubenin bilgilerini, fotoğrafını ve takımını buradan güncelle.",
   visualTitle: "Şube görsel kimliği",
   visualDescription:
-    "Her şube artık brand kabuğundan ayrı kendi cover fotoğrafını taşıyabiliyor.",
-  visualPendingTitle: "Şube kapağı ekle",
+    "Bu foto zorunlu değil. Eklersen şube listesinde varsayılan ikon yerine görünür.",
+  visualPendingTitle: "Şube fotoğrafı ekle",
   visualPendingBody:
-    "Bu şubeyi kendi operasyon alanı gibi hissettirmek için 16:9 bir kapak yükle.",
-  visualPromptHint:
-    "Kapaklar artık backend'e `branch_cover` media usage ile kaydoluyor.",
+    "Tek bir foto seç, kare çerçevede crop et ve şube görseli olarak kullan.",
   visualAddAction: "Şube fotoğrafı ekle",
   visualReplaceAction: "Fotoğrafı değiştir",
   visualRemoveAction: "Fotoğrafı kaldır",
-  visualFrontendOnly:
-    "Bu kapak artık branch ile birlikte kalıcı olarak saklanır. Kaldırmak backend'e `cover_media_id: null` gönderir.",
-  visualReadyBadge: "Kapak hazır",
-  visualEmptyBadge: "Henüz kapak yok",
+  visualReadyBadge: "Foto hazır",
+  visualEmptyBadge: "Foto yok",
   teamTitle: "Şube takımı",
   teamDescription:
-    "Takım sahipliği doğrudan şubeye aittir. USO kullanıcılarını buradan davet edip yönetebilirsin.",
-  teamUnlockedTitle: "Takım, branch kaydedildikten sonra aktif olur",
+    "Bu şubede çalışan kişileri buradan yönetebilirsin.",
+  teamUnlockedTitle: "Takım bölümü şube kaydedildikten sonra açılır",
   teamUnlockedBody:
-    "Önce branch'i kaydet. Brand owner otomatik olarak varsayılan takım sahibi olur, sonra diğer USO kullanıcılarını davet edebilirsin.",
+    "Önce şubeyi kaydet, sonra buraya kişileri davet edebilirsin.",
   teamLoading: "Şube takımı yükleniyor...",
   teamError: "Şube takımı yüklenemedi.",
   retryTeam: "Takımı yenile",
@@ -228,37 +226,33 @@ const TR_COPY: StudioCopy = {
   rejectedStatus: "Reddedildi",
   removedStatus: "Kaldırıldı",
   branchIdentityTitle: "Şube kimliği",
-  teamCreatedAfterSave: "Takım, branch kaydedildikten sonra otomatik oluşturulur.",
-  coverPlannedBadge: "Medya sıradaki",
-  teamLiveBadge: "Takım aktif",
+  teamCreatedAfterSave: "Şube kaydedildikten sonra takım bölümü açılır.",
+  coverPlannedBadge: "Fotoğraf",
+  teamLiveBadge: "Aktif",
 };
 
 const AZ_COPY: StudioCopy = {
   subtitleNew:
-    "Əvvəl filialın əsasını qur, sonra gələcək media və komanda qatını bunun üzərinə əlavə et.",
+    "Filial məlumatlarını doldur və hazır olduqda yadda saxla.",
   subtitleEdit:
-    "Bu filialı artıq öz vizual kimliyi və komanda məntiqi olan əməliyyat vahidi kimi redaktə et.",
+    "Bu filialın məlumatlarını, fotosunu və komandasını buradan yenilə.",
   visualTitle: "Filial vizual kimliyi",
   visualDescription:
-    "Hər filial artıq brand qabığından ayrı öz cover fotosuna sahib ola bilir.",
-  visualPendingTitle: "Filial cover-i əlavə et",
+    "Bu foto məcburi deyil. Əlavə etsən filial siyahısında default ikon yerinə görünəcək.",
+  visualPendingTitle: "Filial fotosu əlavə et",
   visualPendingBody:
-    "Bu filialı ayrıca əməliyyat sahəsi kimi göstərmək üçün 16:9 cover yüklə.",
-  visualPromptHint:
-    "Cover-lər artıq backend-ə `branch_cover` media usage ilə yazılır.",
+    "Bir foto seç, kvadrat çərçivədə crop et və filial şəkli kimi istifadə et.",
   visualAddAction: "Filial fotosu əlavə et",
   visualReplaceAction: "Fotonu dəyiş",
   visualRemoveAction: "Fotonu sil",
-  visualFrontendOnly:
-    "Bu cover artıq filial ilə birlikdə daimi saxlanır. Silmək backend-ə `cover_media_id: null` göndərir.",
-  visualReadyBadge: "Cover hazırdır",
-  visualEmptyBadge: "Hələ cover yoxdur",
+  visualReadyBadge: "Foto hazırdır",
+  visualEmptyBadge: "Foto yoxdur",
   teamTitle: "Filial komandası",
   teamDescription:
-    "Komanda sahibliyi birbaşa filiala aiddir. USO istifadəçilərini buradan dəvət edib idarə edə bilərsən.",
-  teamUnlockedTitle: "Komanda filial save olunduqdan sonra aktiv olur",
+    "Bu filialda çalışan şəxsləri buradan idarə edə bilərsən.",
+  teamUnlockedTitle: "Komanda bölməsi filial yadda saxlandıqdan sonra açılır",
   teamUnlockedBody:
-    "Əvvəl filialı save et. Brand owner avtomatik olaraq default komanda sahibi olacaq, sonra digər USO istifadəçilərini dəvət edə bilərsən.",
+    "Əvvəl filialı yadda saxla, sonra buraya şəxsləri dəvət edə bilərsən.",
   teamLoading: "Filial komandası yüklənir...",
   teamError: "Filial komandası yüklənmədi.",
   retryTeam: "Komandanı yenilə",
@@ -289,9 +283,9 @@ const AZ_COPY: StudioCopy = {
   rejectedStatus: "Rədd edildi",
   removedStatus: "Silindi",
   branchIdentityTitle: "Filial kimliyi",
-  teamCreatedAfterSave: "Komanda filial save olunduqdan sonra avtomatik yaradılır.",
-  coverPlannedBadge: "Media növbəti",
-  teamLiveBadge: "Komanda aktivdir",
+  teamCreatedAfterSave: "Filial yadda saxlandıqdan sonra komanda bölməsi açılır.",
+  coverPlannedBadge: "Foto",
+  teamLiveBadge: "Aktivdir",
 };
 
 function getCopy(locale: string) {
@@ -363,6 +357,7 @@ export function BranchModal({
   const session = useAppSelector(selectAuthSession);
   const accessToken = session.accessToken;
   const visualInputRef = useRef<HTMLInputElement>(null);
+  const searchTimerRef = useRef<number | null>(null);
   const [draft, setDraft] = useState<BranchDraft>(() => initial ?? createEmptyBranch());
   const [errors, setErrors] = useState<
     Partial<Record<keyof BranchDraft | string, string>>
@@ -375,9 +370,15 @@ export function BranchModal({
     tone: "success" | "error";
     message: string;
   } | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const deferredQuery = useDeferredValue(searchQuery.trim());
-  const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
+  const [cropTarget, setCropTarget] = useState<CropTarget | null>(null);
+  const [searchInputValue, setSearchInputValue] = useState("");
+  const [searchComboValue, setSearchComboValue] = useState("");
+  const [searchItems, setSearchItems] = useState<ComboboxOption[]>([]);
+  const [searchItemsMap, setSearchItemsMap] = useState<
+    Map<string, UserSearchResult>
+  >(new Map());
+  const [selectedSearchTarget, setSelectedSearchTarget] =
+    useState<UserSearchResult | null>(null);
   const [searchState, setSearchState] = useState<"idle" | "loading" | "done" | "error">(
     "idle",
   );
@@ -390,8 +391,15 @@ export function BranchModal({
     setTeam(null);
     setTeamState(initial?.id && brandId && accessToken ? "loading" : "idle");
     setTeamFeedback(null);
-    setSearchQuery("");
-    setSearchResults([]);
+    setCropTarget(null);
+    if (searchTimerRef.current) {
+      window.clearTimeout(searchTimerRef.current);
+    }
+    setSearchInputValue("");
+    setSearchComboValue("");
+    setSearchItems([]);
+    setSearchItemsMap(new Map());
+    setSelectedSearchTarget(null);
     setSearchState("idle");
     setInviteUserId(null);
     setMemberActionId(null);
@@ -480,58 +488,14 @@ export function BranchModal({
     [team],
   );
 
-  useEffect(() => {
-    if (!teamEnabled || deferredQuery.length < 2 || !team || !accessToken) {
-      return;
-    }
-
-    const resolvedAccessToken: string = accessToken;
-
-    let active = true;
-
-    const timeoutId = window.setTimeout(async () => {
-      try {
-        const memberIds = new Set(
-          [...acceptedMembers, ...pendingMembers].map((member) => member.user_id),
-        );
-        const results = await searchUsoUsers(deferredQuery, resolvedAccessToken);
-
-        if (!active) {
-          return;
-        }
-
-        startTransition(() => {
-          setSearchResults(
-            results.filter(
-              (user) =>
-                !memberIds.has(user.id) && user.id !== session.user?.id,
-            ),
-          );
-          setSearchState("done");
-        });
-      } catch {
-        if (!active) {
-          return;
-        }
-
-        setSearchResults([]);
-        setSearchState("error");
+  useEffect(
+    () => () => {
+      if (searchTimerRef.current) {
+        window.clearTimeout(searchTimerRef.current);
       }
-    }, 260);
-
-    return () => {
-      active = false;
-      window.clearTimeout(timeoutId);
-    };
-  }, [
-    acceptedMembers,
-    accessToken,
-    deferredQuery,
-    pendingMembers,
-    session.user?.id,
-    team,
-    teamEnabled,
-  ]);
+    },
+    [],
+  );
 
   function updateField<K extends keyof BranchDraft>(key: K, value: BranchDraft[K]) {
     setDraft((prev) => ({ ...prev, [key]: value }));
@@ -562,23 +526,31 @@ export function BranchModal({
 
   function handleVisualChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
+    if (visualInputRef.current) {
+      visualInputRef.current.value = "";
+    }
+
     if (!file) return;
 
+    setCropTarget({
+      file,
+      aspectRatio: "1:1",
+    });
+  }
+
+  function handleVisualCrop(croppedFile: File) {
     if (draft.photoPreviewUrl?.startsWith("blob:")) {
       URL.revokeObjectURL(draft.photoPreviewUrl);
     }
 
-    const previewUrl = URL.createObjectURL(file);
+    const previewUrl = URL.createObjectURL(croppedFile);
     setDraft((prev) => ({
       ...prev,
-      photoFile: file,
+      photoFile: croppedFile,
       photoPreviewUrl: previewUrl,
       photoRemoved: false,
     }));
-
-    if (visualInputRef.current) {
-      visualInputRef.current.value = "";
-    }
+    setCropTarget(null);
   }
 
   function handleRemoveVisual() {
@@ -685,8 +657,11 @@ export function BranchModal({
         resolvedAccessToken,
       );
       await refreshTeam();
-      setSearchQuery("");
-      setSearchResults([]);
+      setSearchInputValue("");
+      setSearchComboValue("");
+      setSearchItems([]);
+      setSearchItemsMap(new Map());
+      setSelectedSearchTarget(null);
       setSearchState("idle");
       setTeamFeedback({ tone: "success", message: copy.inviteSuccess });
     } catch (error) {
@@ -697,6 +672,62 @@ export function BranchModal({
     } finally {
       setInviteUserId(null);
     }
+  }
+
+  function handleSearchInput(event: React.FormEvent<HTMLInputElement>) {
+    const query = (event.target as HTMLInputElement).value.trim();
+    setSearchInputValue(query);
+    setSearchComboValue("");
+    setSelectedSearchTarget(null);
+    setTeamFeedback(null);
+
+    if (searchTimerRef.current) {
+      window.clearTimeout(searchTimerRef.current);
+    }
+
+    if (!teamEnabled || !team || !accessToken || query.length < 2) {
+      setSearchItems([]);
+      setSearchItemsMap(new Map());
+      setSearchState("idle");
+      return;
+    }
+
+    setSearchState("loading");
+    const resolvedAccessToken: string = accessToken;
+    const memberIds = new Set(
+      [...acceptedMembers, ...pendingMembers].map((member) => member.user_id),
+    );
+
+    searchTimerRef.current = window.setTimeout(async () => {
+      try {
+        const results = await searchUsoUsers(query, resolvedAccessToken);
+        const filteredResults = results.filter(
+          (user) => !memberIds.has(user.id) && user.id !== session.user?.id,
+        );
+
+        setSearchItemsMap(new Map(filteredResults.map((user) => [user.id, user])));
+        setSearchItems(
+          filteredResults.map((user) => ({
+            value: user.id,
+            label: `${user.first_name} ${user.last_name}`.trim(),
+            description: user.email,
+            keywords: [user.email ?? "", user.first_name, user.last_name],
+          })),
+        );
+        setSearchState("done");
+      } catch {
+        setSearchItems([]);
+        setSearchItemsMap(new Map());
+        setSearchState("error");
+      }
+    }, 260);
+  }
+
+  function handleSearchValueChange(value: string | string[]) {
+    const userId = Array.isArray(value) ? value[0] : value;
+    setSearchComboValue(userId ?? "");
+    setSelectedSearchTarget(searchItemsMap.get(userId ?? "") ?? null);
+    setTeamFeedback(null);
   }
 
   async function handleRemove(member: TeamWorkspaceMember) {
@@ -894,11 +925,6 @@ export function BranchModal({
                   </Button>
                 ) : null}
               </div>
-
-              <p className={styles.visualNote}>{copy.visualPromptHint}</p>
-              <p className={styles.visualFrontendOnly}>
-                {copy.visualFrontendOnly}
-              </p>
             </article>
           </section>
 
@@ -1138,19 +1164,49 @@ export function BranchModal({
               <div className={styles.teamPanel}>
                 <Field>
                   <FieldLabel>{copy.searchLabel}</FieldLabel>
-                  <Input
-                    value={searchQuery}
+                  <Combobox
+                    items={searchItems}
+                    value={searchComboValue}
                     placeholder={copy.searchPlaceholder}
-                    onChange={(event) => {
-                      const nextValue = event.target.value;
-                      setSearchQuery(nextValue);
-                      if (nextValue.trim().length < 2) {
-                        setSearchResults([]);
-                        setSearchState("idle");
-                      } else {
-                        setSearchState("loading");
-                      }
-                      setTeamFeedback(null);
+                    emptyMessage={
+                      searchState === "loading"
+                        ? copy.searchLoading
+                        : searchState === "error"
+                          ? copy.teamError
+                          : searchInputValue.length >= 2
+                            ? copy.searchEmpty
+                            : copy.searchHint
+                    }
+                    onValueChange={handleSearchValueChange}
+                    onInput={handleSearchInput}
+                    renderItem={(item) => {
+                      const user = searchItemsMap.get(item.value);
+                      const avatarUrl = proxyMediaUrl(user?.avatar_url);
+
+                      return (
+                        <div className={styles.memberIdentity}>
+                          <div
+                            className={styles.avatar}
+                            style={
+                              avatarUrl
+                                ? { backgroundImage: `url(${avatarUrl})` }
+                                : undefined
+                            }
+                            data-has-image={avatarUrl ? "true" : "false"}
+                          >
+                            {!avatarUrl && user
+                              ? getInitials({
+                                  first_name: user.first_name,
+                                  last_name: user.last_name,
+                                } as TeamWorkspaceMember)
+                              : null}
+                          </div>
+                          <div className={styles.memberMeta}>
+                            <strong>{item.label}</strong>
+                            {item.description ? <span>{item.description}</span> : null}
+                          </div>
+                        </div>
+                      );
                     }}
                   />
                   <FieldDescription>{copy.searchHint}</FieldDescription>
@@ -1168,64 +1224,71 @@ export function BranchModal({
                   </div>
                 ) : null}
 
-                <div className={styles.searchState}>
-                  {searchState === "loading"
-                    ? copy.searchLoading
-                    : searchState === "error"
-                      ? copy.teamError
-                      : deferredQuery.length < 2
-                        ? copy.searchIdle
-                        : searchResults.length === 0
-                          ? copy.searchEmpty
-                          : copy.searchReady}
-                </div>
+                {!selectedSearchTarget ? (
+                  <div className={styles.searchState}>
+                    {searchState === "loading"
+                      ? copy.searchLoading
+                      : searchState === "error"
+                        ? copy.teamError
+                        : searchInputValue.length < 2
+                          ? copy.searchIdle
+                          : searchItems.length === 0
+                            ? copy.searchEmpty
+                            : copy.searchReady}
+                  </div>
+                ) : null}
 
-                {searchResults.length > 0 ? (
+                {selectedSearchTarget ? (
                   <div className={styles.searchList}>
-                    {searchResults.map((result) => {
-                      const avatarUrl = proxyMediaUrl(result.avatar_url);
+                    <article
+                      key={selectedSearchTarget.id}
+                      className={styles.memberCard}
+                    >
+                      <div className={styles.memberIdentity}>
+                        <div
+                          className={styles.avatar}
+                          style={
+                            proxyMediaUrl(selectedSearchTarget.avatar_url)
+                              ? {
+                                  backgroundImage: `url(${proxyMediaUrl(
+                                    selectedSearchTarget.avatar_url,
+                                  )})`,
+                                }
+                              : undefined
+                          }
+                          data-has-image={
+                            proxyMediaUrl(selectedSearchTarget.avatar_url)
+                              ? "true"
+                              : "false"
+                          }
+                        >
+                          {!proxyMediaUrl(selectedSearchTarget.avatar_url)
+                            ? getInitials({
+                                first_name: selectedSearchTarget.first_name,
+                                last_name: selectedSearchTarget.last_name,
+                              } as TeamWorkspaceMember)
+                            : null}
+                        </div>
+                        <div className={styles.memberMeta}>
+                          <strong>
+                            {`${selectedSearchTarget.first_name} ${selectedSearchTarget.last_name}`.trim()}
+                          </strong>
+                          <span>{selectedSearchTarget.email}</span>
+                        </div>
+                      </div>
 
-                      return (
-                        <article key={result.id} className={styles.memberCard}>
-                          <div className={styles.memberIdentity}>
-                            <div
-                              className={styles.avatar}
-                              style={
-                                avatarUrl
-                                  ? { backgroundImage: `url(${avatarUrl})` }
-                                  : undefined
-                              }
-                              data-has-image={avatarUrl ? "true" : "false"}
-                            >
-                              {!avatarUrl
-                                ? getInitials({
-                                    first_name: result.first_name,
-                                    last_name: result.last_name,
-                                  } as TeamWorkspaceMember)
-                                : null}
-                            </div>
-                            <div className={styles.memberMeta}>
-                              <strong>
-                                {`${result.first_name} ${result.last_name}`.trim()}
-                              </strong>
-                              <span>{result.email}</span>
-                            </div>
-                          </div>
-
-                          <Button
-                            variant="primary"
-                            size="small"
-                            icon="add"
-                            isLoading={inviteUserId === result.id}
-                            onClick={() => {
-                              void handleInvite(result);
-                            }}
-                          >
-                            {copy.inviteAction}
-                          </Button>
-                        </article>
-                      );
-                    })}
+                      <Button
+                        variant="primary"
+                        size="small"
+                        icon="add"
+                        isLoading={inviteUserId === selectedSearchTarget.id}
+                        onClick={() => {
+                          void handleInvite(selectedSearchTarget);
+                        }}
+                      >
+                        {copy.inviteAction}
+                      </Button>
+                    </article>
                   </div>
                 ) : null}
 
@@ -1399,6 +1462,14 @@ export function BranchModal({
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
+      {cropTarget ? (
+        <ImageCropModal
+          file={cropTarget.file}
+          aspectRatio={cropTarget.aspectRatio}
+          onCrop={handleVisualCrop}
+          onCancel={() => setCropTarget(null)}
+        />
+      ) : null}
     </AlertDialog>
   );
 }

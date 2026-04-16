@@ -408,6 +408,7 @@ export const arMessages: Messages = {
     detailMetricCategories: "الفئات",
     detailMetricBranches: "الفروع",
     detailMetricGallery: "عناصر المعرض",
+    detailMetricTeamMembers: "أعضاء الفريق",
     detailMetricRating: "التقييم",
     detailNoGalleryMedia:
       "لم تتم إضافة صور معرض لهذه العلامة التجارية بعد.",

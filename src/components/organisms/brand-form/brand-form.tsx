@@ -159,6 +159,102 @@ function getBranchUploadKey(branch: BranchDraft, index: number) {
   return branch.id ?? `new-${index}`;
 }
 
+function loadImageFromFile(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new window.Image();
+
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Failed to load image file"));
+    };
+
+    image.src = objectUrl;
+  });
+}
+
+function canvasToFile(
+  canvas: HTMLCanvasElement,
+  fileName: string,
+  type: string,
+  quality = 0.92,
+): Promise<File> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error("Failed to export canvas"));
+          return;
+        }
+
+        resolve(new File([blob], fileName, { type }));
+      },
+      type,
+      quality,
+    );
+  });
+}
+
+async function prepareBranchCoverUpload(file: File): Promise<File> {
+  const image = await loadImageFromFile(file);
+  const canvas = document.createElement("canvas");
+  const width = 1280;
+  const height = 720;
+  const inset = 72;
+  const squareSize = height - inset * 2;
+  const squareX = (width - squareSize) / 2;
+  const squareY = inset;
+  const baseName = file.name.replace(/\.[^.]+$/, "");
+  const ctx = canvas.getContext("2d");
+  const sourceSize = Math.min(image.naturalWidth, image.naturalHeight);
+  const sourceX = (image.naturalWidth - sourceSize) / 2;
+  const sourceY = (image.naturalHeight - sourceSize) / 2;
+
+  canvas.width = width;
+  canvas.height = height;
+
+  if (!ctx) {
+    return file;
+  }
+
+  const backgroundGradient = ctx.createLinearGradient(0, 0, width, height);
+  backgroundGradient.addColorStop(0, "#0f172a");
+  backgroundGradient.addColorStop(1, "#1e293b");
+  ctx.fillStyle = backgroundGradient;
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.save();
+  ctx.globalAlpha = 0.18;
+  ctx.drawImage(image, sourceX, sourceY, sourceSize, sourceSize, 0, 0, width, width);
+  ctx.restore();
+
+  ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+  ctx.fillRect(squareX - 14, squareY - 14, squareSize + 28, squareSize + 28);
+
+  ctx.drawImage(
+    image,
+    sourceX,
+    sourceY,
+    sourceSize,
+    sourceSize,
+    squareX,
+    squareY,
+    squareSize,
+    squareSize,
+  );
+
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.24)";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(squareX, squareY, squareSize, squareSize);
+
+  return canvasToFile(canvas, `${baseName}-branch-cover.jpg`, "image/jpeg");
+}
+
 type CropTarget = {
   file: File;
   aspectRatio: "1:1" | "16:9";
@@ -401,8 +497,9 @@ export function BrandForm({
       case "media.invalid_logo_ratio":
         return t.logoRatioError;
       case "media.invalid_gallery_ratio":
-      case "media.invalid_cover_ratio":
         return t.galleryRatioError;
+      case "media.invalid_cover_ratio":
+        return t.errorGeneric;
       default:
         return (
           translateBackendErrorMessage(apiMessage, messages.backendErrors) ??
@@ -447,8 +544,9 @@ export function BrandForm({
           continue;
         }
 
+        const normalizedCoverFile = await prepareBranchCoverUpload(branch.photoFile);
         const uploaded = await uploadBrandMedia(
-          branch.photoFile,
+          normalizedCoverFile,
           accessToken,
           "branch_cover",
         );

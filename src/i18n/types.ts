@@ -346,6 +346,7 @@ export type Messages = {
     detailMetricCategories: string;
     detailMetricBranches: string;
     detailMetricGallery: string;
+    detailMetricTeamMembers: string;
     detailMetricRating: string;
     detailNoGalleryMedia: string;
     detailGalleryPrevious: string;

@@ -413,6 +413,7 @@ export const trMessages: Messages = {
     detailMetricCategories: "Kategoriler",
     detailMetricBranches: "Şubeler",
     detailMetricGallery: "Galeri öğeleri",
+    detailMetricTeamMembers: "Takım üyeleri",
     detailMetricRating: "Puan",
     detailNoGalleryMedia:
       "Bu marka için henüz galeri görseli eklenmedi.",

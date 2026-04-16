@@ -375,6 +375,7 @@ export const azMessages: Messages = {
     detailMetricCategories: "Kateqoriyalar",
     detailMetricBranches: "Filiallar",
     detailMetricGallery: "Qalereya şəkilləri",
+    detailMetricTeamMembers: "Komanda üzvləri",
     detailMetricRating: "Reytinq",
     detailNoGalleryMedia: "Bu brend üçün hələ qalereya şəkli əlavə edilməyib.",
     detailGalleryPrevious: "Əvvəlki şəkil",

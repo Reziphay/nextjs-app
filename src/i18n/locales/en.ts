@@ -375,6 +375,7 @@ export const enMessages: Messages = {
     detailMetricCategories: "Categories",
     detailMetricBranches: "Branches",
     detailMetricGallery: "Gallery items",
+    detailMetricTeamMembers: "Team members",
     detailMetricRating: "Rating",
     detailNoGalleryMedia: "No gallery images have been added for this brand yet.",
     detailGalleryPrevious: "Previous image",

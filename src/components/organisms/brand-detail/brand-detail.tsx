@@ -40,7 +40,6 @@ type BranchFilter = "all" | "open247" | "withContact";
 
 type BranchStudioCopy = {
   rowHint: string;
-  editBranch: string;
   branchVisualTitle: string;
   branchVisualLead: string;
   branchVisualHint: string;
@@ -61,18 +60,17 @@ type BranchStudioCopy = {
 };
 
 const EN_BRANCH_STUDIO_COPY: BranchStudioCopy = {
-  rowHint: "Open branch studio. Team and photo belong to this branch.",
-  editBranch: "Edit branch",
+  rowHint: "Tap the branch row to view its details.",
   branchVisualTitle: "Branch photo",
   branchVisualLead:
-    "This branch now carries its own dedicated cover photo, separate from the brand shell.",
+    "Photo and quick details for this branch.",
   branchVisualHint:
-    "Branch cover is now persisted on the backend and shown wherever this branch appears.",
+    "Branch photo",
   branchVisualEmptyHint:
-    "This branch still has no cover. Open branch edit to upload one.",
+    "No photo has been added for this branch yet.",
   branchTeamTitle: "Branch team",
   branchTeamLead:
-    "This branch owns its own team. Invitations and membership live at branch level.",
+    "People working in this branch.",
   branchTeamEmpty: "Only the owner is attached here right now.",
   branchTeamLoading: "Loading branch team...",
   branchTeamError: "Branch team data could not be loaded.",
@@ -81,24 +79,23 @@ const EN_BRANCH_STUDIO_COPY: BranchStudioCopy = {
   archivedShort: "Archived",
   ownerShort: "Owner",
   memberShort: "Member",
-  branchPhotoBadge: "Photo next",
-  branchPhotoReadyBadge: "Cover live",
-  branchTeamBadge: "Branch team",
+  branchPhotoBadge: "No photo",
+  branchPhotoReadyBadge: "Photo ready",
+  branchTeamBadge: "Team",
 };
 
 const TR_BRANCH_STUDIO_COPY: BranchStudioCopy = {
-  rowHint: "Şube stüdyosunu aç. Takım ve foto artık bu şubeye ait.",
-  editBranch: "Şubeyi düzenle",
+  rowHint: "Detayları görmek için şube satırına dokun.",
   branchVisualTitle: "Şube fotoğrafı",
   branchVisualLead:
-    "Bu şube artık brand kabuğundan ayrı kendi cover fotoğrafını taşıyor.",
+    "Bu şubeye ait fotoğraf ve kısa bilgiler.",
   branchVisualHint:
-    "Şube kapağı artık backend'de kalıcı tutuluyor ve bu şube göründüğü yerlerde kullanılabiliyor.",
+    "Şube fotoğrafı",
   branchVisualEmptyHint:
-    "Bu şubenin henüz kapağı yok. Yüklemek için şube düzenlemeyi aç.",
+    "Bu şube için henüz fotoğraf eklenmedi.",
   branchTeamTitle: "Şube takımı",
   branchTeamLead:
-    "Bu şube kendi takımına sahiptir. Davet ve üyelik mantığı branch seviyesinde yaşar.",
+    "Bu şubede çalışan kişiler.",
   branchTeamEmpty: "Şimdilik burada sadece owner bağlı.",
   branchTeamLoading: "Şube takımı yükleniyor...",
   branchTeamError: "Şube takım verisi yüklenemedi.",
@@ -107,24 +104,23 @@ const TR_BRANCH_STUDIO_COPY: BranchStudioCopy = {
   archivedShort: "Arşiv",
   ownerShort: "Sahip",
   memberShort: "Üye",
-  branchPhotoBadge: "Foto sıradaki",
-  branchPhotoReadyBadge: "Kapak aktif",
-  branchTeamBadge: "Şube takımı",
+  branchPhotoBadge: "Foto yok",
+  branchPhotoReadyBadge: "Foto hazır",
+  branchTeamBadge: "Takım",
 };
 
 const AZ_BRANCH_STUDIO_COPY: BranchStudioCopy = {
-  rowHint: "Filial studiyasını aç. Komanda və foto artıq bu filiala aiddir.",
-  editBranch: "Filialı redaktə et",
+  rowHint: "Detalları görmək üçün filial sətrinə toxun.",
   branchVisualTitle: "Filial fotosu",
   branchVisualLead:
-    "Bu filial artıq brand qabığından ayrı öz cover fotosunu daşıyır.",
+    "Bu filiala aid foto və qısa məlumatlar.",
   branchVisualHint:
-    "Filial cover-i artıq backend-də daimi saxlanılır və filial görünən bütün yerlərdə istifadə oluna bilir.",
+    "Filial fotosu",
   branchVisualEmptyHint:
-    "Bu filialın hələ cover-i yoxdur. Yükləmək üçün filial redaktəsini aç.",
+    "Bu filial üçün hələ foto əlavə olunmayıb.",
   branchTeamTitle: "Filial komandası",
   branchTeamLead:
-    "Bu filial öz komandasına sahibdir. Dəvət və üzvlük məntiqi filial səviyyəsində yaşayır.",
+    "Bu filialda çalışan şəxslər.",
   branchTeamEmpty: "Hazırda burada yalnız owner qoşulub.",
   branchTeamLoading: "Filial komandası yüklənir...",
   branchTeamError: "Filial komanda məlumatı yüklənmədi.",
@@ -133,9 +129,9 @@ const AZ_BRANCH_STUDIO_COPY: BranchStudioCopy = {
   archivedShort: "Arxiv",
   ownerShort: "Sahib",
   memberShort: "Üzv",
-  branchPhotoBadge: "Foto növbəti",
-  branchPhotoReadyBadge: "Cover aktivdir",
-  branchTeamBadge: "Filial komandası",
+  branchPhotoBadge: "Foto yoxdur",
+  branchPhotoReadyBadge: "Foto hazırdır",
+  branchTeamBadge: "Komanda",
 };
 
 function getBranchStudioCopy(locale: string) {
@@ -363,6 +359,17 @@ export function BrandDetail({
       ),
     [teamWorkspace],
   );
+  const totalBrandTeamMembers = useMemo(() => {
+    const memberIds = new Set<string>();
+
+    for (const branchItem of teamWorkspace?.branches ?? []) {
+      for (const member of branchItem.members.accepted) {
+        memberIds.add(member.user_id);
+      }
+    }
+
+    return memberIds.size;
+  }, [teamWorkspace]);
 
   useEffect(() => {
     const token = accessToken;
@@ -491,8 +498,14 @@ export function BrandDetail({
       value: String(branches.length),
     },
     {
-      label: t.detailMetricGallery,
-      value: String(gallery.length),
+      label: t.detailMetricTeamMembers,
+      value: !isOwner
+        ? "—"
+        : teamWorkspaceState === "loading"
+          ? "…"
+          : teamWorkspaceState === "ready"
+            ? String(totalBrandTeamMembers)
+            : "—",
     },
     {
       label: t.detailMetricRating,
@@ -506,10 +519,6 @@ export function BrandDetail({
 
   function handleEdit() {
     router.push(`/brands?progress=edit&id=${brandState.id}`);
-  }
-
-  function handleEditBranch(branchId: string) {
-    router.push(`/brands?progress=edit&id=${brandState.id}&branch=${branchId}`);
   }
 
   async function handleRate(value: number) {
@@ -767,7 +776,13 @@ export function BrandDetail({
                 (branchTeam?.members.removed.length ?? 0);
 
               return (
-                <article key={branch.id} className={styles.branchRow}>
+                <button
+                  key={branch.id}
+                  type="button"
+                  className={styles.branchRow}
+                  onClick={() => setSelectedBranch(branch)}
+                  aria-label={`${branch.name} — ${t.detailBranchOpenDetails}`}
+                >
                   <div className={styles.branchIdentity}>
                     {branchCoverUrl ? (
                       <div className={styles.branchCoverThumb}>
@@ -787,26 +802,6 @@ export function BrandDetail({
                     <div className={styles.branchIdentityText}>
                       <p className={styles.branchName}>{branch.name}</p>
                       <p className={styles.branchNote}>{studioCopy.rowHint}</p>
-                      <div className={styles.branchInlineActions}>
-                        <Button
-                          variant="ghost"
-                          size="small"
-                          onClick={() => setSelectedBranch(branch)}
-                          className={styles.branchActionLink}
-                        >
-                          {t.detailBranchOpenDetails}
-                        </Button>
-                        {isOwner ? (
-                          <Button
-                            variant="icon"
-                            size="small"
-                            icon="edit"
-                            onClick={() => handleEditBranch(branch.id)}
-                            aria-label={`${studioCopy.editBranch}: ${branch.name}`}
-                            className={styles.branchEditIcon}
-                          />
-                        ) : null}
-                      </div>
                     </div>
                   </div>
 
@@ -863,7 +858,7 @@ export function BrandDetail({
                       </div>
                     ) : null}
                   </div>
-                </article>
+                </button>
               );
             })
           )}
@@ -1169,17 +1164,6 @@ export function BrandDetail({
                       </p>
                     )}
 
-                    {isOwner ? (
-                      <Button
-                        variant="outline"
-                        size="small"
-                        icon="edit"
-                        onClick={() => handleEditBranch(selectedBranch.id)}
-                        className={styles.branchStudioEditButton}
-                      >
-                        {studioCopy.editBranch}
-                      </Button>
-                    ) : null}
                   </article>
                 </div>
 
