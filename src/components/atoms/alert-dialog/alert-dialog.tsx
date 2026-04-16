@@ -5,6 +5,7 @@ import {
   cloneElement,
   createContext,
   isValidElement,
+  useCallback,
   useContext,
   useEffect,
   useId,
@@ -96,21 +97,32 @@ export function AlertDialog({
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const dialogId = useId();
   const open = controlledOpen ?? uncontrolledOpen;
+  const onOpenChangeRef = useRef(onOpenChange);
+  const isControlled = controlledOpen !== undefined;
+
+  useEffect(() => {
+    onOpenChangeRef.current = onOpenChange;
+  }, [onOpenChange]);
+
+  const setOpen = useCallback(
+    (nextOpen: boolean) => {
+      if (!isControlled) {
+        setUncontrolledOpen(nextOpen);
+      }
+
+      onOpenChangeRef.current?.(nextOpen);
+    },
+    [isControlled],
+  );
 
   const contextValue = useMemo<AlertDialogContextValue>(
     () => ({
       descriptionId: `${dialogId}-description`,
       open,
-      setOpen(nextOpen) {
-        if (controlledOpen === undefined) {
-          setUncontrolledOpen(nextOpen);
-        }
-
-        onOpenChange?.(nextOpen);
-      },
+      setOpen,
       titleId: `${dialogId}-title`,
     }),
-    [controlledOpen, dialogId, onOpenChange, open],
+    [dialogId, open, setOpen],
   );
 
   return (
