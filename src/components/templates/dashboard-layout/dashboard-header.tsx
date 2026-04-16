@@ -24,6 +24,12 @@ import {
   getDashboardBreadcrumbs,
   isProtectedAppPath,
 } from "@/lib/app-routes";
+import {
+  fetchIncomingTransfers,
+  fetchMyTeamInvitations,
+  fetchNotifications,
+  fetchOutgoingTransfers,
+} from "@/lib/brands-api";
 import { clearAuthCookies } from "@/lib/auth-cookies";
 import { selectAuthSession, signOut } from "@/store/auth";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -44,6 +50,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
   const db = messages.dashboard;
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
+  const [hasNotificationSignal, setHasNotificationSignal] = useState(false);
   const settingsWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -72,6 +79,65 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
     };
   }, [settingsOpen]);
 
+  useEffect(() => {
+    const accessToken = session.accessToken;
+
+    if (!accessToken) {
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    async function loadNotificationSignal() {
+      try {
+        if (session.user?.type === "uso") {
+          const [incomingTransfers, outgoingTransfers, teamInvitations, notifications] =
+            await Promise.all([
+              fetchIncomingTransfers(accessToken).catch(() => []),
+              fetchOutgoingTransfers(accessToken).catch(() => []),
+              fetchMyTeamInvitations(accessToken).catch(() => []),
+              fetchNotifications(accessToken).catch(() => []),
+            ]);
+
+          if (cancelled) {
+            return;
+          }
+
+          const visibleNotifications = notifications.filter(
+            (notification) => notification.type !== "team_invite_request",
+          );
+
+          setHasNotificationSignal(
+            incomingTransfers.length > 0 ||
+              outgoingTransfers.length > 0 ||
+              teamInvitations.length > 0 ||
+              visibleNotifications.length > 0,
+          );
+
+          return;
+        }
+
+        const notifications = await fetchNotifications(accessToken).catch(() => []);
+
+        if (cancelled) {
+          return;
+        }
+
+        setHasNotificationSignal(notifications.length > 0);
+      } catch {
+        if (!cancelled) {
+          setHasNotificationSignal(false);
+        }
+      }
+    }
+
+    void loadNotificationSignal();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname, session.accessToken, session.user?.type]);
+
   function handleConfirmSignOut() {
     clearAuthCookies();
     dispatch(signOut());
@@ -82,6 +148,8 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
 
   const notificationsActive = pathname === "/notification";
   const settingsActive = pathname === "/settings";
+  const showNotificationBadge =
+    !notificationsActive && Boolean(session.accessToken) && hasNotificationSignal;
   const defaultHref = getDefaultAppRouteForUserType(session.user?.type);
   const crumbs = isProtectedAppPath(pathname)
     ? getDashboardBreadcrumbs({
@@ -149,7 +217,12 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
           title={db.notifications}
           className={`${styles.supportLink} ${notificationsActive ? styles.iconActionActive : ""}`}
         >
-          <Icon icon="notifications" size={16} color="current" className={styles.supportIcon} />
+          <span className={styles.iconLinkInner}>
+            <Icon icon="notifications" size={16} color="current" className={styles.supportIcon} />
+            {showNotificationBadge ? (
+              <span className={styles.notificationBadge} aria-hidden />
+            ) : null}
+          </span>
         </Link>
 
         <div ref={settingsWrapRef} className={styles.settingsWrap}>
