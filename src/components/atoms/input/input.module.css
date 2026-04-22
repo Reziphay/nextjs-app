@@ -33,6 +33,9 @@
 
 .input {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   min-height: var(--general-control-height);
   padding: 0 calc(var(--general-control-height) * 0.35);
   border: 1px solid var(--app-border-soft);
@@ -49,6 +52,52 @@
     box-shadow 160ms ease,
     color 160ms ease,
     opacity 160ms ease;
+}
+
+.passwordInputWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.passwordInput {
+  padding-right: calc(var(--general-control-height) + 0.35rem);
+}
+
+.passwordToggle {
+  display: inline-flex;
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--general-control-height) - 0.5rem);
+  height: calc(var(--general-control-height) - 0.5rem);
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--general-border-radius-md) - 0.125rem);
+  background: transparent;
+  color: var(--app-text-subtle);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease;
+}
+
+.passwordToggle:hover:not(:disabled) {
+  background: var(--app-bg-surface);
+  color: var(--app-text-strong);
+}
+
+.passwordToggle:focus-visible {
+  outline: 3px solid var(--app-focus-ring);
+  outline-offset: 2px;
+}
+
+.passwordToggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .input::placeholder {
@@ -86,6 +135,10 @@
 .field[data-invalid] .input {
   border-color: var(--app-error);
   box-shadow: 0 0 0 0.214rem var(--app-error-bg);
+}
+
+.field[data-invalid] .passwordToggle {
+  color: var(--app-error);
 }
 
 .field[data-disabled] .fieldLabel,

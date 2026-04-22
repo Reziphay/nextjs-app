@@ -180,7 +180,7 @@ export function AuthHeader() {
         </div>
 
         <div className={styles.mobilePanelContent}>
-          <LanguageSwitcher className={styles.mobileSwitcher} />
+          <LanguageSwitcher className={styles.mobileSwitcher} variant="panel" />
 
           <nav
             aria-label={messages.navigationAriaLabel}

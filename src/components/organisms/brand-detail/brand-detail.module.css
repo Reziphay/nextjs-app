@@ -1,0 +1,1254 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.pageAlert {
+  width: 100%;
+  max-width: none;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 0.7fr);
+  gap: 1.5rem;
+  padding: 2rem;
+  border-radius: var(--general-border-radius);
+  border: 1px solid var(--app-border-soft);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand-surface-base) 98%, transparent),
+    color-mix(in srgb, var(--brand-surface-overlay-soft) 76%, var(--brand-surface-base) 24%)
+  );
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--brand-shadow-base) 64%, transparent);
+}
+
+.heroMain {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.heroTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.heroTitle {
+  margin: 0;
+  color: var(--brand-text-heading);
+  font-size: clamp(1.2rem, 2vw, 1.35rem);
+  font-weight: 900;
+  line-height: 0.96;
+  letter-spacing: -0.06em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.36rem 0.78rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.statusSuccess {
+  background: color-mix(in srgb, var(--brand-success-bg) 88%, var(--brand-surface-base) 12%);
+  color: var(--brand-success);
+}
+
+.statusWarm {
+  background: color-mix(in srgb, var(--brand-warning) 16%, var(--brand-surface-base) 84%);
+  color: var(--brand-warning);
+}
+
+.statusError {
+  background: color-mix(in srgb, var(--brand-error-bg) 88%, var(--brand-surface-base) 12%);
+  color: var(--brand-error);
+}
+
+.statusClosed {
+  background: color-mix(in srgb, var(--brand-disabled-bg) 72%, var(--brand-surface-base) 28%);
+  color: var(--brand-disabled-text);
+}
+
+.eyebrow {
+  color: var(--app-primary);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+}
+
+.heroDescription {
+  margin: 0;
+  max-width: 46rem;
+  color: var(--brand-text-muted);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.ratingSummary {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.ratingValue {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--brand-warning);
+}
+
+.ratingCount {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--app-text-muted);
+}
+
+.ratingActionCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1rem 1.1rem;
+  max-width: 28rem;
+  border-radius: var(--general-border-radius);
+  border: 1px solid
+    color-mix(in srgb, var(--brand-accent) 10%, var(--brand-border));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand-surface-overlay-strong) 32%, var(--brand-surface-base) 68%),
+    color-mix(in srgb, var(--brand-surface-base) 96%, transparent)
+  );
+}
+
+.ratingActionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ratingActionLabel {
+  color: var(--app-text-strong);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.ratingButtons {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.ratingButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 999px;
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface-strong);
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    background-color 160ms ease;
+}
+
+.ratingButton:hover:not(:disabled) {
+  border-color: var(--brand-warning);
+  transform: translateY(-1px);
+}
+
+.ratingButton:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.ratingButtonActive {
+  border-color: color-mix(
+    in srgb,
+    var(--brand-warning) 55%,
+    var(--brand-border)
+  );
+  background: color-mix(in srgb, var(--brand-warning) 10%, var(--brand-surface-base) 90%);
+}
+
+.ratingButtonIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.ratingFeedback {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.categoryRail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ownerRow {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 0.75rem;
+  padding-top: 0;
+}
+
+.ownerProfile {
+  width: fit-content;
+  max-width: min(100%, 22rem);
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--general-border-radius);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 84%, transparent);
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 56%, var(--brand-surface-base) 44%);
+}
+
+.categoryChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--app-primary) 14%, transparent);
+  background: color-mix(in srgb, var(--brand-accent-faint) 78%, var(--brand-surface-base) 22%);
+  color: var(--brand-accent-strong);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.heroAside {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.editRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.editButton {
+  min-width: 13rem;
+}
+
+.logoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: var(--general-border-radius);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 78%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand-surface-overlay-soft) 66%, var(--brand-surface-base) 34%),
+    color-mix(in srgb, var(--brand-surface-base) 96%, transparent)
+  );
+}
+
+.logoFrame,
+.logoFallback {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--general-border-radius);
+  overflow: hidden;
+  border: 1px solid var(--brand-border);
+  background: radial-gradient(
+    circle at 30% 25%,
+    color-mix(in srgb, var(--brand-surface-base) 85%, transparent),
+    color-mix(in srgb, var(--brand-surface-overlay-soft) 76%, var(--brand-surface-base) 24%)
+  );
+  box-shadow:
+    0 18px 36px color-mix(in srgb, var(--brand-shadow-base) 72%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--brand-surface-base) 86%, transparent);
+}
+
+.logoImage {
+  object-fit: cover;
+}
+
+.logoFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--app-text-muted);
+}
+
+.logoMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.logoStatBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.logoStatGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.logoStatLabel {
+  color: var(--app-primary);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.logoStatValue {
+  color: var(--app-text-strong);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.controlPanel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 0 1rem;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.filterTabs {
+  display: flex;
+  align-items: stretch;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.filterTab {
+  min-height: 3.1rem;
+  padding: 0.9rem 1.15rem;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--brand-text-subtle);
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.filterTabActive {
+  color: var(--app-text-strong);
+  border-bottom-color: var(--app-primary);
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 72%, var(--brand-surface-base) 28%);
+}
+
+.searchField {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: min(100%, 23rem);
+  min-height: 3.15rem;
+  padding: 0 1rem;
+  border-radius: var(--general-border-radius);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 90%, transparent);
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 70%, var(--brand-surface-base) 30%);
+}
+
+.searchIcon {
+  flex-shrink: 0;
+  color: var(--app-text-muted);
+}
+
+.searchInput {
+  min-height: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.searchInput:hover:not(:disabled),
+.searchInput:focus {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.branchPanel,
+.galleryPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tableHead {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.4fr) minmax(0, 1.25fr) minmax(9rem, 0.9fr)
+    minmax(10rem, 1fr);
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--general-border-radius);
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 68%, var(--brand-surface-base) 32%);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 90%, transparent);
+  color: var(--brand-text-subtle);
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tableBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.branchRow {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.4fr) minmax(0, 1.25fr) minmax(9rem, 0.9fr)
+    minmax(10rem, 1fr);
+  gap: 1rem;
+  align-items: center;
+  width: 100%;
+  padding: 1.1rem 1.25rem;
+  border-radius: var(--general-border-radius);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 80%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand-surface-base) 98%, transparent),
+    color-mix(in srgb, var(--brand-surface-overlay-soft) 74%, var(--brand-surface-base) 26%)
+  );
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--brand-shadow-base) 40%, transparent);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.branchRow:hover {
+  border-color: color-mix(in srgb, var(--app-primary) 26%, var(--brand-border) 74%);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--brand-shadow-base) 48%, transparent);
+  transform: translateY(-1px);
+}
+
+.branchRow:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
+}
+
+.branchIdentity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.branchIconBox {
+  width: 4rem;
+  height: 4rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--general-border-radius);
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 62%, var(--brand-surface-base) 38%);
+  color: var(--brand-text-subtle);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 88%, transparent);
+}
+
+.branchIdentityText {
+  min-width: 0;
+}
+
+.branchName {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.branchNote {
+  margin: 0.25rem 0 0;
+  color: var(--brand-text-subtle);
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.branchCell {
+  min-width: 0;
+}
+
+.branchAddress {
+  margin: 0;
+  color: var(--brand-text-body);
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.availabilityBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.availabilityLive {
+  background: color-mix(in srgb, var(--brand-success-bg) 90%, var(--brand-surface-base) 10%);
+  color: var(--brand-success);
+}
+
+.availabilityMuted {
+  background: color-mix(in srgb, var(--brand-disabled-bg) 78%, var(--brand-surface-base) 22%);
+  color: var(--brand-disabled-text);
+}
+
+.contactStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  color: var(--brand-text-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.branchMuted {
+  color: var(--app-text-subtle);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.branchDialogContent {
+  width: min(100%, 46rem);
+}
+
+.branchDialogTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem 1.714rem 1rem;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.branchDialogHero {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.branchDialogIcon {
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--general-border-radius);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 84%, transparent);
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 54%, var(--brand-surface-base) 46%);
+  color: var(--app-primary);
+}
+
+.branchDialogTitleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.branchDialogTitle {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.branchDialogDescription {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.branchDialogClose {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--brand-border) 82%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--app-text-muted);
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.branchDialogClose:hover {
+  color: var(--app-primary);
+  border-color: color-mix(in srgb, var(--app-primary) 30%, var(--brand-border) 70%);
+  background: color-mix(in srgb, var(--app-primary-faint) 54%, var(--brand-surface-base) 46%);
+}
+
+.branchDialogClose:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
+}
+
+.branchDialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem 1.714rem 1.5rem;
+}
+
+.branchDialogSection,
+.branchDialogItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.branchDialogGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.branchDialogLabel {
+  color: var(--app-primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.branchDialogText {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: 0.96rem;
+  font-weight: 600;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.branchDialogList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.branchDialogListItem {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 68%, var(--brand-surface-base) 32%);
+  color: var(--app-text-strong);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.emptyState {
+  padding: 2.25rem 1.5rem;
+  border-radius: var(--general-border-radius);
+  border: 1px dashed color-mix(in srgb, var(--app-border-soft) 84%, transparent);
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 42%, var(--brand-surface-base) 58%);
+  color: var(--app-text-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  border-radius: var(--general-border-radius);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--brand-border) 88%, transparent);
+  background: color-mix(in srgb, var(--brand-surface-base) 96%, transparent);
+}
+
+.metricCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-height: 9rem;
+  padding: 1.5rem 1.6rem;
+  border-right: 1px solid
+    color-mix(in srgb, var(--app-border-soft) 82%, transparent);
+}
+
+.metricCard:last-child {
+  border-right: none;
+}
+
+.metricLabel {
+  color: var(--brand-text-subtle);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.metricValueRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.metricValue {
+  color: var(--brand-text-heading);
+  font-size: clamp(1rem, 1vw, 2rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.metricHint {
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.galleryHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.galleryTitle {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.galleryCarousel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.galleryStage {
+  position: relative;
+  min-height: 20rem;
+  aspect-ratio: 16 / 8;
+  overflow: hidden;
+  border-radius: var(--general-border-radius);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 84%, transparent);
+  background:
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--brand-accent-soft) 16%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--brand-surface-overlay-soft) 72%, var(--brand-surface-base) 28%),
+      color-mix(in srgb, var(--brand-surface-base) 96%, transparent)
+    );
+  box-shadow: 0 16px 36px color-mix(in srgb, var(--brand-shadow-base) 48%, transparent);
+}
+
+.galleryStage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--brand-text-heading) 16%, transparent),
+      transparent 24%,
+      transparent 68%,
+      color-mix(in srgb, var(--brand-text-heading) 38%, transparent)
+    );
+  pointer-events: none;
+}
+
+.gallerySlide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.04);
+  transition:
+    opacity 520ms ease,
+    transform 5600ms ease;
+  pointer-events: none;
+}
+
+.gallerySlideActive {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.galleryTopBar {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.galleryCounter,
+.galleryAutoplayHint {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.42rem 0.72rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--brand-surface-base) 16%, transparent);
+  background: color-mix(in srgb, var(--brand-text-heading) 46%, transparent);
+  color: var(--brand-text-inverse);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--brand-shadow-strong) 42%, transparent);
+}
+
+.galleryCounter {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.galleryAutoplayHint {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.galleryControls {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.galleryNav {
+  width: 2.8rem;
+  height: 2.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--brand-surface-base) 14%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-text-heading) 44%, transparent);
+  color: var(--brand-text-inverse);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--brand-shadow-strong) 42%, transparent);
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.galleryNav:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--app-primary) 60%, var(--brand-text-heading) 40%);
+}
+
+.galleryNav:focus-visible,
+.galleryDot:focus-visible,
+.galleryThumb:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
+}
+
+.galleryDots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.galleryDot {
+  width: 0.72rem;
+  height: 0.72rem;
+  border: none;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-surface-base) 54%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-text-heading) 10%, transparent);
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    width 200ms ease;
+}
+
+.galleryDotActive {
+  width: 2rem;
+  background: var(--app-primary);
+}
+
+.galleryThumbRail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(4.75rem, 1fr));
+  gap: 0.8rem;
+}
+
+.galleryThumb {
+  position: relative;
+  min-height: 4.75rem;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: var(--general-border-radius);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 84%, transparent);
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 66%, var(--brand-surface-base) 34%);
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.galleryThumb:hover {
+  transform: translateY(-1px);
+}
+
+.galleryThumbActive {
+  border-color: color-mix(in srgb, var(--app-primary) 48%, var(--brand-border) 52%);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--brand-shadow-base) 34%, transparent);
+}
+
+.galleryThumbImage,
+.galleryImage {
+  object-fit: cover;
+}
+
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 0.18rem;
+}
+
+.star {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1100px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .editRow {
+    justify-content: flex-start;
+  }
+
+  .logoCard {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .logoFrame,
+  .logoFallback {
+    width: 8.5rem;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 960px) {
+  .controlPanel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchField {
+    width: 100%;
+  }
+
+  .tableHead {
+    display: none;
+  }
+
+  .branchRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "identity availability"
+      "address address";
+    gap: 0.8rem 0.9rem;
+    align-items: start;
+  }
+
+  .branchIdentity {
+    grid-area: identity;
+    gap: 0.85rem;
+  }
+
+  .branchAddressCell {
+    grid-area: address;
+  }
+
+  .branchAvailabilityCell {
+    grid-area: availability;
+    justify-self: end;
+  }
+
+  .branchContactCell {
+    display: none;
+  }
+
+  .branchAddress {
+    max-width: 100%;
+  }
+
+  .metricsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .branchDialogGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .galleryStage {
+    min-height: 18rem;
+    aspect-ratio: 16 / 10;
+  }
+
+  .galleryTopBar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .metricCard:nth-child(2n) {
+    border-right: none;
+  }
+
+  .metricCard:nth-child(-n + 2) {
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--app-border-soft) 82%, transparent);
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .heroTitle {
+    font-size: clamp(1.4rem, 7vw, 2rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .heroDescription {
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  .heroTitleRow {
+    gap: 0.55rem;
+  }
+
+  .statusPill {
+    min-height: 1.8rem;
+    padding: 0.32rem 0.68rem;
+    font-size: 0.76rem;
+  }
+
+  .ratingSummary {
+    gap: 0.35rem;
+  }
+
+  .categoryRail {
+    gap: 0.4rem;
+  }
+
+  .categoryChip {
+    min-height: 1.85rem;
+    padding: 0.32rem 0.62rem;
+    font-size: 0.76rem;
+  }
+
+  .ownerProfile {
+    width: 100%;
+    max-width: none;
+  }
+
+  .editRow {
+    justify-content: stretch;
+  }
+
+  .editButton {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .filterTab {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-inline: 0.8rem;
+    font-size: 0.78rem;
+  }
+
+  .logoCard {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.8rem;
+    padding: 0.85rem;
+  }
+
+  .logoFrame,
+  .logoFallback {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+  }
+
+  .logoMeta {
+    display: none;
+  }
+
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .branchDialogBody {
+    padding: 1rem 1.429rem 1.25rem;
+  }
+
+  .branchDialogTop {
+    padding: 1.25rem 1.429rem 0.9rem;
+  }
+
+  .branchDialogHero {
+    gap: 0.85rem;
+  }
+
+  .branchDialogIcon {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .galleryStage {
+    min-height: 15rem;
+    aspect-ratio: 4 / 3;
+  }
+
+  .galleryControls {
+    gap: 0.75rem;
+  }
+
+  .galleryNav {
+    width: 2.45rem;
+    height: 2.45rem;
+  }
+
+  .galleryAutoplayHint {
+    display: none;
+  }
+
+  .galleryThumbRail {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .branchPanel,
+  .galleryPanel {
+    gap: 0.65rem;
+  }
+
+  .branchRow {
+    gap: 0.75rem;
+    padding: 0.95rem;
+  }
+
+  .branchIconBox {
+    width: 3.15rem;
+    height: 3.15rem;
+  }
+
+  .branchName {
+    font-size: 0.96rem;
+  }
+
+  .branchNote {
+    font-size: 0.78rem;
+  }
+
+  .branchAvailabilityCell {
+    justify-self: start;
+  }
+
+  .availabilityBadge {
+    min-height: 1.85rem;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.72rem;
+  }
+
+  .branchAddress {
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .metricCard {
+    min-height: 0;
+    border-right: none;
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--app-border-soft) 82%, transparent);
+  }
+
+  .metricCard:last-child {
+    border-bottom: none;
+  }
+}

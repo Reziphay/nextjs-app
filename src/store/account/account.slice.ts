@@ -1,6 +1,10 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { isAxiosError } from "axios";
 import { getMessages, type Locale } from "@/i18n/config";
+import {
+  normalizeBackendErrorMessage,
+  translateBackendErrorMessage,
+} from "@/lib/backend-errors";
 import { findCountryByValue, normalizeCountryValue } from "@/lib/countries";
 import { createApiClient } from "@/lib/api";
 import type {
@@ -37,6 +41,7 @@ const accountFieldNames = [
 
 type RequestStatus = "idle" | "loading" | "succeeded" | "failed";
 type ProfileMessages = ReturnType<typeof getMessages>["profile"];
+type BackendErrorMessages = ReturnType<typeof getMessages>["backendErrors"];
 type AccountFieldName = keyof AccountProfileDraft;
 type AccountFieldErrors = Partial<Record<AccountFieldName, string>>;
 type ApiFieldError = {
@@ -137,14 +142,6 @@ function readFileAsDataUrl(file: File) {
   });
 }
 
-function normalizeMessage(message: string | string[] | undefined) {
-  if (Array.isArray(message)) {
-    return message.join(" ");
-  }
-
-  return message;
-}
-
 function normalizeDraft(values: AccountProfileDraft): AccountProfileDraft {
   return {
     first_name: values.first_name.trim(),
@@ -210,7 +207,10 @@ function validateAccountDraft(
   return errors;
 }
 
-function mapApiFieldErrors(errors: ApiFieldError[] | undefined) {
+function mapApiFieldErrors(
+  errors: ApiFieldError[] | undefined,
+  backendErrorMessages: BackendErrorMessages,
+) {
   const nextErrors: AccountFieldErrors = {};
 
   for (const entry of errors ?? []) {
@@ -219,7 +219,9 @@ function mapApiFieldErrors(errors: ApiFieldError[] | undefined) {
     }
 
     if (accountFieldNames.includes(entry.field as AccountFieldName)) {
-      nextErrors[entry.field as AccountFieldName] = entry.message;
+      nextErrors[entry.field as AccountFieldName] =
+        translateBackendErrorMessage(entry.message, backendErrorMessages) ??
+        entry.message;
     }
   }
 
@@ -229,10 +231,16 @@ function mapApiFieldErrors(errors: ApiFieldError[] | undefined) {
 function resolveAccountApiMessage(
   apiMessage: string | undefined,
   messages: ProfileMessages,
+  backendErrorMessages: BackendErrorMessages,
 ) {
   if (!apiMessage) {
     return undefined;
   }
+
+  const translatedMessage = translateBackendErrorMessage(
+    apiMessage,
+    backendErrorMessages,
+  );
 
   const mappedMessages: Record<string, string> = {
     "errors.validation_error": messages.validationErrorDescription,
@@ -249,12 +257,13 @@ function resolveAccountApiMessage(
     return mappedMessages[apiMessage];
   }
 
-  return apiMessage.includes(".") ? undefined : apiMessage;
+  return translatedMessage;
 }
 
 function getAccountErrorResult(
   error: unknown,
   messages: ProfileMessages,
+  backendErrorMessages: BackendErrorMessages,
 ): ThunkReject {
   if (error instanceof Error && error.message === invalidApiResponseError) {
     return {
@@ -269,9 +278,16 @@ function getAccountErrorResult(
 
   if (isAxiosError<ApiErrorResponse>(error)) {
     const status = error.response?.status;
-    const apiMessage = normalizeMessage(error.response?.data?.message);
-    const resolvedApiMessage = resolveAccountApiMessage(apiMessage, messages);
-    const fieldErrors = mapApiFieldErrors(error.response?.data?.errors);
+    const apiMessage = normalizeBackendErrorMessage(error.response?.data?.message);
+    const resolvedApiMessage = resolveAccountApiMessage(
+      apiMessage,
+      messages,
+      backendErrorMessages,
+    );
+    const fieldErrors = mapApiFieldErrors(
+      error.response?.data?.errors,
+      backendErrorMessages,
+    );
 
     if (apiMessage === "user.email_change_not_allowed") {
       fieldErrors.email = messages.emailLockedDescription;
@@ -344,6 +360,7 @@ function getAccountErrorResult(
 function getAvatarErrorResult(
   error: unknown,
   messages: ProfileMessages,
+  backendErrorMessages: BackendErrorMessages,
 ): Exclude<AccountFeedback, null> {
   if (error instanceof Error) {
     if (error.message === invalidApiResponseError) {
@@ -367,7 +384,7 @@ function getAvatarErrorResult(
 
   if (isAxiosError<ApiErrorResponse>(error)) {
     const status = error.response?.status;
-    const apiMessage = normalizeMessage(error.response?.data?.message);
+    const apiMessage = normalizeBackendErrorMessage(error.response?.data?.message);
 
     if (!status) {
       return {
@@ -401,6 +418,7 @@ function getAvatarErrorResult(
       title: messages.photoUpdateErrorTitle,
       description:
         descriptionByMessage[apiMessage ?? ""] ??
+        translateBackendErrorMessage(apiMessage, backendErrorMessages) ??
         descriptionByStatus[status] ??
         (status >= 500
           ? messages.photoServerErrorDescription
@@ -426,7 +444,8 @@ export const submitAccountUpdate = createAsyncThunk<
   { locale: Locale },
   { state: RootState; rejectValue: ThunkReject }
 >("account/submitUpdate", async ({ locale }, thunkApi) => {
-  const messages = getMessages(locale).profile;
+  const localeMessages = getMessages(locale);
+  const messages = localeMessages.profile;
   const state = thunkApi.getState();
   const accessToken = state.auth.session.accessToken;
   const profile = state.account.profile;
@@ -512,7 +531,9 @@ export const submitAccountUpdate = createAsyncThunk<
       },
     };
   } catch (error) {
-    return thunkApi.rejectWithValue(getAccountErrorResult(error, messages));
+    return thunkApi.rejectWithValue(
+      getAccountErrorResult(error, messages, localeMessages.backendErrors),
+    );
   }
 });
 
@@ -526,7 +547,8 @@ export function uploadAccountAvatar({
   locale,
 }: UploadAccountAvatarParams) {
   return async (dispatch: AppDispatch, getState: () => RootState) => {
-    const messages = getMessages(locale).profile;
+    const localeMessages = getMessages(locale);
+    const messages = localeMessages.profile;
     const state = getState();
     const accessToken = state.auth.session.accessToken;
     const profile = state.account.profile;
@@ -643,7 +665,11 @@ export function uploadAccountAvatar({
     } catch (error) {
       dispatch(
         accountSlice.actions.avatarUploadFailed({
-          feedback: getAvatarErrorResult(error, messages),
+          feedback: getAvatarErrorResult(
+            error,
+            messages,
+            localeMessages.backendErrors,
+          ),
         }),
       );
     }
@@ -652,7 +678,8 @@ export function uploadAccountAvatar({
 
 export function removeAccountAvatar({ locale }: { locale: Locale }) {
   return async (dispatch: AppDispatch, getState: () => RootState) => {
-    const messages = getMessages(locale).profile;
+    const localeMessages = getMessages(locale);
+    const messages = localeMessages.profile;
     const state = getState();
     const accessToken = state.auth.session.accessToken;
     const profile = state.account.profile;
@@ -728,7 +755,11 @@ export function removeAccountAvatar({ locale }: { locale: Locale }) {
     } catch (error) {
       dispatch(
         accountSlice.actions.avatarUploadFailed({
-          feedback: getAvatarErrorResult(error, messages),
+          feedback: getAvatarErrorResult(
+            error,
+            messages,
+            localeMessages.backendErrors,
+          ),
         }),
       );
     }

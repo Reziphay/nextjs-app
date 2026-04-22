@@ -1,8 +1,8 @@
 import { getMessages } from "@/i18n/config";
 import { getServerLocale } from "@/i18n/server";
+import { ComingSoonPanel } from "@/components/organisms/coming-soon-panel/coming-soon-panel";
 import { getProtectedRouteLabel, type ProtectedAppPath } from "@/lib/app-routes";
 import { requireProtectedRouteAccess } from "@/lib/protected-route";
-import { ComingSoonPanel } from "@/components/organisms/coming-soon-panel";
 
 type SearchParamsRecord = Record<string, string | string[] | undefined>;
 

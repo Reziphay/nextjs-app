@@ -1,6 +1,10 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { isAxiosError } from "axios";
 import { getMessages, type Locale } from "@/i18n/config";
+import {
+  normalizeBackendErrorMessage,
+  translateBackendErrorMessage,
+} from "@/lib/backend-errors";
 import { checkApiHealth, createApiClient } from "@/lib/api";
 import { writeAuthCookies } from "@/lib/auth-cookies";
 import {
@@ -45,6 +49,7 @@ type AuthFeedback = {
 
 type LoginMessages = ReturnType<typeof getMessages>["auth"]["login"];
 type RegisterMessages = ReturnType<typeof getMessages>["auth"]["register"];
+type BackendErrorMessages = ReturnType<typeof getMessages>["backendErrors"];
 type LoginFieldName = keyof LoginFormValues;
 type RegisterFormDraft = Omit<RegisterFormValues, "type"> & {
   type: RegisterUserType | "";
@@ -131,17 +136,10 @@ const initialState: AuthState = {
   session: createInitialSessionState(),
 };
 
-function normalizeErrorMessage(message: string | string[] | undefined) {
-  if (Array.isArray(message)) {
-    return message.join(" ");
-  }
-
-  return message;
-}
-
 function mapApiFieldErrors<TField extends string>(
   errors: ApiFieldError[] | undefined,
   allowedFields: readonly TField[],
+  backendErrorMessages: BackendErrorMessages,
 ) {
   const nextErrors: Partial<Record<TField, string>> = {};
 
@@ -151,7 +149,9 @@ function mapApiFieldErrors<TField extends string>(
     }
 
     if (allowedFields.includes(entry.field as TField)) {
-      nextErrors[entry.field as TField] = entry.message;
+      nextErrors[entry.field as TField] =
+        translateBackendErrorMessage(entry.message, backendErrorMessages) ??
+        entry.message;
     }
   }
 
@@ -259,6 +259,7 @@ function validateRegisterForm(
 async function getLoginErrorResult(
   error: unknown,
   messages: LoginMessages,
+  backendErrorMessages: BackendErrorMessages,
   locale: Locale,
 ): Promise<ThunkReject<LoginFieldName>> {
   if (error instanceof Error && error.message === invalidApiResponseError) {
@@ -273,10 +274,15 @@ async function getLoginErrorResult(
 
   if (isAxiosError<ApiErrorResponse>(error)) {
     const status = error.response?.status;
-    const apiMessage = normalizeErrorMessage(error.response?.data?.message);
+    const apiMessage = normalizeBackendErrorMessage(error.response?.data?.message);
+    const resolvedApiMessage = translateBackendErrorMessage(
+      apiMessage,
+      backendErrorMessages,
+    );
     const fieldErrors = mapApiFieldErrors(
       error.response?.data?.errors,
       loginFieldNames,
+      backendErrorMessages,
     );
 
     if (!status) {
@@ -297,7 +303,7 @@ async function getLoginErrorResult(
       return {
         feedback: {
           title: messages.errorTitle,
-          description: apiMessage ?? messages.validationErrorDescription,
+          description: resolvedApiMessage ?? messages.validationErrorDescription,
           variant: "destructive",
         },
         fieldErrors,
@@ -316,7 +322,7 @@ async function getLoginErrorResult(
       feedback: {
         title: messages.errorTitle,
         description:
-          apiMessage ??
+          resolvedApiMessage ??
           descriptionByStatus[status] ??
           (status >= 500
             ? messages.serverErrorDescription
@@ -338,6 +344,7 @@ async function getLoginErrorResult(
 async function getRegisterErrorResult(
   error: unknown,
   messages: RegisterMessages,
+  backendErrorMessages: BackendErrorMessages,
   locale: Locale,
 ): Promise<ThunkReject<RegisterFieldName>> {
   if (error instanceof Error && error.message === invalidApiResponseError) {
@@ -352,10 +359,15 @@ async function getRegisterErrorResult(
 
   if (isAxiosError<ApiErrorResponse>(error)) {
     const status = error.response?.status;
-    const apiMessage = normalizeErrorMessage(error.response?.data?.message);
+    const apiMessage = normalizeBackendErrorMessage(error.response?.data?.message);
+    const resolvedApiMessage = translateBackendErrorMessage(
+      apiMessage,
+      backendErrorMessages,
+    );
     const fieldErrors = mapApiFieldErrors(
       error.response?.data?.errors,
       registerFieldNames,
+      backendErrorMessages,
     );
 
     if (!status) {
@@ -376,7 +388,7 @@ async function getRegisterErrorResult(
       return {
         feedback: {
           title: messages.errorTitle,
-          description: apiMessage ?? messages.validationErrorDescription,
+          description: resolvedApiMessage ?? messages.validationErrorDescription,
           variant: "destructive",
         },
         fieldErrors,
@@ -397,7 +409,7 @@ async function getRegisterErrorResult(
       feedback: {
         title: messages.errorTitle,
         description:
-          apiMessage ??
+          resolvedApiMessage ??
           descriptionByStatus[status] ??
           (status >= 500
             ? messages.serverErrorDescription
@@ -423,7 +435,8 @@ export const submitLogin = createAsyncThunk<
   { locale: Locale },
   { state: RootState; rejectValue: ThunkReject<LoginFieldName> }
 >("auth/submitLogin", async ({ locale }, thunkApi) => {
-  const messages = getMessages(locale).auth.login;
+  const localeMessages = getMessages(locale);
+  const messages = localeMessages.auth.login;
   const values = normalizeLoginValues(thunkApi.getState().auth.login.values);
   const fieldErrors = validateLoginForm(values, messages);
 
@@ -476,7 +489,12 @@ export const submitLogin = createAsyncThunk<
     };
   } catch (error) {
     return thunkApi.rejectWithValue(
-      await getLoginErrorResult(error, messages, locale),
+      await getLoginErrorResult(
+        error,
+        messages,
+        localeMessages.backendErrors,
+        locale,
+      ),
     );
   }
 });
@@ -486,7 +504,8 @@ export const submitRegister = createAsyncThunk<
   { locale: Locale },
   { state: RootState; rejectValue: ThunkReject<RegisterFieldName> }
 >("auth/submitRegister", async ({ locale }, thunkApi) => {
-  const messages = getMessages(locale).auth.register;
+  const localeMessages = getMessages(locale);
+  const messages = localeMessages.auth.register;
   const values = normalizeRegisterValues(thunkApi.getState().auth.register.values);
   const fieldErrors = validateRegisterForm(values, messages);
 
@@ -525,7 +544,12 @@ export const submitRegister = createAsyncThunk<
     }
   } catch (error) {
     return thunkApi.rejectWithValue(
-      await getRegisterErrorResult(error, messages, locale),
+      await getRegisterErrorResult(
+        error,
+        messages,
+        localeMessages.backendErrors,
+        locale,
+      ),
     );
   }
 });

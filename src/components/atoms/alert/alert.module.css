@@ -23,6 +23,13 @@
   --alert-text: var(--app-text-muted);
 }
 
+.success {
+  --alert-border: var(--app-success-border);
+  --alert-bg: var(--app-success-bg);
+  --alert-accent: var(--app-success);
+  --alert-text: var(--app-text-muted);
+}
+
 .destructive {
   --alert-border: var(--app-error-border);
   --alert-bg: var(--app-error-bg);

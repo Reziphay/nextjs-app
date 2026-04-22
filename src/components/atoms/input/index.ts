@@ -4,4 +4,5 @@ export {
   FieldDescription,
   FieldLabel,
   Input,
+  PasswordInput,
 } from "./input";

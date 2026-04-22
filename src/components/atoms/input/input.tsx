@@ -1,9 +1,13 @@
+"use client";
+
 import {
   forwardRef,
+  useState,
   type HTMLAttributes,
   type InputHTMLAttributes,
   type LabelHTMLAttributes,
 } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import styles from "./input.module.css";
 
 type FieldProps = HTMLAttributes<HTMLDivElement>;
@@ -17,6 +21,10 @@ type FieldDescriptionProps = HTMLAttributes<HTMLParagraphElement>;
 type FieldContentProps = HTMLAttributes<HTMLDivElement>;
 
 type InputProps = InputHTMLAttributes<HTMLInputElement>;
+type PasswordInputProps = Omit<InputProps, "type"> & {
+  showPasswordLabel: string;
+  hidePasswordLabel: string;
+};
 
 function joinClassNames(...classNames: Array<string | undefined>) {
   return classNames.filter(Boolean).join(" ");
@@ -71,3 +79,56 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
 });
 
 Input.displayName = "Input";
+
+export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
+  function PasswordInput(
+    {
+      className,
+      showPasswordLabel,
+      hidePasswordLabel,
+      disabled,
+      ...props
+    },
+    ref,
+  ) {
+    const [isVisible, setIsVisible] = useState(false);
+
+    return (
+      <div className={styles.passwordInputWrapper}>
+        <input
+          ref={ref}
+          type={isVisible ? "text" : "password"}
+          className={joinClassNames(
+            styles.input,
+            styles.passwordInput,
+            className,
+          )}
+          autoComplete="off"
+          disabled={disabled}
+          {...props}
+        />
+        <button
+          type="button"
+          className={styles.passwordToggle}
+          aria-label={isVisible ? hidePasswordLabel : showPasswordLabel}
+          aria-pressed={isVisible}
+          disabled={disabled}
+          onMouseDown={(event) => {
+            event.preventDefault();
+          }}
+          onClick={() => {
+            setIsVisible((current) => !current);
+          }}
+        >
+          {isVisible ? (
+            <EyeOff aria-hidden="true" size={18} />
+          ) : (
+            <Eye aria-hidden="true" size={18} />
+          )}
+        </button>
+      </div>
+    );
+  },
+);
+
+PasswordInput.displayName = "PasswordInput";

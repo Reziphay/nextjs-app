@@ -1,13 +1,30 @@
 .layout {
   display: flex;
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
   background: transparent;
   position: relative;
+}
+
+.layout[data-content-direction="rtl"] .content {
+  text-align: right;
+}
+
+.layout[data-content-direction="rtl"] .content :is(input, textarea) {
+  direction: rtl;
+  text-align: right;
+}
+
+.layout[data-content-direction="rtl"] .content :is(input[type="email"], input[type="tel"], input[type="url"], input[type="number"]) {
+  direction: ltr;
+  text-align: left;
 }
 
 /* ── Sidebar wrapper ── */
 .sidebarWrap {
   flex-shrink: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 .body {
@@ -15,20 +32,26 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
 .main {
   flex: 1;
   display: grid;
   justify-items: center;
+  overflow-y: auto;
   background-color: var(--app-background-pattern-base);
   background-image: var(--app-background-pattern-image);
-  background-size: var(--app-background-pattern-size)
-    var(--app-background-pattern-size);
+  background-size: var(--app-background-pattern-size);
+  background-position: var(--app-background-pattern-position);
+  background-repeat: var(--app-background-pattern-repeat);
 }
 
 .content {
-  width: min(100%, 72rem);
+  width: 100%;
+  max-width: 72rem;
+  min-width: 0;
   margin-inline: auto;
   margin-top: 2rem;
   padding: 1.714rem 2rem;

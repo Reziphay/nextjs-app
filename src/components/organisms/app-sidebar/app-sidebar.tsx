@@ -4,10 +4,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { selectAuthSession } from "@/store/auth";
-import { UserAvatar } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import { Logo } from "@/components/logo";
 import { Icon } from "@/components/icon";
+import { UserAvatar } from "@/components/molecules/user-avatar/user-avatar";
 import {
   getDefaultAppRouteForUserType,
   getSidebarRoutesForUserType,

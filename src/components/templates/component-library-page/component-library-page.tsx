@@ -294,6 +294,10 @@ export function ComponentLibraryPage() {
             <ShowcaseCard title="Compact" description="Header və popup üçün istifadə olunan yığcam variant">
               <LanguageSwitcher />
             </ShowcaseCard>
+
+            <ShowcaseCard title="Panel" description="Settings və mobil panel üçün trigger + seçim siyahısı variantı">
+              <LanguageSwitcher variant="panel" />
+            </ShowcaseCard>
           </div>
         </section>
 
@@ -785,9 +789,12 @@ export function ComponentLibraryPage() {
           <div className={styles.cardGrid}>
             <ShowcaseCard title="Default" description="Bütün prop-larla tam görünüş">
               <BrandCard
-                image={{ src: "/banner1.jpg", alt: "Brand cover image" }}
+                logo={{ src: "/reziphay-logo.png", alt: "Brand logo" }}
+                backgroundImage={{ src: "/banner1.jpg", alt: "Brand cover image" }}
                 title="Exploring the Peaks of Kazbegi"
                 description="A journey through the breathtaking highlands of Georgia, where ancient towers meet snow-capped mountains and the air carries stories of centuries past."
+                category="Adventure"
+                badgeText="Featured"
                 author={{ name: "Leyla Həsənova", avatar: "/banner1.jpg" }}
                 rating={2.5}
               />
@@ -795,9 +802,13 @@ export function ComponentLibraryPage() {
 
             <ShowcaseCard title="Clickable" description="onClick ilə hover lift effekti">
               <BrandCard
-                image={{ src: "/banner1.jpg", alt: "Brand cover image" }}
+                logo={{ src: "/reziphay-logo.png", alt: "Brand logo" }}
+                backgroundImage={{ src: "/banner1.jpg", alt: "Brand cover image" }}
                 title="The Hidden Valleys of Şəki"
                 description="Nestled between forested hills and winding rivers, Şəki offers a glimpse into Azerbaijan's rich cultural and architectural heritage."
+                category="Culture"
+                badgeText="Active"
+                badgeVariant="secondary"
                 author={{ name: "Anar Quliyev", avatar: "/banner1.jpg" }}
                 rating={4}
                 onClick={() => {}}
@@ -806,9 +817,13 @@ export function ComponentLibraryPage() {
 
             <ShowcaseCard title="Full rating" description="5/5 reytinq nümunəsi">
               <BrandCard
-                image={{ src: "/banner1.jpg", alt: "Brand cover image" }}
+                logo={{ src: "/reziphay-logo.png", alt: "Brand logo" }}
+                backgroundImage={{ src: "/banner1.jpg", alt: "Brand cover image" }}
                 title="Baku: City of Contrasts"
                 description="Where ancient walls stand beside glass towers and the Caspian breeze carries the scent of saffron rice and pomegranate."
+                category="Lifestyle"
+                badgeText="Pending"
+                badgeVariant="outline"
                 author={{ name: "Nigar Əliyeva", avatar: "/banner1.jpg" }}
                 rating={5}
                 onClick={() => {}}

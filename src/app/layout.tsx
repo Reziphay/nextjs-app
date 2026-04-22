@@ -1,10 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { getMessages } from "@/i18n/config";
+import { getLocaleDirection, getMessages } from "@/i18n/config";
 import { StoreProvider } from "@/components/providers/store-provider";
 import { getServerLocale } from "@/i18n/server";
 import { lightThemeStyle } from "@/theme/light-theme";
 import { fontLinks, typographyStyle } from "@/theme/typography";
 import "./globals.css";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale();
@@ -39,9 +44,10 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
+      dir={getLocaleDirection(locale)}
       data-theme="light"
       style={{ ...lightThemeStyle, ...typographyStyle }}
-      suppressHydrationWarning
+      suppressHydrationWarning className={cn("font-sans", geist.variable)}
     >
       <head>
         {fontLinks.map((link) => (
@@ -53,7 +59,7 @@ export default async function RootLayout({
           />
         ))}
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <StoreProvider>{children}</StoreProvider>
       </body>
     </html>

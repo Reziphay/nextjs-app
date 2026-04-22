@@ -1,0 +1,66 @@
+.box {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.clickable {
+  border-radius: var(--general-border-radius-xl);
+  text-decoration: none;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.clickable:hover {
+  opacity: 0.8;
+}
+
+.clickable:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
+}
+
+.avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border: 2px solid color-mix(in srgb, var(--brand-accent) 16%, transparent);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--brand-shadow-base) 72%, transparent);
+}
+
+.meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+}
+
+.label {
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--app-primary);
+}
+
+.name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--brand-text-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subtitle {
+  font-size: 0.78rem;
+  color: var(--app-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

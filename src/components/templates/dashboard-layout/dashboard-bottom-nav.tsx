@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserAvatar } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import { selectAuthSession } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
 import { getSidebarRoutesForUserType } from "@/lib/app-routes";
 import { Icon } from "@/components/icon";
+import { UserAvatar } from "@/components/molecules/user-avatar/user-avatar";
 import styles from "./dashboard-bottom-nav.module.css";
 
 export function DashboardBottomNav() {
