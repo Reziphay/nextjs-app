@@ -37,6 +37,11 @@
   gap: 1rem;
 }
 
+.stack {
+  display: grid;
+  gap: 1rem;
+}
+
 .fieldGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -93,6 +98,104 @@
 
 .feedback {
   margin-bottom: 0.143rem;
+}
+
+.supportAlert {
+  margin-top: 0.143rem;
+}
+
+.supportList {
+  display: grid;
+  gap: 0.714rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.supportItem {
+  display: grid;
+  gap: 0.286rem;
+  padding: 0.857rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--app-border) 74%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--app-surface) 88%, white 12%), var(--app-surface)),
+    var(--app-surface);
+}
+
+.supportItem strong {
+  color: var(--app-text-strong);
+  font-size: var(--font-size-small);
+}
+
+.supportItem span {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  line-height: 1.6;
+}
+
+.metaCard {
+  display: grid;
+  gap: 0.857rem;
+  padding: 1rem;
+  border-radius: 1.143rem;
+  border: 1px solid color-mix(in srgb, var(--app-border) 82%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--app-surface) 84%, white 16%), var(--app-surface)),
+    var(--app-surface);
+}
+
+.metaGrid {
+  display: grid;
+  gap: 0.714rem;
+}
+
+.metaRow {
+  display: grid;
+  gap: 0.286rem;
+}
+
+.metaLabel {
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.metaValue {
+  color: var(--app-text-strong);
+  font-size: var(--font-size-small);
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.714rem;
+}
+
+.helperText {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  line-height: 1.7;
+}
+
+.helperStrong {
+  color: var(--app-text-strong);
+  font-weight: 600;
+}
+
+.inlineLink {
+  color: var(--app-primary-strong);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.214rem;
+}
+
+.readOnlyInput {
+  cursor: text;
 }
 
 @media (max-width: 48rem) {

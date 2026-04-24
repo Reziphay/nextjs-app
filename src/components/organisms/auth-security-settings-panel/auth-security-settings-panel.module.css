@@ -1,0 +1,137 @@
+.panel {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.hero {
+  display: grid;
+  gap: 0.714rem;
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--app-border) 86%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--app-surface) 82%, white 18%), var(--app-surface)),
+    var(--app-surface);
+}
+
+.hero h1 {
+  color: var(--app-text-strong);
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.hero p {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  line-height: 1.7;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.card {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--app-border) 86%, transparent);
+  background: var(--app-surface);
+  box-shadow: 0 20px 48px color-mix(in srgb, var(--app-shadow) 10%, transparent);
+}
+
+.cardHeader {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.cardHeader h2 {
+  color: var(--app-text-strong);
+  font-size: 1.1rem;
+  line-height: 1.2;
+}
+
+.cardHeader p {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  line-height: 1.6;
+}
+
+.statusRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.714rem;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid color-mix(in srgb, var(--app-border) 78%, transparent);
+}
+
+.statusPill[data-tone="success"] {
+  color: var(--app-success);
+  background: color-mix(in srgb, var(--app-success) 12%, white 88%);
+}
+
+.statusPill[data-tone="warning"] {
+  color: var(--app-warning);
+  background: color-mix(in srgb, var(--app-warning) 12%, white 88%);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.714rem;
+}
+
+.form {
+  display: grid;
+  gap: 0.857rem;
+}
+
+.meta {
+  display: grid;
+  gap: 0.286rem;
+  padding: 0.857rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--app-border) 78%, transparent);
+  background: color-mix(in srgb, var(--app-surface) 72%, white 28%);
+}
+
+.metaLabel {
+  color: var(--app-text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.metaValue {
+  color: var(--app-text-strong);
+  font-size: var(--font-size-small);
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.linkAction {
+  color: var(--app-primary-strong);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.214rem;
+}
+
+@media (max-width: 64rem) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

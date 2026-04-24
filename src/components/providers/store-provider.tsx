@@ -7,19 +7,18 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { makeStore, type AppStore } from "@/store";
 import { setStoreRef } from "@/store/store-ref";
 import {
+  fetchAuthenticatedSession,
   hydrateAuthSession,
   refreshAuthToken,
   selectAuthHydrated,
   selectAuthSession,
 } from "@/store/auth";
-import { createApiClient } from "@/lib/api";
 import {
   clearAuthCookies,
   getStoredAccessToken,
   getStoredRefreshToken,
   writeAuthCookies,
 } from "@/lib/auth-cookies";
-import type { ApiSuccessResponse, AuthenticatedUser } from "@/types";
 
 type StoreProviderProps = {
   children: ReactNode;
@@ -31,12 +30,6 @@ function AuthStoreSync() {
   const session = useAppSelector(selectAuthSession);
 
   useEffect(() => {
-    async function fetchMe(accessToken: string) {
-      const client = createApiClient({ accessToken });
-      const response = await client.get<ApiSuccessResponse<{ user: AuthenticatedUser }>>("/auth/me");
-      return response.data?.data?.user ?? null;
-    }
-
     async function restoreSession() {
       const accessToken = getStoredAccessToken();
       const refreshToken = getStoredRefreshToken();
@@ -46,53 +39,29 @@ function AuthStoreSync() {
         return;
       }
 
-      // Try with stored access token
-      try {
-        const user = await fetchMe(accessToken);
+      dispatch(
+        hydrateAuthSession({
+          user: null,
+          accessToken,
+          refreshToken,
+          restrictionState: null,
+          status: "anonymous",
+        }),
+      );
 
-        if (user?.id && user?.email) {
-          dispatch(
-            hydrateAuthSession({
-              user,
-              accessToken,
-              refreshToken,
-              status: "authenticated",
-            }),
-          );
-          return;
-        }
+      try {
+        await dispatch(fetchAuthenticatedSession()).unwrap();
+        return;
       } catch {
-        // Access token may be expired — try refresh below
+        // Access token may be expired; try refresh below.
       }
 
-      // Access token expired: attempt refresh
       try {
-        // Temporarily hydrate with stored tokens so the thunk can read refreshToken
-        dispatch(
-          hydrateAuthSession({
-            user: null,
-            accessToken,
-            refreshToken,
-            status: "anonymous",
-          }),
-        );
-
-        const tokens = await dispatch(refreshAuthToken()).unwrap();
-        const user = await fetchMe(tokens.access_token);
-
-        if (user?.id && user?.email) {
-          dispatch(
-            hydrateAuthSession({
-              user,
-              accessToken: tokens.access_token,
-              refreshToken: tokens.refresh_token,
-              status: "authenticated",
-            }),
-          );
-          return;
-        }
+        await dispatch(refreshAuthToken()).unwrap();
+        await dispatch(fetchAuthenticatedSession()).unwrap();
+        return;
       } catch {
-        // Refresh also failed
+        // Refresh also failed.
       }
 
       clearAuthCookies();

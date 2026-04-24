@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Alert,
@@ -20,9 +21,13 @@ import {
   getStoredAccessToken,
   getStoredRefreshToken,
 } from "@/lib/auth-cookies";
+import { getAuthFlowMessages } from "@/lib/auth-flow-messages";
 import { getCountryOptions } from "@/lib/countries";
+import { getDefaultAppRouteForUserType } from "@/lib/app-routes";
+import { executeRecaptcha, getRecaptchaMode } from "@/lib/recaptcha";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
+  resetRegisterState,
   selectAuthHydrated,
   selectAuthSession,
   selectIsAuthenticated,
@@ -30,22 +35,36 @@ import {
   setRegisterField,
   submitRegister,
 } from "@/store/auth";
+import type { RegisterResponseData } from "@/types";
 import sharedStyles from "../auth-panel.module.css";
 
 function getTodayDateValue() {
   return new Date().toISOString().slice(0, 10);
 }
 
+type RegistrationCompletionState = RegisterResponseData & {
+  email: string;
+  phone: string;
+};
+
 export function AuthRegisterPanel() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { locale, messages } = useLocale();
+  const authFlow = getAuthFlowMessages(locale);
   const hydrated = useAppSelector(selectAuthHydrated);
   const session = useAppSelector(selectAuthSession);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const { errors, feedback, status, values } = useAppSelector(selectRegisterState);
+  const { errors, feedback, status, values } =
+    useAppSelector(selectRegisterState);
   const register = messages.auth.register;
+  const registerFlow = authFlow.register;
+  const restrictionFlow = authFlow.restriction;
+  const recaptchaMode = getRecaptchaMode();
   const isSubmitting = status === "loading";
+  const [completion, setCompletion] =
+    useState<RegistrationCompletionState | null>(null);
+  const [recaptchaError, setRecaptchaError] = useState<string | null>(null);
 
   const userTypeOptions: readonly ComboboxOption[] = useMemo(
     () => [
@@ -90,28 +109,133 @@ export function AuthRegisterPanel() {
       return;
     }
 
-    router.replace("/");
+    router.replace(getDefaultAppRouteForUserType(session.user?.type));
   }, [
     hydrated,
     isAuthenticated,
     router,
     session.accessToken,
     session.refreshToken,
+    session.user?.type,
   ]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setRecaptchaError(null);
+
+    const submittedEmail = values.email.trim().toLowerCase();
+    const submittedPhone = values.phone.trim();
 
     try {
-      await dispatch(submitRegister({ locale })).unwrap();
-      router.replace("/auth/login");
-    } catch {
-      return;
+      const recaptchaToken = await executeRecaptcha("register");
+      const payload = await dispatch(
+        submitRegister({ locale, recaptchaToken }),
+      ).unwrap();
+      setCompletion({
+        ...payload,
+        email: submittedEmail,
+        phone: submittedPhone,
+      });
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === "RECAPTCHA_UNAVAILABLE"
+      ) {
+        setRecaptchaError(registerFlow.recaptchaError);
+      }
     }
   }
 
   if (isAuthenticated) {
     return null;
+  }
+
+  const recaptchaDescription =
+    recaptchaMode === "live"
+      ? authFlow.recaptcha.live
+      : recaptchaMode === "development-bypass"
+        ? authFlow.recaptcha.developmentBypass
+        : authFlow.recaptcha.unavailable;
+
+  if (completion) {
+    return (
+      <section className={sharedStyles.wrapper}>
+        <div className={sharedStyles.card}>
+          <div className={sharedStyles.cardHeader}>
+            <h1>{registerFlow.successTitle}</h1>
+            <p>{registerFlow.successDescription}</p>
+          </div>
+
+          <Alert variant="success" icon="verified">
+            <AlertTitle>{registerFlow.restrictionTitle}</AlertTitle>
+            <AlertDescription>
+              {completion.restriction_state.is_restricted
+                ? completion.restriction_state.missing_verifications
+                    .map((entry) =>
+                      entry === "email"
+                        ? restrictionFlow.missingEmail
+                        : restrictionFlow.missingPhone,
+                    )
+                    .join(", ")
+                : register.successDescription}
+            </AlertDescription>
+          </Alert>
+
+          <div className={sharedStyles.stack}>
+            <div className={sharedStyles.metaCard}>
+              <div className={sharedStyles.metaGrid}>
+                <div className={sharedStyles.metaRow}>
+                  <span className={sharedStyles.metaLabel}>{register.emailLabel}</span>
+                  <span className={sharedStyles.metaValue}>{completion.email}</span>
+                </div>
+                {completion.phone ? (
+                  <div className={sharedStyles.metaRow}>
+                    <span className={sharedStyles.metaLabel}>
+                      {registerFlow.phoneLabel}
+                    </span>
+                    <span className={sharedStyles.metaValue}>{completion.phone}</span>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            <ul className={sharedStyles.supportList}>
+              <li className={sharedStyles.supportItem}>
+                <strong>{registerFlow.successEmail}</strong>
+                <span>{registerFlow.restrictionTitle}</span>
+              </li>
+              {completion.phone_verification ? (
+                <li className={sharedStyles.supportItem}>
+                  <strong>{registerFlow.successPhone}</strong>
+                  <span>
+                    {new Intl.DateTimeFormat(locale, {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    }).format(new Date(completion.phone_verification.expires_at))}
+                  </span>
+                </li>
+              ) : null}
+            </ul>
+
+            <div className={sharedStyles.actionRow}>
+              <Link className={sharedStyles.footerLink} href="/auth/login">
+                {registerFlow.loginNow}
+              </Link>
+              <Button
+                variant="ghost"
+                type="button"
+                onClick={() => {
+                  setCompletion(null);
+                  dispatch(resetRegisterState());
+                }}
+              >
+                {registerFlow.createAnother}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -130,6 +254,13 @@ export function AuthRegisterPanel() {
           >
             <AlertTitle>{feedback.title}</AlertTitle>
             <AlertDescription>{feedback.description}</AlertDescription>
+          </Alert>
+        ) : null}
+
+        {recaptchaError ? (
+          <Alert className={sharedStyles.feedback} variant="warning" icon="warning">
+            <AlertTitle>reCAPTCHA</AlertTitle>
+            <AlertDescription>{recaptchaError}</AlertDescription>
           </Alert>
         ) : null}
 
@@ -276,6 +407,33 @@ export function AuthRegisterPanel() {
 
           <Field
             className={sharedStyles.fieldFull}
+            data-invalid={errors.phone ? "" : undefined}
+          >
+            <FieldLabel htmlFor="register_phone">
+              {registerFlow.phoneLabel}
+            </FieldLabel>
+            <Input
+              id="register_phone"
+              type="tel"
+              value={values.phone}
+              placeholder={registerFlow.phonePlaceholder}
+              aria-invalid={errors.phone ? "true" : undefined}
+              onChange={(event) => {
+                dispatch(
+                  setRegisterField({
+                    field: "phone",
+                    value: event.target.value,
+                  }),
+                );
+              }}
+            />
+            <FieldDescription>
+              {errors.phone ?? registerFlow.phoneHint}
+            </FieldDescription>
+          </Field>
+
+          <Field
+            className={sharedStyles.fieldFull}
             data-invalid={errors.password ? "" : undefined}
           >
             <FieldLabel htmlFor="register_password" required>
@@ -331,6 +489,10 @@ export function AuthRegisterPanel() {
               {errors.type ?? register.typeDescription}
             </FieldDescription>
           </Field>
+
+          <Alert className={sharedStyles.supportAlert} icon="warning" variant="default">
+            <AlertDescription>{recaptchaDescription}</AlertDescription>
+          </Alert>
 
           <Button
             className={sharedStyles.submitButton}

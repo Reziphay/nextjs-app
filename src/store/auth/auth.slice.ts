@@ -1,4 +1,8 @@
-import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import {
+  createAsyncThunk,
+  createSlice,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
 import { isAxiosError } from "axios";
 import { getMessages, type Locale } from "@/i18n/config";
 import {
@@ -7,27 +11,34 @@ import {
 } from "@/lib/backend-errors";
 import { checkApiHealth, createApiClient } from "@/lib/api";
 import { writeAuthCookies } from "@/lib/auth-cookies";
-import {
-  isRegisterUserType,
-  type ApiSuccessResponse,
-  type AuthTokens,
-  type AuthenticatedUser,
-  type LoginFormValues,
-  type LoginResponseData,
-  type RegisterFormValues,
-  type RegisterResponseData,
-  type RegisterUserType,
+import { getAuthFlowMessages } from "@/lib/auth-flow-messages";
+import type {
+  ApiSuccessResponse,
+  AuthMeResponseData,
+  AuthSessionPayload,
+  AuthTokens,
+  AuthenticatedUser,
+  LoginFormValues,
+  LoginResponseData,
+  RegisterFormValues,
+  RegisterResponseData,
+  RegisterUserType,
+  RestrictionState,
 } from "@/types";
+import { isRegisterUserType } from "@/types";
 import type { RootState } from "@/store";
 
 const authLoginEndpoint = "/auth/login";
+const authLoginTwoFactorEndpoint = "/auth/login/2fa";
 const authMeEndpoint = "/auth/me";
 const authRefreshEndpoint = "/auth/refresh";
 const authRegisterEndpoint = "/auth/register";
 const invalidApiResponseError = "INVALID_AUTH_API_RESPONSE";
 const minimumRegisterAge = 13;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phonePattern = /^\+\d{7,15}$/;
 const registerPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,72}$/;
+const twoFactorCodePattern = /^\d{6}$/;
 const loginFieldNames = ["email", "password"] as const;
 const registerFieldNames = [
   "first_name",
@@ -35,6 +46,7 @@ const registerFieldNames = [
   "birthday",
   "country",
   "email",
+  "phone",
   "password",
   "type",
 ] as const;
@@ -76,15 +88,34 @@ type FormState<TValues, TField extends string> = {
   status: RequestStatus;
 };
 
+type LoginChallengeState = {
+  challengeId: string;
+  expiresAt: string;
+} | null;
+
+type LoginSuccessResult =
+  | {
+      kind: "authenticated";
+      session: AuthSessionPayload;
+    }
+  | {
+      kind: "two_factor_required";
+      challengeId: string;
+      challengeExpiresAt: string;
+    };
+
 export type PersistedAuthSession = {
   user: AuthenticatedUser | null;
   accessToken: string | null;
   refreshToken: string | null;
+  restrictionState: RestrictionState | null;
   status: "anonymous" | "authenticated";
 };
 
 type AuthState = {
-  login: FormState<LoginFormValues, LoginFieldName>;
+  login: FormState<LoginFormValues, LoginFieldName> & {
+    challenge: LoginChallengeState;
+  };
   register: FormState<RegisterFormDraft, RegisterFieldName>;
   session: PersistedAuthSession & {
     hydrated: boolean;
@@ -105,6 +136,7 @@ function createInitialRegisterValues(): RegisterFormDraft {
     birthday: "",
     country: "",
     email: "",
+    phone: "",
     password: "",
     type: "",
   };
@@ -115,6 +147,7 @@ function createInitialSessionState(): AuthState["session"] {
     user: null,
     accessToken: null,
     refreshToken: null,
+    restrictionState: null,
     status: "anonymous",
     hydrated: false,
   };
@@ -126,6 +159,7 @@ const initialState: AuthState = {
     errors: {},
     feedback: null,
     status: "idle",
+    challenge: null,
   },
   register: {
     values: createInitialRegisterValues(),
@@ -173,6 +207,7 @@ function normalizeRegisterValues(values: RegisterFormDraft): RegisterFormDraft {
     birthday: values.birthday.trim(),
     country: values.country.trim(),
     email: values.email.trim().toLowerCase(),
+    phone: values.phone.trim(),
     password: values.password,
   };
 }
@@ -243,6 +278,10 @@ function validateRegisterForm(
     errors.email = messages.emailInvalidMessage;
   }
 
+  if (values.phone && !phonePattern.test(values.phone)) {
+    errors.phone = "INVALID_PHONE_FORMAT";
+  }
+
   if (!values.password) {
     errors.password = messages.requiredMessage;
   } else if (!registerPasswordPattern.test(values.password)) {
@@ -254,6 +293,29 @@ function validateRegisterForm(
   }
 
   return errors;
+}
+
+async function requestAuthenticatedSession(
+  accessToken: string,
+  locale?: Locale,
+): Promise<AuthSessionPayload> {
+  const meClient = createApiClient({ accessToken, locale });
+  const response = await meClient.request<ApiSuccessResponse<AuthMeResponseData>>({
+    url: authMeEndpoint,
+    method: "GET",
+  });
+  const data = response.data?.data;
+
+  if (!data?.user?.id || !data.user.email || !data.restriction_state) {
+    throw new Error(invalidApiResponseError);
+  }
+
+  return {
+    user: data.user,
+    access_token: accessToken,
+    refresh_token: "",
+    restriction_state: data.restriction_state,
+  };
 }
 
 async function getLoginErrorResult(
@@ -431,10 +493,10 @@ async function getRegisterErrorResult(
 }
 
 export const submitLogin = createAsyncThunk<
-  LoginResponseData,
-  { locale: Locale },
+  LoginSuccessResult,
+  { locale: Locale; recaptchaToken: string },
   { state: RootState; rejectValue: ThunkReject<LoginFieldName> }
->("auth/submitLogin", async ({ locale }, thunkApi) => {
+>("auth/submitLogin", async ({ locale, recaptchaToken }, thunkApi) => {
   const localeMessages = getMessages(locale);
   const messages = localeMessages.auth.login;
   const values = normalizeLoginValues(thunkApi.getState().auth.login.values);
@@ -453,38 +515,105 @@ export const submitLogin = createAsyncThunk<
 
   try {
     const client = createApiClient({ locale });
-    const loginResponse = await client.request<ApiSuccessResponse<AuthTokens>>({
+    const loginResponse = await client.request<ApiSuccessResponse<LoginResponseData>>({
       url: authLoginEndpoint,
       method: "POST",
-      data: values,
+      data: {
+        ...values,
+        recaptcha_token: recaptchaToken,
+      },
     });
     const contentType = String(loginResponse.headers["content-type"] ?? "");
-    const tokens = loginResponse.data?.data;
+    const payload = loginResponse.data?.data;
+
+    if (contentType.includes("text/html") || !payload) {
+      throw new Error(invalidApiResponseError);
+    }
+
+    if (payload.requires_two_factor) {
+      return {
+        kind: "two_factor_required",
+        challengeId: payload.challenge_id,
+        challengeExpiresAt: payload.challenge_expires_at,
+      };
+    }
+
+    if (!payload.access_token || !payload.refresh_token) {
+      throw new Error(invalidApiResponseError);
+    }
+
+    const session = await requestAuthenticatedSession(payload.access_token, locale);
+    writeAuthCookies(payload.access_token, payload.refresh_token);
+
+    return {
+      kind: "authenticated",
+      session: {
+        ...session,
+        refresh_token: payload.refresh_token,
+        restriction_state:
+          session.restriction_state ?? payload.restriction_state,
+      },
+    };
+  } catch (error) {
+    return thunkApi.rejectWithValue(
+      await getLoginErrorResult(
+        error,
+        messages,
+        localeMessages.backendErrors,
+        locale,
+      ),
+    );
+  }
+});
+
+export const submitLoginTwoFactor = createAsyncThunk<
+  AuthSessionPayload,
+  { locale: Locale; challengeId: string; code: string },
+  { rejectValue: ThunkReject<never> }
+>("auth/submitLoginTwoFactor", async ({ locale, challengeId, code }, thunkApi) => {
+  const localeMessages = getMessages(locale);
+  const messages = localeMessages.auth.login;
+
+  if (!twoFactorCodePattern.test(code)) {
+    return thunkApi.rejectWithValue({
+      feedback: {
+        title: messages.errorTitle,
+        description:
+          translateBackendErrorMessage(
+            "auth.invalid_two_factor_code",
+            localeMessages.backendErrors,
+          ) ?? messages.validationErrorDescription,
+        variant: "destructive",
+      },
+    });
+  }
+
+  try {
+    const client = createApiClient({ locale });
+    const response = await client.request<ApiSuccessResponse<AuthTokens>>({
+      url: authLoginTwoFactorEndpoint,
+      method: "POST",
+      data: {
+        challenge_id: challengeId,
+        code,
+      },
+    });
+    const contentType = String(response.headers["content-type"] ?? "");
+    const tokens = response.data?.data;
 
     if (
       contentType.includes("text/html") ||
       !tokens?.access_token ||
-      !tokens?.refresh_token
+      !tokens.refresh_token
     ) {
       throw new Error(invalidApiResponseError);
     }
 
-    const meClient = createApiClient({ accessToken: tokens.access_token });
-    const meResponse = await meClient.request<ApiSuccessResponse<{ user: AuthenticatedUser }>>({
-      url: authMeEndpoint,
-      method: "GET",
-    });
-    const user = meResponse.data?.data?.user;
-
-    if (!user?.id || !user?.email) {
-      throw new Error(invalidApiResponseError);
-    }
-
+    const session = await requestAuthenticatedSession(tokens.access_token, locale);
     writeAuthCookies(tokens.access_token, tokens.refresh_token);
 
     return {
-      user,
-      access_token: tokens.access_token,
+      ...session,
       refresh_token: tokens.refresh_token,
     };
   } catch (error) {
@@ -500,14 +629,18 @@ export const submitLogin = createAsyncThunk<
 });
 
 export const submitRegister = createAsyncThunk<
-  void,
-  { locale: Locale },
+  RegisterResponseData,
+  { locale: Locale; recaptchaToken: string },
   { state: RootState; rejectValue: ThunkReject<RegisterFieldName> }
->("auth/submitRegister", async ({ locale }, thunkApi) => {
+>("auth/submitRegister", async ({ locale, recaptchaToken }, thunkApi) => {
   const localeMessages = getMessages(locale);
   const messages = localeMessages.auth.register;
   const values = normalizeRegisterValues(thunkApi.getState().auth.register.values);
   const fieldErrors = validateRegisterForm(values, messages);
+
+  if (fieldErrors.phone === "INVALID_PHONE_FORMAT") {
+    fieldErrors.phone = getAuthFlowMessages(locale).register.phoneInvalidMessage;
+  }
 
   if (Object.keys(fieldErrors).length > 0) {
     return thunkApi.rejectWithValue({
@@ -533,15 +666,24 @@ export const submitRegister = createAsyncThunk<
         birthday: values.birthday,
         country: values.country,
         email: values.email,
+        phone: values.phone || null,
         password: values.password,
         type: values.type as RegisterUserType,
+        recaptcha_token: recaptchaToken,
       },
     });
     const contentType = String(response.headers["content-type"] ?? "");
+    const data = response.data?.data;
 
-    if (contentType.includes("text/html") || response.data?.success !== true) {
+    if (
+      contentType.includes("text/html") ||
+      response.data?.success !== true ||
+      !data?.restriction_state
+    ) {
       throw new Error(invalidApiResponseError);
     }
+
+    return data;
   } catch (error) {
     return thunkApi.rejectWithValue(
       await getRegisterErrorResult(
@@ -554,8 +696,12 @@ export const submitRegister = createAsyncThunk<
   }
 });
 
+type RefreshAuthResponseData = AuthTokens & {
+  restriction_state?: RestrictionState;
+};
+
 export const refreshAuthToken = createAsyncThunk<
-  AuthTokens,
+  RefreshAuthResponseData,
   void,
   { state: RootState }
 >("auth/refreshToken", async (_, thunkApi) => {
@@ -567,7 +713,9 @@ export const refreshAuthToken = createAsyncThunk<
 
   try {
     const client = createApiClient();
-    const response = await client.request<ApiSuccessResponse<AuthTokens>>({
+    const response = await client.request<
+      ApiSuccessResponse<RefreshAuthResponseData>
+    >({
       url: authRefreshEndpoint,
       method: "POST",
       data: { refresh_token: refreshToken },
@@ -586,6 +734,37 @@ export const refreshAuthToken = createAsyncThunk<
   }
 });
 
+export const fetchAuthenticatedSession = createAsyncThunk<
+  AuthMeResponseData,
+  { locale?: Locale } | void,
+  { state: RootState }
+>("auth/fetchAuthenticatedSession", async (input, thunkApi) => {
+  const { accessToken } = thunkApi.getState().auth.session;
+
+  if (!accessToken) {
+    return thunkApi.rejectWithValue(null);
+  }
+
+  try {
+    const response = await createApiClient({
+      accessToken,
+      locale: input?.locale,
+    }).request<ApiSuccessResponse<AuthMeResponseData>>({
+      url: authMeEndpoint,
+      method: "GET",
+    });
+    const data = response.data?.data;
+
+    if (!data?.user?.id || !data.user.email || !data.restriction_state) {
+      return thunkApi.rejectWithValue(null);
+    }
+
+    return data;
+  } catch {
+    return thunkApi.rejectWithValue(null);
+  }
+});
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -596,6 +775,14 @@ const authSlice = createSlice({
     ) {
       state.login.values[action.payload.field] = action.payload.value;
       delete state.login.errors[action.payload.field];
+      state.login.feedback = null;
+      state.login.challenge = null;
+      if (state.login.status !== "loading") {
+        state.login.status = "idle";
+      }
+    },
+    clearLoginChallenge(state) {
+      state.login.challenge = null;
       state.login.feedback = null;
       if (state.login.status !== "loading") {
         state.login.status = "idle";
@@ -624,6 +811,7 @@ const authSlice = createSlice({
         errors: {},
         feedback: null,
         status: "idle",
+        challenge: null,
       };
     },
     resetRegisterState(state) {
@@ -658,6 +846,7 @@ const authSlice = createSlice({
     },
     signOut(state) {
       state.session = { ...createInitialSessionState(), hydrated: true };
+      state.login.challenge = null;
     },
   },
   extraReducers: (builder) => {
@@ -666,16 +855,29 @@ const authSlice = createSlice({
         state.login.status = "loading";
         state.login.feedback = null;
         state.login.errors = {};
+        state.login.challenge = null;
       })
       .addCase(submitLogin.fulfilled, (state, action) => {
         state.login.status = "succeeded";
         state.login.feedback = null;
         state.login.errors = {};
+
+        if (action.payload.kind === "two_factor_required") {
+          state.login.challenge = {
+            challengeId: action.payload.challengeId,
+            expiresAt: action.payload.challengeExpiresAt,
+          };
+          state.login.values.password = "";
+          return;
+        }
+
         state.login.values = createInitialLoginValues();
+        state.login.challenge = null;
         state.session = {
-          user: action.payload.user,
-          accessToken: action.payload.access_token,
-          refreshToken: action.payload.refresh_token,
+          user: action.payload.session.user,
+          accessToken: action.payload.session.access_token,
+          refreshToken: action.payload.session.refresh_token,
+          restrictionState: action.payload.session.restriction_state,
           status: "authenticated",
           hydrated: true,
         };
@@ -689,6 +891,34 @@ const authSlice = createSlice({
             variant: "destructive",
           };
         state.login.errors = action.payload?.fieldErrors ?? {};
+      })
+      .addCase(submitLoginTwoFactor.pending, (state) => {
+        state.login.status = "loading";
+        state.login.feedback = null;
+      })
+      .addCase(submitLoginTwoFactor.fulfilled, (state, action) => {
+        state.login.status = "succeeded";
+        state.login.feedback = null;
+        state.login.errors = {};
+        state.login.challenge = null;
+        state.login.values = createInitialLoginValues();
+        state.session = {
+          user: action.payload.user,
+          accessToken: action.payload.access_token,
+          refreshToken: action.payload.refresh_token,
+          restrictionState: action.payload.restriction_state,
+          status: "authenticated",
+          hydrated: true,
+        };
+      })
+      .addCase(submitLoginTwoFactor.rejected, (state, action) => {
+        state.login.status = "failed";
+        state.login.feedback =
+          action.payload?.feedback ?? {
+            title: "Login failed",
+            description: "Something went wrong while logging in.",
+            variant: "destructive",
+          };
       })
       .addCase(submitRegister.pending, (state) => {
         state.register.status = "loading";
@@ -714,14 +944,23 @@ const authSlice = createSlice({
       .addCase(refreshAuthToken.fulfilled, (state, action) => {
         state.session.accessToken = action.payload.access_token;
         state.session.refreshToken = action.payload.refresh_token;
+        state.session.restrictionState =
+          action.payload.restriction_state ?? state.session.restrictionState;
       })
       .addCase(refreshAuthToken.rejected, (state) => {
         state.session = { ...createInitialSessionState(), hydrated: true };
+      })
+      .addCase(fetchAuthenticatedSession.fulfilled, (state, action) => {
+        state.session.user = action.payload.user;
+        state.session.restrictionState = action.payload.restriction_state;
+        state.session.status = "authenticated";
+        state.session.hydrated = true;
       });
   },
 });
 
 export const {
+  clearLoginChallenge,
   hydrateAuthSession,
   resetLoginState,
   resetRegisterState,
@@ -732,9 +971,12 @@ export const {
 } = authSlice.actions;
 
 export const selectAuthSession = (state: RootState) => state.auth.session;
-export const selectAuthHydrated = (state: RootState) => state.auth.session.hydrated;
+export const selectAuthHydrated = (state: RootState) =>
+  state.auth.session.hydrated;
 export const selectLoginState = (state: RootState) => state.auth.login;
 export const selectRegisterState = (state: RootState) => state.auth.register;
+export const selectRestrictionState = (state: RootState) =>
+  state.auth.session.restrictionState;
 export const selectIsAuthenticated = (state: RootState) =>
   state.auth.session.status === "authenticated";
 

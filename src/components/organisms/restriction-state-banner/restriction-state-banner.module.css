@@ -1,0 +1,36 @@
+.banner {
+  display: grid;
+  gap: 0.857rem;
+  margin-bottom: 1rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.714rem;
+}
+
+.list {
+  display: grid;
+  gap: 0.714rem;
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.list li {
+  color: var(--app-text-muted);
+  line-height: 1.6;
+}
+
+.linkAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.9rem;
+  background: var(--app-primary);
+  color: var(--app-text-inverse);
+  font-weight: 600;
+  text-decoration: none;
+}

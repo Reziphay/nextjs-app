@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { AppSidebar } from "@/components/organisms/app-sidebar";
+import { RestrictionStateBanner } from "@/components/organisms/restriction-state-banner/restriction-state-banner";
 import { useLocale } from "@/components/providers/locale-provider";
 import { getLocaleDirection } from "@/i18n/config";
 import { DashboardBottomNav } from "./dashboard-bottom-nav";
@@ -34,7 +35,10 @@ export function DashboardShell({ children }: DashboardShellProps) {
           onToggle={() => setCollapsed((value) => !value)}
         />
         <main className={styles.main}>
-          <div className={styles.content}>{children}</div>
+          <div className={styles.content}>
+            <RestrictionStateBanner />
+            {children}
+          </div>
         </main>
         <DashboardBottomNav />
       </div>

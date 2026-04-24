@@ -130,6 +130,32 @@ export const enMessages: Messages = {
   },
   backendErrors: {
     "auth.invalid_credentials": "Invalid email or password.",
+    "auth.recaptcha_required": "Complete the reCAPTCHA check before continuing.",
+    "auth.recaptcha_unavailable":
+      "reCAPTCHA is unavailable right now. Please try again shortly.",
+    "auth.recaptcha_failed":
+      "reCAPTCHA verification failed. Please try again.",
+    "auth.invalid_two_factor_code": "The two-factor code is invalid.",
+    "auth.two_factor_setup_expired":
+      "The two-factor setup session has expired. Start setup again.",
+    "auth.challenge_resend_too_soon":
+      "A code was sent recently. Please wait a moment before requesting another.",
+    "auth.challenge_rate_limited":
+      "Too many verification codes were sent. Please try again later.",
+    "auth.email_already_verified": "This email address is already verified.",
+    "auth.phone_already_verified": "This phone number is already verified.",
+    "auth.invalid_otp": "The OTP code is invalid.",
+    "auth.verification_required":
+      "Finish the required verification steps before continuing.",
+    "auth.step_up_required":
+      "A stronger authentication check is required for this action.",
+    "auth.phone_required":
+      "Add a phone number before requesting phone verification.",
+    "auth.two_factor_already_enabled":
+      "Two-factor authentication is already enabled.",
+    "auth.two_factor_not_enabled":
+      "Two-factor authentication is not enabled for this account.",
+    "auth.user_not_found": "User not found.",
     "errors.validation_error": "The submitted data failed validation.",
     "errors.missing_token": "Authentication token is missing.",
     "errors.invalid_token": "Authentication token is invalid.",

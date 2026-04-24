@@ -130,6 +130,34 @@ export const ruMessages: Messages = {
   },
   backendErrors: {
     "auth.invalid_credentials": "Неверный email или пароль.",
+    "auth.recaptcha_required":
+      "Перед продолжением завершите проверку reCAPTCHA.",
+    "auth.recaptcha_unavailable":
+      "reCAPTCHA сейчас недоступна. Попробуйте немного позже.",
+    "auth.recaptcha_failed":
+      "Проверка reCAPTCHA завершилась ошибкой. Попробуйте еще раз.",
+    "auth.invalid_two_factor_code":
+      "Код двухфакторной аутентификации неверный.",
+    "auth.two_factor_setup_expired":
+      "Срок сессии настройки двухфакторной аутентификации истек. Начните заново.",
+    "auth.challenge_resend_too_soon":
+      "Код был отправлен совсем недавно. Немного подождите перед повторным запросом.",
+    "auth.challenge_rate_limited":
+      "Отправлено слишком много кодов подтверждения. Попробуйте позже.",
+    "auth.email_already_verified": "Этот email уже подтвержден.",
+    "auth.phone_already_verified": "Этот номер телефона уже подтвержден.",
+    "auth.invalid_otp": "OTP-код неверный.",
+    "auth.verification_required":
+      "Перед продолжением завершите обязательные шаги подтверждения.",
+    "auth.step_up_required":
+      "Для этого действия требуется усиленная проверка аутентификации.",
+    "auth.phone_required":
+      "Добавьте номер телефона перед запросом подтверждения телефона.",
+    "auth.two_factor_already_enabled":
+      "Двухфакторная аутентификация уже включена.",
+    "auth.two_factor_not_enabled":
+      "Для этого аккаунта двухфакторная аутентификация не включена.",
+    "auth.user_not_found": "Пользователь не найден.",
     "errors.validation_error": "Отправленные данные не прошли валидацию.",
     "errors.missing_token": "Токен авторизации отсутствует.",
     "errors.invalid_token": "Токен авторизации недействителен.",

@@ -1,4 +1,6 @@
 export {
+  clearLoginChallenge,
+  fetchAuthenticatedSession,
   hydrateAuthSession,
   refreshAuthToken,
   resetLoginState,
@@ -8,11 +10,13 @@ export {
   selectIsAuthenticated,
   selectLoginState,
   selectRegisterState,
+  selectRestrictionState,
   setLoginField,
   setRegisterField,
   signOut,
   syncAuthenticatedUser,
   submitLogin,
+  submitLoginTwoFactor,
   submitRegister,
   type PersistedAuthSession,
 } from "./auth.slice";

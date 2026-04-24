@@ -131,6 +131,34 @@ export const azMessages: Messages = {
   },
   backendErrors: {
     "auth.invalid_credentials": "Email və ya şifrə yanlışdır.",
+    "auth.recaptcha_required":
+      "Davam etməzdən əvvəl reCAPTCHA yoxlamasını tamamlayın.",
+    "auth.recaptcha_unavailable":
+      "reCAPTCHA hazırda əlçatan deyil. Bir az sonra yenidən cəhd edin.",
+    "auth.recaptcha_failed":
+      "reCAPTCHA təsdiqi uğursuz oldu. Yenidən cəhd edin.",
+    "auth.invalid_two_factor_code":
+      "İki mərhələli identifikasiya kodu yanlışdır.",
+    "auth.two_factor_setup_expired":
+      "İki mərhələli quraşdırma sessiyasının vaxtı bitib. Yenidən başladın.",
+    "auth.challenge_resend_too_soon":
+      "Kod az əvvəl göndərilib. Yenisini istəməzdən əvvəl bir qədər gözləyin.",
+    "auth.challenge_rate_limited":
+      "Həddən artıq çox təsdiq kodu göndərilib. Sonra yenidən cəhd edin.",
+    "auth.email_already_verified": "Bu email ünvanı artıq təsdiqlənib.",
+    "auth.phone_already_verified": "Bu telefon nömrəsi artıq təsdiqlənib.",
+    "auth.invalid_otp": "OTP kodu yanlışdır.",
+    "auth.verification_required":
+      "Davam etməzdən əvvəl tələb olunan təsdiqləri tamamlayın.",
+    "auth.step_up_required":
+      "Bu əməliyyat üçün daha güclü identifikasiya yoxlaması tələb olunur.",
+    "auth.phone_required":
+      "Telefon təsdiqi istəməzdən əvvəl nömrə əlavə edin.",
+    "auth.two_factor_already_enabled":
+      "İki mərhələli identifikasiya artıq aktivdir.",
+    "auth.two_factor_not_enabled":
+      "Bu hesab üçün iki mərhələli identifikasiya aktiv deyil.",
+    "auth.user_not_found": "İstifadəçi tapılmadı.",
     "errors.validation_error": "Məlumatlar yoxlamadan keçmədi.",
     "errors.missing_token": "Giriş məlumatı tapılmadı.",
     "errors.invalid_token": "Giriş məlumatı etibarsızdır.",
