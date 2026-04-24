@@ -1291,8 +1291,37 @@ pre {
   transition: transform 160ms ease;
 }
 
+.logoSwap {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+}
+
+.logoSwapImage {
+  position: absolute !important;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity 180ms ease;
+}
+
+.logoSwapImageHover {
+  opacity: 0;
+}
+
 .logoButton:hover {
   transform: translateY(-1px) scale(1.02);
+}
+
+.logoButton:hover .logoSwapImageDefault,
+.logoButton:focus-visible .logoSwapImageDefault {
+  opacity: 0;
+}
+
+.logoButton:hover .logoSwapImageHover,
+.logoButton:focus-visible .logoSwapImageHover {
+  opacity: 1;
 }
 
 .logoButton:focus-visible {

@@ -5,7 +5,7 @@ import {
   normalizeBackendErrorMessage,
   translateBackendErrorMessage,
 } from "@/lib/backend-errors";
-import { findCountryByValue, normalizeCountryValue } from "@/lib/countries";
+import { normalizeCountryValue } from "@/lib/countries";
 import { createApiClient } from "@/lib/api";
 import type {
   AccountProfileDraft,
@@ -29,7 +29,9 @@ const allowedAvatarMimeTypes = new Set([
   "image/webp",
 ]);
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const phonePattern = /^[0-9()+\-\s]{7,20}$/;
+// Full E.164 format: optional '+' followed by 7–15 digits.
+// The user types (or the field prefills) the complete international number.
+const phonePattern = /^\+\d{7,15}$/;
 const accountFieldNames = [
   "first_name",
   "last_name",
@@ -478,19 +480,18 @@ export const submitAccountUpdate = createAsyncThunk<
   try {
     const isEmailLocked = isEmailFieldLocked(profile);
     const isPhoneLocked = isPhoneFieldLocked(profile);
+    // phone is already full E.164 in the draft (e.g. "+9941234567").
+    // If the field is locked we fall back to the profile value so the user
+    // cannot accidentally clear a verified number.
     const resolvedEmail = isEmailLocked ? (profile?.email ?? values.email) : values.email;
-    const resolvedPhone = isPhoneLocked ? (profile?.phone ?? null) : values.phone || null;
-    const resolvedCountryPrefix = isPhoneLocked
-      ? (profile?.country_prefix ?? null)
-      : resolvedPhone
-        ? (findCountryByValue(values.country)?.prefix ?? null)
-        : null;
+    const resolvedPhone = isPhoneLocked
+      ? (profile?.phone ?? null)
+      : values.phone || null;
     const payload: UpdateMyAccountRequestBody = {
       first_name: values.first_name,
       last_name: values.last_name,
       birthday: values.birthday,
       country: values.country,
-      country_prefix: resolvedCountryPrefix,
       email: resolvedEmail,
       phone: resolvedPhone,
     };

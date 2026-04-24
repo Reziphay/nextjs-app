@@ -353,6 +353,7 @@ export const zhMessages: Messages = {
     detailMetricCategories: "分类数",
     detailMetricBranches: "分店数",
     detailMetricGallery: "图库项目",
+    detailMetricTeamMembers: "团队成员",
     detailMetricRating: "评分",
     detailNoGalleryMedia: "此品牌尚未添加图库图片。",
     detailGalleryPrevious: "上一张图片",

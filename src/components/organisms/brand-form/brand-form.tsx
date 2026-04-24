@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { isAxiosError } from "axios";
 import { Button } from "@/components/atoms/button";
 import { Field, FieldLabel, Input } from "@/components/atoms/input";
@@ -41,7 +41,7 @@ import {
 } from "@/lib/brands-api";
 import { translateBackendErrorMessage } from "@/lib/backend-errors";
 import type { Brand, BrandCategory, BrandGalleryItem, Branch } from "@/types/brand";
-import { BranchModal } from "./branch-modal";
+import { BranchPage } from "./branch-page";
 import styles from "./brand-form.module.css";
 
 // Branch draft preserves the server id for persisted branches
@@ -49,6 +49,8 @@ type BranchDraft = {
   id?: string; // undefined = new (not yet persisted)
   name: string;
   description?: string;
+  cover_media_id?: string | null;
+  cover_url?: string | null;
   address1: string;
   address2?: string;
   phone?: string;
@@ -57,6 +59,9 @@ type BranchDraft = {
   opening?: string;
   closing?: string;
   breaks: { id?: string; start: string; end: string }[];
+  photoFile?: File | null;
+  photoPreviewUrl?: string | null;
+  photoRemoved?: boolean;
 };
 
 type BrandFormDraft = {
@@ -119,6 +124,11 @@ function brandToDraft(brand: Brand): BrandFormDraft {
       opening: b.opening,
       closing: b.closing,
       breaks: b.breaks,
+      cover_media_id: b.cover_media_id ?? null,
+      cover_url: b.cover_url ?? null,
+      photoFile: null,
+      photoPreviewUrl: proxyMediaUrl(b.cover_url) ?? null,
+      photoRemoved: false,
     })),
   };
 }
@@ -133,10 +143,116 @@ function revokeDraftObjectUrls(draft: BrandFormDraft) {
       URL.revokeObjectURL(url);
     }
   }
+
+  for (const branch of draft.branches) {
+    if (branch.photoPreviewUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(branch.photoPreviewUrl);
+    }
+  }
 }
 
 function buildTransferTargetLabel(user: UserSearchResult) {
   return `${user.first_name} ${user.last_name}`.trim();
+}
+
+function getBranchUploadKey(branch: BranchDraft, index: number) {
+  return branch.id ?? `new-${index}`;
+}
+
+function loadImageFromFile(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new window.Image();
+
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Failed to load image file"));
+    };
+
+    image.src = objectUrl;
+  });
+}
+
+function canvasToFile(
+  canvas: HTMLCanvasElement,
+  fileName: string,
+  type: string,
+  quality = 0.92,
+): Promise<File> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error("Failed to export canvas"));
+          return;
+        }
+
+        resolve(new File([blob], fileName, { type }));
+      },
+      type,
+      quality,
+    );
+  });
+}
+
+async function prepareBranchCoverUpload(file: File): Promise<File> {
+  const image = await loadImageFromFile(file);
+  const canvas = document.createElement("canvas");
+  const width = 1280;
+  const height = 720;
+  const inset = 72;
+  const squareSize = height - inset * 2;
+  const squareX = (width - squareSize) / 2;
+  const squareY = inset;
+  const baseName = file.name.replace(/\.[^.]+$/, "");
+  const ctx = canvas.getContext("2d");
+  const sourceSize = Math.min(image.naturalWidth, image.naturalHeight);
+  const sourceX = (image.naturalWidth - sourceSize) / 2;
+  const sourceY = (image.naturalHeight - sourceSize) / 2;
+
+  canvas.width = width;
+  canvas.height = height;
+
+  if (!ctx) {
+    return file;
+  }
+
+  const backgroundGradient = ctx.createLinearGradient(0, 0, width, height);
+  backgroundGradient.addColorStop(0, "#0f172a");
+  backgroundGradient.addColorStop(1, "#1e293b");
+  ctx.fillStyle = backgroundGradient;
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.save();
+  ctx.globalAlpha = 0.18;
+  ctx.drawImage(image, sourceX, sourceY, sourceSize, sourceSize, 0, 0, width, width);
+  ctx.restore();
+
+  ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+  ctx.fillRect(squareX - 14, squareY - 14, squareSize + 28, squareSize + 28);
+
+  ctx.drawImage(
+    image,
+    sourceX,
+    sourceY,
+    sourceSize,
+    sourceSize,
+    squareX,
+    squareY,
+    squareSize,
+    squareSize,
+  );
+
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.24)";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(squareX, squareY, squareSize, squareSize);
+
+  return canvasToFile(canvas, `${baseName}-branch-cover.jpg`, "image/jpeg");
 }
 
 type CropTarget = {
@@ -153,9 +269,11 @@ export function BrandForm({
   phoneVerified,
 }: BrandFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { messages } = useLocale();
   const t = messages.brands;
   const session = useAppSelector(selectAuthSession);
+  const branchQueryId = searchParams.get("branch");
   const [persistedBrand, setPersistedBrand] = useState<Brand | null>(
     mode === "edit" ? brand ?? null : null,
   );
@@ -178,6 +296,7 @@ export function BrandForm({
   // Branch modal state
   const [branchModalOpen, setBranchModalOpen] = useState(false);
   const [editingBranchIndex, setEditingBranchIndex] = useState<number | null>(null);
+  const [branchQueryHandled, setBranchQueryHandled] = useState(false);
 
   // Transfer modal state
   const [transferModalOpen, setTransferModalOpen] = useState(false);
@@ -305,6 +424,11 @@ export function BrandForm({
   }
 
   function handleDeleteBranch(index: number) {
+    const branch = draft.branches[index];
+    if (branch?.photoPreviewUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(branch.photoPreviewUrl);
+    }
+
     setDraft((prev) => ({
       ...prev,
       branches: prev.branches.filter((_, i) => i !== index),
@@ -315,6 +439,15 @@ export function BrandForm({
     if (editingBranchIndex !== null) {
       setDraft((prev) => {
         const next = [...prev.branches];
+        const previousBranch = next[editingBranchIndex];
+
+        if (
+          previousBranch?.photoPreviewUrl?.startsWith("blob:") &&
+          previousBranch.photoPreviewUrl !== branchDraft.photoPreviewUrl
+        ) {
+          URL.revokeObjectURL(previousBranch.photoPreviewUrl);
+        }
+
         next[editingBranchIndex] = branchDraft;
         return { ...prev, branches: next };
       });
@@ -326,6 +459,40 @@ export function BrandForm({
     }
     setEditingBranchIndex(null);
   }
+
+  useEffect(() => {
+    if (
+      mode !== "edit" ||
+      !branchQueryId ||
+      branchQueryHandled ||
+      draft.branches.length === 0
+    ) {
+      return;
+    }
+
+    const branchIndex = draft.branches.findIndex((branchItem) => branchItem.id === branchQueryId);
+    setBranchQueryHandled(true);
+
+    if (branchIndex >= 0) {
+      setEditingBranchIndex(branchIndex);
+      setBranchModalOpen(true);
+    }
+  }, [branchQueryHandled, branchQueryId, draft.branches, mode]);
+
+  useEffect(() => {
+    if (!branchModalOpen) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "auto" });
+      document.querySelector("main")?.scrollTo({ top: 0, behavior: "auto" });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [branchModalOpen]);
 
   function validate(): boolean {
     const nextErrors: Partial<Record<string, string>> = {};
@@ -346,6 +513,8 @@ export function BrandForm({
         return t.logoRatioError;
       case "media.invalid_gallery_ratio":
         return t.galleryRatioError;
+      case "media.invalid_cover_ratio":
+        return t.errorGeneric;
       default:
         return (
           translateBackendErrorMessage(apiMessage, messages.backendErrors) ??
@@ -384,6 +553,21 @@ export function BrandForm({
         newGalleryMediaIds.push(uploaded.media_id);
       }
 
+      const branchCoverMediaIds = new Map<string, string>();
+      for (const [index, branch] of draft.branches.entries()) {
+        if (!branch.photoFile) {
+          continue;
+        }
+
+        const normalizedCoverFile = await prepareBranchCoverUpload(branch.photoFile);
+        const uploaded = await uploadBrandMedia(
+          normalizedCoverFile,
+          accessToken,
+          "branch_cover",
+        );
+        branchCoverMediaIds.set(getBranchUploadKey(branch, index), uploaded.media_id);
+      }
+
       if (mode === "create") {
         const allGalleryIds = newGalleryMediaIds;
 
@@ -393,9 +577,12 @@ export function BrandForm({
           categoryIds: draft.category_ids,
           logo_media_id: logoMediaId,
           gallery_media_ids: allGalleryIds.length > 0 ? allGalleryIds : undefined,
-          branches: draft.branches.map((branch) => ({
+          branches: draft.branches.map((branch, index) => ({
             name: branch.name,
             description: branch.description || undefined,
+            cover_media_id: branchCoverMediaIds.get(
+              getBranchUploadKey(branch, index),
+            ),
             address1: branch.address1,
             address2: branch.address2 || undefined,
             phone: branch.phone || undefined,
@@ -453,11 +640,17 @@ export function BrandForm({
         }
 
         // Update existing / create new
-        for (const b of draft.branches) {
+        for (const [index, b] of draft.branches.entries()) {
           if (b.id && originalIds.has(b.id)) {
+            const uploadedCoverMediaId = branchCoverMediaIds.get(b.id);
             const updatedBranchDraft = await updateBranch(currentBrand.id, b.id, {
               name: b.name,
               description: b.description ?? null,
+              ...(uploadedCoverMediaId !== undefined
+                ? { cover_media_id: uploadedCoverMediaId }
+                : b.photoRemoved
+                  ? { cover_media_id: null as null }
+                  : {}),
               address1: b.address1,
               address2: b.address2 ?? null,
               phone: b.phone ?? null,
@@ -470,9 +663,15 @@ export function BrandForm({
             nextPersistedBranches.push(updatedBranchDraft);
             didMutateServerState = true;
           } else if (!b.id) {
+            const uploadedCoverMediaId = branchCoverMediaIds.get(
+              getBranchUploadKey(b, index),
+            );
             const createdBranch = await createBranch(currentBrand.id, {
               name: b.name,
               description: b.description || undefined,
+              ...(uploadedCoverMediaId !== undefined
+                ? { cover_media_id: uploadedCoverMediaId }
+                : {}),
               address1: b.address1,
               address2: b.address2 || undefined,
               phone: b.phone || undefined,
@@ -674,6 +873,24 @@ export function BrandForm({
           </div>
         )}
       </div>
+    );
+  }
+
+  if (branchModalOpen) {
+    return (
+      <BranchPage
+        key={editingBranchIndex === null ? "new" : `edit-${editingBranchIndex}`}
+        open={branchModalOpen}
+        onOpenChange={(open) => {
+          setBranchModalOpen(open);
+          if (!open) {
+            setEditingBranchIndex(null);
+          }
+        }}
+        initial={editingBranch}
+        brandId={mode === "edit" ? (persistedBrand?.id ?? brand?.id ?? null) : null}
+        onSave={handleBranchSave}
+      />
     );
   }
 
@@ -958,15 +1175,6 @@ export function BrandForm({
           {renderFormActions()}
         </div>
       </form>
-
-      {/* Branch modal — keyed so it remounts when switching between add and different edits */}
-      <BranchModal
-        key={editingBranchIndex === null ? "new" : `edit-${editingBranchIndex}`}
-        open={branchModalOpen}
-        onOpenChange={setBranchModalOpen}
-        initial={editingBranch}
-        onSave={handleBranchSave}
-      />
 
       {/* Image crop modal */}
       {cropTarget && (

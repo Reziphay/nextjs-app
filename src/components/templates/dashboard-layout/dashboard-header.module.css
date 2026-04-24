@@ -47,9 +47,29 @@
     color 120ms ease;
 }
 
+.iconLinkInner {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .supportLink:hover {
   background: var(--app-bg-primary-soft);
   color: var(--app-primary-deep);
+}
+
+.notificationBadge {
+  position: absolute;
+  top: -0.15rem;
+  right: -0.2rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: #ef4444;
+  box-shadow:
+    0 0 0 2px var(--app-bg-sidebar),
+    0 0.2rem 0.5rem color-mix(in srgb, #ef4444 35%, transparent);
 }
 
 .supportIcon {
@@ -91,7 +111,7 @@
 }
 
 .settingsPopup {
-  width: min(18rem, calc(100vw - 2rem));
+  width: min(21rem, calc(100vw - 2rem));
   position: absolute;
   top: calc(100% + 0.714rem);
   right: 0;

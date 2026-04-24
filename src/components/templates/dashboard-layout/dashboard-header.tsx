@@ -18,12 +18,16 @@ import {
 import { Icon } from "@/components/icon";
 import { Logo } from "@/components/logo";
 import { LanguageSwitcher } from "@/components/molecules/language-switcher/language-switcher";
+import { ThemeSwitcher } from "@/components/molecules/theme-switcher/theme-switcher";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   getDefaultAppRouteForUserType,
   getDashboardBreadcrumbs,
   isProtectedAppPath,
 } from "@/lib/app-routes";
+import {
+  fetchNotificationFeed,
+} from "@/lib/brands-api";
 import { clearAuthCookies } from "@/lib/auth-cookies";
 import { selectAuthSession, signOut } from "@/store/auth";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -44,6 +48,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
   const db = messages.dashboard;
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
+  const [hasNotificationSignal, setHasNotificationSignal] = useState(false);
   const settingsWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -72,6 +77,46 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
     };
   }, [settingsOpen]);
 
+  useEffect(() => {
+    const accessToken = session.accessToken;
+
+    if (!accessToken) {
+      return undefined;
+    }
+
+    const activeAccessToken = accessToken;
+
+    let cancelled = false;
+
+    async function loadNotificationSignal() {
+      try {
+        const feed = await fetchNotificationFeed(activeAccessToken).catch(() => ({
+          items: [],
+          meta: {
+            total_count: 0,
+            unread_count: 0,
+          },
+        }));
+
+        if (cancelled) {
+          return;
+        }
+
+        setHasNotificationSignal(feed.meta.total_count > 0);
+      } catch {
+        if (!cancelled) {
+          setHasNotificationSignal(false);
+        }
+      }
+    }
+
+    void loadNotificationSignal();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname, session.accessToken]);
+
   function handleConfirmSignOut() {
     clearAuthCookies();
     dispatch(signOut());
@@ -82,6 +127,8 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
 
   const notificationsActive = pathname === "/notification";
   const settingsActive = pathname === "/settings";
+  const showNotificationBadge =
+    !notificationsActive && Boolean(session.accessToken) && hasNotificationSignal;
   const defaultHref = getDefaultAppRouteForUserType(session.user?.type);
   const crumbs = isProtectedAppPath(pathname)
     ? getDashboardBreadcrumbs({
@@ -149,7 +196,12 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
           title={db.notifications}
           className={`${styles.supportLink} ${notificationsActive ? styles.iconActionActive : ""}`}
         >
-          <Icon icon="notifications" size={16} color="current" className={styles.supportIcon} />
+          <span className={styles.iconLinkInner}>
+            <Icon icon="notifications" size={16} color="current" className={styles.supportIcon} />
+            {showNotificationBadge ? (
+              <span className={styles.notificationBadge} aria-hidden />
+            ) : null}
+          </span>
         </Link>
 
         <div ref={settingsWrapRef} className={styles.settingsWrap}>
@@ -177,6 +229,10 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
 
               <div className={styles.settingsSection}>
                 <LanguageSwitcher variant="panel" />
+              </div>
+
+              <div className={styles.settingsSection}>
+                <ThemeSwitcher variant="panel" />
               </div>
 
               <div className={styles.settingsDivider} />

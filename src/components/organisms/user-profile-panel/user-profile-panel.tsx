@@ -34,11 +34,7 @@ import {
 } from "@/components/molecules";
 import { AccountBrandsSection } from "@/components/organisms/account-brands-section/account-brands-section";
 import { useLocale } from "@/components/providers/locale-provider";
-import {
-  findCountryByValue,
-  getCountryLabel,
-  getCountryOptions,
-} from "@/lib/countries";
+import { getCountryLabel, getCountryOptions } from "@/lib/countries";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   cancelEditingAccount,
@@ -81,19 +77,6 @@ function formatDate(value: string | Date, locale: string) {
   });
 }
 
-function formatPhoneWithPrefix(phone: string | null, prefix?: string | null) {
-  if (!phone) {
-    return null;
-  }
-
-  const normalizedPrefix = prefix?.trim();
-
-  if (!normalizedPrefix) {
-    return phone;
-  }
-
-  return `${normalizedPrefix}${phone}`;
-}
 
 export function UserProfilePanel({
   user,
@@ -160,16 +143,8 @@ export function UserProfilePanel({
   const avatarSrc = canEdit
     ? (accountState.avatarPreviewUrl ?? profile.avatar_url ?? null)
     : (profile.avatar_url ?? null);
-  const derivedPhonePrefix =
-    findCountryByValue(draft.country || editableProfile?.country || "")?.prefix ??
-    editableProfile?.country_prefix ??
-    "—";
-  const formattedPhone =
-    formatPhoneWithPrefix(
-      editableProfile?.phone ?? null,
-      editableProfile?.country_prefix ??
-        findCountryByValue(editableProfile?.country ?? "")?.prefix,
-    ) ?? p.phoneMissing;
+  // phone is stored and returned as a full E.164 number (e.g. "+9941234567").
+  const formattedPhone = editableProfile?.phone ?? p.phoneMissing;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -557,31 +532,27 @@ export function UserProfilePanel({
                   data-disabled={isPhoneLocked ? "" : undefined}
                 >
                   <FieldLabel htmlFor="account_phone">{p.phone}</FieldLabel>
-                  <div className={styles.phoneRow}>
-                    <div className={styles.phonePrefix}>{derivedPhonePrefix}</div>
-                    <Input
-                      id="account_phone"
-                      type="tel"
-                      value={draft.phone}
-                      placeholder={p.phonePlaceholder}
-                      disabled={isPhoneLocked}
-                      aria-invalid={errors.phone ? "true" : undefined}
-                      onChange={(event) => {
-                        dispatch(
-                          setAccountDraftField({
-                            field: "phone",
-                            value: event.target.value,
-                          }),
-                        );
-                      }}
-                    />
-                  </div>
-                  <FieldDescription>
-                    {errors.phone ??
-                      (isPhoneLocked
-                        ? p.phoneLockedDescription
-                        : `${p.phonePrefix}: ${derivedPhonePrefix}`)}
-                  </FieldDescription>
+                  <Input
+                    id="account_phone"
+                    type="tel"
+                    value={draft.phone}
+                    placeholder="+9941234567"
+                    disabled={isPhoneLocked}
+                    aria-invalid={errors.phone ? "true" : undefined}
+                    onChange={(event) => {
+                      dispatch(
+                        setAccountDraftField({
+                          field: "phone",
+                          value: event.target.value,
+                        }),
+                      );
+                    }}
+                  />
+                  {errors.phone || isPhoneLocked ? (
+                    <FieldDescription>
+                      {errors.phone ?? p.phoneLockedDescription}
+                    </FieldDescription>
+                  ) : null}
                 </Field>
               </div>
 

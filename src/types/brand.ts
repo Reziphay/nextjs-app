@@ -24,6 +24,8 @@ export type Branch = {
   opening?: string;
   closing?: string;
   breaks: Break[];
+  cover_media_id?: string | null;
+  cover_url?: string | null;
 };
 
 export type BrandGalleryItem = {

@@ -8,14 +8,9 @@
 }
 
 .logoWrap {
-  width: clamp(8rem, 18vw, 12rem);
-  aspect-ratio: 1;
   display: grid;
   place-items: center;
-  padding: clamp(1rem, 2vw, 1.571rem);
-  border-radius: var(--general-border-radius-5xl);
-  background: var(--app-bg-surface-strong);
-  box-shadow: 0 1rem 2.857rem var(--app-shadow-card-soft);
+  line-height: 0;
 }
 
 @media (max-width: 72rem) {
@@ -27,10 +22,6 @@
 @media (max-width: 48rem) {
   .panel {
     min-height: 14rem;
-    border-radius: var(--general-border-radius-3xl);
-  }
-
-  .logoWrap {
     border-radius: var(--general-border-radius-3xl);
   }
 }

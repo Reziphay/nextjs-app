@@ -5,7 +5,7 @@ import type { CSSProperties } from "react";
 const palette = [
   "#212529", "#212529", "#212529",
   "#00111c", "#00111c", "#f5b82e",
-  "#f8f9fa", "#f8f9fa", "#f8f9fa",
+  "#ffffff", "#f8f9fa", "#f8f9fa",
 ];
 
 // palette[0–2]: near-black → text range (darkest, near-neutral)

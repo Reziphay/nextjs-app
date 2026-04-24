@@ -241,10 +241,16 @@
 
 .editRow {
   display: flex;
+  gap: 0.65rem;
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .editButton {
+  min-width: 13rem;
+}
+
+.teamButton {
   min-width: 13rem;
 }
 
@@ -487,7 +493,25 @@
   border: 1px solid color-mix(in srgb, var(--brand-border) 88%, transparent);
 }
 
+.branchCoverThumb {
+  position: relative;
+  width: 4rem;
+  height: 4rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: var(--general-border-radius);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 88%, transparent);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--brand-shadow-base) 22%, transparent);
+}
+
+.branchCoverThumbImage {
+  object-fit: cover;
+}
+
 .branchIdentityText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
   min-width: 0;
 }
 
@@ -500,7 +524,7 @@
 }
 
 .branchNote {
-  margin: 0.25rem 0 0;
+  margin: 0;
   color: var(--brand-text-subtle);
   font-size: 0.88rem;
   font-weight: 600;
@@ -550,6 +574,12 @@
   line-height: 1.5;
 }
 
+.branchContactCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 .branchMuted {
   color: var(--app-text-subtle);
   font-size: 0.88rem;
@@ -557,7 +587,7 @@
 }
 
 .branchDialogContent {
-  width: min(100%, 46rem);
+  width: min(100%, 60rem);
 }
 
 .branchDialogTop {
@@ -645,8 +675,220 @@
 .branchDialogBody {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.15rem;
   padding: 1.25rem 1.714rem 1.5rem;
+}
+
+.branchStudioGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.branchStudioCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  padding: 1rem;
+  border-radius: var(--general-border-radius);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 82%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand-surface-overlay-soft) 58%, var(--brand-surface-base) 42%),
+    color-mix(in srgb, var(--brand-surface-base) 96%, transparent)
+  );
+}
+
+.branchStudioCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.branchStudioTitle {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.branchStudioLead {
+  margin: 0.35rem 0 0;
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.branchStudioBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.95rem;
+  padding: 0.32rem 0.68rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--app-primary-faint) 70%, var(--brand-surface-base) 30%);
+  color: var(--app-primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.branchVisualStage {
+  position: relative;
+  min-height: 14rem;
+  overflow: hidden;
+  border-radius: calc(var(--general-border-radius) - 0.05rem);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 86%, transparent);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--app-primary-faint) 62%, var(--brand-surface-base) 38%),
+    color-mix(in srgb, var(--brand-surface-base) 94%, transparent)
+  );
+}
+
+.branchVisualImage {
+  object-fit: cover;
+}
+
+.branchVisualPlaceholder {
+  position: absolute;
+  inset: auto auto 1rem 1rem;
+  width: 3rem;
+  height: 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-surface-base) 90%, transparent);
+  color: var(--app-primary);
+  border: 1px solid color-mix(in srgb, var(--app-primary) 18%, transparent);
+}
+
+.branchVisualOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  padding: 1rem;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--brand-shadow-base) 70%, transparent) 100%
+  );
+}
+
+.branchVisualOverlay strong {
+  color: var(--brand-surface-base);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.branchVisualOverlay span {
+  color: color-mix(in srgb, var(--brand-surface-base) 84%, transparent);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.branchStudioMuted {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.branchTeamMetrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.branchTeamMetric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: calc(var(--general-border-radius) - 0.1rem);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 84%, transparent);
+  background: color-mix(in srgb, var(--brand-surface-base) 96%, transparent);
+}
+
+.branchTeamMetric span {
+  color: var(--brand-text-subtle);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.branchTeamMetric strong {
+  color: var(--app-text-strong);
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.branchMemberRail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.branchMemberChip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: calc(var(--general-border-radius) - 0.1rem);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 84%, transparent);
+  background: color-mix(in srgb, var(--brand-surface-base) 96%, transparent);
+}
+
+.branchMemberAvatar {
+  width: 2.55rem;
+  height: 2.55rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle at 30% 20%,
+    color-mix(in srgb, var(--brand-surface-base) 88%, transparent),
+    color-mix(in srgb, var(--app-primary-faint) 72%, var(--brand-surface-base) 28%)
+  );
+  border: 1px solid color-mix(in srgb, var(--app-primary) 18%, transparent);
+  color: var(--app-primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+  background-size: cover;
+  background-position: center;
+}
+
+.branchMemberAvatar[data-has-image="true"] {
+  color: transparent;
+}
+
+.branchMemberMeta {
+  min-width: 0;
+}
+
+.branchMemberMeta strong {
+  display: block;
+  color: var(--app-text-strong);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.branchMemberMeta span {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--app-text-muted);
+  font-size: 0.82rem;
 }
 
 .branchDialogSection,
@@ -1026,7 +1268,8 @@
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
       "identity availability"
-      "address address";
+      "address address"
+      "contact contact";
     gap: 0.8rem 0.9rem;
     align-items: start;
   }
@@ -1046,7 +1289,8 @@
   }
 
   .branchContactCell {
-    display: none;
+    grid-area: contact;
+    display: flex;
   }
 
   .branchAddress {
@@ -1058,6 +1302,11 @@
   }
 
   .branchDialogGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .branchStudioGrid,
+  .branchTeamMetrics {
     grid-template-columns: 1fr;
   }
 
@@ -1213,7 +1462,8 @@
     padding: 0.95rem;
   }
 
-  .branchIconBox {
+  .branchIconBox,
+  .branchCoverThumb {
     width: 3.15rem;
     height: 3.15rem;
   }
@@ -1228,6 +1478,10 @@
 
   .branchAvailabilityCell {
     justify-self: start;
+  }
+
+  .branchInlineActions {
+    gap: 0.35rem;
   }
 
   .availabilityBadge {
@@ -1250,5 +1504,9 @@
 
   .metricCard:last-child {
     border-bottom: none;
+  }
+
+  .branchMemberChip {
+    align-items: flex-start;
   }
 }

@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/atoms/button";
 import styles from "./image-crop-modal.module.css";
@@ -12,119 +19,229 @@ type ImageCropModalProps = {
   onCancel: () => void;
 };
 
-const VP_W = 360;
-const OUTPUT = { "1:1": [400, 400], "16:9": [1280, 720] } as const;
+type Offset = {
+  x: number;
+  y: number;
+};
 
-export function ImageCropModal({ file, aspectRatio, onCrop, onCancel }: ImageCropModalProps) {
-  const vpH = aspectRatio === "1:1" ? VP_W : Math.round(VP_W * 9 / 16);
+const VIEWPORT_WIDTH = 360;
+const OUTPUT = {
+  "1:1": { width: 400, height: 400 },
+  "16:9": { width: 1280, height: 720 },
+} as const;
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 3;
+const ZOOM_STEP = 0.01;
 
-  const imgRef = useRef<HTMLImageElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<{ sx: number; sy: number; px: number; py: number } | null>(null);
-  const touchRef = useRef<{ x: number; y: number } | null>(null);
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
 
+function getViewportHeight(aspectRatio: ImageCropModalProps["aspectRatio"]) {
+  return aspectRatio === "1:1"
+    ? VIEWPORT_WIDTH
+    : Math.round((VIEWPORT_WIDTH * 9) / 16);
+}
+
+function getImageNaturalSize(image: HTMLImageElement) {
+  return {
+    width: image.naturalWidth || 1,
+    height: image.naturalHeight || 1,
+  };
+}
+
+function getDisplaySize(
+  viewportWidth: number,
+  viewportHeight: number,
+  imageWidth: number,
+  imageHeight: number,
+  zoom: number,
+) {
+  const baseScale = Math.max(
+    viewportWidth / imageWidth,
+    viewportHeight / imageHeight,
+  );
+
+  return {
+    width: imageWidth * baseScale * zoom,
+    height: imageHeight * baseScale * zoom,
+    scale: baseScale * zoom,
+  };
+}
+
+function constrainOffset(
+  nextOffset: Offset,
+  viewportWidth: number,
+  viewportHeight: number,
+  imageWidth: number,
+  imageHeight: number,
+  zoom: number,
+) {
+  const displaySize = getDisplaySize(
+    viewportWidth,
+    viewportHeight,
+    imageWidth,
+    imageHeight,
+    zoom,
+  );
+  const maxX = Math.max(0, (displaySize.width - viewportWidth) / 2);
+  const maxY = Math.max(0, (displaySize.height - viewportHeight) / 2);
+
+  return {
+    x: clamp(nextOffset.x, -maxX, maxX),
+    y: clamp(nextOffset.y, -maxY, maxY),
+  };
+}
+
+export function ImageCropModal({
+  file,
+  aspectRatio,
+  onCrop,
+  onCancel,
+}: ImageCropModalProps) {
+  const viewportHeight = getViewportHeight(aspectRatio);
+  const outputSize = OUTPUT[aspectRatio];
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const pointerStartRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    offset: Offset;
+  } | null>(null);
   const [src] = useState(() => URL.createObjectURL(file));
-  const [nat, setNat] = useState<{ w: number; h: number } | null>(null);
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-  const [scale, setScale] = useState(1);
-  const [minScale, setMinScale] = useState(1);
+  const [zoom, setZoom] = useState(MIN_ZOOM);
+  const [offset, setOffset] = useState<Offset>({ x: 0, y: 0 });
+  const [imageSize, setImageSize] = useState({ width: 1, height: 1 });
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => () => URL.revokeObjectURL(src), [src]);
 
-  const clamp = useCallback(
-    (x: number, y: number, s: number, nw: number, nh: number) => ({
-      x: Math.min(0, Math.max(VP_W - nw * s, x)),
-      y: Math.min(0, Math.max(vpH - nh * s, y)),
-    }),
-    [vpH],
+  const displaySize = useMemo(
+    () =>
+      getDisplaySize(
+        VIEWPORT_WIDTH,
+        viewportHeight,
+        imageSize.width,
+        imageSize.height,
+        zoom,
+      ),
+    [imageSize.height, imageSize.width, viewportHeight, zoom],
   );
 
-  const handleLoad = useCallback(() => {
-    const img = imgRef.current;
-    if (!img) return;
-    const nw = img.naturalWidth;
-    const nh = img.naturalHeight;
-    const s = Math.max(VP_W / nw, vpH / nh);
-    setNat({ w: nw, h: nh });
-    setMinScale(s);
-    setScale(s);
-    setPos({ x: (VP_W - nw * s) / 2, y: (vpH - nh * s) / 2 });
-  }, [vpH]);
+  function handleImageLoad() {
+    if (!imageRef.current) {
+      return;
+    }
 
-  // Mouse drag
-  useEffect(() => {
-    if (!nat) return;
-    const onMove = (e: MouseEvent) => {
-      if (!dragRef.current) return;
-      const { sx, sy, px, py } = dragRef.current;
-      setPos(clamp(px + e.clientX - sx, py + e.clientY - sy, scale, nat.w, nat.h));
-    };
-    const onUp = () => { dragRef.current = null; };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-  }, [nat, scale, clamp]);
-
-  // Touch drag (passive: false to allow preventDefault)
-  useEffect(() => {
-    const el = viewportRef.current;
-    if (!el || !nat) return;
-    const onTouchMove = (e: TouchEvent) => {
-      if (!touchRef.current) return;
-      e.preventDefault();
-      const t = e.touches[0];
-      const dx = t.clientX - touchRef.current.x;
-      const dy = t.clientY - touchRef.current.y;
-      touchRef.current = { x: t.clientX, y: t.clientY };
-      setPos((prev) => clamp(prev.x + dx, prev.y + dy, scale, nat.w, nat.h));
-    };
-    el.addEventListener("touchmove", onTouchMove, { passive: false });
-    return () => el.removeEventListener("touchmove", onTouchMove);
-  }, [nat, scale, clamp]);
-
-  function onMouseDown(e: React.MouseEvent) {
-    e.preventDefault();
-    dragRef.current = { sx: e.clientX, sy: e.clientY, px: pos.x, py: pos.y };
+    setImageSize(getImageNaturalSize(imageRef.current));
+    setOffset({ x: 0, y: 0 });
+    setZoom(MIN_ZOOM);
   }
 
-  function onTouchStart(e: React.TouchEvent) {
-    const t = e.touches[0];
-    touchRef.current = { x: t.clientX, y: t.clientY };
+  function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    pointerStartRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      offset,
+    };
+    setIsDragging(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
   }
 
-  function onZoom(e: React.ChangeEvent<HTMLInputElement>) {
-    if (!nat) return;
-    const s = parseFloat(e.target.value);
-    setScale(s);
-    setPos((prev) => clamp(prev.x, prev.y, s, nat.w, nat.h));
+  function handlePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    const state = pointerStartRef.current;
+
+    if (!state || state.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const nextOffset = constrainOffset(
+      {
+        x: state.offset.x + (event.clientX - state.startX),
+        y: state.offset.y + (event.clientY - state.startY),
+      },
+      VIEWPORT_WIDTH,
+      viewportHeight,
+      imageSize.width,
+      imageSize.height,
+      zoom,
+    );
+
+    setOffset(nextOffset);
+  }
+
+  function handlePointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    if (pointerStartRef.current?.pointerId !== event.pointerId) {
+      return;
+    }
+
+    pointerStartRef.current = null;
+    setIsDragging(false);
+    event.currentTarget.releasePointerCapture(event.pointerId);
+  }
+
+  function handleZoomChange(nextZoom: number) {
+    const constrainedOffset = constrainOffset(
+      offset,
+      VIEWPORT_WIDTH,
+      viewportHeight,
+      imageSize.width,
+      imageSize.height,
+      nextZoom,
+    );
+
+    setZoom(nextZoom);
+    setOffset(constrainedOffset);
+  }
+
+  function handleZoomInput(event: ChangeEvent<HTMLInputElement>) {
+    handleZoomChange(parseFloat(event.target.value));
   }
 
   function handleCrop() {
-    const img = imgRef.current;
+    const image = imageRef.current;
     const canvas = canvasRef.current;
-    if (!img || !canvas || !nat) return;
 
-    const [outW, outH] = OUTPUT[aspectRatio];
-    canvas.width = outW;
-    canvas.height = outH;
+    if (!image || !canvas) {
+      return;
+    }
+
+    canvas.width = outputSize.width;
+    canvas.height = outputSize.height;
 
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!ctx) {
+      return;
+    }
 
-    const srcX = -pos.x / scale;
-    const srcY = -pos.y / scale;
-    const srcW = VP_W / scale;
-    const srcH = vpH / scale;
+    const left = (VIEWPORT_WIDTH - displaySize.width) / 2 + offset.x;
+    const top = (viewportHeight - displaySize.height) / 2 + offset.y;
+    const srcX = -left / displaySize.scale;
+    const srcY = -top / displaySize.scale;
+    const srcWidth = VIEWPORT_WIDTH / displaySize.scale;
+    const srcHeight = viewportHeight / displaySize.scale;
 
-    ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
+    ctx.drawImage(
+      image,
+      srcX,
+      srcY,
+      srcWidth,
+      srcHeight,
+      0,
+      0,
+      outputSize.width,
+      outputSize.height,
+    );
 
     canvas.toBlob(
       (blob) => {
-        if (!blob) return;
+        if (!blob) {
+          return;
+        }
+
         const baseName = file.name.replace(/\.[^.]+$/, "");
         onCrop(new File([blob], `${baseName}.jpg`, { type: "image/jpeg" }));
       },
@@ -134,49 +251,49 @@ export function ImageCropModal({ file, aspectRatio, onCrop, onCancel }: ImageCro
   }
 
   const portal = typeof document !== "undefined" ? document.body : null;
-  if (!portal) return null;
+  if (!portal) {
+    return null;
+  }
 
   return createPortal(
     <div
       className={styles.overlay}
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onCancel();
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          onCancel();
+        }
       }}
     >
       <div className={styles.modal}>
         <div className={styles.header}>
           <p className={styles.title}>Crop Image</p>
           <p className={styles.subtitle}>
-            {aspectRatio === "1:1" ? "Square 1:1" : "Widescreen 16:9"} — drag to reposition, slider to zoom
+            {aspectRatio === "1:1" ? "Square 1:1" : "Widescreen 16:9"} - drag to
+            reposition, slider to zoom
           </p>
         </div>
 
         <div
           ref={viewportRef}
           className={styles.viewport}
-          style={{ width: VP_W, height: vpH }}
-          onMouseDown={onMouseDown}
-          onTouchStart={onTouchStart}
+          style={{ width: VIEWPORT_WIDTH, height: viewportHeight }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            ref={imgRef}
+            ref={imageRef}
             src={src}
             alt=""
             draggable={false}
-            onLoad={handleLoad}
+            onLoad={handleImageLoad}
+            className={`${styles.image} ${isDragging ? styles.imageDragging : ""}`}
             style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: nat ? nat.w * scale : "auto",
-              height: nat ? nat.h * scale : "auto",
-              transform: `translate(${pos.x}px, ${pos.y}px)`,
-              transformOrigin: "top left",
-              userSelect: "none",
-              pointerEvents: "none",
-              opacity: nat ? 1 : 0,
-              transition: nat ? "none" : "opacity 0.2s",
+              width: `${displaySize.width}px`,
+              height: `${displaySize.height}px`,
+              transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px))`,
             }}
           />
         </div>
@@ -186,12 +303,11 @@ export function ImageCropModal({ file, aspectRatio, onCrop, onCancel }: ImageCro
           <input
             type="range"
             className={styles.slider}
-            min={minScale}
-            max={minScale * 3}
-            step={0.001}
-            value={scale}
-            disabled={!nat}
-            onChange={onZoom}
+            min={MIN_ZOOM}
+            max={MAX_ZOOM}
+            step={ZOOM_STEP}
+            value={zoom}
+            onChange={handleZoomInput}
           />
         </div>
 
@@ -199,7 +315,7 @@ export function ImageCropModal({ file, aspectRatio, onCrop, onCancel }: ImageCro
           <Button variant="outline" type="button" onClick={onCancel}>
             Cancel
           </Button>
-          <Button variant="primary" type="button" disabled={!nat} onClick={handleCrop}>
+          <Button variant="primary" type="button" onClick={handleCrop}>
             Crop & Save
           </Button>
         </div>

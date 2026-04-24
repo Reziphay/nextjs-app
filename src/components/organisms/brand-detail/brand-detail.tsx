@@ -15,7 +15,12 @@ import { Input } from "@/components/atoms/input";
 import { Icon } from "@/components/icon";
 import { ProfileBox } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
-import { submitBrandRating } from "@/lib/brands-api";
+import {
+  fetchBrandTeamWorkspace,
+  submitBrandRating,
+  type BrandTeamWorkspace,
+  type TeamWorkspaceMember,
+} from "@/lib/brands-api";
 import { translateBackendErrorMessage } from "@/lib/backend-errors";
 import { proxyMediaUrl } from "@/lib/media";
 import { selectAuthSession } from "@/store/auth";
@@ -31,6 +36,108 @@ type BrandDetailProps = {
 };
 
 type BranchFilter = "all" | "open247" | "withContact";
+
+type BranchStudioCopy = {
+  rowHint: string;
+  branchVisualTitle: string;
+  branchVisualLead: string;
+  branchVisualHint: string;
+  branchVisualEmptyHint: string;
+  branchTeamTitle: string;
+  branchTeamLead: string;
+  branchTeamEmpty: string;
+  branchTeamLoading: string;
+  branchTeamError: string;
+  acceptedShort: string;
+  pendingShort: string;
+  archivedShort: string;
+  ownerShort: string;
+  memberShort: string;
+  branchPhotoBadge: string;
+  branchPhotoReadyBadge: string;
+  branchTeamBadge: string;
+};
+
+const EN_BRANCH_STUDIO_COPY: BranchStudioCopy = {
+  rowHint: "Tap the branch row to view its details.",
+  branchVisualTitle: "Branch photo",
+  branchVisualLead:
+    "Photo and quick details for this branch.",
+  branchVisualHint:
+    "Branch photo",
+  branchVisualEmptyHint:
+    "No photo has been added for this branch yet.",
+  branchTeamTitle: "Branch team",
+  branchTeamLead:
+    "People working in this branch.",
+  branchTeamEmpty: "Only the owner is attached here right now.",
+  branchTeamLoading: "Loading branch team...",
+  branchTeamError: "Branch team data could not be loaded.",
+  acceptedShort: "Accepted",
+  pendingShort: "Pending",
+  archivedShort: "Archived",
+  ownerShort: "Owner",
+  memberShort: "Member",
+  branchPhotoBadge: "No photo",
+  branchPhotoReadyBadge: "Photo ready",
+  branchTeamBadge: "Team",
+};
+
+const TR_BRANCH_STUDIO_COPY: BranchStudioCopy = {
+  rowHint: "Detayları görmek için şube satırına dokun.",
+  branchVisualTitle: "Şube fotoğrafı",
+  branchVisualLead:
+    "Bu şubeye ait fotoğraf ve kısa bilgiler.",
+  branchVisualHint:
+    "Şube fotoğrafı",
+  branchVisualEmptyHint:
+    "Bu şube için henüz fotoğraf eklenmedi.",
+  branchTeamTitle: "Şube takımı",
+  branchTeamLead:
+    "Bu şubede çalışan kişiler.",
+  branchTeamEmpty: "Şimdilik burada sadece owner bağlı.",
+  branchTeamLoading: "Şube takımı yükleniyor...",
+  branchTeamError: "Şube takım verisi yüklenemedi.",
+  acceptedShort: "Kabul",
+  pendingShort: "Bekleyen",
+  archivedShort: "Arşiv",
+  ownerShort: "Sahip",
+  memberShort: "Üye",
+  branchPhotoBadge: "Foto yok",
+  branchPhotoReadyBadge: "Foto hazır",
+  branchTeamBadge: "Takım",
+};
+
+const AZ_BRANCH_STUDIO_COPY: BranchStudioCopy = {
+  rowHint: "Detalları görmək üçün filial sətrinə toxun.",
+  branchVisualTitle: "Filial fotosu",
+  branchVisualLead:
+    "Bu filiala aid foto və qısa məlumatlar.",
+  branchVisualHint:
+    "Filial fotosu",
+  branchVisualEmptyHint:
+    "Bu filial üçün hələ foto əlavə olunmayıb.",
+  branchTeamTitle: "Filial komandası",
+  branchTeamLead:
+    "Bu filialda çalışan şəxslər.",
+  branchTeamEmpty: "Hazırda burada yalnız owner qoşulub.",
+  branchTeamLoading: "Filial komandası yüklənir...",
+  branchTeamError: "Filial komanda məlumatı yüklənmədi.",
+  acceptedShort: "Qəbul",
+  pendingShort: "Gözləyən",
+  archivedShort: "Arxiv",
+  ownerShort: "Sahib",
+  memberShort: "Üzv",
+  branchPhotoBadge: "Foto yoxdur",
+  branchPhotoReadyBadge: "Foto hazırdır",
+  branchTeamBadge: "Komanda",
+};
+
+function getBranchStudioCopy(locale: string) {
+  if (locale.startsWith("az")) return AZ_BRANCH_STUDIO_COPY;
+  if (locale.startsWith("tr")) return TR_BRANCH_STUDIO_COPY;
+  return EN_BRANCH_STUDIO_COPY;
+}
 
 function StarRating({ rating, max = 5 }: { rating: number; max?: number }) {
   return (
@@ -149,6 +256,18 @@ function getBranchBreaks(branch: Branch) {
     .filter(Boolean);
 }
 
+function formatTeamMemberName(
+  member: Pick<TeamWorkspaceMember, "first_name" | "last_name">,
+) {
+  return `${member.first_name} ${member.last_name}`.trim();
+}
+
+function getTeamMemberInitials(
+  member: Pick<TeamWorkspaceMember, "first_name" | "last_name">,
+) {
+  return `${member.first_name[0] ?? ""}${member.last_name[0] ?? ""}`.toUpperCase();
+}
+
 export function BrandDetail({
   brand,
   currentUserId,
@@ -156,8 +275,9 @@ export function BrandDetail({
 }: BrandDetailProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { messages } = useLocale();
+  const { locale, messages } = useLocale();
   const t = messages.brands;
+  const studioCopy = useMemo(() => getBranchStudioCopy(locale), [locale]);
   const session = useAppSelector(selectAuthSession);
   const currentUser = session.user;
   const dashboard = messages.dashboard;
@@ -169,6 +289,10 @@ export function BrandDetail({
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
   const [activeGalleryIndex, setActiveGalleryIndex] = useState(0);
   const [galleryPaused, setGalleryPaused] = useState(false);
+  const [teamWorkspace, setTeamWorkspace] = useState<BrandTeamWorkspace | null>(null);
+  const [teamWorkspaceState, setTeamWorkspaceState] = useState<
+    "idle" | "loading" | "ready" | "error"
+  >("idle");
 
   const isOwner = Boolean(currentUserId && brandState.owner_id === currentUserId);
   const categories = useMemo(
@@ -223,6 +347,72 @@ export function BrandDetail({
       ? currentUser.id
       : undefined;
   const ownerProfileVisible = Boolean(ownerUserId && ownerDisplayName);
+  const accessToken = session.accessToken;
+  const branchTeamMap = useMemo(
+    () =>
+      new Map(
+        (teamWorkspace?.branches ?? []).map((branchItem) => [
+          branchItem.branch_id,
+          branchItem,
+        ]),
+      ),
+    [teamWorkspace],
+  );
+  const totalBrandTeamMembers = useMemo(() => {
+    const memberIds = new Set<string>();
+
+    for (const branchItem of teamWorkspace?.branches ?? []) {
+      for (const member of branchItem.members.accepted) {
+        memberIds.add(member.user_id);
+      }
+    }
+
+    return memberIds.size;
+  }, [teamWorkspace]);
+
+  useEffect(() => {
+    const token = accessToken;
+
+    if (!isOwner || !token) {
+      setTeamWorkspace(null);
+      setTeamWorkspaceState("idle");
+      return;
+    }
+
+    const resolvedAccessToken: string = token;
+
+    let active = true;
+    setTeamWorkspaceState("loading");
+
+    async function loadWorkspace() {
+      try {
+        const workspace = await fetchBrandTeamWorkspace(
+          brandState.id,
+          resolvedAccessToken,
+        );
+
+        if (!active) {
+          return;
+        }
+
+        setTeamWorkspace(workspace);
+        setTeamWorkspaceState("ready");
+      } catch {
+        if (!active) {
+          return;
+        }
+
+        setTeamWorkspace(null);
+        setTeamWorkspaceState("error");
+      }
+    }
+
+    void loadWorkspace();
+
+    return () => {
+      active = false;
+    };
+  }, [accessToken, brandState.id, isOwner]);
 
   const filteredBranches = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -248,6 +438,13 @@ export function BrandDetail({
       return haystack.includes(normalizedQuery);
     });
   }, [branches, branchFilter, searchQuery]);
+  const selectedBranchTeam = useMemo(
+    () => (selectedBranch ? branchTeamMap.get(selectedBranch.id) ?? null : null),
+    [branchTeamMap, selectedBranch],
+  );
+  const selectedBranchCoverUrl = selectedBranch
+    ? proxyMediaUrl(selectedBranch.cover_url ?? selectedBranchTeam?.cover_url ?? null)
+    : null;
 
   const gallerySlides = useMemo(
     () =>
@@ -300,8 +497,14 @@ export function BrandDetail({
       value: String(branches.length),
     },
     {
-      label: t.detailMetricGallery,
-      value: String(gallery.length),
+      label: t.detailMetricTeamMembers,
+      value: !isOwner
+        ? "—"
+        : teamWorkspaceState === "loading"
+          ? "…"
+          : teamWorkspaceState === "ready"
+            ? String(totalBrandTeamMembers)
+            : "—",
     },
     {
       label: t.detailMetricRating,
@@ -559,48 +762,64 @@ export function BrandDetail({
               {branches.length === 0 ? t.noBranches : t.detailNoMatchingBranches}
             </div>
           ) : (
-            filteredBranches.map((branch) => (
-              <button
-                key={branch.id}
-                type="button"
-                className={styles.branchRow}
-                onClick={() => setSelectedBranch(branch)}
-                aria-label={`${branch.name} — ${t.detailBranchOpenDetails}`}
-              >
-                <div className={styles.branchIdentity}>
-                  <div className={styles.branchIconBox}>
-                    <Icon icon="account_tree" size={24} color="current" />
-                  </div>
-                  <div className={styles.branchIdentityText}>
-                    <p className={styles.branchName}>{branch.name}</p>
-                    <p className={styles.branchNote}>{t.detailBranchOpenDetails}</p>
-                  </div>
-                </div>
+            filteredBranches.map((branch) => {
+              const branchCoverUrl = proxyMediaUrl(branch.cover_url ?? null);
 
-                <div className={`${styles.branchCell} ${styles.branchAddressCell}`}>
-                  <p className={styles.branchAddress}>{getBranchAddress(branch)}</p>
-                </div>
-
-                <div className={`${styles.branchCell} ${styles.branchAvailabilityCell}`}>
-                  <span
-                    className={`${styles.availabilityBadge} ${branch.is_24_7 ? styles.availabilityLive : styles.availabilityMuted}`}
-                  >
-                    {getBranchAvailability(branch, t.branchField247)}
-                  </span>
-                </div>
-
-                <div className={`${styles.branchCell} ${styles.branchContactCell}`}>
-                  {hasBranchContact(branch) ? (
-                    <div className={styles.contactStack}>
-                      {branch.phone ? <span>{branch.phone}</span> : null}
-                      {branch.email ? <span>{branch.email}</span> : null}
+              return (
+                <button
+                  key={branch.id}
+                  type="button"
+                  className={styles.branchRow}
+                  onClick={() => setSelectedBranch(branch)}
+                  aria-label={`${branch.name} — ${t.detailBranchOpenDetails}`}
+                >
+                  <div className={styles.branchIdentity}>
+                    {branchCoverUrl ? (
+                      <div className={styles.branchCoverThumb}>
+                        <Image
+                          src={branchCoverUrl}
+                          alt={`${branch.name} cover`}
+                          fill
+                          className={styles.branchCoverThumbImage}
+                          sizes="64px"
+                        />
+                      </div>
+                    ) : (
+                      <div className={styles.branchIconBox}>
+                        <Icon icon="account_tree" size={24} color="current" />
+                      </div>
+                    )}
+                    <div className={styles.branchIdentityText}>
+                      <p className={styles.branchName}>{branch.name}</p>
+                      <p className={styles.branchNote}>{studioCopy.rowHint}</p>
                     </div>
-                  ) : (
-                    <span className={styles.branchMuted}>—</span>
-                  )}
-                </div>
-              </button>
-            ))
+                  </div>
+
+                  <div className={`${styles.branchCell} ${styles.branchAddressCell}`}>
+                    <p className={styles.branchAddress}>{getBranchAddress(branch)}</p>
+                  </div>
+
+                  <div className={`${styles.branchCell} ${styles.branchAvailabilityCell}`}>
+                    <span
+                      className={`${styles.availabilityBadge} ${branch.is_24_7 ? styles.availabilityLive : styles.availabilityMuted}`}
+                    >
+                      {getBranchAvailability(branch, t.branchField247)}
+                    </span>
+                  </div>
+
+                  <div className={`${styles.branchCell} ${styles.branchContactCell}`}>
+                    {hasBranchContact(branch) ? (
+                      <div className={styles.contactStack}>
+                        {branch.phone ? <span>{branch.phone}</span> : null}
+                        {branch.email ? <span>{branch.email}</span> : null}
+                      </div>
+                    ) : (
+                      <span className={styles.branchMuted}>—</span>
+                    )}
+                  </div>
+                </button>
+              );
+            })
           )}
         </div>
       </section>
@@ -760,6 +979,153 @@ export function BrandDetail({
               </div>
 
               <div className={styles.branchDialogBody}>
+                <div className={styles.branchStudioGrid}>
+                  <article className={styles.branchStudioCard}>
+                    <div className={styles.branchStudioCardHeader}>
+                      <div>
+                        <h3 className={styles.branchStudioTitle}>
+                          {studioCopy.branchVisualTitle}
+                        </h3>
+                        <p className={styles.branchStudioLead}>
+                          {studioCopy.branchVisualLead}
+                        </p>
+                      </div>
+                      <span className={styles.branchStudioBadge}>
+                        {selectedBranchCoverUrl
+                          ? studioCopy.branchPhotoReadyBadge
+                          : studioCopy.branchPhotoBadge}
+                      </span>
+                    </div>
+
+                    <div className={styles.branchVisualStage}>
+                      {selectedBranchCoverUrl ? (
+                        <>
+                          <Image
+                            src={selectedBranchCoverUrl}
+                            alt={`${selectedBranch.name} cover`}
+                            fill
+                            className={styles.branchVisualImage}
+                            sizes="(max-width: 960px) 100vw, 420px"
+                          />
+                          <div className={styles.branchVisualOverlay}>
+                            <strong>{selectedBranch.name}</strong>
+                            <span>{studioCopy.branchVisualHint}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className={styles.branchVisualPlaceholder}>
+                            <Icon icon="sell" size={22} color="current" />
+                          </div>
+                          <div className={styles.branchVisualOverlay}>
+                            <strong>{selectedBranch.name}</strong>
+                            <span>{studioCopy.branchVisualEmptyHint}</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </article>
+
+                  <article className={styles.branchStudioCard}>
+                    <div className={styles.branchStudioCardHeader}>
+                      <div>
+                        <h3 className={styles.branchStudioTitle}>
+                          {studioCopy.branchTeamTitle}
+                        </h3>
+                        <p className={styles.branchStudioLead}>
+                          {studioCopy.branchTeamLead}
+                        </p>
+                      </div>
+                      <span className={styles.branchStudioBadge}>
+                        {studioCopy.branchTeamBadge}
+                      </span>
+                    </div>
+
+                    {isOwner ? (
+                      teamWorkspaceState === "loading" ? (
+                        <p className={styles.branchStudioMuted}>
+                          {studioCopy.branchTeamLoading}
+                        </p>
+                      ) : teamWorkspaceState === "error" ? (
+                        <p className={styles.branchStudioMuted}>
+                          {studioCopy.branchTeamError}
+                        </p>
+                      ) : (
+                        <>
+                          <div className={styles.branchTeamMetrics}>
+                            <div className={styles.branchTeamMetric}>
+                              <span>{studioCopy.acceptedShort}</span>
+                              <strong>
+                                {selectedBranchTeam?.members.accepted.length ?? 0}
+                              </strong>
+                            </div>
+                            <div className={styles.branchTeamMetric}>
+                              <span>{studioCopy.pendingShort}</span>
+                              <strong>
+                                {selectedBranchTeam?.members.pending.length ?? 0}
+                              </strong>
+                            </div>
+                            <div className={styles.branchTeamMetric}>
+                              <span>{studioCopy.archivedShort}</span>
+                              <strong>
+                                {(selectedBranchTeam?.members.rejected.length ?? 0) +
+                                  (selectedBranchTeam?.members.removed.length ?? 0)}
+                              </strong>
+                            </div>
+                          </div>
+
+                          {selectedBranchTeam &&
+                          selectedBranchTeam.members.accepted.length > 0 ? (
+                            <div className={styles.branchMemberRail}>
+                              {selectedBranchTeam.members.accepted.map((member) => {
+                                const avatarUrl = proxyMediaUrl(member.avatar_url);
+
+                                return (
+                                  <div
+                                    key={member.membership_id}
+                                    className={styles.branchMemberChip}
+                                  >
+                                    <div
+                                      className={styles.branchMemberAvatar}
+                                      style={
+                                        avatarUrl
+                                          ? { backgroundImage: `url(${avatarUrl})` }
+                                          : undefined
+                                      }
+                                      data-has-image={avatarUrl ? "true" : "false"}
+                                    >
+                                      {!avatarUrl
+                                        ? getTeamMemberInitials(member)
+                                        : null}
+                                    </div>
+                                    <div className={styles.branchMemberMeta}>
+                                      <strong>{formatTeamMemberName(member)}</strong>
+                                      <span>
+                                        {member.role === "OWNER"
+                                          ? studioCopy.ownerShort
+                                          : studioCopy.memberShort}
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <p className={styles.branchStudioMuted}>
+                              {studioCopy.branchTeamEmpty}
+                            </p>
+                          )}
+                        </>
+                      )
+                    ) : (
+                      <p className={styles.branchStudioMuted}>
+                        {studioCopy.branchTeamLead}
+                      </p>
+                    )}
+
+                  </article>
+                </div>
+
                 {selectedBranch.description?.trim() ? (
                   <div className={styles.branchDialogSection}>
                     <span className={styles.branchDialogLabel}>

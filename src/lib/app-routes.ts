@@ -97,10 +97,7 @@ export function getDefaultAppRouteForUserType(
 export function canAccessProtectedRoute({
   pathname,
   userType,
-  searchParams,
 }: RouteAccessInput) {
-  const hasEntityId = Boolean(searchParams?.get("id")?.trim());
-
   switch (pathname) {
     case "/search":
     case "/settings":
@@ -216,6 +213,16 @@ export function getDashboardBreadcrumbs({
         crumbs.push({
           label: messages.brands.editBrand,
           icon: "edit_square",
+          current: true,
+        });
+        return crumbs;
+      }
+
+      if (progress === "team" && entityId) {
+        pushRoute("/brands");
+        crumbs.push({
+          label: messages.brands.teamWorkspace,
+          icon: "groups",
           current: true,
         });
         return crumbs;

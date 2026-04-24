@@ -14,7 +14,7 @@
 /* ── Sticky page header ── */
 .pageHeader {
   position: sticky;
-  top: 0;
+  top: 0.875rem;
   z-index: 20;
   display: flex;
   align-items: center;
@@ -517,6 +517,10 @@
   font-size: var(--font-size-small);
   font-weight: 500;
   line-height: 1.5;
+}
+
+.wrapper > .feedback {
+  margin-bottom: 1.25rem;
 }
 
 .feedbackSuccess {

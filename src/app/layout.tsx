@@ -2,12 +2,16 @@ import type { Metadata, Viewport } from "next";
 import { getLocaleDirection, getMessages } from "@/i18n/config";
 import { StoreProvider } from "@/components/providers/store-provider";
 import { getServerLocale } from "@/i18n/server";
-import { lightThemeStyle } from "@/theme/light-theme";
+import {
+  themeInitializationScript,
+  themeStylesheet,
+} from "@/theme/theme-config";
 import { fontLinks, typographyStyle } from "@/theme/typography";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 
+const FAVICON_URL = "/reziphay-logo-default.svg";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 
@@ -23,6 +27,10 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: messages.metadata.description,
     authors: [{ name: "Vugar Safarzada" }],
+    icons: {
+      icon: [{ url: FAVICON_URL, type: "image/svg+xml", sizes: "any" }],
+      shortcut: FAVICON_URL,
+    },
   };
 }
 
@@ -46,10 +54,16 @@ export default async function RootLayout({
       lang={locale}
       dir={getLocaleDirection(locale)}
       data-theme="light"
-      style={{ ...lightThemeStyle, ...typographyStyle }}
-      suppressHydrationWarning className={cn("font-sans", geist.variable)}
+      data-theme-preference="system"
+      style={typographyStyle}
+      suppressHydrationWarning
+      className={cn("font-sans", geist.variable)}
     >
       <head>
+        <script
+          dangerouslySetInnerHTML={{ __html: themeInitializationScript }}
+        />
+        <style>{themeStylesheet}</style>
         {fontLinks.map((link) => (
           <link
             key={`${link.rel}-${link.href}`}
