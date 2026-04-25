@@ -10,4 +10,5 @@ export { BrandsUsoPage } from "./brands-uso-page";
 export { ComingSoonPanel } from "./coming-soon-panel";
 export { HomeDashboardPanel } from "./home-dashboard-panel";
 export { ProtectedComingSoonRoute } from "./protected-coming-soon-route";
+export { ServicesUsoPage } from "./services-uso-page";
 export { UserProfilePanel } from "./user-profile-panel";
