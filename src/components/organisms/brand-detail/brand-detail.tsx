@@ -21,12 +21,14 @@ import {
   type BrandTeamWorkspace,
   type TeamWorkspaceMember,
 } from "@/lib/brands-api";
+import { fetchPublicServices } from "@/lib/services-api";
 import { translateBackendErrorMessage } from "@/lib/backend-errors";
 import { proxyMediaUrl } from "@/lib/media";
 import { selectAuthSession } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
 import type { Brand, Branch, BrandStatus } from "@/types/brand";
 import type { PublicUserProfile } from "@/types";
+import type { Service } from "@/types/service";
 import styles from "./brand-detail.module.css";
 
 type BrandDetailProps = {
@@ -36,6 +38,105 @@ type BrandDetailProps = {
 };
 
 type BranchFilter = "all" | "open247" | "withContact";
+
+type ServicesCopy = {
+  sectionTitle: string;
+  emptyState: string;
+  loadingState: string;
+  labelFree: string;
+  labelFrom: string;
+  labelDurationUnit: string;
+  viewService: string;
+  modalTitle: string;
+  modalDescription: string;
+  modalCategory: string;
+  modalPrice: string;
+  modalDuration: string;
+  modalAddress: string;
+  modalBranch: string;
+  modalIndividual: string;
+  modalClose: string;
+};
+
+const EN_SERVICES_COPY: ServicesCopy = {
+  sectionTitle: "Services",
+  emptyState: "No active services at this branch.",
+  loadingState: "Loading services…",
+  labelFree: "Free",
+  labelFrom: "From",
+  labelDurationUnit: "min",
+  viewService: "View service",
+  modalTitle: "Service details",
+  modalDescription: "Description",
+  modalCategory: "Category",
+  modalPrice: "Price",
+  modalDuration: "Duration",
+  modalAddress: "Address",
+  modalBranch: "Branch",
+  modalIndividual: "Individual",
+  modalClose: "Close",
+};
+
+const TR_SERVICES_COPY: ServicesCopy = {
+  ...EN_SERVICES_COPY,
+  sectionTitle: "Hizmetler",
+  emptyState: "Bu şubede aktif hizmet bulunmuyor.",
+  loadingState: "Hizmetler yükleniyor…",
+  labelFree: "Ücretsiz",
+  labelFrom: "Başlangıç",
+  labelDurationUnit: "dk",
+  viewService: "Hizmeti gör",
+  modalTitle: "Hizmet detayları",
+  modalDescription: "Açıklama",
+  modalCategory: "Kategori",
+  modalPrice: "Fiyat",
+  modalDuration: "Süre",
+  modalAddress: "Adres",
+  modalBranch: "Şube",
+  modalIndividual: "Bireysel",
+  modalClose: "Kapat",
+};
+
+const AZ_SERVICES_COPY: ServicesCopy = {
+  ...EN_SERVICES_COPY,
+  sectionTitle: "Xidmətlər",
+  emptyState: "Bu filialda aktiv xidmət yoxdur.",
+  loadingState: "Xidmətlər yüklənir…",
+  labelFree: "Pulsuz",
+  labelFrom: "Başlangıcdan",
+  labelDurationUnit: "dəq",
+  viewService: "Xidmətə bax",
+  modalTitle: "Xidmət detalları",
+  modalDescription: "Təsvir",
+  modalCategory: "Kateqoriya",
+  modalPrice: "Qiymət",
+  modalDuration: "Müddət",
+  modalAddress: "Ünvan",
+  modalBranch: "Filial",
+  modalIndividual: "Fərdi",
+  modalClose: "Bağla",
+};
+
+function getServicesCopy(locale: string): ServicesCopy {
+  if (locale.startsWith("az")) return AZ_SERVICES_COPY;
+  if (locale.startsWith("tr")) return TR_SERVICES_COPY;
+  return EN_SERVICES_COPY;
+}
+
+function formatServicePrice(service: Service, copy: ServicesCopy): string {
+  if (service.price_type === "FREE") return copy.labelFree;
+  if (service.price === null) return "—";
+  if (service.price_type === "STARTING_FROM") return `${copy.labelFrom} ${service.price}`;
+  return String(service.price);
+}
+
+function formatServiceDuration(minutes: number | null, unit: string): string {
+  if (!minutes) return "—";
+  if (minutes < 60) return `${minutes} ${unit}`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m > 0 ? `${h}h ${m}${unit}` : `${h}h`;
+}
 
 type BranchStudioCopy = {
   rowHint: string;
@@ -278,6 +379,7 @@ export function BrandDetail({
   const { locale, messages } = useLocale();
   const t = messages.brands;
   const studioCopy = useMemo(() => getBranchStudioCopy(locale), [locale]);
+  const servicesCopy = useMemo(() => getServicesCopy(locale), [locale]);
   const session = useAppSelector(selectAuthSession);
   const currentUser = session.user;
   const dashboard = messages.dashboard;
@@ -293,6 +395,9 @@ export function BrandDetail({
   const [teamWorkspaceState, setTeamWorkspaceState] = useState<
     "idle" | "loading" | "ready" | "error"
   >("idle");
+  const [brandServices, setBrandServices] = useState<Service[]>([]);
+  const [servicesState, setServicesState] = useState<"idle" | "loading" | "ready">("idle");
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
 
   const isOwner = Boolean(currentUserId && brandState.owner_id === currentUserId);
   const categories = useMemo(
@@ -486,6 +591,39 @@ export function BrandDetail({
 
     return () => window.clearInterval(intervalId);
   }, [galleryPaused, gallerySlides.length]);
+
+  // Lazy load active services for this brand's branches
+  useEffect(() => {
+    const branchIds = branches.map((b) => b.id);
+    if (branchIds.length === 0) {
+      setBrandServices([]);
+      setServicesState("ready");
+      return;
+    }
+
+    let active = true;
+    setServicesState("loading");
+
+    async function loadServices() {
+      try {
+        const allServices = await fetchPublicServices({}, session.accessToken ?? undefined);
+        if (!active) return;
+        const filtered = allServices.filter(
+          (s) => s.status === "ACTIVE" && s.branch_id && branchIds.includes(s.branch_id),
+        );
+        setBrandServices(filtered);
+        setServicesState("ready");
+      } catch {
+        if (!active) return;
+        setBrandServices([]);
+        setServicesState("ready");
+      }
+    }
+
+    void loadServices();
+    return () => { active = false; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brandState.id]);
 
   const stats = [
     {
@@ -940,6 +1078,156 @@ export function BrandDetail({
           </div>
         )}
       </section>
+
+      <section className={styles.servicesPanel}>
+        <div className={styles.servicesPanelHeader}>
+          <h2 className={styles.servicesPanelTitle}>{servicesCopy.sectionTitle}</h2>
+        </div>
+
+        {servicesState === "loading" ? (
+          <div className={styles.emptyState}>{servicesCopy.loadingState}</div>
+        ) : brandServices.length === 0 ? (
+          <div className={styles.emptyState}>{servicesCopy.emptyState}</div>
+        ) : (
+          <div className={styles.servicesGrid}>
+            {brandServices.map((svc) => {
+              const priceLabel = formatServicePrice(svc, servicesCopy);
+              const durationLabel = formatServiceDuration(svc.duration, servicesCopy.labelDurationUnit);
+              const firstImg = svc.images[0];
+              const imgUrl = firstImg ? proxyMediaUrl(firstImg.url) : null;
+
+              return (
+                <button
+                  key={svc.id}
+                  type="button"
+                  className={styles.serviceCard}
+                  onClick={() => setSelectedService(svc)}
+                >
+                  {imgUrl ? (
+                    <div className={styles.serviceCardThumb}>
+                      <Image
+                        src={imgUrl}
+                        alt={svc.title}
+                        fill
+                        className={styles.serviceCardThumbImage}
+                        sizes="64px"
+                      />
+                    </div>
+                  ) : (
+                    <div className={styles.serviceCardThumbPlaceholder}>
+                      <Icon icon="design_services" size={20} color="current" />
+                    </div>
+                  )}
+                  <div className={styles.serviceCardBody}>
+                    <p className={styles.serviceCardTitle}>{svc.title}</p>
+                    {svc.category ? (
+                      <span className={styles.serviceCardCategory}>{svc.category}</span>
+                    ) : null}
+                    <div className={styles.serviceCardMeta}>
+                      <span>{priceLabel}</span>
+                      {durationLabel !== "—" ? <span>{durationLabel}</span> : null}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <AlertDialog
+        open={Boolean(selectedService)}
+        onOpenChange={(open) => {
+          if (!open) setSelectedService(null);
+        }}
+      >
+        <AlertDialogContent className={styles.branchDialogContent}>
+          {selectedService ? (
+            <>
+              <div className={styles.branchDialogTop}>
+                <div className={styles.branchDialogHero}>
+                  <div className={styles.branchDialogIcon}>
+                    <Icon icon="design_services" size={24} color="current" />
+                  </div>
+                  <div className={styles.branchDialogTitleGroup}>
+                    <h2 className={styles.branchDialogTitle}>{selectedService.title}</h2>
+                    {selectedService.category ? (
+                      <p className={styles.branchDialogDescription}>{selectedService.category}</p>
+                    ) : null}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className={styles.branchDialogClose}
+                  onClick={() => setSelectedService(null)}
+                  aria-label={servicesCopy.modalClose}
+                >
+                  <Icon icon="close" size={18} color="current" />
+                </button>
+              </div>
+
+              <div className={styles.branchDialogBody}>
+                {selectedService.description?.trim() ? (
+                  <div className={styles.branchDialogSection}>
+                    <span className={styles.branchDialogLabel}>{servicesCopy.modalDescription}</span>
+                    <p className={styles.branchDialogText}>{selectedService.description.trim()}</p>
+                  </div>
+                ) : null}
+
+                <div className={styles.branchDialogGrid}>
+                  <div className={styles.branchDialogItem}>
+                    <span className={styles.branchDialogLabel}>{servicesCopy.modalPrice}</span>
+                    <p className={styles.branchDialogText}>{formatServicePrice(selectedService, servicesCopy)}</p>
+                  </div>
+
+                  {selectedService.duration ? (
+                    <div className={styles.branchDialogItem}>
+                      <span className={styles.branchDialogLabel}>{servicesCopy.modalDuration}</span>
+                      <p className={styles.branchDialogText}>
+                        {formatServiceDuration(selectedService.duration, servicesCopy.labelDurationUnit)}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  {selectedService.branch_id ? (
+                    <div className={styles.branchDialogItem}>
+                      <span className={styles.branchDialogLabel}>{servicesCopy.modalBranch}</span>
+                      <p className={styles.branchDialogText}>
+                        {branches.find((b) => b.id === selectedService.branch_id)?.name ?? selectedService.branch_id}
+                      </p>
+                    </div>
+                  ) : selectedService.address ? (
+                    <div className={styles.branchDialogItem}>
+                      <span className={styles.branchDialogLabel}>{servicesCopy.modalAddress}</span>
+                      <p className={styles.branchDialogText}>{selectedService.address}</p>
+                    </div>
+                  ) : null}
+                </div>
+
+                {selectedService.images.length > 0 ? (
+                  <div className={styles.serviceModalImages}>
+                    {selectedService.images.map((img) => {
+                      const imgUrl = proxyMediaUrl(img.url);
+                      if (!imgUrl) return null;
+                      return (
+                        <div key={img.id} className={styles.serviceModalImageFrame}>
+                          <Image
+                            src={imgUrl}
+                            alt={selectedService.title}
+                            fill
+                            className={styles.serviceModalImage}
+                            sizes="(max-width: 640px) 50vw, 180px"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
+            </>
+          ) : null}
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={Boolean(selectedBranch)}

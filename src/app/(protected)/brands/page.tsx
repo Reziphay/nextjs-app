@@ -10,6 +10,7 @@ import {
   fetchBrandCategories,
   fetchBrandTeamWorkspace,
 } from "@/lib/brands-api";
+import { fetchPublicServices } from "@/lib/services-api";
 import { BrandsUsoPage } from "@/components/organisms/brands-uso-page";
 import { BrandsUcrPage } from "@/components/organisms/brands-ucr-page";
 import { BrandDetail } from "@/components/organisms/brand-detail";
@@ -225,8 +226,12 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
 
   // ── UCR default view (should only land here with ?id, handled above) ───────
   // Fallback: show the active brands gallery
-  const brands = await fetchActiveBrands(accessToken).catch(() => []);
+  const [brands, featuredServices] = await Promise.all([
+    fetchActiveBrands(accessToken).catch(() => []),
+    fetchPublicServices({}, accessToken).catch(() => []),
+  ]);
   const ownersById = await fetchBrandOwnersById(brands, accessToken);
+  const activeServices = featuredServices.filter((s) => s.status === "ACTIVE");
 
-  return <BrandsUcrPage brands={brands} ownersById={ownersById} />;
+  return <BrandsUcrPage brands={brands} ownersById={ownersById} featuredServices={activeServices} />;
 }
