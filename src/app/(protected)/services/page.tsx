@@ -1,6 +1,8 @@
+import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { ServicesStrategyPage } from "@/components/organisms/services-strategy-page";
-import { fetchBrandById, fetchMyBrands } from "@/lib/brands-api";
+import { fetchMyServices } from "@/lib/services-api";
+import { fetchMyBrands, fetchBrandById } from "@/lib/brands-api";
+import { ServicesUsoPage } from "@/components/organisms/services-uso-page";
 import { requireProtectedRouteAccess } from "@/lib/protected-route";
 
 type ServicesPageProps = {
@@ -10,19 +12,34 @@ type ServicesPageProps = {
 export default async function ServicesPage({
   searchParams,
 }: ServicesPageProps) {
-  await requireProtectedRouteAccess("/services", searchParams);
+  const resolvedParams = await (searchParams ?? Promise.resolve({}));
+  const user = await requireProtectedRouteAccess("/services", resolvedParams);
+
+  if (user.type !== "uso") {
+    redirect("/brands");
+  }
 
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("rzp_at")?.value ?? "";
-  const brands = await fetchMyBrands(accessToken).catch(() => []);
+
+  const [services, brands] = await Promise.all([
+    fetchMyServices(accessToken).catch(() => []),
+    fetchMyBrands(accessToken).catch(() => []),
+  ]);
+
+  // Fetch detailed brand info (with branches) for the service form branch selector
   const detailedBrands = await Promise.all(
     brands.map(async (brand) => {
-      const detailedBrand = await fetchBrandById(brand.id, accessToken).catch(
-        () => null,
-      );
-      return detailedBrand ?? brand;
+      const detailed = await fetchBrandById(brand.id, accessToken).catch(() => null);
+      return detailed ?? brand;
     }),
   );
 
-  return <ServicesStrategyPage brands={detailedBrands} />;
+  return (
+    <ServicesUsoPage
+      services={services}
+      brands={detailedBrands}
+      accessToken={accessToken}
+    />
+  );
 }
