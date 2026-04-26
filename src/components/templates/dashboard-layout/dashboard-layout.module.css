@@ -57,6 +57,25 @@
   padding: 1.714rem 2rem;
 }
 
+/* ── Full-height variant (calendar, etc.) ── */
+.body[data-variant="full"] .main {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.body[data-variant="full"] .content {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 @media (max-width: 64rem) {
   .sidebarWrap {
     display: none;
@@ -64,5 +83,9 @@
 
   .content {
     padding: 1.5rem 1rem 6rem;
+  }
+
+  .body[data-variant="full"] .content {
+    padding: 0;
   }
 }

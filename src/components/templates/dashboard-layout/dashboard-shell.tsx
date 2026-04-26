@@ -8,11 +8,14 @@ import { DashboardBottomNav } from "./dashboard-bottom-nav";
 import { DashboardHeader } from "./dashboard-header";
 import styles from "./dashboard-layout.module.css";
 
+export type ContentVariant = "default" | "full";
+
 type DashboardShellProps = {
   children: ReactNode;
+  contentVariant?: ContentVariant;
 };
 
-export function DashboardShell({ children }: DashboardShellProps) {
+export function DashboardShell({ children, contentVariant = "default" }: DashboardShellProps) {
   const [collapsed, setCollapsed] = useState(false);
   const { locale } = useLocale();
   const contentDirection = getLocaleDirection(locale);
@@ -28,7 +31,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
         <AppSidebar collapsed={collapsed} />
       </div>
 
-      <div className={styles.body}>
+      <div className={styles.body} data-variant={contentVariant}>
         <DashboardHeader
           collapsed={collapsed}
           onToggle={() => setCollapsed((value) => !value)}
