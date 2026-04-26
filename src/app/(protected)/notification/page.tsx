@@ -39,7 +39,7 @@ async function buildTeamInvitationDetails(
           brand_name: brand?.name ?? item.data.brand_name,
           brand_logo_url: brand?.logo_url ?? null,
           brand_gallery_url: brand?.gallery?.[0]?.url ?? null,
-          brand_categories: brand?.categories?.map((category) => category.name) ?? [],
+          brand_categories: brand?.categories?.map((category) => category.key) ?? [],
           brand_description: brand?.description ?? null,
           branch_name: branch?.name ?? item.data.branch_name,
           branch_cover_url: branch?.cover_url ?? null,

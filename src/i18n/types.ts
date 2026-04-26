@@ -488,6 +488,28 @@ export type Messages = {
       ctaSecondary: string;
     };
   };
+  categories: {
+    // Brand categories
+    food_beverage: string;
+    beauty_wellness: string;
+    fitness_sports: string;
+    fashion_apparel: string;
+    technology_electronics: string;
+    home_furniture: string;
+    health_pharmacy: string;
+    education_training: string;
+    entertainment_media: string;
+    travel_hospitality: string;
+    // Service categories
+    haircut_styling: string;
+    massage_therapy: string;
+    personal_training: string;
+    nail_care: string;
+    facial_treatment: string;
+    dental_care: string;
+    consulting: string;
+    photo_session: string;
+  };
   moderation: {
     pageTitle: string;
     pageDescription: string;

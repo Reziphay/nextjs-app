@@ -30,19 +30,20 @@ import {
 } from "@/lib/services-api";
 import { proxyMediaUrl } from "@/lib/media";
 import type { Brand, Branch } from "@/types/brand";
-import type { Service, ServiceStatus, PriceType } from "@/types/service";
+import type { Service, ServiceCategory, ServiceStatus, PriceType } from "@/types/service";
 import styles from "./services-uso-page.module.css";
 
 type ServicesUsoPageProps = {
   services: Service[];
   brands: Brand[];
   accessToken: string;
+  serviceCategories: ServiceCategory[];
 };
 
 type ServiceFormState = {
   title: string;
   description: string;
-  category: string;
+  service_category_id: string;
   contextType: "individual" | "branch";
   address: string;
   brandId: string;
@@ -384,7 +385,7 @@ function getBrandByBranchId(brands: Brand[], branchId: string): Brand | undefine
 const DEFAULT_FORM: ServiceFormState = {
   title: "",
   description: "",
-  category: "",
+  service_category_id: "",
   contextType: "individual",
   address: "",
   brandId: "",
@@ -402,7 +403,7 @@ function serviceToFormState(service: Service, brands: Brand[]): ServiceFormState
   return {
     title: service.title,
     description: service.description ?? "",
-    category: service.category ?? "",
+    service_category_id: service.service_category_id ?? "",
     contextType,
     address: service.address ?? "",
     brandId: brand?.id ?? "",
@@ -419,7 +420,7 @@ function buildPayload(form: ServiceFormState): CreateServicePayload {
   const payload: CreateServicePayload = {
     title: form.title.trim(),
     description: form.description.trim() || undefined,
-    category: form.category.trim() || undefined,
+    service_category_id: form.service_category_id || null,
     price_type: form.price_type,
     image_media_ids: form.image_media_ids.length > 0 ? form.image_media_ids : undefined,
   };
@@ -449,6 +450,7 @@ function buildPayload(form: ServiceFormState): CreateServicePayload {
 type ServiceFormPageProps = {
   copy: PageCopy;
   brands: Brand[];
+  serviceCategories: ServiceCategory[];
   accessToken: string;
   editingService: Service | null;
   onSaved: (service: Service, isNew: boolean) => void;
@@ -462,11 +464,13 @@ type CropTarget = {
 function ServiceFormPage({
   copy,
   brands,
+  serviceCategories,
   accessToken,
   editingService,
   onSaved,
   onCancel,
 }: ServiceFormPageProps) {
+  const { messages } = useLocale();
   const initialData = editingService ? serviceToFormState(editingService, brands) : DEFAULT_FORM;
   const [form, setForm] = useState<ServiceFormState>(initialData);
   const [isLoading, setIsLoading] = useState(false);
@@ -476,6 +480,10 @@ function ServiceFormPage({
 
   const selectedBrand = brands.find((b) => b.id === form.brandId);
   const brandOptions: ComboboxOption[] = brands.map((b) => ({ value: b.id, label: b.name }));
+  const categoryOptions: ComboboxOption[] = serviceCategories.map((c) => ({
+    value: c.id,
+    label: messages.categories[c.key as keyof typeof messages.categories] ?? c.key,
+  }));
   const branchOptions: ComboboxOption[] = (selectedBrand?.branches ?? []).map((b) => ({
     value: b.id,
     label: b.name,
@@ -697,10 +705,15 @@ function ServiceFormPage({
               <div className={styles.fieldRow}>
                 <Field>
                   <FieldLabel>{copy.fieldCategory}</FieldLabel>
-                  <Input
-                    value={form.category}
-                    onChange={(e) => setField("category", e.target.value)}
+                  <Combobox
+                    items={categoryOptions}
+                    value={form.service_category_id}
                     placeholder={copy.fieldCategoryPlaceholder}
+                    emptyMessage={copy.fieldCategoryPlaceholder}
+                    onValueChange={(val) => {
+                      const id = Array.isArray(val) ? (val[0] ?? "") : (val ?? "");
+                      setField("service_category_id", id);
+                    }}
                   />
                 </Field>
               </div>
@@ -901,6 +914,7 @@ function ServiceCard({
   onArchive: () => void;
   actionLoading: boolean;
 }) {
+  const { messages } = useLocale();
   const statusLabel = getStatusLabel(service.status, copy);
   const badgeVariant = STATUS_BADGE_VARIANT[service.status];
   const priceLabel = formatPrice(service, copy);
@@ -937,8 +951,10 @@ function ServiceCard({
         </div>
 
         <div className={styles.cardMeta}>
-          {service.category ? (
-            <span className={styles.metaChip}>{service.category}</span>
+          {service.service_category ? (
+            <span className={styles.metaChip}>
+              {messages.categories[service.service_category.key as keyof typeof messages.categories] ?? service.service_category.key}
+            </span>
           ) : null}
           <span className={styles.metaItem}>{priceLabel}</span>
           {durationLabel !== "—" ? (
@@ -1019,6 +1035,7 @@ export function ServicesUsoPage({
   services: initialServices,
   brands,
   accessToken,
+  serviceCategories,
 }: ServicesUsoPageProps) {
   const { locale } = useLocale();
   const copy = useMemo(() => getCopy(locale), [locale]);
@@ -1099,6 +1116,7 @@ export function ServicesUsoPage({
         key={editingService?.id ?? "create"}
         copy={copy}
         brands={brands}
+        serviceCategories={serviceCategories}
         accessToken={accessToken}
         editingService={editingService}
         onSaved={(service, isNew) => {

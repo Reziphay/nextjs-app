@@ -255,7 +255,7 @@ export function ServicesStrategyPage({
   brands,
 }: ServicesStrategyPageProps) {
   const router = useRouter();
-  const { locale } = useLocale();
+  const { locale, messages } = useLocale();
   const copy = useMemo(() => getCopy(locale), [locale]);
 
   const totalBranches = useMemo(
@@ -385,7 +385,7 @@ export function ServicesStrategyPage({
               const branchCount = brand.branches?.length ?? 0;
               const categories =
                 brand.categories.length > 0
-                  ? brand.categories.map((category) => category.name).join(", ")
+                  ? brand.categories.map((category) => messages.categories[category.key as keyof typeof messages.categories] ?? category.key).join(", ")
                   : copy.noCategories;
 
               return (

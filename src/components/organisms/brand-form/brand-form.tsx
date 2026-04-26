@@ -319,7 +319,7 @@ export function BrandForm({
 
   const categoryOptions: ComboboxOption[] = categories.map((c) => ({
     value: c.id,
-    label: c.name,
+    label: messages.categories[c.key as keyof typeof messages.categories] ?? c.key,
   }));
 
   const verificationMissing =

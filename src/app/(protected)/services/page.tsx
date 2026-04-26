@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { fetchMyServices } from "@/lib/services-api";
+import { fetchMyServices, fetchServiceCategories } from "@/lib/services-api";
 import { fetchMyBrands, fetchBrandById } from "@/lib/brands-api";
 import { ServicesUsoPage } from "@/components/organisms/services-uso-page";
 import { requireProtectedRouteAccess } from "@/lib/protected-route";
@@ -22,9 +22,10 @@ export default async function ServicesPage({
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("rzp_at")?.value ?? "";
 
-  const [services, brands] = await Promise.all([
+  const [services, brands, serviceCategories] = await Promise.all([
     fetchMyServices(accessToken).catch(() => []),
     fetchMyBrands(accessToken).catch(() => []),
+    fetchServiceCategories(accessToken).catch(() => []),
   ]);
 
   // Fetch detailed brand info (with branches) for the service form branch selector
@@ -40,6 +41,7 @@ export default async function ServicesPage({
       services={services}
       brands={detailedBrands}
       accessToken={accessToken}
+      serviceCategories={serviceCategories}
     />
   );
 }

@@ -778,7 +778,7 @@ export function BrandDetail({
             <div className={styles.categoryRail}>
               {categories.map((cat) => (
                 <span key={cat.id} className={styles.categoryChip}>
-                  {cat.name}
+                  {messages.categories[cat.key as keyof typeof messages.categories] ?? cat.key}
                 </span>
               ))}
             </div>
@@ -1120,8 +1120,8 @@ export function BrandDetail({
                   )}
                   <div className={styles.serviceCardBody}>
                     <p className={styles.serviceCardTitle}>{svc.title}</p>
-                    {svc.category ? (
-                      <span className={styles.serviceCardCategory}>{svc.category}</span>
+                    {svc.service_category ? (
+                      <span className={styles.serviceCardCategory}>{messages.categories[svc.service_category.key as keyof typeof messages.categories] ?? svc.service_category.key}</span>
                     ) : null}
                     <div className={styles.serviceCardMeta}>
                       <span>{priceLabel}</span>
@@ -1151,8 +1151,8 @@ export function BrandDetail({
                   </div>
                   <div className={styles.branchDialogTitleGroup}>
                     <h2 className={styles.branchDialogTitle}>{selectedService.title}</h2>
-                    {selectedService.category ? (
-                      <p className={styles.branchDialogDescription}>{selectedService.category}</p>
+                    {selectedService.service_category ? (
+                      <p className={styles.branchDialogDescription}>{messages.categories[selectedService.service_category.key as keyof typeof messages.categories] ?? selectedService.service_category.key}</p>
                     ) : null}
                   </div>
                 </div>

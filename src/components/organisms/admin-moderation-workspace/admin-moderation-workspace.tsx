@@ -344,9 +344,15 @@ export function AdminModerationWorkspace() {
 
   const entityCategory =
     detail?.type === "brand"
-      ? detail.data.categories?.[0]?.name
+      ? (() => {
+          const cat = detail.data.categories?.[0];
+          return cat ? (messages.categories[cat.key as keyof typeof messages.categories] ?? cat.key) : undefined;
+        })()
       : detail?.type === "service"
-        ? detail.data.category ?? undefined
+        ? (() => {
+            const cat = detail.data.service_category;
+            return cat ? (messages.categories[cat.key as keyof typeof messages.categories] ?? cat.key) : undefined;
+          })()
         : undefined;
 
   const entityOwner = detail?.data.owner;

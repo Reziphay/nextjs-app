@@ -27,7 +27,7 @@ export type ModerationBrandDetail = {
   status: string;
   owner: QueueItemOwner;
   created_at: string;
-  categories?: { id: string; name: string }[];
+  categories?: { id: string; key: string }[];
   logo_url?: string | null;
   gallery?: { url: string }[];
   checklist?: ChecklistItem[];
@@ -40,7 +40,8 @@ export type ModerationServiceDetail = {
   status: string;
   owner: QueueItemOwner;
   created_at: string;
-  category?: string | null;
+  service_category_id?: string | null;
+  service_category?: { id: string; key: string } | null;
   images?: { url: string }[];
   checklist?: ChecklistItem[];
 };
