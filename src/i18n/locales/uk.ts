@@ -140,6 +140,9 @@ export const ukMessages: Messages = {
     "brand.not_found": "Бренд не знайдено.",
     "brand.transfer_not_found": "Передачу бренду не знайдено.",
     "brand.transfer_not_pending": "Ця передача бренду більше не очікує підтвердження.",
+    "moderation.brand_not_found": "Бренд не знайдено.",
+    "moderation.service_not_found": "Послугу не знайдено.",
+    "moderation.not_pending": "Цей запит більше не перебуває в очікуванні.",
   },
   hero: {
     eyebrow: "Багатомовний стартовий Next.js",

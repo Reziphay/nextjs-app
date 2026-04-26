@@ -140,6 +140,9 @@ export const ptMessages: Messages = {
     "brand.not_found": "Marca não encontrada.",
     "brand.transfer_not_found": "Transferência de marca não encontrada.",
     "brand.transfer_not_pending": "Esta transferência de marca não está mais pendente.",
+    "moderation.brand_not_found": "Marca não encontrada.",
+    "moderation.service_not_found": "Serviço não encontrado.",
+    "moderation.not_pending": "Esta submissão já não está pendente.",
   },
   hero: {
     eyebrow: "Starter multilíngue em Next.js",

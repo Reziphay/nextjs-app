@@ -190,6 +190,9 @@ export const arMessages: Messages = {
       "لم يتم العثور على نقل العلامة التجارية.",
     "brand.transfer_not_pending":
       "لم يعد نقل العلامة التجارية هذا قيد الانتظار.",
+    "moderation.brand_not_found": "العلامة التجارية غير موجودة.",
+    "moderation.service_not_found": "الخدمة غير موجودة.",
+    "moderation.not_pending": "هذا الطلب لم يعد قيد الانتظار.",
   },
   hero: {
     eyebrow: "مشروع Next.js متعدد اللغات",

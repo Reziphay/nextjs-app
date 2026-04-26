@@ -140,6 +140,9 @@ export const faMessages: Messages = {
     "brand.not_found": "برند پیدا نشد.",
     "brand.transfer_not_found": "انتقال برند پیدا نشد.",
     "brand.transfer_not_pending": "این انتقال برند دیگر در حالت انتظار نیست.",
+    "moderation.brand_not_found": "برند پیدا نشد.",
+    "moderation.service_not_found": "سرویس پیدا نشد.",
+    "moderation.not_pending": "این درخواست دیگر در حالت انتظار نیست.",
   },
   hero: {
     eyebrow: "شروع‌کننده چندزبانه Next.js",

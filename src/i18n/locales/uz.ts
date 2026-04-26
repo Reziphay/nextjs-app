@@ -140,6 +140,9 @@ export const uzMessages: Messages = {
     "brand.not_found": "Brend topilmadi.",
     "brand.transfer_not_found": "Brend transferi topilmadi.",
     "brand.transfer_not_pending": "Bu brend transferi endi kutilayotgan holatda emas.",
+    "moderation.brand_not_found": "Brend topilmadi.",
+    "moderation.service_not_found": "Xizmat topilmadi.",
+    "moderation.not_pending": "Bu ariza endi kutilayotgan holatda emas.",
   },
   hero: {
     eyebrow: "Ko‘p tilli Next.js starteri",

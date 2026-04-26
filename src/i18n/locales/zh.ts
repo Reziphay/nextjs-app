@@ -140,6 +140,9 @@ export const zhMessages: Messages = {
     "brand.not_found": "未找到品牌。",
     "brand.transfer_not_found": "未找到品牌转移请求。",
     "brand.transfer_not_pending": "该品牌转移已不再处于待处理状态。",
+    "moderation.brand_not_found": "未找到品牌。",
+    "moderation.service_not_found": "未找到服务。",
+    "moderation.not_pending": "该申请已不再处于待处理状态。",
   },
   hero: {
     eyebrow: "多语言 Next.js 启动项目",

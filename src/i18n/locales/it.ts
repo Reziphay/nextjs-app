@@ -140,6 +140,9 @@ export const itMessages: Messages = {
     "brand.not_found": "Marchio non trovato.",
     "brand.transfer_not_found": "Trasferimento del marchio non trovato.",
     "brand.transfer_not_pending": "Questo trasferimento del marchio non è più in attesa.",
+    "moderation.brand_not_found": "Marchio non trovato.",
+    "moderation.service_not_found": "Servizio non trovato.",
+    "moderation.not_pending": "Questa proposta non è più in attesa.",
   },
   hero: {
     eyebrow: "Starter Next.js multilingue",

@@ -140,6 +140,9 @@ export const hiMessages: Messages = {
     "brand.not_found": "ब्रांड नहीं मिला।",
     "brand.transfer_not_found": "ब्रांड ट्रांसफर नहीं मिला।",
     "brand.transfer_not_pending": "यह ब्रांड ट्रांसफर अब लंबित नहीं है।",
+    "moderation.brand_not_found": "ब्रांड नहीं मिला।",
+    "moderation.service_not_found": "सेवा नहीं मिली।",
+    "moderation.not_pending": "यह आवेदन अब लंबित नहीं है।",
   },
   hero: {
     eyebrow: "बहुभाषी Next.js स्टार्टर",

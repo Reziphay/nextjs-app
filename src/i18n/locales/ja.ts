@@ -140,6 +140,9 @@ export const jaMessages: Messages = {
     "brand.not_found": "ブランドが見つかりません。",
     "brand.transfer_not_found": "ブランド譲渡が見つかりません。",
     "brand.transfer_not_pending": "このブランド譲渡は現在保留中ではありません。",
+    "moderation.brand_not_found": "ブランドが見つかりません。",
+    "moderation.service_not_found": "サービスが見つかりません。",
+    "moderation.not_pending": "この申請はもう保留中ではありません。",
   },
   hero: {
     eyebrow: "多言語 Next.js スターター",

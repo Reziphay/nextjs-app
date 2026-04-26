@@ -186,6 +186,9 @@ export const esMessages: Messages = {
       "Transferencia de marca no encontrada.",
     "brand.transfer_not_pending":
       "Esta transferencia de marca ya no está pendiente.",
+    "moderation.brand_not_found": "Marca no encontrada.",
+    "moderation.service_not_found": "Servicio no encontrado.",
+    "moderation.not_pending": "Esta solicitud ya no está pendiente.",
   },
   hero: {
     eyebrow: "Starter multilingüe de Next.js",

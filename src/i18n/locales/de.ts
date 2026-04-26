@@ -190,6 +190,9 @@ export const deMessages: Messages = {
       "Markenübertragung wurde nicht gefunden.",
     "brand.transfer_not_pending":
       "Diese Markenübertragung ist nicht mehr ausstehend.",
+    "moderation.brand_not_found": "Marke nicht gefunden.",
+    "moderation.service_not_found": "Dienst nicht gefunden.",
+    "moderation.not_pending": "Diese Einreichung ist nicht mehr ausstehend.",
   },
   hero: {
     eyebrow: "Mehrsprachiger Next.js-Starter",

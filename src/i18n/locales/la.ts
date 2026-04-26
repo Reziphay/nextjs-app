@@ -140,6 +140,9 @@ export const laMessages: Messages = {
     "brand.not_found": "Nota inventa non est.",
     "brand.transfer_not_found": "Translatio notae inventa non est.",
     "brand.transfer_not_pending": "Haec translatio notae iam pendens non est.",
+    "moderation.brand_not_found": "Nota inventa non est.",
+    "moderation.service_not_found": "Ministerium inventum non est.",
+    "moderation.not_pending": "Haec submissio iam pendens non est.",
   },
   hero: {
     eyebrow: "Initium Next.js multilingue",

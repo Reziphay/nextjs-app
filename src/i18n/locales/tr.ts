@@ -197,6 +197,9 @@ export const trMessages: Messages = {
     "team.invite_not_pending": "Bu davet artık beklemede değil.",
     "team.cannot_remove_owner": "Şube sahibinin takım üyeliği kaldırılamaz.",
     "team.already_removed": "Bu üyelik zaten kaldırılmış.",
+    "moderation.brand_not_found": "Marka bulunamadı.",
+    "moderation.service_not_found": "Hizmet bulunamadı.",
+    "moderation.not_pending": "Bu başvuru artık beklemede değil.",
   },
   hero: {
     eyebrow: "Çok dilli Next.js başlangıcı",

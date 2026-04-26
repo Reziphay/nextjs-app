@@ -140,6 +140,9 @@ export const heMessages: Messages = {
     "brand.not_found": "המותג לא נמצא.",
     "brand.transfer_not_found": "העברת המותג לא נמצאה.",
     "brand.transfer_not_pending": "העברת המותג הזו כבר אינה ממתינה.",
+    "moderation.brand_not_found": "המותג לא נמצא.",
+    "moderation.service_not_found": "השירות לא נמצא.",
+    "moderation.not_pending": "הגשה זו כבר אינה ממתינה.",
   },
   hero: {
     eyebrow: "פרויקט פתיחה רב-לשוני ב-Next.js",

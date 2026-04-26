@@ -1,5 +1,5 @@
-import { ProtectedComingSoonRoute } from "@/components/organisms/protected-coming-soon-route/protected-coming-soon-route";
+import { AdminModerationWorkspace } from "@/components/organisms/admin-moderation-workspace";
 
 export default function ModerationPage() {
-  return <ProtectedComingSoonRoute path="/moderation" />;
+  return <AdminModerationWorkspace />;
 }

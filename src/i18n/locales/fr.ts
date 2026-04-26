@@ -187,6 +187,9 @@ export const frMessages: Messages = {
       "Transfert de marque introuvable.",
     "brand.transfer_not_pending":
       "Ce transfert de marque n’est plus en attente.",
+    "moderation.brand_not_found": "Marque introuvable.",
+    "moderation.service_not_found": "Service introuvable.",
+    "moderation.not_pending": "Cette soumission n’est plus en attente.",
   },
   hero: {
     eyebrow: "Starter Next.js multilingue",
