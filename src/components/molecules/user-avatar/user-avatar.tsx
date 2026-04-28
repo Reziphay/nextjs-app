@@ -98,6 +98,8 @@ export function UserAvatar({
             className={styles.image}
             src={avatarSource}
             alt={alt}
+            loading="eager"
+            fetchPriority="high"
           />
         ) : (
           <span className={styles.fallback}>{fallbackLabel}</span>

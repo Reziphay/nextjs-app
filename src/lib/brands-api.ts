@@ -377,6 +377,22 @@ export async function fetchAccountBrands(
   );
 }
 
+export async function fetchAllAccountBrands(
+  accountUserId: string,
+  accessToken?: string,
+): Promise<Brand[]> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ brands: Brand[] }>>({
+    url: "/brands",
+    method: "GET",
+    params: { account: accountUserId },
+  });
+
+  return normalizeBrands(response.data?.data?.brands).filter(
+    (brand) => brand.owner_id === accountUserId,
+  );
+}
+
 export async function fetchBrandCategories(
   accessToken?: string,
 ): Promise<BrandCategory[]> {
