@@ -120,7 +120,7 @@
   padding: 1rem;
   border: 1px solid var(--app-border-soft);
   border-radius: var(--general-border-radius-3xl);
-  background: var(--app-bg-surface-strong);
+  background: var(--app-bg-sidebar);
   box-shadow: 0 1rem 2.5rem var(--app-shadow-card-soft);
 }
 

@@ -540,34 +540,38 @@ function TimeGrid({ days, today, locale, timeFormat, emptyTitle, emptyDesc }: Ti
     nowRef.current?.scrollIntoView({ block: "center", behavior: "instant" });
   }, []);
 
+  const isDayView = days.length === 1;
+
   return (
     <div className={styles.timeGrid}>
-      <div className={styles.timeGridHeader}>
-        <div className={styles.timeGutter} />
-        {days.map((d) => {
-          const isToday = isSameDay(d, today);
-          return (
-            <div
-              key={d.toISOString()}
-              className={[styles.dayColumn, isToday ? styles.dayColumnToday : ""]
-                .filter(Boolean)
-                .join(" ")}
-            >
-              <span
-                className={[
-                  styles.dayNumber,
-                  isToday ? styles.dayNumberToday : "",
-                ]
+      {!isDayView && (
+        <div className={styles.timeGridHeader}>
+          <div className={styles.timeGutter} />
+          {days.map((d) => {
+            const isToday = isSameDay(d, today);
+            return (
+              <div
+                key={d.toISOString()}
+                className={[styles.dayColumn, isToday ? styles.dayColumnToday : ""]
                   .filter(Boolean)
                   .join(" ")}
               >
-                {d.getDate()}
-              </span>
-              <span className={styles.dayName}>{dayShorts[d.getDay()]}</span>
-            </div>
-          );
-        })}
-      </div>
+                <span
+                  className={[
+                    styles.dayNumber,
+                    isToday ? styles.dayNumberToday : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  {d.getDate()}
+                </span>
+                <span className={styles.dayName}>{dayShorts[d.getDay()]}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <div className={styles.timeGridBody}>
         <div className={styles.timeGridInner}>
