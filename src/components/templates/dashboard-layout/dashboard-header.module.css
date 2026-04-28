@@ -40,7 +40,7 @@
   flex-shrink: 0;
   border-radius: var(--general-border-radius-xl);
   background: transparent;
-  color: var(--app-primary);
+  color: var(--app-text-muted);
   text-decoration: none;
   transition:
     background-color 120ms ease,
@@ -55,8 +55,8 @@
 }
 
 .supportLink:hover {
-  background: var(--app-bg-primary-soft);
-  color: var(--app-primary-deep);
+  background: var(--app-bg-surface-strong);
+  color: var(--app-text-strong);
 }
 
 .notificationBadge {
@@ -92,7 +92,7 @@
   border: 0;
   border-radius: var(--general-border-radius-xl);
   background: transparent;
-  color: var(--app-primary);
+  color: var(--app-text-muted);
   cursor: pointer;
   transition:
     background-color 120ms ease,
@@ -100,14 +100,14 @@
 }
 
 .settingsTrigger:hover {
-  background: var(--app-bg-primary-soft);
-  color: var(--app-primary-deep);
+  background: var(--app-bg-surface-strong);
+  color: var(--app-text-strong);
 }
 
 .iconActionActive {
-  background: var(--app-primary-soft);
-  color: var(--app-primary-deep);
-  box-shadow: inset 0 0 0 1px var(--app-border-primary-soft);
+  background: var(--app-primary);
+  color: var(--app-text-inverse);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.16);
 }
 
 .settingsPopup {
@@ -184,7 +184,7 @@
 }
 
 .toggleBtn:hover {
-  background: var(--app-bg-primary-soft);
+  background: var(--app-bg-surface-strong);
   color: var(--app-text-strong);
 }
 
@@ -249,7 +249,7 @@
 }
 
 .crumbLink:hover {
-  color: var(--app-primary-deep);
+  color: var(--app-text-strong);
 }
 
 .crumbCurrent {
