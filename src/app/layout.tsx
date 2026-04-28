@@ -10,6 +10,7 @@ import { fontLinks, typographyStyle } from "@/theme/typography";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { APP_TITLE } from "@/lib/page-metadata";
 
 const FAVICON_URL = "/reziphay-logo-default.svg";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
@@ -20,10 +21,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const messages = getMessages(locale);
 
   return {
-    applicationName: "Reziphay Next App",
+    applicationName: APP_TITLE,
     title: {
-      default: "Reziphay Next App",
-      template: "%s | Reziphay Next App",
+      default: APP_TITLE,
+      template: `${APP_TITLE} - %s`,
     },
     description: messages.metadata.description,
     authors: [{ name: "Vugar Safarzada" }],

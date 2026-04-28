@@ -16,10 +16,11 @@ import styles from "./app-sidebar.module.css";
 
 type AppSidebarProps = {
   collapsed: boolean;
+  mobileOpen?: boolean;
   onClose?: () => void;
 };
 
-export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
+export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { messages } = useLocale();
@@ -47,7 +48,11 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
 
   return (
     <aside
-      className={`${styles.sidebar} ${collapsed ? styles.sidebarCollapsed : ""}`}
+      className={[
+        styles.sidebar,
+        collapsed ? styles.sidebarCollapsed : "",
+        mobileOpen ? styles.sidebarMobileOpen : "",
+      ].filter(Boolean).join(" ")}
     >
       {/* Brand */}
       <div className={styles.brand}>

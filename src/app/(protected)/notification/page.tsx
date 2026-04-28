@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import {
   NotificationTransferPage,
@@ -5,6 +6,17 @@ import {
 } from "@/components/organisms/notification-transfer-page/notification-transfer-page";
 import { fetchBrandById, fetchNotificationFeed } from "@/lib/brands-api";
 import { requireProtectedRouteAccess } from "@/lib/protected-route";
+import { getMessages } from "@/i18n/config";
+import { getServerLocale } from "@/i18n/server";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const messages = getMessages(locale);
+
+  return {
+    title: messages.dashboard.notifications,
+  };
+}
 
 async function buildTeamInvitationDetails(
   initialFeed: Awaited<ReturnType<typeof fetchNotificationFeed>>,

@@ -5,6 +5,7 @@ import { UserProfilePanel } from "@/components/organisms";
 import { getMessages } from "@/i18n/config";
 import { getServerLocale } from "@/i18n/server";
 import { fetchAccountBrands } from "@/lib/brands-api";
+import { buildPageTitle } from "@/lib/page-metadata";
 import { requireProtectedRouteAccess } from "@/lib/protected-route";
 import { fetchUserProfileById } from "@/lib/users-api";
 
@@ -22,9 +23,28 @@ function getSearchParamValue(
   return value ?? null;
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: AccountPageProps): Promise<Metadata> {
   const locale = await getServerLocale();
   const messages = getMessages(locale);
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const requestedUserId = getSearchParamValue(resolvedSearchParams.id)?.trim();
+
+  if (requestedUserId) {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("rzp_at")?.value;
+    const targetUser = accessToken
+      ? await fetchUserProfileById(requestedUserId, accessToken).catch(() => null)
+      : null;
+    const fullName = targetUser
+      ? `${targetUser.first_name} ${targetUser.last_name}`.trim()
+      : null;
+
+    return {
+      title: buildPageTitle(messages.dashboard.profile, fullName),
+    };
+  }
 
   return {
     title: messages.dashboard.account,
