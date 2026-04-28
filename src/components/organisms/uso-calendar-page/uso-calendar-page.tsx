@@ -861,12 +861,12 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(today);
-  const [view, setView] = useState<CalendarView>("week");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [view, setView] = useState<CalendarView>("day");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Open sidebar by default only on desktop
+  // Close sidebar by default on mobile
   useEffect(() => {
-    if (window.innerWidth >= 768) setSidebarOpen(true);
+    if (window.innerWidth < 768) setSidebarOpen(false);
   }, []);
   const [timeFormat, setTimeFormat] = useState<TimeFormat>("24h");
   const [selectedBrandId, setSelectedBrandId] = useState("all");

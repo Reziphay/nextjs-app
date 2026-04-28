@@ -6,7 +6,7 @@ import type { CSSProperties } from "react";
 const palette = [
   "#080808", "#1c1c1c", "#6b6b6b",  // blacks: richest dark → body text → muted
   "#000000", "#141414", "#0ea5e9",  // primaries: pressed black → charcoal button → sky accent
-  "#ffffff", "#f7f7f7", "#eeeeee",  // whites: pure white → canvas → hover bg
+  "#ffffff", "#f0f0f0", "#f8f8f8",  // whites: surface white → canvas gray → input/hover bg
 ];
 
 // palette[0–2]: text ramp
@@ -91,8 +91,8 @@ const semanticColors = {
   "app-text-inverse": "#ffffff",
 
   // ── Borders ──────────────────────────────────────────────────────────────────
-  "app-border-soft": withAlpha(blackColors[1], 0.1),
-  "app-border-strong": withAlpha(blackColors[1], 0.2),
+  "app-border-soft": withAlpha(blackColors[1], 0.14),
+  "app-border-strong": withAlpha(blackColors[1], 0.26),
   "app-border-primary-soft": withAlpha(accent, 0.25),
   "app-border-primary-strong": withAlpha(accent, 0.5),
 
@@ -111,7 +111,7 @@ const semanticColors = {
   "app-shadow-color-strong": withAlpha(blackColors[0], 0.13),
   "app-shadow-primary-soft": withAlpha(accent, 0.14),
   "app-shadow-primary-faint": withAlpha(accent, 0.07),
-  "app-shadow-card-soft": withAlpha(blackColors[1], 0.06),
+  "app-shadow-card-soft": withAlpha(blackColors[1], 0.09),
 
   // ── Glow ─────────────────────────────────────────────────────────────────────
   "app-glow-primary-soft": withAlpha(accent, 0.14),
