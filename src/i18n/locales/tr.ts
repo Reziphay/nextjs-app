@@ -149,7 +149,7 @@ export const trMessages: Messages = {
       birthdayRequiredMessage:
         "Lütfen doğum tarihinizi girin.",
       birthdayAgeMessage:
-        "Kayıt olmak için en az 13 yaşında olmalısınız.",
+        "Kayıt olmak için en az 18 yaşında olmalısınız.",
       emailInvalidMessage:
         "Lütfen geçerli bir e-posta adresi girin.",
       passwordInvalidMessage:
@@ -541,7 +541,7 @@ export const trMessages: Messages = {
     lastNameInvalidMessage: "Soyad en az 2 karakter olmalıdır.",
     birthdayRequiredMessage:
       "Lütfen doğum tarihinizi girin.",
-    birthdayAgeMessage: "En az 13 yaşında olmalısınız.",
+    birthdayAgeMessage: "En az 18 yaşında olmalısınız.",
     emailInvalidMessage:
       "Lütfen geçerli bir e-posta adresi girin.",
     phoneInvalidMessage:

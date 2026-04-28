@@ -120,7 +120,7 @@ export const azMessages: Messages = {
       firstNameInvalidMessage: "Ad ən azı 2 simvol olmalıdır.",
       lastNameInvalidMessage: "Soyad ən azı 2 simvol olmalıdır.",
       birthdayRequiredMessage: "Doğum tarixini daxil edin.",
-      birthdayAgeMessage: "Qeydiyyat üçün ən azı 13 yaşınız olmalıdır.",
+      birthdayAgeMessage: "Qeydiyyat üçün ən azı 18 yaşınız olmalıdır.",
       emailInvalidMessage: "Düzgün email ünvanı daxil edin.",
       passwordInvalidMessage:
         "Şifrə ən azı 8 simvol olmalı, böyük hərf, kiçik hərf və rəqəm içərməlidir.",
@@ -666,7 +666,7 @@ export const azMessages: Messages = {
     firstNameInvalidMessage: "Ad ən azı 2 simvol olmalıdır.",
     lastNameInvalidMessage: "Soyad ən azı 2 simvol olmalıdır.",
     birthdayRequiredMessage: "Doğum tarixini daxil edin.",
-    birthdayAgeMessage: "Ən azı 13 yaşınız olmalıdır.",
+    birthdayAgeMessage: "Ən azı 18 yaşınız olmalıdır.",
     emailInvalidMessage: "Düzgün email ünvanı daxil edin.",
     phoneInvalidMessage: "Düzgün telefon nömrəsi daxil edin.",
     typeUso: "Xidmət sahibi",

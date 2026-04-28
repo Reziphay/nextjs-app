@@ -114,7 +114,7 @@ export const hiMessages: Messages = {
       firstNameInvalidMessage: "पहला नाम कम से कम 2 अक्षर का होना चाहिए।",
       lastNameInvalidMessage: "अंतिम नाम कम से कम 2 अक्षर का होना चाहिए।",
       birthdayRequiredMessage: "कृपया अपनी जन्मतिथि दर्ज करें।",
-      birthdayAgeMessage: "पंजीकरण के लिए आपकी आयु कम से कम 13 वर्ष होनी चाहिए।",
+      birthdayAgeMessage: "पंजीकरण के लिए आपकी आयु कम से कम 18 वर्ष होनी चाहिए।",
       emailInvalidMessage: "कृपया वैध ईमेल पता दर्ज करें।",
       passwordInvalidMessage: "पासवर्ड कम से कम 8 अक्षरों का हो और उसमें बड़े अक्षर, छोटे अक्षर तथा एक संख्या होनी चाहिए।",
       typeRequiredMessage: "कृपया उपयोगकर्ता प्रकार चुनें।",

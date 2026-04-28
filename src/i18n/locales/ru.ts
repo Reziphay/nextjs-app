@@ -119,7 +119,7 @@ export const ruMessages: Messages = {
       firstNameInvalidMessage: "Имя должно содержать не менее 2 символов.",
       lastNameInvalidMessage: "Фамилия должна содержать не менее 2 символов.",
       birthdayRequiredMessage: "Введите дату рождения.",
-      birthdayAgeMessage: "Для регистрации вам должно быть не менее 13 лет.",
+      birthdayAgeMessage: "Для регистрации вам должно быть не менее 18 лет.",
       emailInvalidMessage: "Введите корректный email.",
       passwordInvalidMessage:
         "Пароль должен содержать не менее 8 символов, а также заглавную, строчную букву и цифру.",
@@ -482,7 +482,7 @@ export const ruMessages: Messages = {
     firstNameInvalidMessage: "Имя должно содержать не менее 2 символов.",
     lastNameInvalidMessage: "Фамилия должна содержать не менее 2 символов.",
     birthdayRequiredMessage: "Введите дату рождения.",
-    birthdayAgeMessage: "Вам должно быть не менее 13 лет.",
+    birthdayAgeMessage: "Вам должно быть не менее 18 лет.",
     emailInvalidMessage: "Введите корректный email.",
     phoneInvalidMessage: "Введите корректный номер телефона.",
     typeUso: "Владелец сервиса",

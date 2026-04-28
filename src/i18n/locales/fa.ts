@@ -114,7 +114,7 @@ export const faMessages: Messages = {
       firstNameInvalidMessage: "نام باید حداقل ۲ کاراکتر باشد.",
       lastNameInvalidMessage: "نام خانوادگی باید حداقل ۲ کاراکتر باشد.",
       birthdayRequiredMessage: "لطفاً تاریخ تولد خود را وارد کنید.",
-      birthdayAgeMessage: "برای ثبت‌نام باید حداقل ۱۳ سال داشته باشید.",
+      birthdayAgeMessage: "برای ثبت‌نام باید حداقل ۱۸ سال داشته باشید.",
       emailInvalidMessage: "لطفاً یک ایمیل معتبر وارد کنید.",
       passwordInvalidMessage: "رمز عبور باید حداقل ۸ کاراکتر داشته باشد و شامل حروف بزرگ، حروف کوچک و عدد باشد.",
       typeRequiredMessage: "لطفاً نوع کاربر را انتخاب کنید.",

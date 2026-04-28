@@ -114,7 +114,7 @@ export const ptMessages: Messages = {
       firstNameInvalidMessage: "O nome deve ter pelo menos 2 caracteres.",
       lastNameInvalidMessage: "O sobrenome deve ter pelo menos 2 caracteres.",
       birthdayRequiredMessage: "Digite sua data de nascimento.",
-      birthdayAgeMessage: "Você deve ter pelo menos 13 anos para se registrar.",
+      birthdayAgeMessage: "Você deve ter pelo menos 18 anos para se registrar.",
       emailInvalidMessage: "Digite um endereço de email válido.",
       passwordInvalidMessage: "A senha deve ter pelo menos 8 caracteres e incluir letras maiúsculas, minúsculas e um número.",
       typeRequiredMessage: "Selecione um tipo de usuário.",

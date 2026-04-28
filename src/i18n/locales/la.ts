@@ -114,7 +114,7 @@ export const laMessages: Messages = {
       firstNameInvalidMessage: "Praenomen saltem II characteres habere debet.",
       lastNameInvalidMessage: "Cognomen saltem II characteres habere debet.",
       birthdayRequiredMessage: "Quaeso diem natalem tuum insere.",
-      birthdayAgeMessage: "Saltem XIII annos natus esse debes ut registres.",
+      birthdayAgeMessage: "Saltem XVIII annos natus esse debes ut registres.",
       emailInvalidMessage: "Quaeso inscriptionem electronicam validam insere.",
       passwordInvalidMessage: "Tessera saltem VIII characteres habere debet atque litteras maiusculas, minusculas et numerum continere.",
       typeRequiredMessage: "Quaeso elige genus usoris.",

@@ -147,7 +147,7 @@ export const esMessages: Messages = {
       birthdayRequiredMessage:
         "Introduce tu fecha de nacimiento.",
       birthdayAgeMessage:
-        "Debes tener al menos 13 años para registrarte.",
+        "Debes tener al menos 18 años para registrarte.",
       emailInvalidMessage:
         "Introduce una dirección de correo válida.",
       passwordInvalidMessage:
@@ -542,7 +542,7 @@ export const esMessages: Messages = {
     birthdayRequiredMessage:
       "Introduce tu fecha de nacimiento.",
     birthdayAgeMessage:
-      "Debes tener al menos 13 años.",
+      "Debes tener al menos 18 años.",
     emailInvalidMessage:
       "Introduce una dirección de correo válida.",
     phoneInvalidMessage:

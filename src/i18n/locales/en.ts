@@ -119,7 +119,7 @@ export const enMessages: Messages = {
       firstNameInvalidMessage: "First name must be at least 2 characters.",
       lastNameInvalidMessage: "Last name must be at least 2 characters.",
       birthdayRequiredMessage: "Please enter your birthday.",
-      birthdayAgeMessage: "You must be at least 13 years old to register.",
+      birthdayAgeMessage: "You must be at least 18 years old to register.",
       emailInvalidMessage: "Please enter a valid email address.",
       passwordInvalidMessage:
         "Password must be at least 8 characters and include uppercase, lowercase, and a number.",
@@ -665,7 +665,7 @@ export const enMessages: Messages = {
     firstNameInvalidMessage: "First name must be at least 2 characters.",
     lastNameInvalidMessage: "Last name must be at least 2 characters.",
     birthdayRequiredMessage: "Please enter your birthday.",
-    birthdayAgeMessage: "You must be at least 13 years old.",
+    birthdayAgeMessage: "You must be at least 18 years old.",
     emailInvalidMessage: "Please enter a valid email address.",
     phoneInvalidMessage: "Please enter a valid phone number.",
     typeUso: "Service Owner",

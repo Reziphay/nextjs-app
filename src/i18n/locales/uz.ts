@@ -114,7 +114,7 @@ export const uzMessages: Messages = {
       firstNameInvalidMessage: "Ism kamida 2 ta belgidan iborat bo‘lishi kerak.",
       lastNameInvalidMessage: "Familiya kamida 2 ta belgidan iborat bo‘lishi kerak.",
       birthdayRequiredMessage: "Iltimos, tug‘ilgan sanangizni kiriting.",
-      birthdayAgeMessage: "Ro‘yxatdan o‘tish uchun kamida 13 yoshda bo‘lishingiz kerak.",
+      birthdayAgeMessage: "Ro‘yxatdan o‘tish uchun kamida 18 yoshda bo‘lishingiz kerak.",
       emailInvalidMessage: "Iltimos, to‘g‘ri email manzilini kiriting.",
       passwordInvalidMessage: "Parol kamida 8 ta belgidan iborat bo‘lishi va katta-kichik harf hamda raqamni o‘z ichiga olishi kerak.",
       typeRequiredMessage: "Iltimos, foydalanuvchi turini tanlang.",

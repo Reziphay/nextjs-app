@@ -147,7 +147,7 @@ export const frMessages: Messages = {
       birthdayRequiredMessage:
         "Veuillez saisir votre date de naissance.",
       birthdayAgeMessage:
-        "Vous devez avoir au moins 13 ans pour vous inscrire.",
+        "Vous devez avoir au moins 18 ans pour vous inscrire.",
       emailInvalidMessage: "Veuillez saisir une adresse e-mail valide.",
       passwordInvalidMessage:
         "Le mot de passe doit contenir au moins 8 caractères et inclure une majuscule, une minuscule et un chiffre.",
@@ -549,7 +549,7 @@ export const frMessages: Messages = {
     birthdayRequiredMessage:
       "Veuillez saisir votre date de naissance.",
     birthdayAgeMessage:
-      "Vous devez avoir au moins 13 ans.",
+      "Vous devez avoir au moins 18 ans.",
     emailInvalidMessage:
       "Veuillez saisir une adresse e-mail valide.",
     phoneInvalidMessage:

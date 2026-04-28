@@ -114,7 +114,7 @@ export const heMessages: Messages = {
       firstNameInvalidMessage: "השם הפרטי חייב להכיל לפחות 2 תווים.",
       lastNameInvalidMessage: "שם המשפחה חייב להכיל לפחות 2 תווים.",
       birthdayRequiredMessage: "הזינו את תאריך הלידה שלכם.",
-      birthdayAgeMessage: "עליכם להיות בני 13 לפחות כדי להירשם.",
+      birthdayAgeMessage: "עליכם להיות בני 18 לפחות כדי להירשם.",
       emailInvalidMessage: "הזינו כתובת אימייל תקינה.",
       passwordInvalidMessage: "הסיסמה חייבת להכיל לפחות 8 תווים, אות גדולה, אות קטנה ומספר.",
       typeRequiredMessage: "בחרו סוג משתמש.",

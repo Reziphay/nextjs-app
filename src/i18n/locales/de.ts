@@ -149,7 +149,7 @@ export const deMessages: Messages = {
       birthdayRequiredMessage:
         "Bitte geben Sie Ihr Geburtsdatum ein.",
       birthdayAgeMessage:
-        "Sie müssen mindestens 13 Jahre alt sein, um sich zu registrieren.",
+        "Sie müssen mindestens 18 Jahre alt sein, um sich zu registrieren.",
       emailInvalidMessage:
         "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
       passwordInvalidMessage:
@@ -549,7 +549,7 @@ export const deMessages: Messages = {
       "Der Nachname muss mindestens 2 Zeichen lang sein.",
     birthdayRequiredMessage:
       "Bitte geben Sie Ihr Geburtsdatum ein.",
-    birthdayAgeMessage: "Sie müssen mindestens 13 Jahre alt sein.",
+    birthdayAgeMessage: "Sie müssen mindestens 18 Jahre alt sein.",
     emailInvalidMessage:
       "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
     phoneInvalidMessage:

@@ -20,7 +20,7 @@ const updateMyAccountEndpoint = "/users/me";
 const uploadAccountAvatarEndpoint = "/users/me/avatar";
 const removeAccountAvatarEndpoint = "/users/me/avatar";
 const invalidApiResponseError = "INVALID_ACCOUNT_API_RESPONSE";
-const minimumAccountAge = 13;
+const minimumAccountAge = 18;
 const maximumAvatarFileSizeBytes = 5 * 1024 * 1024;
 const allowedAvatarMimeTypes = new Set([
   "image/jpeg",

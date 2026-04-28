@@ -114,7 +114,7 @@ export const jaMessages: Messages = {
       firstNameInvalidMessage: "名は 2 文字以上で入力してください。",
       lastNameInvalidMessage: "姓は 2 文字以上で入力してください。",
       birthdayRequiredMessage: "生年月日を入力してください。",
-      birthdayAgeMessage: "登録するには 13 歳以上である必要があります。",
+      birthdayAgeMessage: "登録するには 18 歳以上である必要があります。",
       emailInvalidMessage: "有効なメールアドレスを入力してください。",
       passwordInvalidMessage: "パスワードは 8 文字以上で、大文字・小文字・数字を含めてください。",
       typeRequiredMessage: "ユーザー種別を選択してください。",

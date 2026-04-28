@@ -150,7 +150,7 @@ export const arMessages: Messages = {
       birthdayRequiredMessage:
         "يرجى إدخال تاريخ الميلاد.",
       birthdayAgeMessage:
-        "يجب أن يكون عمرك 13 عامًا على الأقل للتسجيل.",
+        "يجب أن يكون عمرك 18 عامًا على الأقل للتسجيل.",
       emailInvalidMessage:
         "يرجى إدخال عنوان بريد إلكتروني صالح.",
       passwordInvalidMessage:
@@ -537,7 +537,7 @@ export const arMessages: Messages = {
     lastNameInvalidMessage:
       "يجب أن يحتوي اسم العائلة على حرفين على الأقل.",
     birthdayRequiredMessage: "يرجى إدخال تاريخ الميلاد.",
-    birthdayAgeMessage: "يجب أن يكون عمرك 13 عامًا على الأقل.",
+    birthdayAgeMessage: "يجب أن يكون عمرك 18 عامًا على الأقل.",
     emailInvalidMessage:
       "يرجى إدخال عنوان بريد إلكتروني صالح.",
     phoneInvalidMessage:

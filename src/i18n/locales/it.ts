@@ -114,7 +114,7 @@ export const itMessages: Messages = {
       firstNameInvalidMessage: "Il nome deve contenere almeno 2 caratteri.",
       lastNameInvalidMessage: "Il cognome deve contenere almeno 2 caratteri.",
       birthdayRequiredMessage: "Inserisci la tua data di nascita.",
-      birthdayAgeMessage: "Devi avere almeno 13 anni per registrarti.",
+      birthdayAgeMessage: "Devi avere almeno 18 anni per registrarti.",
       emailInvalidMessage: "Inserisci un indirizzo email valido.",
       passwordInvalidMessage: "La password deve contenere almeno 8 caratteri e includere maiuscole, minuscole e un numero.",
       typeRequiredMessage: "Seleziona un tipo di utente.",

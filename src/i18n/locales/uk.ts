@@ -114,7 +114,7 @@ export const ukMessages: Messages = {
       firstNameInvalidMessage: "Ім’я має містити щонайменше 2 символи.",
       lastNameInvalidMessage: "Прізвище має містити щонайменше 2 символи.",
       birthdayRequiredMessage: "Введіть свою дату народження.",
-      birthdayAgeMessage: "Щоб зареєструватися, вам має бути щонайменше 13 років.",
+      birthdayAgeMessage: "Щоб зареєструватися, вам має бути щонайменше 18 років.",
       emailInvalidMessage: "Введіть дійсну адресу електронної пошти.",
       passwordInvalidMessage: "Пароль має містити щонайменше 8 символів, а також великі, малі літери та цифру.",
       typeRequiredMessage: "Виберіть тип користувача.",
