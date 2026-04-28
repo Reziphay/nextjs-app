@@ -20,7 +20,7 @@ type FieldDescriptionProps = HTMLAttributes<HTMLParagraphElement>;
 
 type FieldContentProps = HTMLAttributes<HTMLDivElement>;
 
-type InputProps = InputHTMLAttributes<HTMLInputElement>;
+export type InputProps = InputHTMLAttributes<HTMLInputElement>;
 type PasswordInputProps = Omit<InputProps, "type"> & {
   showPasswordLabel: string;
   hidePasswordLabel: string;

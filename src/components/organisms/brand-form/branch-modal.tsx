@@ -46,6 +46,10 @@ import { selectAuthSession } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
 import type { Branch } from "@/types/brand";
 import styles from "./branch-modal.module.css";
+import {
+  isValidTime24,
+  TimeInput,
+} from "./time-input";
 
 type BranchDraft = Omit<Branch, "id" | "brand_id"> & {
   id?: string;
@@ -580,10 +584,14 @@ export function BranchModal({
     if (!draft.is_24_7) {
       if (!draft.opening?.trim()) {
         nextErrors.opening = t.openingRequiredMessage;
+      } else if (!isValidTime24(draft.opening)) {
+        nextErrors.opening = "HH:mm";
       }
 
       if (!draft.closing?.trim()) {
         nextErrors.closing = t.closingRequiredMessage;
+      } else if (!isValidTime24(draft.closing)) {
+        nextErrors.closing = "HH:mm";
       }
     }
 
@@ -1034,15 +1042,11 @@ export function BranchModal({
                   <div className={styles.row}>
                     <Field>
                       <FieldLabel required>{t.branchFieldOpening}</FieldLabel>
-                      <Input
-                        type="time"
+                      <TimeInput
                         value={draft.opening ?? ""}
                         placeholder="09:00"
-                        step={60}
                         aria-invalid={Boolean(errors.opening)}
-                        onChange={(event) =>
-                          updateField("opening", event.target.value)
-                        }
+                        onChange={(value) => updateField("opening", value)}
                       />
                       {errors.opening ? (
                         <p className={styles.errorText}>{errors.opening}</p>
@@ -1051,15 +1055,11 @@ export function BranchModal({
 
                     <Field>
                       <FieldLabel required>{t.branchFieldClosing}</FieldLabel>
-                      <Input
-                        type="time"
+                      <TimeInput
                         value={draft.closing ?? ""}
                         placeholder="18:00"
-                        step={60}
                         aria-invalid={Boolean(errors.closing)}
-                        onChange={(event) =>
-                          updateField("closing", event.target.value)
-                        }
+                        onChange={(value) => updateField("closing", value)}
                       />
                       {errors.closing ? (
                         <p className={styles.errorText}>{errors.closing}</p>
@@ -1086,26 +1086,18 @@ export function BranchModal({
                       <div key={branchBreak.id ?? index} className={styles.breakRow}>
                         <Field>
                           <FieldLabel>Start</FieldLabel>
-                          <Input
-                            type="time"
+                          <TimeInput
                             value={branchBreak.start}
                             placeholder="12:00"
-                            step={60}
-                            onChange={(event) =>
-                              updateBreak(index, "start", event.target.value)
-                            }
+                            onChange={(value) => updateBreak(index, "start", value)}
                           />
                         </Field>
                         <Field>
                           <FieldLabel>End</FieldLabel>
-                          <Input
-                            type="time"
+                          <TimeInput
                             value={branchBreak.end}
                             placeholder="13:00"
-                            step={60}
-                            onChange={(event) =>
-                              updateBreak(index, "end", event.target.value)
-                            }
+                            onChange={(value) => updateBreak(index, "end", value)}
                           />
                         </Field>
                         <button
