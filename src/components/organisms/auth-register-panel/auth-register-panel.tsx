@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarIcon } from "lucide-react";
 import {
@@ -101,6 +101,7 @@ export function AuthRegisterPanel() {
   const register = messages.auth.register;
   const isSubmitting = status === "loading";
   const [isBirthdayPickerOpen, setBirthdayPickerOpen] = useState(false);
+  const birthdayPickerControlRef = useRef<HTMLDivElement>(null);
   const maximumBirthday = useMemo(() => getMaximumBirthday(), []);
   const selectedBirthday = useMemo(
     () => parseBirthdayDate(values.birthday),
@@ -158,6 +159,43 @@ export function AuthRegisterPanel() {
     session.accessToken,
     session.refreshToken,
   ]);
+
+  useEffect(() => {
+    if (!isBirthdayPickerOpen) {
+      return;
+    }
+
+    function closeOnOutsidePointerDown(event: PointerEvent) {
+      const target = event.target;
+
+      if (!(target instanceof Node)) {
+        return;
+      }
+
+      if (birthdayPickerControlRef.current?.contains(target)) {
+        return;
+      }
+
+      if (
+        target instanceof Element &&
+        target.closest('[data-birthday-picker-content="true"]')
+      ) {
+        return;
+      }
+
+      setBirthdayPickerOpen(false);
+    }
+
+    document.addEventListener("pointerdown", closeOnOutsidePointerDown, true);
+
+    return () => {
+      document.removeEventListener(
+        "pointerdown",
+        closeOnOutsidePointerDown,
+        true,
+      );
+    };
+  }, [isBirthdayPickerOpen]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -256,12 +294,16 @@ export function AuthRegisterPanel() {
               <FieldLabel htmlFor="birthday" required>
                 {register.birthdayLabel}
               </FieldLabel>
-              <div className={sharedStyles.datePickerControl}>
+              <div
+                className={sharedStyles.datePickerControl}
+                ref={birthdayPickerControlRef}
+              >
                 <Popover
                   open={isBirthdayPickerOpen}
                   onOpenChange={setBirthdayPickerOpen}
                 >
                   <PopoverTrigger
+                    nativeButton={false}
                     render={
                       <Input
                         id="birthday"
@@ -272,7 +314,7 @@ export function AuthRegisterPanel() {
                         value={values.birthday}
                         aria-invalid={errors.birthday ? "true" : undefined}
                         autoComplete="bday"
-                        onFocus={() => {
+                        onClick={() => {
                           setBirthdayPickerOpen(true);
                         }}
                         onChange={(event) => {
@@ -293,6 +335,9 @@ export function AuthRegisterPanel() {
                   <PopoverContent
                     className={sharedStyles.datePickerPopover}
                     align="start"
+                    data-birthday-picker-content="true"
+                    finalFocus={false}
+                    initialFocus={false}
                   >
                     <Calendar
                       mode="single"

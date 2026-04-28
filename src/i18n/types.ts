@@ -633,4 +633,21 @@ export type Messages = {
     typeUcr: string;
     typeAdmin: string;
   };
+  calendar: {
+    today: string;
+    viewDay: string;
+    viewWorkWeek: string;
+    viewWeek: string;
+    viewMonth: string;
+    filter: string;
+    newReservation: string;
+    myServices: string;
+    noServicesYet: string;
+    noReservationsTitle: string;
+    noReservationsDesc: string;
+    settingsTitle: string;
+    settingsTimeFormat: string;
+    timeFormat12h: string;
+    timeFormat24h: string;
+  };
 };
