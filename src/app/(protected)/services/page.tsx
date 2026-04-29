@@ -79,6 +79,7 @@ export default async function ServicesPage({
       brands={detailedBrands}
       accessToken={accessToken}
       serviceCategories={serviceCategories}
+      user={user}
     />
   );
 }

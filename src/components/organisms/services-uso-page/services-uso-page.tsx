@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { isAxiosError } from "axios";
 import {
@@ -31,6 +32,8 @@ import {
 import { proxyMediaUrl } from "@/lib/media";
 import type { Brand, Branch } from "@/types/brand";
 import type { Service, ServiceCategory, ServiceStatus, PriceType } from "@/types/service";
+import type { AuthenticatedUser } from "@/types/user_types";
+import { OwnerCard } from "@/components/molecules/owner-card";
 import styles from "./services-uso-page.module.css";
 
 type ServicesUsoPageProps = {
@@ -38,6 +41,7 @@ type ServicesUsoPageProps = {
   brands: Brand[];
   accessToken: string;
   serviceCategories: ServiceCategory[];
+  user: AuthenticatedUser;
 };
 
 type ServiceFormState = {
@@ -109,6 +113,7 @@ type PageCopy = {
   labelPrice: string;
   labelBranch: string;
   labelIndividual: string;
+  labelOwner: string;
   successCreate: string;
   successUpdate: string;
   successDelete: string;
@@ -120,6 +125,9 @@ type PageCopy = {
   confirmDelete: string;
   pendingNote: string;
   selectBrandFirst: string;
+  detailInfo: string;
+  detailActions: string;
+  noDescription: string;
 };
 
 const EN_COPY: PageCopy = {
@@ -176,6 +184,7 @@ const EN_COPY: PageCopy = {
   labelPrice: "Price",
   labelBranch: "Branch",
   labelIndividual: "Individual",
+  labelOwner: "Owner",
   successCreate: "Service created.",
   successUpdate: "Service updated.",
   successDelete: "Service deleted.",
@@ -187,6 +196,9 @@ const EN_COPY: PageCopy = {
   confirmDelete: "Are you sure you want to delete this service?",
   pendingNote: "Under review — no actions available.",
   selectBrandFirst: "Select a brand first",
+  detailInfo: "Details",
+  detailActions: "Actions",
+  noDescription: "No description provided.",
 };
 
 const TR_COPY: PageCopy = {
@@ -244,6 +256,7 @@ const TR_COPY: PageCopy = {
   labelPrice: "Fiyat",
   labelBranch: "Şube",
   labelIndividual: "Bireysel",
+  labelOwner: "Sahib",
   successCreate: "Hizmet oluşturuldu.",
   successUpdate: "Hizmet güncellendi.",
   successDelete: "Hizmet silindi.",
@@ -255,6 +268,9 @@ const TR_COPY: PageCopy = {
   confirmDelete: "Bu hizmeti silmek istediğinden emin misin?",
   pendingNote: "İnceleniyor — işlem yapılamaz.",
   selectBrandFirst: "Önce marka seç",
+  detailInfo: "Detaylar",
+  detailActions: "İşlemler",
+  noDescription: "Açıklama yok.",
 };
 
 const AZ_COPY: PageCopy = {
@@ -312,6 +328,7 @@ const AZ_COPY: PageCopy = {
   labelPrice: "Qiymət",
   labelBranch: "Filial",
   labelIndividual: "Fərdi",
+  labelOwner: "Sahib",
   successCreate: "Xidmət yaradıldı.",
   successUpdate: "Xidmət yeniləndi.",
   successDelete: "Xidmət silindi.",
@@ -323,6 +340,9 @@ const AZ_COPY: PageCopy = {
   confirmDelete: "Bu xidməti silmək istədiyindən əminsən?",
   pendingNote: "İcazə gözlənilir — heç bir əməliyyat mümkün deyil.",
   selectBrandFirst: "Əvvəlcə brend seç",
+  detailInfo: "Təfərrüatlar",
+  detailActions: "Əməliyyatlar",
+  noDescription: "Təsvir yoxdur.",
 };
 
 function getCopy(locale: string): PageCopy {
@@ -347,7 +367,7 @@ function formatPrice(service: Service, copy: PageCopy): string {
   if (service.price_type === "FREE") return copy.priceTypeFree;
   if (service.price === null) return "—";
   const prefix = service.price_type === "STARTING_FROM" ? `${copy.priceTypeStartingFrom} ` : "";
-  return `${prefix}${service.price}`;
+  return `${prefix}${service.price} AZN`;
 }
 
 function formatDuration(minutes: number | null, unit: string): string {
@@ -380,6 +400,22 @@ function getBranchById(brands: Brand[], branchId: string): Branch | undefined {
 
 function getBrandByBranchId(brands: Brand[], branchId: string): Brand | undefined {
   return brands.find((brand) => brand.branches?.some((b) => b.id === branchId));
+}
+
+type OwnerInfo =
+  | { isBrand: true; name: string; brand: Brand }
+  | { isBrand: false; name: string; brand: null };
+
+function getOwnerInfo(
+  service: Service,
+  brands: Brand[],
+  user: AuthenticatedUser,
+): OwnerInfo {
+  if (service.branch_id) {
+    const brand = getBrandByBranchId(brands, service.branch_id);
+    if (brand) return { isBrand: true, name: brand.name, brand };
+  }
+  return { isBrand: false, name: `${user.first_name} ${user.last_name}`, brand: null };
 }
 
 const DEFAULT_FORM: ServiceFormState = {
@@ -457,9 +493,7 @@ type ServiceFormPageProps = {
   onCancel: () => void;
 };
 
-type CropTarget = {
-  file: File;
-};
+type CropTarget = { file: File };
 
 function ServiceFormPage({
   copy,
@@ -575,7 +609,6 @@ function ServiceFormPage({
 
   return (
     <div className={styles.formWrapper}>
-      {/* Sticky header */}
       <div className={styles.formPageHeader}>
         <Button variant="ghost" icon="arrow_back" onClick={onCancel} />
         <div className={styles.headerMeta}>
@@ -600,9 +633,7 @@ function ServiceFormPage({
 
       <form className={styles.formBody} onSubmit={handleSubmit}>
         <div className={styles.desktopShell}>
-          {/* ── Sidebar ── */}
           <div className={styles.sidebarStack}>
-            {/* Photos */}
             <div className={styles.formSection}>
               <div className={styles.sectionHeader}>
                 <span className={styles.stepBadge}>1</span>
@@ -639,12 +670,7 @@ function ServiceFormPage({
               {form.image_media_ids.length < 5 ? (
                 <label className={`${styles.uploadArea} ${styles.uploadAreaWide}`}>
                   <div className={styles.uploadContent}>
-                    <Icon
-                      icon="add_photo_alternate"
-                      size={28}
-                      color="current"
-                      className={styles.uploadIcon}
-                    />
+                    <Icon icon="add_photo_alternate" size={28} color="current" className={styles.uploadIcon} />
                     <p className={styles.uploadLabel}>{copy.fieldImages}</p>
                     <p className={styles.uploadHint}>JPEG · PNG · max 5</p>
                   </div>
@@ -660,15 +686,12 @@ function ServiceFormPage({
               ) : null}
             </div>
 
-            {/* Desktop aside actions */}
             <div className={styles.desktopAside}>
               {renderFormActions(styles.formFooterAside)}
             </div>
           </div>
 
-          {/* ── Main stack ── */}
           <div className={styles.mainStack}>
-            {/* Section 2: Basic info */}
             <div className={styles.formSection}>
               <div className={styles.sectionHeader}>
                 <span className={styles.stepBadge}>2</span>
@@ -680,25 +703,14 @@ function ServiceFormPage({
               <div className={styles.fieldRow}>
                 <Field>
                   <FieldLabel required>{copy.fieldTitle}</FieldLabel>
-                  <Input
-                    value={form.title}
-                    onChange={(e) => setField("title", e.target.value)}
-                    placeholder={copy.fieldTitlePlaceholder}
-                    required
-                  />
+                  <Input value={form.title} onChange={(e) => setField("title", e.target.value)} placeholder={copy.fieldTitlePlaceholder} required />
                 </Field>
               </div>
 
               <div className={styles.fieldRow}>
                 <Field>
                   <FieldLabel>{copy.fieldDescription}</FieldLabel>
-                  <textarea
-                    className={styles.textarea}
-                    value={form.description}
-                    onChange={(e) => setField("description", e.target.value)}
-                    placeholder={copy.fieldDescriptionPlaceholder}
-                    rows={4}
-                  />
+                  <textarea className={styles.textarea} value={form.description} onChange={(e) => setField("description", e.target.value)} placeholder={copy.fieldDescriptionPlaceholder} rows={4} />
                 </Field>
               </div>
 
@@ -719,7 +731,6 @@ function ServiceFormPage({
               </div>
             </div>
 
-            {/* Section 3: Context */}
             <div className={styles.formSection}>
               <div className={styles.sectionHeader}>
                 <span className={styles.stepBadge}>3</span>
@@ -747,11 +758,7 @@ function ServiceFormPage({
                 <div className={styles.fieldRow}>
                   <Field>
                     <FieldLabel>{copy.fieldAddress}</FieldLabel>
-                    <Input
-                      value={form.address}
-                      onChange={(e) => setField("address", e.target.value)}
-                      placeholder={copy.fieldAddressPlaceholder}
-                    />
+                    <Input value={form.address} onChange={(e) => setField("address", e.target.value)} placeholder={copy.fieldAddressPlaceholder} />
                   </Field>
                 </div>
               ) : (
@@ -793,7 +800,6 @@ function ServiceFormPage({
               )}
             </div>
 
-            {/* Section 4: Pricing & Duration */}
             <div className={styles.formSection}>
               <div className={styles.sectionHeader}>
                 <span className={styles.stepBadge}>4</span>
@@ -808,22 +814,10 @@ function ServiceFormPage({
                   <FieldContent>
                     <div className={styles.radioGroup}>
                       {(["FIXED", "STARTING_FROM", "FREE"] as PriceType[]).map((pt) => {
-                        const label =
-                          pt === "FIXED"
-                            ? copy.priceTypeFixed
-                            : pt === "STARTING_FROM"
-                              ? copy.priceTypeStartingFrom
-                              : copy.priceTypeFree;
+                        const label = pt === "FIXED" ? copy.priceTypeFixed : pt === "STARTING_FROM" ? copy.priceTypeStartingFrom : copy.priceTypeFree;
                         return (
                           <label key={pt} className={styles.radioLabel}>
-                            <input
-                              type="radio"
-                              name="price_type"
-                              value={pt}
-                              checked={form.price_type === pt}
-                              onChange={() => setField("price_type", pt)}
-                              className={styles.radioInput}
-                            />
+                            <input type="radio" name="price_type" value={pt} checked={form.price_type === pt} onChange={() => setField("price_type", pt)} className={styles.radioInput} />
                             <span>{label}</span>
                           </label>
                         );
@@ -837,14 +831,7 @@ function ServiceFormPage({
                 <div className={styles.fieldRow}>
                   <Field>
                     <FieldLabel>{copy.fieldPrice}</FieldLabel>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={form.price}
-                      onChange={(e) => setField("price", e.target.value)}
-                      placeholder={copy.fieldPricePlaceholder}
-                    />
+                    <Input type="number" min="0" step="0.01" value={form.price} onChange={(e) => setField("price", e.target.value)} placeholder={copy.fieldPricePlaceholder} />
                   </Field>
                 </div>
               ) : null}
@@ -854,14 +841,7 @@ function ServiceFormPage({
                   <FieldLabel>{copy.fieldDuration}</FieldLabel>
                   <FieldContent>
                     <div className={styles.inlineRow}>
-                      <Input
-                        type="number"
-                        min="1"
-                        value={form.duration}
-                        onChange={(e) => setField("duration", e.target.value)}
-                        placeholder={copy.fieldDurationPlaceholder}
-                        className={styles.durationInput}
-                      />
+                      <Input type="number" min="1" value={form.duration} onChange={(e) => setField("duration", e.target.value)} placeholder={copy.fieldDurationPlaceholder} className={styles.durationInput} />
                       <span className={styles.inlineUnit}>{copy.fieldDurationUnit}</span>
                     </div>
                   </FieldContent>
@@ -871,7 +851,6 @@ function ServiceFormPage({
           </div>
         </div>
 
-        {/* Mobile footer */}
         <div className={styles.mobileFooter}>{renderFormActions()}</div>
       </form>
 
@@ -887,12 +866,110 @@ function ServiceFormPage({
   );
 }
 
-// ─── Service Card ─────────────────────────────────────────────────────────────
+// ─── Service Card (Wolt-style) ────────────────────────────────────────────────
 
 function ServiceCard({
   service,
   copy,
   brands,
+  user,
+  onClick,
+}: {
+  service: Service;
+  copy: PageCopy;
+  brands: Brand[];
+  user: AuthenticatedUser;
+  onClick: () => void;
+}) {
+  const { messages } = useLocale();
+  const statusLabel = getStatusLabel(service.status, copy);
+  const badgeVariant = STATUS_BADGE_VARIANT[service.status];
+  const priceLabel = formatPrice(service, copy);
+  const durationLabel = formatDuration(service.duration, copy.fieldDurationUnit);
+  const owner = getOwnerInfo(service, brands, user);
+
+  const branch = service.branch_id ? getBranchById(brands, service.branch_id) : null;
+
+  const firstImage = service.images[0];
+  const imageUrl = firstImage ? proxyMediaUrl(firstImage.url) : null;
+
+  const category = service.service_category
+    ? (messages.categories[service.service_category.key as keyof typeof messages.categories] ?? service.service_category.key)
+    : null;
+
+  return (
+    <button type="button" className={styles.serviceCard} onClick={onClick}>
+      {/* Image hero */}
+      <div className={styles.cardHero}>
+        {imageUrl ? (
+          <Image src={imageUrl} alt={service.title} fill className={styles.cardHeroImage} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
+        ) : (
+          <div className={styles.cardHeroPlaceholder}>
+            <Icon icon="design_services" size={32} color="current" className={styles.cardHeroIcon} />
+          </div>
+        )}
+        {/* Status badge overlaid top-right */}
+        <div className={styles.cardStatusOverlay}>
+          <Badge variant={badgeVariant}>{statusLabel}</Badge>
+        </div>
+        {/* Price pill overlaid bottom-right */}
+        {priceLabel !== "—" && (
+          <div className={styles.cardPricePill}>
+            {priceLabel}
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className={styles.cardBody}>
+        <div className={styles.cardTitleRow}>
+          <h3 className={styles.cardTitle}>{service.title}</h3>
+          {durationLabel !== "—" && (
+            <span className={styles.cardDurationPill}>{durationLabel}</span>
+          )}
+        </div>
+
+        {category && (
+          <span className={styles.cardCategory}>{category}</span>
+        )}
+
+        <div className={styles.cardFooter}>
+          <span className={styles.cardOwner}>
+            <Icon
+              icon={owner.isBrand ? "store" : "person"}
+              size={12}
+              color="current"
+              className={styles.cardOwnerIcon}
+            />
+            {owner.name}
+          </span>
+          {branch && !owner.isBrand && (
+            <span className={styles.cardBranch}>
+              <Icon icon="location_on" size={12} color="current" />
+              {branch.name}
+            </span>
+          )}
+          {owner.isBrand && owner.brand.rating !== null && owner.brand.rating > 0 && (
+            <span className={styles.cardRating}>
+              <Icon icon="star" size={11} color="current" className={styles.cardStarIcon} />
+              {owner.brand.rating.toFixed(1)}
+            </span>
+          )}
+        </div>
+      </div>
+    </button>
+  );
+}
+
+// ─── Service Detail View ──────────────────────────────────────────────────────
+
+function ServiceDetailView({
+  service,
+  copy,
+  brands,
+  user,
+  actionLoading,
+  onBack,
   onEdit,
   onSubmit,
   onResubmit,
@@ -900,11 +977,13 @@ function ServiceCard({
   onPause,
   onResume,
   onArchive,
-  actionLoading,
 }: {
   service: Service;
   copy: PageCopy;
   brands: Brand[];
+  user: AuthenticatedUser;
+  actionLoading: boolean;
+  onBack: () => void;
   onEdit: () => void;
   onSubmit: () => void;
   onResubmit: () => void;
@@ -912,120 +991,200 @@ function ServiceCard({
   onPause: () => void;
   onResume: () => void;
   onArchive: () => void;
-  actionLoading: boolean;
 }) {
   const { messages } = useLocale();
   const statusLabel = getStatusLabel(service.status, copy);
   const badgeVariant = STATUS_BADGE_VARIANT[service.status];
   const priceLabel = formatPrice(service, copy);
   const durationLabel = formatDuration(service.duration, copy.fieldDurationUnit);
-
+  const owner = getOwnerInfo(service, brands, user);
   const branch = service.branch_id ? getBranchById(brands, service.branch_id) : null;
-  const contextLabel = branch ? `${copy.labelBranch}: ${branch.name}` : copy.labelIndividual;
 
-  const firstImage = service.images[0];
-  const imageUrl = firstImage ? proxyMediaUrl(firstImage.url) : null;
+  const category = service.service_category
+    ? (messages.categories[service.service_category.key as keyof typeof messages.categories] ?? service.service_category.key)
+    : null;
+
+  const images = service.images.map((img) => proxyMediaUrl(img.url) ?? img.url);
 
   return (
-    <article className={styles.serviceCard}>
-      {imageUrl ? (
-        <div className={styles.cardImageThumb}>
-          <Image
-            src={imageUrl}
-            alt={service.title}
-            fill
-            className={styles.cardImage}
-            sizes="72px"
-          />
-        </div>
-      ) : (
-        <div className={styles.cardImagePlaceholder}>
-          <Icon icon="design_services" size={22} color="current" />
-        </div>
-      )}
-
-      <div className={styles.cardContent}>
-        <div className={styles.cardHeader}>
-          <h3 className={styles.cardTitle}>{service.title}</h3>
+    <div className={styles.detailWrapper}>
+      {/* Sticky header */}
+      <div className={styles.detailHeader}>
+        <Button variant="ghost" icon="arrow_back" onClick={onBack} />
+        <div className={styles.detailHeaderMeta}>
+          <h1 className={styles.detailTitle}>{service.title}</h1>
           <Badge variant={badgeVariant}>{statusLabel}</Badge>
         </div>
+      </div>
 
-        <div className={styles.cardMeta}>
-          {service.service_category ? (
-            <span className={styles.metaChip}>
-              {messages.categories[service.service_category.key as keyof typeof messages.categories] ?? service.service_category.key}
-            </span>
-          ) : null}
-          <span className={styles.metaItem}>{priceLabel}</span>
-          {durationLabel !== "—" ? (
-            <span className={styles.metaItem}>{durationLabel}</span>
-          ) : null}
-          <span className={styles.metaItem}>{contextLabel}</span>
+      <div className={styles.detailShell}>
+        {/* Left: images + description */}
+        <div className={styles.detailMain}>
+          {/* Image gallery */}
+          {images.length > 0 ? (
+            <div className={styles.detailGallery}>
+              <div className={styles.detailHeroWrap}>
+                <Image
+                  src={images[0]}
+                  alt={service.title}
+                  fill
+                  className={styles.detailHeroImage}
+                  sizes="(max-width: 768px) 100vw, 60vw"
+                  priority
+                />
+              </div>
+              {images.length > 1 && (
+                <div className={styles.detailThumbnails}>
+                  {images.slice(1).map((url, i) => (
+                    <div key={i} className={styles.detailThumbWrap}>
+                      <Image src={url} alt={`Photo ${i + 2}`} fill className={styles.detailThumbImage} sizes="120px" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className={styles.detailHeroPlaceholder}>
+              <Icon icon="design_services" size={48} color="current" className={styles.detailPlaceholderIcon} />
+            </div>
+          )}
+
+          {/* Description */}
+          <div className={styles.detailSection}>
+            <p className={styles.detailDescription}>
+              {service.description || <em className={styles.noDescription}>{copy.noDescription}</em>}
+            </p>
+          </div>
+
+          {/* Rejection reason */}
+          {service.status === "REJECTED" && service.rejection_reason && (
+            <div className={styles.rejectionBanner}>
+              <Icon icon="info" size={14} color="current" />
+              <span>
+                <strong>{copy.labelRejectionReason}:</strong> {service.rejection_reason}
+              </span>
+            </div>
+          )}
         </div>
 
-        {service.status === "REJECTED" && service.rejection_reason ? (
-          <div className={styles.rejectionBanner}>
-            <Icon icon="info" size={14} color="current" />
-            <span>
-              <strong>{copy.labelRejectionReason}:</strong> {service.rejection_reason}
-            </span>
+        {/* Right: info + actions */}
+        <div className={styles.detailSidebar}>
+          {/* Info card */}
+          <div className={styles.detailInfoCard}>
+            <h2 className={styles.detailSidebarTitle}>{copy.detailInfo}</h2>
+
+            <dl className={styles.detailDl}>
+              {category && (
+                <>
+                  <dt className={styles.detailDt}>{copy.labelCategory}</dt>
+                  <dd className={styles.detailDd}>
+                    <span className={styles.detailChip}>{category}</span>
+                  </dd>
+                </>
+              )}
+
+              <dt className={styles.detailDt}>{copy.fieldPrice}</dt>
+              <dd className={styles.detailDd}>{priceLabel}</dd>
+
+              <dt className={styles.detailDt}>{copy.fieldDuration}</dt>
+              <dd className={styles.detailDd}>{durationLabel}</dd>
+
+              {branch && (
+                <>
+                  <dt className={styles.detailDt}>{copy.labelBranch}</dt>
+                  <dd className={styles.detailDd}>{branch.name}</dd>
+                </>
+              )}
+
+              {service.address && !branch && (
+                <>
+                  <dt className={styles.detailDt}>{copy.fieldAddress}</dt>
+                  <dd className={styles.detailDd}>{service.address}</dd>
+                </>
+              )}
+            </dl>
+
+            <div className={styles.detailOwnerCardWrap}>
+              {owner.isBrand ? (
+                <OwnerCard
+                  roleLabel={copy.labelOwner}
+                  name={owner.brand.name}
+                  href={`/brands?id=${owner.brand.id}`}
+                  logoUrl={owner.brand.logo_url}
+                  rating={owner.brand.rating}
+                  ratingCount={owner.brand.rating_count}
+                />
+              ) : (
+                <OwnerCard
+                  roleLabel={copy.labelOwner}
+                  name={owner.name}
+                  href="/account"
+                  avatarUrl={user.avatar_url}
+                  initials={`${user.first_name[0] ?? ""}${user.last_name[0] ?? ""}`.toUpperCase()}
+                  subtitle={user.email}
+                />
+              )}
+            </div>
           </div>
-        ) : null}
 
-        {service.status === "PENDING" ? (
-          <p className={styles.pendingNote}>{copy.pendingNote}</p>
-        ) : null}
+          {/* Actions card */}
+          <div className={styles.detailActionsCard}>
+            <h2 className={styles.detailSidebarTitle}>{copy.detailActions}</h2>
+
+            {service.status === "PENDING" && (
+              <p className={styles.pendingNote}>{copy.pendingNote}</p>
+            )}
+
+            {service.status === "DRAFT" && (
+              <div className={styles.detailActionGroup}>
+                <Button variant="primary" icon="send" onClick={onSubmit} isLoading={actionLoading} className={styles.detailActionBtn}>
+                  {copy.actionSubmit}
+                </Button>
+                <Button variant="outline" icon="edit" onClick={onEdit} disabled={actionLoading} className={styles.detailActionBtn}>
+                  {copy.actionEdit}
+                </Button>
+                <Button variant="destructive" icon="delete" onClick={onDelete} disabled={actionLoading} className={styles.detailActionBtn}>
+                  {copy.actionDelete}
+                </Button>
+              </div>
+            )}
+
+            {service.status === "REJECTED" && (
+              <div className={styles.detailActionGroup}>
+                <Button variant="outline" icon="edit" onClick={onEdit} disabled={actionLoading} className={styles.detailActionBtn}>
+                  {copy.actionEdit}
+                </Button>
+                <Button variant="primary" icon="send" onClick={onResubmit} isLoading={actionLoading} className={styles.detailActionBtn}>
+                  {copy.actionResubmit}
+                </Button>
+              </div>
+            )}
+
+            {service.status === "ACTIVE" && (
+              <div className={styles.detailActionGroup}>
+                <Button variant="outline" icon="pause" onClick={onPause} isLoading={actionLoading} className={styles.detailActionBtn}>
+                  {copy.actionPause}
+                </Button>
+                <Button variant="ghost" icon="archive" onClick={onArchive} disabled={actionLoading} className={styles.detailActionBtn}>
+                  {copy.actionArchive}
+                </Button>
+              </div>
+            )}
+
+            {service.status === "PAUSED" && (
+              <div className={styles.detailActionGroup}>
+                <Button variant="primary" icon="play_arrow" onClick={onResume} isLoading={actionLoading} className={styles.detailActionBtn}>
+                  {copy.actionResume}
+                </Button>
+                <Button variant="ghost" icon="archive" onClick={onArchive} disabled={actionLoading} className={styles.detailActionBtn}>
+                  {copy.actionArchive}
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-
-      <div className={styles.cardActions}>
-        {service.status === "DRAFT" ? (
-          <>
-            <Button size="small" variant="outline" icon="edit" onClick={onEdit} disabled={actionLoading}>
-              {copy.actionEdit}
-            </Button>
-            <Button size="small" variant="primary" icon="send" onClick={onSubmit} isLoading={actionLoading}>
-              {copy.actionSubmit}
-            </Button>
-            <Button size="small" variant="destructive" icon="delete" onClick={onDelete} disabled={actionLoading}>
-              {copy.actionDelete}
-            </Button>
-          </>
-        ) : null}
-
-        {service.status === "REJECTED" ? (
-          <>
-            <Button size="small" variant="outline" icon="edit" onClick={onEdit} disabled={actionLoading}>
-              {copy.actionEdit}
-            </Button>
-            <Button size="small" variant="primary" icon="send" onClick={onResubmit} isLoading={actionLoading}>
-              {copy.actionResubmit}
-            </Button>
-          </>
-        ) : null}
-
-        {service.status === "ACTIVE" ? (
-          <>
-            <Button size="small" variant="outline" icon="pause" onClick={onPause} isLoading={actionLoading}>
-              {copy.actionPause}
-            </Button>
-            <Button size="small" variant="ghost" icon="archive" onClick={onArchive} disabled={actionLoading}>
-              {copy.actionArchive}
-            </Button>
-          </>
-        ) : null}
-
-        {service.status === "PAUSED" ? (
-          <>
-            <Button size="small" variant="primary" icon="play_arrow" onClick={onResume} isLoading={actionLoading}>
-              {copy.actionResume}
-            </Button>
-            <Button size="small" variant="ghost" icon="archive" onClick={onArchive} disabled={actionLoading}>
-              {copy.actionArchive}
-            </Button>
-          </>
-        ) : null}
-      </div>
-    </article>
+    </div>
   );
 }
 
@@ -1036,29 +1195,67 @@ export function ServicesUsoPage({
   brands,
   accessToken,
   serviceCategories,
+  user,
 }: ServicesUsoPageProps) {
   const { locale } = useLocale();
   const copy = useMemo(() => getCopy(locale), [locale]);
+  const searchParams = useSearchParams();
 
   const [services, setServices] = useState<Service[]>(initialServices);
-  const [formOpen, setFormOpen] = useState(false);
+
+  const initialServiceId = searchParams.get("id");
+  const initialService = initialServiceId
+    ? initialServices.find((s) => s.id === initialServiceId) ?? null
+    : null;
+
+  const [view, setView] = useState<"list" | "detail" | "form">(
+    initialService ? "detail" : "list",
+  );
+  const [viewService, setViewService] = useState<Service | null>(initialService);
+
+  useEffect(() => {
+    const id = searchParams.get("id");
+    if (!id) return;
+    const match = services.find((s) => s.id === id);
+    if (match) {
+      setViewService(match);
+      setView("detail");
+    }
+  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
+  function openDetail(service: Service) {
+    setViewService(service);
+    setView("detail");
+  }
+
   function openCreate() {
     setEditingService(null);
-    setFormOpen(true);
+    setView("form");
   }
 
   function openEdit(service: Service) {
     setEditingService(service);
-    setFormOpen(true);
+    setViewService(null);
+    setView("form");
   }
 
-  function closeForm() {
-    setFormOpen(false);
+  function openEditFromDetail(service: Service) {
+    setEditingService(service);
+    setView("form");
+  }
+
+  function backToList() {
+    setViewService(null);
     setEditingService(null);
+    setView("list");
+  }
+
+  function backToDetail() {
+    setEditingService(null);
+    setView("detail");
   }
 
   function showFeedback(type: "success" | "error", message: string) {
@@ -1073,6 +1270,7 @@ export function ServicesUsoPage({
       await deleteService(service.id, accessToken);
       setServices((prev) => prev.filter((s) => s.id !== service.id));
       showFeedback("success", copy.successDelete);
+      backToList();
     } catch {
       showFeedback("error", copy.errorGeneric);
     } finally {
@@ -1102,6 +1300,7 @@ export function ServicesUsoPage({
         successMsg = copy.successArchive;
       }
       setServices((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
+      setViewService(updated);
       showFeedback("success", successMsg);
     } catch {
       showFeedback("error", copy.errorGeneric);
@@ -1110,7 +1309,7 @@ export function ServicesUsoPage({
     }
   }
 
-  if (formOpen) {
+  if (view === "form") {
     return (
       <ServiceFormPage
         key={editingService?.id ?? "create"}
@@ -1122,13 +1321,37 @@ export function ServicesUsoPage({
         onSaved={(service, isNew) => {
           if (isNew) {
             setServices((prev) => [service, ...prev]);
+            showFeedback("success", copy.successCreate);
+            backToList();
           } else {
             setServices((prev) => prev.map((s) => (s.id === service.id ? service : s)));
+            setViewService(service);
+            showFeedback("success", copy.successUpdate);
+            backToDetail();
           }
-          closeForm();
-          showFeedback("success", isNew ? copy.successCreate : copy.successUpdate);
         }}
-        onCancel={closeForm}
+        onCancel={viewService ? backToDetail : backToList}
+      />
+    );
+  }
+
+  if (view === "detail" && viewService) {
+    const liveService = services.find((s) => s.id === viewService.id) ?? viewService;
+    return (
+      <ServiceDetailView
+        service={liveService}
+        copy={copy}
+        brands={brands}
+        user={user}
+        actionLoading={actionLoadingId === liveService.id}
+        onBack={backToList}
+        onEdit={() => openEditFromDetail(liveService)}
+        onSubmit={() => handleLifecycle(liveService, "submit")}
+        onResubmit={() => handleLifecycle(liveService, "resubmit")}
+        onDelete={() => handleDelete(liveService)}
+        onPause={() => handleLifecycle(liveService, "pause")}
+        onResume={() => handleLifecycle(liveService, "resume")}
+        onArchive={() => handleLifecycle(liveService, "archive")}
       />
     );
   }
@@ -1148,11 +1371,7 @@ export function ServicesUsoPage({
             feedback.type === "success" ? styles.feedbackSuccess : styles.feedbackError
           }`}
         >
-          <Icon
-            icon={feedback.type === "success" ? "check_circle" : "error"}
-            size={16}
-            color="current"
-          />
+          <Icon icon={feedback.type === "success" ? "check_circle" : "error"} size={16} color="current" />
           <span>{feedback.message}</span>
         </div>
       ) : null}
@@ -1169,21 +1388,15 @@ export function ServicesUsoPage({
           </Button>
         </div>
       ) : (
-        <div className={styles.list}>
+        <div className={styles.grid}>
           {services.map((service) => (
             <ServiceCard
               key={service.id}
               service={service}
               copy={copy}
               brands={brands}
-              onEdit={() => openEdit(service)}
-              onSubmit={() => handleLifecycle(service, "submit")}
-              onResubmit={() => handleLifecycle(service, "resubmit")}
-              onDelete={() => handleDelete(service)}
-              onPause={() => handleLifecycle(service, "pause")}
-              onResume={() => handleLifecycle(service, "resume")}
-              onArchive={() => handleLifecycle(service, "archive")}
-              actionLoading={actionLoadingId === service.id}
+              user={user}
+              onClick={() => openDetail(service)}
             />
           ))}
         </div>
