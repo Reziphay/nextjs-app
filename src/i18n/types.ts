@@ -488,6 +488,61 @@ export type Messages = {
       ctaSecondary: string;
     };
   };
+  categories: {
+    // Brand categories
+    food_beverage: string;
+    beauty_wellness: string;
+    fitness_sports: string;
+    fashion_apparel: string;
+    technology_electronics: string;
+    home_furniture: string;
+    health_pharmacy: string;
+    education_training: string;
+    entertainment_media: string;
+    travel_hospitality: string;
+    // Service categories
+    haircut_styling: string;
+    massage_therapy: string;
+    personal_training: string;
+    nail_care: string;
+    facial_treatment: string;
+    dental_care: string;
+    consulting: string;
+    photo_session: string;
+  };
+  moderation: {
+    pageTitle: string;
+    pageDescription: string;
+    tabBrands: string;
+    tabServices: string;
+    queueEmpty: string;
+    queueLoadError: string;
+    colName: string;
+    colOwner: string;
+    colSubmitted: string;
+    colAction: string;
+    reviewButton: string;
+    backToQueue: string;
+    approveButton: string;
+    rejectButton: string;
+    approveConfirmTitle: string;
+    approveConfirmDescription: string;
+    rejectConfirmTitle: string;
+    rejectReasonLabel: string;
+    rejectReasonPlaceholder: string;
+    rejectReasonRequired: string;
+    actionSuccess: string;
+    actionError: string;
+    checklistTitle: string;
+    checklistPassed: string;
+    checklistFailed: string;
+    ownerLabel: string;
+    submittedLabel: string;
+    categoryLabel: string;
+    statusPending: string;
+    loadingQueue: string;
+    loadingDetail: string;
+  };
   profile: {
     title: string;
     description: string;
@@ -577,5 +632,22 @@ export type Messages = {
     typeUso: string;
     typeUcr: string;
     typeAdmin: string;
+  };
+  calendar: {
+    today: string;
+    viewDay: string;
+    viewWorkWeek: string;
+    viewWeek: string;
+    viewMonth: string;
+    filter: string;
+    newReservation: string;
+    myServices: string;
+    noServicesYet: string;
+    noReservationsTitle: string;
+    noReservationsDesc: string;
+    settingsTitle: string;
+    settingsTimeFormat: string;
+    timeFormat12h: string;
+    timeFormat24h: string;
   };
 };

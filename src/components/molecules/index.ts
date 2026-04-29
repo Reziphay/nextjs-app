@@ -1,4 +1,5 @@
 export { AvatarCropDialog } from "./avatar-crop-dialog/avatar-crop-dialog";
+export { OwnerCard } from "./owner-card";
 export { BrandCard } from "./brand-card";
 export { FeedbackPopup } from "./feedback-popup/feedback-popup";
 export { LanguageSwitcher } from "./language-switcher";

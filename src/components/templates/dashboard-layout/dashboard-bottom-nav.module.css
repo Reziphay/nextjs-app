@@ -53,9 +53,9 @@
   }
 
   .itemActive {
-    color: var(--app-primary-faint);
-    background: transparent;
-    box-shadow: none;
+    background: var(--app-primary);
+    color: var(--app-text-inverse);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.16);
   }
 
   .icon {
@@ -74,7 +74,7 @@
   }
 
   .itemActive .icon {
-    color: var(--app-primary);
+    color: var(--app-text-inverse);
   }
 
   .itemActive .avatarSurface {

@@ -10,7 +10,7 @@ import {
   Combobox,
   type ComboboxOption,
 } from "@/components/atoms/combobox";
-import { ImageCropModal } from "@/components/atoms/image-crop-modal/image-crop-modal";
+import { AvatarCropDialog } from "@/components/molecules/avatar-crop-dialog/avatar-crop-dialog";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -274,6 +274,8 @@ export function BrandForm({
   const t = messages.brands;
   const session = useAppSelector(selectAuthSession);
   const branchQueryId = searchParams.get("branch");
+  const addBranchQuery = searchParams.get("addBranch");
+  const [addBranchQueryHandled, setAddBranchQueryHandled] = useState(false);
   const [persistedBrand, setPersistedBrand] = useState<Brand | null>(
     mode === "edit" ? brand ?? null : null,
   );
@@ -319,7 +321,7 @@ export function BrandForm({
 
   const categoryOptions: ComboboxOption[] = categories.map((c) => ({
     value: c.id,
-    label: c.name,
+    label: messages.categories[c.key as keyof typeof messages.categories] ?? c.key,
   }));
 
   const verificationMissing =
@@ -478,6 +480,13 @@ export function BrandForm({
       setBranchModalOpen(true);
     }
   }, [branchQueryHandled, branchQueryId, draft.branches, mode]);
+
+  useEffect(() => {
+    if (mode !== "edit" || addBranchQuery !== "1" || addBranchQueryHandled) return;
+    setAddBranchQueryHandled(true);
+    setEditingBranchIndex(null);
+    setBranchModalOpen(true);
+  }, [addBranchQuery, addBranchQueryHandled, mode]);
 
   useEffect(() => {
     if (!branchModalOpen) {
@@ -1178,11 +1187,12 @@ export function BrandForm({
 
       {/* Image crop modal */}
       {cropTarget && (
-        <ImageCropModal
+        <AvatarCropDialog
           file={cropTarget.file}
           aspectRatio={cropTarget.aspectRatio}
-          onCrop={cropTarget.onDone}
-          onCancel={() => setCropTarget(null)}
+          open={true}
+          onConfirm={cropTarget.onDone}
+          onClose={() => setCropTarget(null)}
         />
       )}
 

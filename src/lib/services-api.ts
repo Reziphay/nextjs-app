@@ -1,12 +1,12 @@
 import { createApiClient } from "@/lib/api";
 import type { ApiSuccessResponse } from "@/types";
-import type { Service } from "@/types/service";
+import type { Service, ServiceCategory } from "@/types/service";
 
 export type CreateServicePayload = {
   title: string;
   description?: string;
   branch_id?: string | null;
-  category?: string;
+  service_category_id?: string | null;
   price?: number;
   price_type?: 'FIXED' | 'STARTING_FROM' | 'FREE';
   duration?: number;
@@ -21,7 +21,8 @@ function normalizeService(service: Service): Service {
     ...service,
     description: service.description ?? undefined,
     branch_id: service.branch_id ?? null,
-    category: service.category ?? undefined,
+    service_category_id: service.service_category_id ?? null,
+    service_category: service.service_category ?? null,
     price: service.price ?? null,
     duration: service.duration ?? null,
     address: service.address ?? undefined,
@@ -165,6 +166,17 @@ export async function archiveService(
   const service = response.data?.data?.service;
   if (!service) throw new Error("Invalid response from archive service API");
   return normalizeService(service);
+}
+
+export async function fetchServiceCategories(
+  accessToken?: string,
+): Promise<ServiceCategory[]> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ categories: ServiceCategory[] }>>({
+    url: "/service-categories",
+    method: "GET",
+  });
+  return response.data?.data?.categories ?? [];
 }
 
 export async function uploadServiceMedia(

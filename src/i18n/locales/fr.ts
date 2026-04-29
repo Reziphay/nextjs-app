@@ -147,7 +147,7 @@ export const frMessages: Messages = {
       birthdayRequiredMessage:
         "Veuillez saisir votre date de naissance.",
       birthdayAgeMessage:
-        "Vous devez avoir au moins 13 ans pour vous inscrire.",
+        "Vous devez avoir au moins 18 ans pour vous inscrire.",
       emailInvalidMessage: "Veuillez saisir une adresse e-mail valide.",
       passwordInvalidMessage:
         "Le mot de passe doit contenir au moins 8 caractères et inclure une majuscule, une minuscule et un chiffre.",
@@ -187,6 +187,9 @@ export const frMessages: Messages = {
       "Transfert de marque introuvable.",
     "brand.transfer_not_pending":
       "Ce transfert de marque n’est plus en attente.",
+    "moderation.brand_not_found": "Marque introuvable.",
+    "moderation.service_not_found": "Service introuvable.",
+    "moderation.not_pending": "Cette soumission n’est plus en attente.",
   },
   hero: {
     eyebrow: "Starter Next.js multilingue",
@@ -546,7 +549,7 @@ export const frMessages: Messages = {
     birthdayRequiredMessage:
       "Veuillez saisir votre date de naissance.",
     birthdayAgeMessage:
-      "Vous devez avoir au moins 13 ans.",
+      "Vous devez avoir au moins 18 ans.",
     emailInvalidMessage:
       "Veuillez saisir une adresse e-mail valide.",
     phoneInvalidMessage:
@@ -554,5 +557,42 @@ export const frMessages: Messages = {
     typeUso: "Propriétaire de service",
     typeUcr: "Client",
     typeAdmin: "Administrateur",
+  },
+  categories: {
+    food_beverage: "Alimentation & Boissons",
+    beauty_wellness: "Beauté & Bien-être",
+    fitness_sports: "Fitness & Sports",
+    fashion_apparel: "Mode & Vêtements",
+    technology_electronics: "Technologie & Électronique",
+    home_furniture: "Maison & Mobilier",
+    health_pharmacy: "Santé & Pharmacie",
+    education_training: "Éducation & Formation",
+    entertainment_media: "Divertissement & Médias",
+    travel_hospitality: "Voyage & Hôtellerie",
+    haircut_styling: "Coupe & Coiffure",
+    massage_therapy: "Massage & Thérapie",
+    personal_training: "Entraînement personnel",
+    nail_care: "Soin des ongles",
+    facial_treatment: "Soin du visage",
+    dental_care: "Soins dentaires",
+    consulting: "Conseil",
+    photo_session: "Séance photo",
+  },
+    calendar: {
+    today: "Aujourd'hui",
+    viewDay: "Jour",
+    viewWorkWeek: "Semaine de travail",
+    viewWeek: "Semaine",
+    viewMonth: "Mois",
+    filter: "Filtrer",
+    newReservation: "Nouveau",
+    myServices: "Mes services",
+    noServicesYet: "Aucun service encore",
+    noReservationsTitle: "Aucune réservation encore",
+    noReservationsDesc: "Les réservations apparaîtront ici quand les clients réserveront vos services.",
+    settingsTitle: "Paramètres du calendrier",
+    settingsTimeFormat: "Format de l'heure",
+    timeFormat12h: "AM/PM",
+    timeFormat24h: "24h",
   },
 };

@@ -149,7 +149,7 @@ export const trMessages: Messages = {
       birthdayRequiredMessage:
         "Lütfen doğum tarihinizi girin.",
       birthdayAgeMessage:
-        "Kayıt olmak için en az 13 yaşında olmalısınız.",
+        "Kayıt olmak için en az 18 yaşında olmalısınız.",
       emailInvalidMessage:
         "Lütfen geçerli bir e-posta adresi girin.",
       passwordInvalidMessage:
@@ -197,6 +197,9 @@ export const trMessages: Messages = {
     "team.invite_not_pending": "Bu davet artık beklemede değil.",
     "team.cannot_remove_owner": "Şube sahibinin takım üyeliği kaldırılamaz.",
     "team.already_removed": "Bu üyelik zaten kaldırılmış.",
+    "moderation.brand_not_found": "Marka bulunamadı.",
+    "moderation.service_not_found": "Hizmet bulunamadı.",
+    "moderation.not_pending": "Bu başvuru artık beklemede değil.",
   },
   hero: {
     eyebrow: "Çok dilli Next.js başlangıcı",
@@ -538,7 +541,7 @@ export const trMessages: Messages = {
     lastNameInvalidMessage: "Soyad en az 2 karakter olmalıdır.",
     birthdayRequiredMessage:
       "Lütfen doğum tarihinizi girin.",
-    birthdayAgeMessage: "En az 13 yaşında olmalısınız.",
+    birthdayAgeMessage: "En az 18 yaşında olmalısınız.",
     emailInvalidMessage:
       "Lütfen geçerli bir e-posta adresi girin.",
     phoneInvalidMessage:
@@ -546,5 +549,42 @@ export const trMessages: Messages = {
     typeUso: "Hizmet Sahibi",
     typeUcr: "Müşteri",
     typeAdmin: "Yönetici",
+  },
+  categories: {
+    food_beverage: "Yiyecek & İçecek",
+    beauty_wellness: "Güzellik & Sağlık",
+    fitness_sports: "Fitness & Spor",
+    fashion_apparel: "Moda & Giyim",
+    technology_electronics: "Teknoloji & Elektronik",
+    home_furniture: "Ev & Mobilya",
+    health_pharmacy: "Sağlık & Eczane",
+    education_training: "Eğitim & Öğretim",
+    entertainment_media: "Eğlence & Medya",
+    travel_hospitality: "Seyahat & Konaklama",
+    haircut_styling: "Saç Kesimi & Şekillendirme",
+    massage_therapy: "Masaj & Terapi",
+    personal_training: "Kişisel Antrenman",
+    nail_care: "Tırnak Bakımı",
+    facial_treatment: "Yüz Bakımı",
+    dental_care: "Diş Bakımı",
+    consulting: "Danışmanlık",
+    photo_session: "Fotoğraf Çekimi",
+  },
+    calendar: {
+    today: "Bugün",
+    viewDay: "Gün",
+    viewWorkWeek: "İş haftası",
+    viewWeek: "Hafta",
+    viewMonth: "Ay",
+    filter: "Filtre",
+    newReservation: "Yeni",
+    myServices: "Hizmetlerim",
+    noServicesYet: "Henüz hizmet yok",
+    noReservationsTitle: "Henüz rezervasyon yok",
+    noReservationsDesc: "Müşteriler hizmetlerinizi rezerve ettiğinde burada görünecek.",
+    settingsTitle: "Takvim ayarları",
+    settingsTimeFormat: "Saat formatı",
+    timeFormat12h: "AM/PM",
+    timeFormat24h: "24s",
   },
 };

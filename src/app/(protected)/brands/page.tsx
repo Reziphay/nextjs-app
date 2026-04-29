@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { AccountBrandsSection } from "@/components/organisms/account-brands-section/account-brands-section";
@@ -19,6 +20,7 @@ import { BrandTeamWorkspace } from "@/components/organisms/brand-team-workspace"
 import { fetchUserProfileById } from "@/lib/users-api";
 import { getMessages } from "@/i18n/config";
 import { getServerLocale } from "@/i18n/server";
+import { buildPageTitle } from "@/lib/page-metadata";
 import type { Brand, PublicUserProfile } from "@/types";
 
 type BrandsPageProps = {
@@ -57,6 +59,62 @@ async function fetchBrandOwnersById(
       ): entry is readonly [string, PublicUserProfile] => entry !== null,
     ),
   );
+}
+
+export async function generateMetadata({
+  searchParams,
+}: BrandsPageProps): Promise<Metadata> {
+  const [locale, resolvedParams, cookieStore] = await Promise.all([
+    getServerLocale(),
+    searchParams ?? Promise.resolve({}),
+    cookies(),
+  ]);
+  const messages = getMessages(locale);
+  const progress = getStringParam(resolvedParams, "progress");
+  const brandId = getStringParam(resolvedParams, "id");
+  const accountUserId = getStringParam(resolvedParams, "account");
+  const accessToken = cookieStore.get("rzp_at")?.value ?? "";
+
+  if (accountUserId && !progress && !brandId) {
+    const targetUser = await fetchUserProfileById(accountUserId, accessToken).catch(() => null);
+    const fullName = targetUser
+      ? `${targetUser.first_name} ${targetUser.last_name}`.trim()
+      : null;
+
+    return {
+      title: buildPageTitle(messages.profile.brandsSectionTitle, fullName),
+    };
+  }
+
+  if (progress === "create") {
+    return {
+      title: buildPageTitle(messages.dashboard.brands, messages.brands.createBrand),
+    };
+  }
+
+  if (brandId) {
+    const brand = await fetchBrandById(brandId, accessToken).catch(() => null);
+
+    if (progress === "edit") {
+      return {
+        title: buildPageTitle(messages.brands.editBrand, brand?.name),
+      };
+    }
+
+    if (progress === "team") {
+      return {
+        title: buildPageTitle(messages.brands.teamWorkspace, brand?.name),
+      };
+    }
+
+    return {
+      title: buildPageTitle(messages.brands.detailTitle, brand?.name),
+    };
+  }
+
+  return {
+    title: messages.dashboard.brands,
+  };
 }
 
 export default async function BrandsPage({ searchParams }: BrandsPageProps) {

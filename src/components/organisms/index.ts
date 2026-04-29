@@ -1,3 +1,4 @@
+export { AdminModerationWorkspace } from "./admin-moderation-workspace";
 export { AppSidebar } from "./app-sidebar";
 export { AuthHeader } from "./auth-header";
 export { AuthLoginPanel } from "./auth-login-panel";

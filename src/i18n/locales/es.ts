@@ -147,7 +147,7 @@ export const esMessages: Messages = {
       birthdayRequiredMessage:
         "Introduce tu fecha de nacimiento.",
       birthdayAgeMessage:
-        "Debes tener al menos 13 años para registrarte.",
+        "Debes tener al menos 18 años para registrarte.",
       emailInvalidMessage:
         "Introduce una dirección de correo válida.",
       passwordInvalidMessage:
@@ -186,6 +186,9 @@ export const esMessages: Messages = {
       "Transferencia de marca no encontrada.",
     "brand.transfer_not_pending":
       "Esta transferencia de marca ya no está pendiente.",
+    "moderation.brand_not_found": "Marca no encontrada.",
+    "moderation.service_not_found": "Servicio no encontrado.",
+    "moderation.not_pending": "Esta solicitud ya no está pendiente.",
   },
   hero: {
     eyebrow: "Starter multilingüe de Next.js",
@@ -539,7 +542,7 @@ export const esMessages: Messages = {
     birthdayRequiredMessage:
       "Introduce tu fecha de nacimiento.",
     birthdayAgeMessage:
-      "Debes tener al menos 13 años.",
+      "Debes tener al menos 18 años.",
     emailInvalidMessage:
       "Introduce una dirección de correo válida.",
     phoneInvalidMessage:
@@ -547,5 +550,42 @@ export const esMessages: Messages = {
     typeUso: "Propietario del servicio",
     typeUcr: "Cliente",
     typeAdmin: "Administrador",
+  },
+  categories: {
+    food_beverage: "Comida & Bebida",
+    beauty_wellness: "Belleza & Bienestar",
+    fitness_sports: "Fitness & Deportes",
+    fashion_apparel: "Moda & Ropa",
+    technology_electronics: "Tecnología & Electrónica",
+    home_furniture: "Hogar & Muebles",
+    health_pharmacy: "Salud & Farmacia",
+    education_training: "Educación & Formación",
+    entertainment_media: "Entretenimiento & Medios",
+    travel_hospitality: "Viajes & Hostelería",
+    haircut_styling: "Corte & Peinado",
+    massage_therapy: "Masaje & Terapia",
+    personal_training: "Entrenamiento personal",
+    nail_care: "Cuidado de uñas",
+    facial_treatment: "Tratamiento facial",
+    dental_care: "Cuidado dental",
+    consulting: "Consultoría",
+    photo_session: "Sesión fotográfica",
+  },
+    calendar: {
+    today: "Hoy",
+    viewDay: "Día",
+    viewWorkWeek: "Semana laboral",
+    viewWeek: "Semana",
+    viewMonth: "Mes",
+    filter: "Filtrar",
+    newReservation: "Nuevo",
+    myServices: "Mis servicios",
+    noServicesYet: "Sin servicios aún",
+    noReservationsTitle: "Sin reservaciones aún",
+    noReservationsDesc: "Las reservaciones aparecerán aquí cuando los clientes reserven sus servicios.",
+    settingsTitle: "Configuración del calendario",
+    settingsTimeFormat: "Formato de hora",
+    timeFormat12h: "AM/PM",
+    timeFormat24h: "24h",
   },
 };

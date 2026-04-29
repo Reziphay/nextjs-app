@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Button } from "@/components/atoms/button";
 import { Checkbox } from "@/components/atoms/checkbox";
 import { Icon } from "@/components/icon";
+import { useLocale } from "@/components/providers/locale-provider";
 import type { Service } from "@/types/service";
 import type { Brand } from "@/types/brand";
 import styles from "./uso-calendar-page.module.css";
@@ -46,16 +47,29 @@ function assignServiceColor(index: number): string {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
-const DAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-const VIEW_LABELS: Record<CalendarView, string> = {
-  day: "Day",
-  work_week: "Work week",
-  week: "Week",
-  month: "Month",
-};
+// Jan 7 2024 = Sunday — anchor for computing day-of-week names
+const WEEK_ANCHOR = new Date(2024, 0, 7);
+
+function getIntlDayNarrows(locale: string): string[] {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(WEEK_ANCHOR);
+    d.setDate(WEEK_ANCHOR.getDate() + i);
+    return new Intl.DateTimeFormat(locale, { weekday: "narrow" }).format(d);
+  });
+}
+
+function getIntlDayShorts(locale: string): string[] {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(WEEK_ANCHOR);
+    d.setDate(WEEK_ANCHOR.getDate() + i);
+    return new Intl.DateTimeFormat(locale, { weekday: "short" }).format(d);
+  });
+}
+
+function getMonthName(date: Date, locale: string, fmt: "long" | "short"): string {
+  return new Intl.DateTimeFormat(locale, { month: fmt }).format(date);
+}
 
 function startOfWeek(date: Date, firstDay = 0): Date {
   const d = new Date(date);
@@ -80,18 +94,23 @@ function isSameDay(a: Date, b: Date): boolean {
   );
 }
 
-function formatDateLabel(date: Date, view: CalendarView): string {
-  const m = MONTHS[date.getMonth()];
+function formatDateLabel(date: Date, view: CalendarView, locale: string): string {
   const y = date.getFullYear();
-  if (view === "day") return `${m} ${date.getDate()}, ${y}`;
-  if (view === "month") return `${m} ${y}`;
+  if (view === "day") {
+    return `${getMonthName(date, locale, "long")} ${date.getDate()}, ${y}`;
+  }
+  if (view === "month") {
+    return `${getMonthName(date, locale, "long")} ${y}`;
+  }
   const weekStart = startOfWeek(date, view === "work_week" ? 1 : 0);
   const weekEnd = addDays(weekStart, view === "work_week" ? 4 : 6);
-  if (weekStart.getMonth() === weekEnd.getMonth()) return `${m} ${y}`;
-  if (weekStart.getFullYear() !== weekEnd.getFullYear()) {
-    return `${MONTHS_SHORT[weekStart.getMonth()]} ${weekStart.getFullYear()} – ${MONTHS_SHORT[weekEnd.getMonth()]} ${weekEnd.getFullYear()}`;
+  if (weekStart.getMonth() === weekEnd.getMonth()) {
+    return `${getMonthName(weekStart, locale, "long")} ${y}`;
   }
-  return `${MONTHS_SHORT[weekStart.getMonth()]} – ${MONTHS_SHORT[weekEnd.getMonth()]} ${y}`;
+  if (weekStart.getFullYear() !== weekEnd.getFullYear()) {
+    return `${getMonthName(weekStart, locale, "short")} ${weekStart.getFullYear()} – ${getMonthName(weekEnd, locale, "short")} ${weekEnd.getFullYear()}`;
+  }
+  return `${getMonthName(weekStart, locale, "short")} – ${getMonthName(weekEnd, locale, "short")} ${y}`;
 }
 
 function navigateDate(date: Date, view: CalendarView, direction: -1 | 1): Date {
@@ -120,10 +139,12 @@ function getDaysInView(date: Date, view: CalendarView): Date[] {
 type MiniCalendarProps = {
   selected: Date;
   today: Date;
+  locale: string;
   onSelect: (d: Date) => void;
 };
 
-function MiniCalendar({ selected, today, onSelect }: MiniCalendarProps) {
+function MiniCalendar({ selected, today, locale, onSelect }: MiniCalendarProps) {
+  const dayNarrows = useMemo(() => getIntlDayNarrows(locale), [locale]);
   const [viewing, setViewing] = useState(() => {
     const d = new Date(selected);
     d.setDate(1);
@@ -170,7 +191,7 @@ function MiniCalendar({ selected, today, onSelect }: MiniCalendarProps) {
     <div className={styles.miniCalendar}>
       <div className={styles.miniCalHeader}>
         <span className={styles.miniCalMonth}>
-          {MONTHS_SHORT[month]} {year}
+          {getMonthName(viewing, locale, "short")} {year}
         </span>
         <div className={styles.miniCalNav}>
           <button className={styles.miniCalBtn} onClick={prevMonth} aria-label="Previous month">
@@ -182,9 +203,9 @@ function MiniCalendar({ selected, today, onSelect }: MiniCalendarProps) {
         </div>
       </div>
       <div className={styles.miniCalGrid}>
-        {DAYS_SHORT.map((d) => (
-          <span key={d} className={styles.miniCalDayLabel}>
-            {d[0]}
+        {dayNarrows.map((d, i) => (
+          <span key={i} className={styles.miniCalDayLabel}>
+            {d}
           </span>
         ))}
         {cells.map((date, i) => {
@@ -218,7 +239,10 @@ type CalendarSidebarProps = {
   open: boolean;
   selected: Date;
   today: Date;
+  locale: string;
   services: CalendarService[];
+  myServicesLabel: string;
+  noServicesLabel: string;
   onDateSelect: (d: Date) => void;
   onServiceToggle: (id: string) => void;
   onClose: () => void;
@@ -228,7 +252,10 @@ function CalendarSidebar({
   open,
   selected,
   today,
+  locale,
   services,
+  myServicesLabel,
+  noServicesLabel,
   onDateSelect,
   onServiceToggle,
   onClose,
@@ -247,11 +274,11 @@ function CalendarSidebar({
         >
           <Icon icon="close" size={18} color="current" />
         </button>
-        <MiniCalendar selected={selected} today={today} onSelect={onDateSelect} />
+        <MiniCalendar selected={selected} today={today} locale={locale} onSelect={onDateSelect} />
 
         {services.length > 0 && (
           <div className={styles.myServices}>
-            <p className={styles.myServicesTitle}>My services</p>
+            <p className={styles.myServicesTitle}>{myServicesLabel}</p>
             <ul className={styles.myServicesList}>
               {services.map((s) => (
                 <li key={s.id} className={styles.myServicesItem}>
@@ -275,8 +302,8 @@ function CalendarSidebar({
 
         {services.length === 0 && (
           <div className={styles.myServices}>
-            <p className={styles.myServicesTitle}>My services</p>
-            <p className={styles.myServicesEmpty}>No services yet</p>
+            <p className={styles.myServicesTitle}>{myServicesLabel}</p>
+            <p className={styles.myServicesEmpty}>{noServicesLabel}</p>
           </div>
         )}
       </div>
@@ -288,10 +315,11 @@ function CalendarSidebar({
 
 type ViewSwitcherProps = {
   view: CalendarView;
+  labels: Record<CalendarView, string>;
   onChange: (v: CalendarView) => void;
 };
 
-function ViewSwitcherDropdown({ view, onChange }: ViewSwitcherProps) {
+function ViewSwitcherDropdown({ view, labels, onChange }: ViewSwitcherProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -306,7 +334,7 @@ function ViewSwitcherDropdown({ view, onChange }: ViewSwitcherProps) {
   return (
     <div className={styles.dropdownWrap} ref={ref}>
       <button className={styles.viewSwitcherBtn} onClick={() => setOpen((o) => !o)}>
-        {VIEW_LABELS[view]}
+        {labels[view]}
         <Icon icon="expand_more" size={14} color="current" />
       </button>
       {open && (
@@ -325,7 +353,7 @@ function ViewSwitcherDropdown({ view, onChange }: ViewSwitcherProps) {
                 setOpen(false);
               }}
             >
-              {VIEW_LABELS[v]}
+              {labels[v]}
             </button>
           ))}
         </div>
@@ -394,11 +422,12 @@ function BrandPickerDropdown({ brands, selectedId, onChange }: BrandPickerProps)
 type DatePickerPopupProps = {
   date: Date;
   today: Date;
+  locale: string;
   onSelect: (d: Date) => void;
   onClose: () => void;
 };
 
-function DatePickerPopup({ date, today, onSelect, onClose }: DatePickerPopupProps) {
+function DatePickerPopup({ date, today, locale, onSelect, onClose }: DatePickerPopupProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -414,6 +443,7 @@ function DatePickerPopup({ date, today, onSelect, onClose }: DatePickerPopupProp
       <MiniCalendar
         selected={date}
         today={today}
+        locale={locale}
         onSelect={(d) => {
           onSelect(d);
           onClose();
@@ -425,16 +455,14 @@ function DatePickerPopup({ date, today, onSelect, onClose }: DatePickerPopupProp
 
 // ─── EmptyState (no reservations yet) ────────────────────────────────────────
 
-function EmptyState() {
+function EmptyState({ title, desc }: { title: string; desc: string }) {
   return (
     <div className={styles.emptyState}>
       <div className={styles.emptyStateIcon}>
         <Icon icon="event_available" size={32} color="primary" />
       </div>
-      <p className={styles.emptyStateTitle}>No reservations yet</p>
-      <p className={styles.emptyStateDesc}>
-        Reservations will appear here once customers start booking your services.
-      </p>
+      <p className={styles.emptyStateTitle}>{title}</p>
+      <p className={styles.emptyStateDesc}>{desc}</p>
     </div>
   );
 }
@@ -445,11 +473,15 @@ type TimeFormat = "12h" | "24h";
 
 type CalendarSettingsPopupProps = {
   timeFormat: TimeFormat;
+  settingsTitle: string;
+  settingsTimeFormatLabel: string;
+  timeFormat12hLabel: string;
+  timeFormat24hLabel: string;
   onTimeFormatChange: (f: TimeFormat) => void;
   onClose: () => void;
 };
 
-function CalendarSettingsPopup({ timeFormat, onTimeFormatChange, onClose }: CalendarSettingsPopupProps) {
+function CalendarSettingsPopup({ timeFormat, settingsTitle, settingsTimeFormatLabel, timeFormat12hLabel, timeFormat24hLabel, onTimeFormatChange, onClose }: CalendarSettingsPopupProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -462,21 +494,21 @@ function CalendarSettingsPopup({ timeFormat, onTimeFormatChange, onClose }: Cale
 
   return (
     <div className={styles.settingsPopup} ref={ref}>
-      <p className={styles.settingsTitle}>Calendar settings</p>
+      <p className={styles.settingsTitle}>{settingsTitle}</p>
       <div className={styles.settingsRow}>
-        <span className={styles.settingsLabel}>Time format</span>
+        <span className={styles.settingsLabel}>{settingsTimeFormatLabel}</span>
         <div className={styles.settingsToggleGroup}>
           <button
             className={[styles.settingsToggleBtn, timeFormat === "12h" ? styles.settingsToggleBtnActive : ""].filter(Boolean).join(" ")}
             onClick={() => onTimeFormatChange("12h")}
           >
-            AM/PM
+            {timeFormat12hLabel}
           </button>
           <button
             className={[styles.settingsToggleBtn, timeFormat === "24h" ? styles.settingsToggleBtnActive : ""].filter(Boolean).join(" ")}
             onClick={() => onTimeFormatChange("24h")}
           >
-            24h
+            {timeFormat24hLabel}
           </button>
         </div>
       </div>
@@ -491,10 +523,14 @@ const SLOT_HEIGHT = 56;
 type TimeGridProps = {
   days: Date[];
   today: Date;
+  locale: string;
   timeFormat: TimeFormat;
+  emptyTitle: string;
+  emptyDesc: string;
 };
 
-function TimeGrid({ days, today, timeFormat }: TimeGridProps) {
+function TimeGrid({ days, today, locale, timeFormat, emptyTitle, emptyDesc }: TimeGridProps) {
+  const dayShorts = useMemo(() => getIntlDayShorts(locale), [locale]);
   const nowRef = useRef<HTMLDivElement>(null);
   const now = new Date();
   const nowTop = (now.getHours() * 60 + now.getMinutes()) / 60 * SLOT_HEIGHT;
@@ -504,34 +540,38 @@ function TimeGrid({ days, today, timeFormat }: TimeGridProps) {
     nowRef.current?.scrollIntoView({ block: "center", behavior: "instant" });
   }, []);
 
+  const isDayView = days.length === 1;
+
   return (
     <div className={styles.timeGrid}>
-      <div className={styles.timeGridHeader}>
-        <div className={styles.timeGutter} />
-        {days.map((d) => {
-          const isToday = isSameDay(d, today);
-          return (
-            <div
-              key={d.toISOString()}
-              className={[styles.dayColumn, isToday ? styles.dayColumnToday : ""]
-                .filter(Boolean)
-                .join(" ")}
-            >
-              <span
-                className={[
-                  styles.dayNumber,
-                  isToday ? styles.dayNumberToday : "",
-                ]
+      {!isDayView && (
+        <div className={styles.timeGridHeader}>
+          <div className={styles.timeGutter} />
+          {days.map((d) => {
+            const isToday = isSameDay(d, today);
+            return (
+              <div
+                key={d.toISOString()}
+                className={[styles.dayColumn, isToday ? styles.dayColumnToday : ""]
                   .filter(Boolean)
                   .join(" ")}
               >
-                {d.getDate()}
-              </span>
-              <span className={styles.dayName}>{DAYS_SHORT[d.getDay()]}</span>
-            </div>
-          );
-        })}
-      </div>
+                <span
+                  className={[
+                    styles.dayNumber,
+                    isToday ? styles.dayNumberToday : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  {d.getDate()}
+                </span>
+                <span className={styles.dayName}>{dayShorts[d.getDay()]}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <div className={styles.timeGridBody}>
         <div className={styles.timeGridInner}>
@@ -566,9 +606,8 @@ function TimeGrid({ days, today, timeFormat }: TimeGridProps) {
           )}
         </div>
 
-        {/* Empty state overlay (no reservations) */}
         <div className={styles.timeGridEmptyOverlay}>
-          <EmptyState />
+          <EmptyState title={emptyTitle} desc={emptyDesc} />
         </div>
       </div>
     </div>
@@ -581,10 +620,12 @@ type MonthGridProps = {
   date: Date;
   selectedDate: Date;
   today: Date;
+  locale: string;
   onDayClick: (d: Date) => void;
 };
 
-function MonthGrid({ date, selectedDate, today, onDayClick }: MonthGridProps) {
+function MonthGrid({ date, selectedDate, today, locale, onDayClick }: MonthGridProps) {
+  const dayShorts = useMemo(() => getIntlDayShorts(locale), [locale]);
   const year = date.getFullYear();
   const month = date.getMonth();
   const firstDow = new Date(year, month, 1).getDay();
@@ -598,8 +639,8 @@ function MonthGrid({ date, selectedDate, today, onDayClick }: MonthGridProps) {
   return (
     <div className={styles.monthGrid}>
       <div className={styles.monthGridHeader}>
-        {DAYS_SHORT.map((d) => (
-          <span key={d} className={styles.monthDayLabel}>
+        {dayShorts.map((d, i) => (
+          <span key={i} className={styles.monthDayLabel}>
             {d}
           </span>
         ))}
@@ -647,11 +688,20 @@ type CalendarToolbarProps = {
   date: Date;
   today: Date;
   view: CalendarView;
+  locale: string;
   sidebarOpen: boolean;
   brands: CalendarBrand[];
   selectedBrandId: string;
   isNewDisabled: boolean;
   timeFormat: TimeFormat;
+  viewLabels: Record<CalendarView, string>;
+  todayLabel: string;
+  filterLabel: string;
+  newLabel: string;
+  settingsTitleLabel: string;
+  settingsTimeFormatLabel: string;
+  timeFormat12hLabel: string;
+  timeFormat24hLabel: string;
   onToggleSidebar: () => void;
   onToday: () => void;
   onPrev: () => void;
@@ -667,11 +717,20 @@ function CalendarToolbar({
   date,
   today,
   view,
+  locale,
   sidebarOpen,
   brands,
   selectedBrandId,
   isNewDisabled,
   timeFormat,
+  viewLabels,
+  todayLabel,
+  filterLabel,
+  newLabel,
+  settingsTitleLabel,
+  settingsTimeFormatLabel,
+  timeFormat12hLabel,
+  timeFormat24hLabel,
   onToggleSidebar,
   onToday,
   onPrev,
@@ -690,7 +749,7 @@ function CalendarToolbar({
     <div className={styles.toolbar}>
       <div className={styles.toolbarLeft}>
         <button className={styles.todayBtn} onClick={onToday}>
-          Today
+          {todayLabel}
         </button>
 
         <div className={styles.navGroup}>
@@ -707,13 +766,14 @@ function CalendarToolbar({
             className={styles.dateLabel}
             onClick={() => setDatePickerOpen((o) => !o)}
           >
-            {formatDateLabel(date, view)}
+            {formatDateLabel(date, view, locale)}
             <Icon icon="expand_more" size={14} color="current" />
           </button>
           {datePickerOpen && (
             <DatePickerPopup
               date={date}
               today={today}
+              locale={locale}
               onSelect={onDateSelect}
               onClose={() => setDatePickerOpen(false)}
             />
@@ -733,17 +793,21 @@ function CalendarToolbar({
           {settingsOpen && (
             <CalendarSettingsPopup
               timeFormat={timeFormat}
+              settingsTitle={settingsTitleLabel}
+              settingsTimeFormatLabel={settingsTimeFormatLabel}
+              timeFormat12hLabel={timeFormat12hLabel}
+              timeFormat24hLabel={timeFormat24hLabel}
               onTimeFormatChange={(f) => { onTimeFormatChange(f); }}
               onClose={() => setSettingsOpen(false)}
             />
           )}
         </div>
 
-        <ViewSwitcherDropdown view={view} onChange={onViewChange} />
+        <ViewSwitcherDropdown view={view} labels={viewLabels} onChange={onViewChange} />
 
-        <button className={styles.toolbarFilterBtn} aria-label="Filter">
+        <button className={styles.toolbarFilterBtn} aria-label={filterLabel}>
           <Icon icon="filter_list" size={16} color="current" />
-          <span>Filter</span>
+          <span>{filterLabel}</span>
         </button>
 
         <BrandPickerDropdown
@@ -753,7 +817,7 @@ function CalendarToolbar({
         />
 
         <Button variant="primary" size="small" icon="add" onClick={onNew} disabled={isNewDisabled}>
-          New
+          {newLabel}
         </Button>
 
         <button
@@ -781,8 +845,18 @@ type UsoCalendarPageProps = {
 };
 
 export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
+  const { locale, messages: m } = useLocale();
+  const t = m.calendar;
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  const viewLabels: Record<CalendarView, string> = useMemo(() => ({
+    day: t.viewDay,
+    work_week: t.viewWorkWeek,
+    week: t.viewWeek,
+    month: t.viewMonth,
+  }), [t]);
 
   const calendarBrands: CalendarBrand[] = [
     { id: "all", name: "All brands" },
@@ -791,12 +865,12 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(today);
-  const [view, setView] = useState<CalendarView>("week");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [view, setView] = useState<CalendarView>("day");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Open sidebar by default only on desktop
+  // Close sidebar by default on mobile
   useEffect(() => {
-    if (window.innerWidth >= 768) setSidebarOpen(true);
+    if (window.innerWidth < 768) setSidebarOpen(false);
   }, []);
   const [timeFormat, setTimeFormat] = useState<TimeFormat>("24h");
   const [selectedBrandId, setSelectedBrandId] = useState("all");
@@ -859,11 +933,20 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
           date={currentDate}
           today={today}
           view={view}
+          locale={locale}
           sidebarOpen={sidebarOpen}
           brands={calendarBrands}
           selectedBrandId={selectedBrandId}
           isNewDisabled={isNewDisabled}
           timeFormat={timeFormat}
+          viewLabels={viewLabels}
+          todayLabel={t.today}
+          filterLabel={t.filter}
+          newLabel={t.newReservation}
+          settingsTitleLabel={t.settingsTitle}
+          settingsTimeFormatLabel={t.settingsTimeFormat}
+          timeFormat12hLabel={t.timeFormat12h}
+          timeFormat24hLabel={t.timeFormat24h}
           onToggleSidebar={() => setSidebarOpen((o) => !o)}
           onToday={() => { setCurrentDate(new Date()); setSelectedDate(today); }}
           onPrev={() => setCurrentDate((d) => navigateDate(d, view, -1))}
@@ -881,10 +964,18 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
               date={currentDate}
               selectedDate={selectedDate}
               today={today}
+              locale={locale}
               onDayClick={handleMonthCellClick}
             />
           ) : (
-            <TimeGrid days={days} today={today} timeFormat={timeFormat} />
+            <TimeGrid
+              days={days}
+              today={today}
+              locale={locale}
+              timeFormat={timeFormat}
+              emptyTitle={t.noReservationsTitle}
+              emptyDesc={t.noReservationsDesc}
+            />
           )}
         </div>
       </div>
@@ -893,7 +984,10 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
         open={sidebarOpen}
         selected={currentDate}
         today={today}
+        locale={locale}
         services={calendarServices}
+        myServicesLabel={t.myServices}
+        noServicesLabel={t.noServicesYet}
         onDateSelect={setCurrentDate}
         onServiceToggle={handleServiceToggle}
         onClose={() => setSidebarOpen(false)}

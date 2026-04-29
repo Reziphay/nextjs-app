@@ -479,7 +479,10 @@ export function NotificationTransferPage({
                   )
                 : undefined;
             const brandSummary =
-              invitationDetail?.brand_categories?.filter(Boolean).join(" · ") ||
+              invitationDetail?.brand_categories
+                ?.filter(Boolean)
+                .map((key) => messages.categories[key as keyof typeof messages.categories] ?? key)
+                .join(" · ") ||
               invitationDetail?.brand_description ||
               null;
             const branchSummary =

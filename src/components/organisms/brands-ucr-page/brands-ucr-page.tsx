@@ -52,6 +52,8 @@ function BrandGrid({
   reviewsSuffix: string;
   onSelect: (id: string) => void;
 }) {
+  const { messages } = useLocale();
+
   if (brands.length === 0) {
     return <div className={styles.empty}>{emptyLabel}</div>;
   }
@@ -80,7 +82,7 @@ function BrandGrid({
             }}
             title={brand.name}
             description={brand.description ?? ""}
-            category={brand.categories[0]?.name}
+            category={brand.categories[0] ? (messages.categories[brand.categories[0].key as keyof typeof messages.categories] ?? brand.categories[0].key) : undefined}
             badgeText={
               brand.rating_count > 0
                 ? `${brand.rating_count} ${reviewsSuffix}`
@@ -277,8 +279,8 @@ export function BrandsUcrPage({ brands, ownersById, featuredServices = [] }: Bra
                   )}
                   <div className={styles.serviceCardBody}>
                     <p className={styles.serviceCardTitle}>{svc.title}</p>
-                    {svc.category ? (
-                      <span className={styles.serviceCardCategory}>{svc.category}</span>
+                    {svc.service_category ? (
+                      <span className={styles.serviceCardCategory}>{messages.categories[svc.service_category.key as keyof typeof messages.categories] ?? svc.service_category.key}</span>
                     ) : null}
                     <div className={styles.serviceCardMeta}>
                       <span>{priceLabel}</span>
@@ -320,8 +322,8 @@ export function BrandsUcrPage({ brands, ownersById, featuredServices = [] }: Bra
               <div className={styles.serviceModalHeader}>
                 <div>
                   <h2 className={styles.serviceModalTitle}>{selectedService.title}</h2>
-                  {selectedService.category ? (
-                    <p className={styles.serviceModalCategory}>{selectedService.category}</p>
+                  {selectedService.service_category ? (
+                    <p className={styles.serviceModalCategory}>{messages.categories[selectedService.service_category.key as keyof typeof messages.categories] ?? selectedService.service_category.key}</p>
                   ) : null}
                 </div>
                 <button

@@ -108,7 +108,7 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
                   }}
                   title={brand.name}
                   description={brand.description ?? ""}
-                  category={brand.categories[0]?.name}
+                  category={brand.categories[0] ? (messages.categories[brand.categories[0].key as keyof typeof messages.categories] ?? brand.categories[0].key) : undefined}
                   badgeText={isOwner ? STATUS_LABEL[brand.status] : undefined}
                   badgeVariant={isOwner ? STATUS_BADGE_VARIANT[brand.status] : undefined}
                   badgePlacement={isOwner ? "below-title" : undefined}

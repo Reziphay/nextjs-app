@@ -1,0 +1,119 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+  border-radius: var(--general-border-radius-card);
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface-strong);
+  text-decoration: none;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+  cursor: pointer;
+}
+
+.card:hover {
+  background: var(--app-bg-surface);
+  border-color: var(--app-border-strong);
+  box-shadow: 0 2px 8px var(--app-shadow-card-soft);
+}
+
+/* Avatar area */
+.avatar {
+  flex-shrink: 0;
+}
+
+.logoWrap {
+  position: relative;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid var(--app-border-soft);
+  background: var(--app-bg-surface-strong);
+}
+
+.logoImage {
+  object-fit: cover;
+}
+
+.userAvatar {
+  width: 3rem !important;
+  height: 3rem !important;
+}
+
+/* Info column */
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.roleLabel {
+  color: var(--app-text-subtle);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.name {
+  color: var(--app-text-strong);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--app-warning);
+  line-height: 1;
+}
+
+.starIcon {
+  color: var(--app-warning);
+  flex-shrink: 0;
+}
+
+.ratingValue {
+  color: var(--app-text-strong);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+}
+
+.ratingCount {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-extra-small);
+  font-weight: 500;
+}
+
+.subtitle {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-extra-small);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Chevron */
+.chevron {
+  flex-shrink: 0;
+  color: var(--app-text-subtle);
+  opacity: 0.5;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.card:hover .chevron {
+  opacity: 1;
+  transform: translateX(2px);
+}

@@ -1,0 +1,421 @@
+/* ─── Layout ─────────────────────────────────────────────────────────────── */
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.714rem;
+}
+
+.pageHeader {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.pageTitle {
+  margin: 0 0 0.25rem;
+  color: var(--app-text-strong);
+  font-size: var(--font-size-large);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.pageDescription {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+}
+
+/* ─── Tabs ───────────────────────────────────────────────────────────────── */
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.tab {
+  padding: 0.625rem 1.25rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease;
+  margin-bottom: -1px;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--app-text-base);
+}
+
+.tabActive {
+  color: var(--app-primary);
+  border-bottom-color: var(--app-primary);
+  font-weight: 600;
+}
+
+/* ─── Feedback ───────────────────────────────────────────────────────────── */
+
+.feedback {
+  margin-bottom: 0.5rem;
+}
+
+/* ─── Queue Table ────────────────────────────────────────────────────────── */
+
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: var(--general-border-radius-card);
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-small);
+}
+
+.table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  color: var(--app-text-muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--app-border-soft);
+  white-space: nowrap;
+  background: var(--app-bg-surface-strong);
+}
+
+.table td {
+  padding: 0.875rem 1rem;
+  color: var(--app-text-base);
+  border-bottom: 1px solid var(--app-border-soft);
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: var(--app-bg-surface-strong);
+}
+
+.colName {
+  font-weight: 500;
+  color: var(--app-text-strong);
+}
+
+.ownerName {
+  font-weight: 500;
+  color: var(--app-text-base);
+}
+
+.ownerEmail {
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+  margin-top: 0.125rem;
+}
+
+.colDate {
+  color: var(--app-text-muted);
+  white-space: nowrap;
+}
+
+.colAction {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ─── Skeleton ───────────────────────────────────────────────────────────── */
+
+.skeletonRow {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.skeletonLine {
+  height: 1rem;
+  background: var(--app-bg-surface-strong);
+  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* ─── Empty State ────────────────────────────────────────────────────────── */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 4rem 2rem;
+  text-align: center;
+  border-radius: var(--general-border-radius-card);
+  background: var(--app-bg-surface-strong);
+  border: 1px dashed var(--app-border-soft);
+}
+
+.emptyTitle {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+
+/* ─── Detail / Review Panel ─────────────────────────────────────────────── */
+
+.detailHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.backButton {
+  flex-shrink: 0;
+}
+
+.detailTitle {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: var(--font-size-large);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 900px) {
+  .detailGrid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.detailCard {
+  background: var(--app-bg-surface);
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-card);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.detailSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detailLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.detailValue {
+  font-size: var(--font-size-small);
+  color: var(--app-text-base);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.detailValueStrong {
+  font-weight: 600;
+  color: var(--app-text-strong);
+}
+
+/* ─── Gallery ─────────────────────────────────────────────────────────────── */
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.5rem;
+}
+
+.galleryImg {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: calc(var(--general-border-radius-card) / 2);
+  border: 1px solid var(--app-border-soft);
+}
+
+.logoImg {
+  width: 4rem;
+  height: 4rem;
+  object-fit: cover;
+  border-radius: calc(var(--general-border-radius-card) / 2);
+  border: 1px solid var(--app-border-soft);
+}
+
+/* ─── Checklist ───────────────────────────────────────────────────────────── */
+
+.checklistItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--app-border-soft);
+  cursor: pointer;
+}
+
+.checklistItem:last-child {
+  border-bottom: none;
+}
+
+.checklistLabel {
+  flex: 1;
+  font-size: var(--font-size-small);
+  color: var(--app-text-base);
+}
+
+.checklistPassed {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--app-success, #16a34a);
+}
+
+.checklistFailed {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--app-error, #dc2626);
+}
+
+/* ─── Action Bar ─────────────────────────────────────────────────────────── */
+
+.actionBar {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-top: 1rem;
+  border-top: 1px solid var(--app-border-soft);
+}
+
+/* ─── Reject Form ─────────────────────────────────────────────────────────── */
+
+.rejectForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rejectTextarea {
+  width: 100%;
+  min-height: 6rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-input, 8px);
+  background: var(--app-bg-surface);
+  color: var(--app-text-base);
+  font-size: var(--font-size-small);
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 140ms ease;
+  box-sizing: border-box;
+}
+
+.rejectTextarea:focus {
+  outline: none;
+  border-color: var(--app-primary);
+}
+
+.rejectTextarea::placeholder {
+  color: var(--app-text-muted);
+}
+
+.rejectError {
+  font-size: 0.75rem;
+  color: var(--app-error, #dc2626);
+  margin: 0;
+}
+
+.rejectActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* ─── Pending Badge ───────────────────────────────────────────────────────── */
+
+.pendingBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  background: var(--app-warning-faint, #fef9c3);
+  color: var(--app-warning, #a16207);
+  border: 1px solid var(--app-warning-border, #fde047);
+}
+
+/* ─── Confirm Modal Overlay ───────────────────────────────────────────────── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal {
+  background: var(--app-bg-surface);
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-card);
+  padding: 1.5rem;
+  max-width: 28rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+}
+
+.modalTitle {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+}
+
+.modalDescription {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  line-height: 1.5;
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}

@@ -149,7 +149,7 @@ export const deMessages: Messages = {
       birthdayRequiredMessage:
         "Bitte geben Sie Ihr Geburtsdatum ein.",
       birthdayAgeMessage:
-        "Sie müssen mindestens 13 Jahre alt sein, um sich zu registrieren.",
+        "Sie müssen mindestens 18 Jahre alt sein, um sich zu registrieren.",
       emailInvalidMessage:
         "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
       passwordInvalidMessage:
@@ -190,6 +190,9 @@ export const deMessages: Messages = {
       "Markenübertragung wurde nicht gefunden.",
     "brand.transfer_not_pending":
       "Diese Markenübertragung ist nicht mehr ausstehend.",
+    "moderation.brand_not_found": "Marke nicht gefunden.",
+    "moderation.service_not_found": "Dienst nicht gefunden.",
+    "moderation.not_pending": "Diese Einreichung ist nicht mehr ausstehend.",
   },
   hero: {
     eyebrow: "Mehrsprachiger Next.js-Starter",
@@ -546,7 +549,7 @@ export const deMessages: Messages = {
       "Der Nachname muss mindestens 2 Zeichen lang sein.",
     birthdayRequiredMessage:
       "Bitte geben Sie Ihr Geburtsdatum ein.",
-    birthdayAgeMessage: "Sie müssen mindestens 13 Jahre alt sein.",
+    birthdayAgeMessage: "Sie müssen mindestens 18 Jahre alt sein.",
     emailInvalidMessage:
       "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
     phoneInvalidMessage:
@@ -554,5 +557,42 @@ export const deMessages: Messages = {
     typeUso: "Serviceinhaber",
     typeUcr: "Kunde",
     typeAdmin: "Administrator",
+  },
+  categories: {
+    food_beverage: "Essen & Getränke",
+    beauty_wellness: "Schönheit & Wohlbefinden",
+    fitness_sports: "Fitness & Sport",
+    fashion_apparel: "Mode & Bekleidung",
+    technology_electronics: "Technologie & Elektronik",
+    home_furniture: "Heim & Möbel",
+    health_pharmacy: "Gesundheit & Apotheke",
+    education_training: "Bildung & Weiterbildung",
+    entertainment_media: "Unterhaltung & Medien",
+    travel_hospitality: "Reise & Gastgewerbe",
+    haircut_styling: "Haarschnitt & Styling",
+    massage_therapy: "Massage & Therapie",
+    personal_training: "Personal Training",
+    nail_care: "Nagelpflege",
+    facial_treatment: "Gesichtsbehandlung",
+    dental_care: "Zahnpflege",
+    consulting: "Beratung",
+    photo_session: "Fotosession",
+  },
+    calendar: {
+    today: "Heute",
+    viewDay: "Tag",
+    viewWorkWeek: "Arbeitswoche",
+    viewWeek: "Woche",
+    viewMonth: "Monat",
+    filter: "Filter",
+    newReservation: "Neu",
+    myServices: "Meine Dienste",
+    noServicesYet: "Noch keine Dienste",
+    noReservationsTitle: "Noch keine Reservierungen",
+    noReservationsDesc: "Reservierungen erscheinen hier, sobald Kunden Ihre Dienste buchen.",
+    settingsTitle: "Kalendereinstellungen",
+    settingsTimeFormat: "Zeitformat",
+    timeFormat12h: "AM/PM",
+    timeFormat24h: "24Std",
   },
 };

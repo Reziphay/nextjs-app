@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { Button } from "@/components/atoms/button";
-import { ImageCropModal } from "@/components/atoms/image-crop-modal/image-crop-modal";
+import { AvatarCropDialog } from "@/components/molecules/avatar-crop-dialog/avatar-crop-dialog";
 import {
   Combobox,
   type ComboboxOption,
@@ -37,6 +37,10 @@ import { selectAuthSession } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
 import type { Branch } from "@/types/brand";
 import styles from "./branch-page.module.css";
+import {
+  isValidTime24,
+  TimeInput,
+} from "./time-input";
 
 type BranchDraft = Omit<Branch, "id" | "brand_id"> & {
   id?: string;
@@ -422,7 +426,9 @@ export function BranchPage({
     if (!draft.address1.trim()) errs.address1 = t.requiredMessage;
     if (!draft.is_24_7) {
       if (!draft.opening?.trim()) errs.opening = t.openingRequiredMessage;
+      else if (!isValidTime24(draft.opening)) errs.opening = "HH:mm";
       if (!draft.closing?.trim()) errs.closing = t.closingRequiredMessage;
+      else if (!isValidTime24(draft.closing)) errs.closing = "HH:mm";
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -760,25 +766,21 @@ export function BranchPage({
                         <div className={styles.fieldGrid2}>
                           <Field>
                             <FieldLabel required>{t.branchFieldOpening}</FieldLabel>
-                            <Input
-                              type="time"
+                            <TimeInput
                               value={draft.opening ?? ""}
                               placeholder="09:00"
-                              step={60}
                               aria-invalid={Boolean(errors.opening)}
-                              onChange={(e) => updateField("opening", e.target.value)}
+                              onChange={(value) => updateField("opening", value)}
                             />
                             {errors.opening ? <p className={styles.fieldError}>{errors.opening}</p> : null}
                           </Field>
                           <Field>
                             <FieldLabel required>{t.branchFieldClosing}</FieldLabel>
-                            <Input
-                              type="time"
+                            <TimeInput
                               value={draft.closing ?? ""}
                               placeholder="18:00"
-                              step={60}
                               aria-invalid={Boolean(errors.closing)}
-                              onChange={(e) => updateField("closing", e.target.value)}
+                              onChange={(value) => updateField("closing", value)}
                             />
                             {errors.closing ? <p className={styles.fieldError}>{errors.closing}</p> : null}
                           </Field>
@@ -795,13 +797,13 @@ export function BranchPage({
                             <div key={br.id ?? index} className={styles.breakRow}>
                               <Field>
                                 <FieldLabel>Start</FieldLabel>
-                                <Input type="time" value={br.start} placeholder="12:00" step={60}
-                                  onChange={(e) => updateBreak(index, "start", e.target.value)} />
+                                <TimeInput value={br.start} placeholder="12:00"
+                                  onChange={(value) => updateBreak(index, "start", value)} />
                               </Field>
                               <Field>
                                 <FieldLabel>End</FieldLabel>
-                                <Input type="time" value={br.end} placeholder="13:00" step={60}
-                                  onChange={(e) => updateBreak(index, "end", e.target.value)} />
+                                <TimeInput value={br.end} placeholder="13:00"
+                                  onChange={(value) => updateBreak(index, "end", value)} />
                               </Field>
                               <button type="button" className={styles.removeBreakBtn}
                                 aria-label={t.branchRemoveBreak} onClick={() => removeBreak(index)}>
@@ -1076,11 +1078,12 @@ export function BranchPage({
       </div>
 
       {cropTarget ? (
-        <ImageCropModal
+        <AvatarCropDialog
           file={cropTarget.file}
           aspectRatio={cropTarget.aspectRatio}
-          onCrop={handleVisualCrop}
-          onCancel={() => setCropTarget(null)}
+          open={true}
+          onConfirm={handleVisualCrop}
+          onClose={() => setCropTarget(null)}
         />
       ) : null}
     </>

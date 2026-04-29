@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { selectAuthSession } from "@/store/auth";
 import { useLocale } from "@/components/providers/locale-provider";
@@ -12,25 +13,30 @@ import {
   getDefaultAppRouteForUserType,
   getSidebarRoutesForUserType,
 } from "@/lib/app-routes";
+import { fetchMyBrands } from "@/lib/brands-api";
+import { fetchMyServices } from "@/lib/services-api";
+import type { Brand } from "@/types/brand";
+import type { Service } from "@/types/service";
 import styles from "./app-sidebar.module.css";
 
 type AppSidebarProps = {
   collapsed: boolean;
+  mobileOpen?: boolean;
   onClose?: () => void;
 };
 
-export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
+export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { messages } = useLocale();
   const session = useAppSelector(selectAuthSession);
   const db = messages.dashboard;
 
   const user = session.user;
+  const accessToken = session.accessToken;
   const defaultHref = getDefaultAppRouteForUserType(user?.type);
-  const platformNav = user
-    ? getSidebarRoutesForUserType(messages, user.type)
-    : [];
+  const platformNav = user ? getSidebarRoutesForUserType(messages, user.type) : [];
   const initials = user
     ? `${user.first_name[0] ?? ""}${user.last_name[0] ?? ""}`.toUpperCase()
     : "?";
@@ -41,13 +47,90 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
     admin: db.typeAdmin,
   };
 
+  // Sub-data
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+
+  useEffect(() => {
+    if (!user || !accessToken) return;
+    if (user.type !== "uso") return;
+
+    fetchMyBrands(accessToken)
+      .then(setBrands)
+      .catch(() => setBrands([]));
+
+    fetchMyServices(accessToken)
+      .then(setServices)
+      .catch(() => setServices([]));
+  }, [user, accessToken]);
+
+  // Expanded sub-menu state — auto-follows route
+  const [expandedKey, setExpandedKey] = useState<string | null>(() => {
+    if (pathname.startsWith("/brands")) return "brands";
+    if (pathname.startsWith("/services")) return "services";
+    return null;
+  });
+
+  useEffect(() => {
+    if (pathname.startsWith("/brands")) setExpandedKey("brands");
+    else if (pathname.startsWith("/services")) setExpandedKey("services");
+  }, [pathname]);
+
   function isActive(href: string) {
     return href === "/home" ? pathname === href : pathname.startsWith(href);
   }
 
+  function getSubItems(href: string) {
+    if (href === "/brands") return brands.map((b) => ({
+      id: b.id,
+      label: b.name,
+      href: `/brands?id=${b.id}`,
+      status: b.status,
+      branches: (b.branches ?? []).map((br) => ({ id: br.id, label: br.name, href: `/brands?id=${b.id}` })),
+    }));
+    if (href === "/services") return services.map((s) => ({
+      id: s.id,
+      label: s.title,
+      href: `/services?id=${s.id}`,
+      status: s.status,
+      branches: [] as { id: string; label: string; href: string }[],
+    }));
+    return [];
+  }
+
+  function getBadgeCount(href: string): number | null {
+    if (href === "/brands" && brands.length > 0) return brands.length;
+    if (href === "/services" && services.length > 0) return services.length;
+    return null;
+  }
+
+  function isSubActive(subHref: string): boolean {
+    const subId = new URLSearchParams(subHref.split("?")[1] ?? "").get("id");
+    return searchParams.get("id") === subId;
+  }
+
+  function handleNavClick(href: string) {
+    const subKey = href === "/brands" ? "brands" : href === "/services" ? "services" : null;
+    if (subKey) {
+      if (expandedKey === subKey && isActive(href)) {
+        setExpandedKey(null);
+      } else {
+        setExpandedKey(subKey);
+        router.push(href);
+      }
+    } else {
+      onClose?.();
+      router.push(href);
+    }
+  }
+
   return (
     <aside
-      className={`${styles.sidebar} ${collapsed ? styles.sidebarCollapsed : ""}`}
+      className={[
+        styles.sidebar,
+        collapsed ? styles.sidebarCollapsed : "",
+        mobileOpen ? styles.sidebarMobileOpen : "",
+      ].filter(Boolean).join(" ")}
     >
       {/* Brand */}
       <div className={styles.brand}>
@@ -69,19 +152,86 @@ export function AppSidebar({ collapsed, onClose }: AppSidebarProps) {
         <div className={styles.section}>
           <p className={styles.sectionLabel}>{db.platform}</p>
           <nav className={styles.nav}>
-            {platformNav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                title={collapsed ? item.label : undefined}
-                aria-current={isActive(item.href) ? "page" : undefined}
-                className={`${styles.navItem} ${isActive(item.href) ? styles.navItemActive : ""}`}
-                onClick={onClose}
-              >
-                <Icon icon={item.icon} size={16} color="current" className={styles.navIcon} />
-                <span className={styles.navLabel}>{item.label}</span>
-              </Link>
-            ))}
+            {platformNav.map((item) => {
+              const active = isActive(item.href);
+              const subItems = getSubItems(item.href);
+              const hasSubItems = subItems.length > 0;
+              const isExpanded = expandedKey === (item.href === "/brands" ? "brands" : "services");
+              const badge = getBadgeCount(item.href);
+
+              return (
+                <div key={item.href} className={styles.navGroup}>
+                  <button
+                    type="button"
+                    aria-current={active ? "page" : undefined}
+                    className={`${styles.navItem} ${active ? styles.navItemActive : ""}`}
+                    onClick={() => handleNavClick(item.href)}
+                    title={collapsed ? item.label : undefined}
+                  >
+                    <span className={styles.navIconWrap}>
+                      <Icon icon={item.icon} size={16} color="current" className={styles.navIcon} />
+                      {badge !== null && !collapsed && (
+                        <span className={`${styles.badge} ${active ? styles.badgeActive : ""}`}>
+                          {badge > 99 ? "99+" : badge}
+                        </span>
+                      )}
+                      {badge !== null && collapsed && (
+                        <span className={`${styles.badgeDot} ${active ? styles.badgeDotActive : ""}`} />
+                      )}
+                    </span>
+                    <span className={styles.navLabel}>{item.label}</span>
+                    {hasSubItems && !collapsed && (
+                      <Icon
+                        icon="chevron_right"
+                        size={14}
+                        color="current"
+                        className={`${styles.chevronIcon} ${isExpanded ? styles.chevronExpanded : ""}`}
+                      />
+                    )}
+                  </button>
+
+                  {/* Sub-items */}
+                  {hasSubItems && isExpanded && !collapsed && (
+                    <div className={styles.subNav}>
+                      {subItems.map((sub) => (
+                        <div key={sub.id} className={styles.subGroup}>
+                          <Link
+                            href={sub.href}
+                            className={`${styles.subItem} ${isSubActive(sub.href) ? styles.subItemActive : ""}`}
+                            onClick={onClose}
+                          >
+                            <span
+                              className={`${styles.subDot} ${
+                                sub.status === "ACTIVE"
+                                  ? styles.subDotActive
+                                  : sub.status === "PENDING"
+                                  ? styles.subDotPending
+                                  : styles.subDotNeutral
+                              }`}
+                            />
+                            <span className={styles.subLabel}>{sub.label}</span>
+                          </Link>
+                          {sub.branches && sub.branches.length > 0 && (
+                            <div className={styles.branchNav}>
+                              {sub.branches.map((br) => (
+                                <Link
+                                  key={br.id}
+                                  href={br.href}
+                                  className={styles.branchItem}
+                                  onClick={onClose}
+                                >
+                                  <span className={styles.branchLabel}>{br.label}</span>
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </nav>
         </div>
       </div>

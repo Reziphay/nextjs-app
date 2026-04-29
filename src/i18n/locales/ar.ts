@@ -150,7 +150,7 @@ export const arMessages: Messages = {
       birthdayRequiredMessage:
         "يرجى إدخال تاريخ الميلاد.",
       birthdayAgeMessage:
-        "يجب أن يكون عمرك 13 عامًا على الأقل للتسجيل.",
+        "يجب أن يكون عمرك 18 عامًا على الأقل للتسجيل.",
       emailInvalidMessage:
         "يرجى إدخال عنوان بريد إلكتروني صالح.",
       passwordInvalidMessage:
@@ -190,6 +190,9 @@ export const arMessages: Messages = {
       "لم يتم العثور على نقل العلامة التجارية.",
     "brand.transfer_not_pending":
       "لم يعد نقل العلامة التجارية هذا قيد الانتظار.",
+    "moderation.brand_not_found": "العلامة التجارية غير موجودة.",
+    "moderation.service_not_found": "الخدمة غير موجودة.",
+    "moderation.not_pending": "هذا الطلب لم يعد قيد الانتظار.",
   },
   hero: {
     eyebrow: "مشروع Next.js متعدد اللغات",
@@ -534,7 +537,7 @@ export const arMessages: Messages = {
     lastNameInvalidMessage:
       "يجب أن يحتوي اسم العائلة على حرفين على الأقل.",
     birthdayRequiredMessage: "يرجى إدخال تاريخ الميلاد.",
-    birthdayAgeMessage: "يجب أن يكون عمرك 13 عامًا على الأقل.",
+    birthdayAgeMessage: "يجب أن يكون عمرك 18 عامًا على الأقل.",
     emailInvalidMessage:
       "يرجى إدخال عنوان بريد إلكتروني صالح.",
     phoneInvalidMessage:
@@ -542,5 +545,42 @@ export const arMessages: Messages = {
     typeUso: "مالك الخدمة",
     typeUcr: "عميل",
     typeAdmin: "مشرف",
+  },
+  categories: {
+    food_beverage: "طعام & مشروبات",
+    beauty_wellness: "جمال & عافية",
+    fitness_sports: "لياقة & رياضة",
+    fashion_apparel: "موضة & ملابس",
+    technology_electronics: "تقنية & إلكترونيات",
+    home_furniture: "منزل & أثاث",
+    health_pharmacy: "صحة & صيدلية",
+    education_training: "تعليم & تدريب",
+    entertainment_media: "ترفيه & إعلام",
+    travel_hospitality: "سياحة & ضيافة",
+    haircut_styling: "قص & تصفيف الشعر",
+    massage_therapy: "تدليك & علاج",
+    personal_training: "تدريب شخصي",
+    nail_care: "العناية بالأظافر",
+    facial_treatment: "علاج الوجه",
+    dental_care: "العناية بالأسنان",
+    consulting: "استشارة",
+    photo_session: "جلسة تصوير",
+  },
+    calendar: {
+    today: "اليوم",
+    viewDay: "يوم",
+    viewWorkWeek: "أسبوع العمل",
+    viewWeek: "أسبوع",
+    viewMonth: "شهر",
+    filter: "تصفية",
+    newReservation: "جديد",
+    myServices: "خدماتي",
+    noServicesYet: "لا توجد خدمات بعد",
+    noReservationsTitle: "لا توجد حجوزات بعد",
+    noReservationsDesc: "ستظهر الحجوزات هنا عندما يبدأ العملاء في حجز خدماتك.",
+    settingsTitle: "إعدادات التقويم",
+    settingsTimeFormat: "تنسيق الوقت",
+    timeFormat12h: "ص/م",
+    timeFormat24h: "٢٤ساعة",
   },
 };
