@@ -81,8 +81,20 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
   }
 
   function getSubItems(href: string) {
-    if (href === "/brands") return brands.map((b) => ({ id: b.id, label: b.name, href: `/brands?id=${b.id}`, status: b.status }));
-    if (href === "/services") return services.map((s) => ({ id: s.id, label: s.title, href: `/services?id=${s.id}`, status: s.status }));
+    if (href === "/brands") return brands.map((b) => ({
+      id: b.id,
+      label: b.name,
+      href: `/brands?id=${b.id}`,
+      status: b.status,
+      branches: (b.branches ?? []).map((br) => ({ id: br.id, label: br.name, href: `/brands?id=${b.id}` })),
+    }));
+    if (href === "/services") return services.map((s) => ({
+      id: s.id,
+      label: s.title,
+      href: `/services?id=${s.id}`,
+      status: s.status,
+      branches: [] as { id: string; label: string; href: string }[],
+    }));
     return [];
   }
 
@@ -182,23 +194,38 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
                   {hasSubItems && isExpanded && !collapsed && (
                     <div className={styles.subNav}>
                       {subItems.map((sub) => (
-                        <Link
-                          key={sub.id}
-                          href={sub.href}
-                          className={`${styles.subItem} ${isSubActive(sub.href) ? styles.subItemActive : ""}`}
-                          onClick={onClose}
-                        >
-                          <span
-                            className={`${styles.subDot} ${
-                              sub.status === "ACTIVE"
-                                ? styles.subDotActive
-                                : sub.status === "PENDING"
-                                ? styles.subDotPending
-                                : styles.subDotNeutral
-                            }`}
-                          />
-                          <span className={styles.subLabel}>{sub.label}</span>
-                        </Link>
+                        <div key={sub.id} className={styles.subGroup}>
+                          <Link
+                            href={sub.href}
+                            className={`${styles.subItem} ${isSubActive(sub.href) ? styles.subItemActive : ""}`}
+                            onClick={onClose}
+                          >
+                            <span
+                              className={`${styles.subDot} ${
+                                sub.status === "ACTIVE"
+                                  ? styles.subDotActive
+                                  : sub.status === "PENDING"
+                                  ? styles.subDotPending
+                                  : styles.subDotNeutral
+                              }`}
+                            />
+                            <span className={styles.subLabel}>{sub.label}</span>
+                          </Link>
+                          {sub.branches && sub.branches.length > 0 && (
+                            <div className={styles.branchNav}>
+                              {sub.branches.map((br) => (
+                                <Link
+                                  key={br.id}
+                                  href={br.href}
+                                  className={styles.branchItem}
+                                  onClick={onClose}
+                                >
+                                  <span className={styles.branchLabel}>{br.label}</span>
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       ))}
                     </div>
                   )}

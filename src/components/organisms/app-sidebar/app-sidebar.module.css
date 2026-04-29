@@ -364,6 +364,48 @@
   opacity: 0.35;
 }
 
+/* ── Branch sub-sub-items ── */
+.subGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.branchNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.0625rem;
+  margin: 0.125rem 0 0.25rem 0.75rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--app-border-soft);
+}
+
+.branchItem {
+  display: flex;
+  align-items: center;
+  padding: 0.286rem 0.5rem;
+  border-radius: var(--general-border-radius-lg);
+  text-decoration: none;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.branchItem:hover {
+  background: var(--app-bg-surface-strong);
+}
+
+.branchLabel {
+  color: var(--app-text-subtle);
+  font-size: 0.675rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 120ms ease;
+}
+
+.branchItem:hover .branchLabel {
+  color: var(--app-text-muted);
+}
+
 /* ── Footer ── */
 .footer {
   flex-shrink: 0;
