@@ -123,6 +123,7 @@ export const heMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials": "אימייל או סיסמה שגויים.",
     "errors.validation_error": "הנתונים שנשלחו לא עברו אימות.",
     "errors.missing_token": "אסימון האימות חסר.",
@@ -407,6 +408,7 @@ export const heMessages: Messages = {
     photo_session: "צילום",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "היום",
     viewDay: "יום",
     viewWorkWeek: "שבוע עבודה",

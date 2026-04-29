@@ -25,7 +25,7 @@ export function DashboardShell({ children, contentVariant = "default" }: Dashboa
 
   // Close mobile sidebar on route change
   useEffect(() => {
-    setMobileOpen(false);
+    queueMicrotask(() => setMobileOpen(false));
   }, [pathname]);
 
   function handleToggle() {

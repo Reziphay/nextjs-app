@@ -63,6 +63,8 @@ type ServicesCopy = {
   modalIndividual: string;
   modalClose: string;
   addService: string;
+  actionEdit: string;
+  actionDelete: string;
   tableService: string;
   tableBranch: string;
   tablePrice: string;
@@ -87,6 +89,8 @@ const EN_SERVICES_COPY: ServicesCopy = {
   modalIndividual: "Individual",
   modalClose: "Close",
   addService: "Add service",
+  actionEdit: "Edit",
+  actionDelete: "Delete",
   tableService: "Service",
   tableBranch: "Branch",
   tablePrice: "Price",
@@ -112,6 +116,8 @@ const TR_SERVICES_COPY: ServicesCopy = {
   modalIndividual: "Bireysel",
   modalClose: "Kapat",
   addService: "Hizmet ekle",
+  actionEdit: "Düzenle",
+  actionDelete: "Sil",
   tableService: "Hizmet",
   tableBranch: "Şube",
   tablePrice: "Fiyat",
@@ -137,6 +143,8 @@ const AZ_SERVICES_COPY: ServicesCopy = {
   modalIndividual: "Fərdi",
   modalClose: "Bağla",
   addService: "Xidmət əlavə et",
+  actionEdit: "Redaktə et",
+  actionDelete: "Sil",
   tableService: "Xidmət",
   tableBranch: "Filial",
   tablePrice: "Qiymət",
@@ -1163,8 +1171,8 @@ export function BrandDetail({
                           type="button"
                           className={styles.rowActionBtn}
                           onClick={(e) => handleEditService(svc, e)}
-                          aria-label="Edit service"
-                          title="Edit"
+                          aria-label={`${servicesCopy.actionEdit}: ${svc.title}`}
+                          title={servicesCopy.actionEdit}
                         >
                           <Icon icon="edit" size={15} color="current" />
                         </button>
@@ -1173,8 +1181,8 @@ export function BrandDetail({
                           className={`${styles.rowActionBtn} ${styles.rowActionBtnDanger}`}
                           onClick={(e) => handleDeleteService(svc, e)}
                           disabled={deletingServiceId === svc.id}
-                          aria-label="Delete service"
-                          title="Delete"
+                          aria-label={`${servicesCopy.actionDelete}: ${svc.title}`}
+                          title={servicesCopy.actionDelete}
                         >
                           <Icon icon="delete" size={15} color="current" />
                         </button>
@@ -1317,8 +1325,8 @@ export function BrandDetail({
                         type="button"
                         className={styles.rowActionBtn}
                         onClick={(e) => handleEditBranch(branch, e)}
-                        aria-label="Edit branch"
-                        title="Edit"
+                        aria-label={`${servicesCopy.actionEdit}: ${branch.name}`}
+                        title={servicesCopy.actionEdit}
                       >
                         <Icon icon="edit" size={15} color="current" />
                       </button>
@@ -1327,8 +1335,8 @@ export function BrandDetail({
                         className={`${styles.rowActionBtn} ${styles.rowActionBtnDanger}`}
                         onClick={(e) => handleDeleteBranch(branch, e)}
                         disabled={deletingBranchId === branch.id}
-                        aria-label="Delete branch"
-                        title="Delete"
+                        aria-label={`${servicesCopy.actionDelete}: ${branch.name}`}
+                        title={servicesCopy.actionDelete}
                       >
                         <Icon icon="delete" size={15} color="current" />
                       </button>
@@ -1724,8 +1732,8 @@ export function BrandDetail({
           <AlertDialogHeader>
             <AlertDialogTitle>
               {deleteTarget?.type === "service"
-                ? `"${deleteTarget.item.title}" xidmətini sil?`
-                : `"${deleteTarget?.item.name}" filialını sil?`}
+                ? `${servicesCopy.actionDelete}: ${deleteTarget.item.title}`
+                : `${t.deleteBranch}: ${deleteTarget?.item.name}`}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {t.deleteModalDescription}

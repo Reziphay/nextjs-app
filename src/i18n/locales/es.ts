@@ -158,6 +158,7 @@ export const esMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials": "Correo electrónico o contraseña no válidos.",
     "errors.validation_error":
       "Los datos enviados no superaron la validación.",
@@ -210,6 +211,7 @@ export const esMessages: Messages = {
       "Puedes usar directamente la instancia compartida `api` o llamar al helper genérico `apiRequest` para peticiones tipadas.",
   },
   dashboard: {
+    ...enMessages.dashboard,
     home: "Inicio",
     search: "Buscar",
     profile: "Perfil",
@@ -572,6 +574,7 @@ export const esMessages: Messages = {
     photo_session: "Sesión fotográfica",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "Hoy",
     viewDay: "Día",
     viewWorkWeek: "Semana laboral",

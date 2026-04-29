@@ -140,10 +140,19 @@ type MiniCalendarProps = {
   selected: Date;
   today: Date;
   locale: string;
+  previousMonthLabel: string;
+  nextMonthLabel: string;
   onSelect: (d: Date) => void;
 };
 
-function MiniCalendar({ selected, today, locale, onSelect }: MiniCalendarProps) {
+function MiniCalendar({
+  selected,
+  today,
+  locale,
+  previousMonthLabel,
+  nextMonthLabel,
+  onSelect,
+}: MiniCalendarProps) {
   const dayNarrows = useMemo(() => getIntlDayNarrows(locale), [locale]);
   const [viewing, setViewing] = useState(() => {
     const d = new Date(selected);
@@ -160,7 +169,7 @@ function MiniCalendar({ selected, today, locale, onSelect }: MiniCalendarProps) 
       const d = new Date(selected);
       d.setDate(1);
       d.setHours(0, 0, 0, 0);
-      setViewing(d);
+      queueMicrotask(() => setViewing(d));
     }
   }, [selected, viewing]);
 
@@ -194,10 +203,10 @@ function MiniCalendar({ selected, today, locale, onSelect }: MiniCalendarProps) 
           {getMonthName(viewing, locale, "short")} {year}
         </span>
         <div className={styles.miniCalNav}>
-          <button className={styles.miniCalBtn} onClick={prevMonth} aria-label="Previous month">
+          <button className={styles.miniCalBtn} onClick={prevMonth} aria-label={previousMonthLabel}>
             <Icon icon="chevron_left" size={14} color="current" />
           </button>
-          <button className={styles.miniCalBtn} onClick={nextMonth} aria-label="Next month">
+          <button className={styles.miniCalBtn} onClick={nextMonth} aria-label={nextMonthLabel}>
             <Icon icon="chevron_right" size={14} color="current" />
           </button>
         </div>
@@ -243,6 +252,9 @@ type CalendarSidebarProps = {
   services: CalendarService[];
   myServicesLabel: string;
   noServicesLabel: string;
+  previousMonthLabel: string;
+  nextMonthLabel: string;
+  closeSidebarLabel: string;
   onDateSelect: (d: Date) => void;
   onServiceToggle: (id: string) => void;
   onClose: () => void;
@@ -256,6 +268,9 @@ function CalendarSidebar({
   services,
   myServicesLabel,
   noServicesLabel,
+  previousMonthLabel,
+  nextMonthLabel,
+  closeSidebarLabel,
   onDateSelect,
   onServiceToggle,
   onClose,
@@ -270,11 +285,18 @@ function CalendarSidebar({
         <button
           className={styles.sidebarCloseBtn}
           onClick={onClose}
-          aria-label="Close sidebar"
+          aria-label={closeSidebarLabel}
         >
           <Icon icon="close" size={18} color="current" />
         </button>
-        <MiniCalendar selected={selected} today={today} locale={locale} onSelect={onDateSelect} />
+        <MiniCalendar
+          selected={selected}
+          today={today}
+          locale={locale}
+          previousMonthLabel={previousMonthLabel}
+          nextMonthLabel={nextMonthLabel}
+          onSelect={onDateSelect}
+        />
 
         {services.length > 0 && (
           <div className={styles.myServices}>
@@ -423,11 +445,21 @@ type DatePickerPopupProps = {
   date: Date;
   today: Date;
   locale: string;
+  previousMonthLabel: string;
+  nextMonthLabel: string;
   onSelect: (d: Date) => void;
   onClose: () => void;
 };
 
-function DatePickerPopup({ date, today, locale, onSelect, onClose }: DatePickerPopupProps) {
+function DatePickerPopup({
+  date,
+  today,
+  locale,
+  previousMonthLabel,
+  nextMonthLabel,
+  onSelect,
+  onClose,
+}: DatePickerPopupProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -444,6 +476,8 @@ function DatePickerPopup({ date, today, locale, onSelect, onClose }: DatePickerP
         selected={date}
         today={today}
         locale={locale}
+        previousMonthLabel={previousMonthLabel}
+        nextMonthLabel={nextMonthLabel}
         onSelect={(d) => {
           onSelect(d);
           onClose();
@@ -698,6 +732,12 @@ type CalendarToolbarProps = {
   todayLabel: string;
   filterLabel: string;
   newLabel: string;
+  previousMonthLabel: string;
+  nextMonthLabel: string;
+  previousPeriodLabel: string;
+  nextPeriodLabel: string;
+  moreOptionsLabel: string;
+  toggleSidebarLabel: string;
   settingsTitleLabel: string;
   settingsTimeFormatLabel: string;
   timeFormat12hLabel: string;
@@ -727,6 +767,12 @@ function CalendarToolbar({
   todayLabel,
   filterLabel,
   newLabel,
+  previousMonthLabel,
+  nextMonthLabel,
+  previousPeriodLabel,
+  nextPeriodLabel,
+  moreOptionsLabel,
+  toggleSidebarLabel,
   settingsTitleLabel,
   settingsTimeFormatLabel,
   timeFormat12hLabel,
@@ -753,10 +799,10 @@ function CalendarToolbar({
         </button>
 
         <div className={styles.navGroup}>
-          <button className={styles.toolbarIconBtn} onClick={onPrev} aria-label="Previous">
+          <button className={styles.toolbarIconBtn} onClick={onPrev} aria-label={previousPeriodLabel}>
             <Icon icon="chevron_left" size={18} color="current" />
           </button>
-          <button className={styles.toolbarIconBtn} onClick={onNext} aria-label="Next">
+          <button className={styles.toolbarIconBtn} onClick={onNext} aria-label={nextPeriodLabel}>
             <Icon icon="chevron_right" size={18} color="current" />
           </button>
         </div>
@@ -774,6 +820,8 @@ function CalendarToolbar({
               date={date}
               today={today}
               locale={locale}
+              previousMonthLabel={previousMonthLabel}
+              nextMonthLabel={nextMonthLabel}
               onSelect={onDateSelect}
               onClose={() => setDatePickerOpen(false)}
             />
@@ -786,7 +834,7 @@ function CalendarToolbar({
           <button
             className={[styles.toolbarIconBtn, settingsOpen ? styles.toolbarIconBtnActive : ""].filter(Boolean).join(" ")}
             onClick={() => setSettingsOpen((o) => !o)}
-            aria-label="More options"
+            aria-label={moreOptionsLabel}
           >
             <Icon icon="more_horiz" size={18} color="current" />
           </button>
@@ -828,7 +876,7 @@ function CalendarToolbar({
             .filter(Boolean)
             .join(" ")}
           onClick={onToggleSidebar}
-          aria-label="Toggle sidebar"
+          aria-label={toggleSidebarLabel}
         >
           <Icon icon="right_panel_open" size={18} color="current" />
         </button>
@@ -859,7 +907,7 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
   }), [t]);
 
   const calendarBrands: CalendarBrand[] = [
-    { id: "all", name: "All brands" },
+    { id: "all", name: t.allBrands },
     ...brands.map((b) => ({ id: b.id, name: b.name })),
   ];
 
@@ -870,7 +918,9 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
 
   // Close sidebar by default on mobile
   useEffect(() => {
-    if (window.innerWidth < 768) setSidebarOpen(false);
+    if (window.innerWidth < 768) {
+      queueMicrotask(() => setSidebarOpen(false));
+    }
   }, []);
   const [timeFormat, setTimeFormat] = useState<TimeFormat>("24h");
   const [selectedBrandId, setSelectedBrandId] = useState("all");
@@ -943,6 +993,12 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
           todayLabel={t.today}
           filterLabel={t.filter}
           newLabel={t.newReservation}
+          previousMonthLabel={t.previousMonth}
+          nextMonthLabel={t.nextMonth}
+          previousPeriodLabel={t.previousPeriod}
+          nextPeriodLabel={t.nextPeriod}
+          moreOptionsLabel={t.moreOptions}
+          toggleSidebarLabel={t.toggleSidebar}
           settingsTitleLabel={t.settingsTitle}
           settingsTimeFormatLabel={t.settingsTimeFormat}
           timeFormat12hLabel={t.timeFormat12h}
@@ -988,6 +1044,9 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
         services={calendarServices}
         myServicesLabel={t.myServices}
         noServicesLabel={t.noServicesYet}
+        previousMonthLabel={t.previousMonth}
+        nextMonthLabel={t.nextMonth}
+        closeSidebarLabel={t.closeSidebar}
         onDateSelect={setCurrentDate}
         onServiceToggle={handleServiceToggle}
         onClose={() => setSidebarOpen(false)}

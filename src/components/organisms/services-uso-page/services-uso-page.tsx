@@ -105,6 +105,9 @@ type PageCopy = {
   fieldPricePlaceholder: string;
   fieldImages: string;
   fieldImagesHint: string;
+  fieldImagesUploadHint: string;
+  removePhotoLabel: string;
+  servicePhotoAlt: string;
   btnSave: string;
   btnResubmit: string;
   btnCancel: string;
@@ -177,6 +180,9 @@ const EN_COPY: PageCopy = {
   fieldPricePlaceholder: "0.00",
   fieldImages: "Photos",
   fieldImagesHint: "Add photos of your service (JPEG or PNG, max 5)",
+  fieldImagesUploadHint: "JPEG · PNG · max 5",
+  removePhotoLabel: "Remove photo",
+  servicePhotoAlt: "Service photo",
   btnSave: "Save service",
   btnResubmit: "Resubmit",
   btnCancel: "Cancel",
@@ -250,6 +256,9 @@ const TR_COPY: PageCopy = {
   fieldPricePlaceholder: "0.00",
   fieldImages: "Fotoğraflar",
   fieldImagesHint: "Hizmetinle ilgili fotoğraf ekle (JPEG veya PNG, max 5)",
+  fieldImagesUploadHint: "JPEG · PNG · maks. 5",
+  removePhotoLabel: "Fotoğrafı kaldır",
+  servicePhotoAlt: "Hizmet fotoğrafı",
   btnSave: "Hizmeti kaydet",
   btnResubmit: "Yenidən göndər",
   btnCancel: "İptal",
@@ -323,6 +332,9 @@ const AZ_COPY: PageCopy = {
   fieldPricePlaceholder: "0.00",
   fieldImages: "Fotolar",
   fieldImagesHint: "Xidmətinlə bağlı foto əlavə et (JPEG və ya PNG, max 5)",
+  fieldImagesUploadHint: "JPEG · PNG · maks. 5",
+  removePhotoLabel: "Fotonu sil",
+  servicePhotoAlt: "Xidmət fotosu",
   btnSave: "Xidməti saxla",
   btnResubmit: "Yenidən göndər",
   btnCancel: "Ləğv et",
@@ -667,7 +679,7 @@ function ServiceFormPage({
                     <div key={index} className={styles.galleryPreviewItem}>
                       <Image
                         src={proxyMediaUrl(url) ?? url}
-                        alt={`Service photo ${index + 1}`}
+                        alt={`${copy.servicePhotoAlt} ${index + 1}`}
                         fill
                         className={styles.previewImage}
                         sizes="200px"
@@ -675,7 +687,7 @@ function ServiceFormPage({
                       <button
                         type="button"
                         className={styles.removePreviewBtn}
-                        aria-label="Remove photo"
+                        aria-label={`${copy.removePhotoLabel} ${index + 1}`}
                         onClick={() => removeImage(index)}
                       >
                         <Icon icon="close" size={12} color="current" />
@@ -690,7 +702,7 @@ function ServiceFormPage({
                   <div className={styles.uploadContent}>
                     <Icon icon="add_photo_alternate" size={28} color="current" className={styles.uploadIcon} />
                     <p className={styles.uploadLabel}>{copy.fieldImages}</p>
-                    <p className={styles.uploadHint}>JPEG · PNG · max 5</p>
+                    <p className={styles.uploadHint}>{copy.fieldImagesUploadHint}</p>
                   </div>
                   <input
                     ref={fileInputRef}

@@ -160,6 +160,7 @@ export const trMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials": "Geçersiz e-posta veya şifre.",
     "errors.validation_error":
       "Gönderilen veriler doğrulamadan geçemedi.",
@@ -221,6 +222,7 @@ export const trMessages: Messages = {
       "Paylaşılan `api` örneğini doğrudan kullanabilir veya tipli istekler için genel `apiRequest` yardımcısını çağırabilirsiniz.",
   },
   dashboard: {
+    ...enMessages.dashboard,
     home: "Ana sayfa",
     search: "Arama",
     profile: "Profil",
@@ -571,6 +573,7 @@ export const trMessages: Messages = {
     photo_session: "Fotoğraf Çekimi",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "Bugün",
     viewDay: "Gün",
     viewWorkWeek: "İş haftası",

@@ -123,6 +123,7 @@ export const zhMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials": "电子邮箱或密码无效。",
     "errors.validation_error": "提交的数据未通过验证。",
     "errors.missing_token": "缺少身份验证令牌。",
@@ -612,6 +613,7 @@ export const zhMessages: Messages = {
     photo_session: "摄影",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "今天",
     viewDay: "日",
     viewWorkWeek: "工作周",

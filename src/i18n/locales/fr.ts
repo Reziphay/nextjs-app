@@ -158,6 +158,7 @@ export const frMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials": "E-mail ou mot de passe invalide.",
     "errors.validation_error":
       "Les données envoyées n’ont pas passé la validation.",
@@ -211,6 +212,7 @@ export const frMessages: Messages = {
       "Vous pouvez utiliser directement l’instance partagée `api` ou appeler le helper générique `apiRequest` pour des requêtes typées.",
   },
   dashboard: {
+    ...enMessages.dashboard,
     home: "Accueil",
     search: "Recherche",
     profile: "Profil",
@@ -579,6 +581,7 @@ export const frMessages: Messages = {
     photo_session: "Séance photo",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "Aujourd'hui",
     viewDay: "Jour",
     viewWorkWeek: "Semaine de travail",

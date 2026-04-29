@@ -72,8 +72,10 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
   });
 
   useEffect(() => {
-    if (pathname.startsWith("/brands")) setExpandedKey("brands");
-    else if (pathname.startsWith("/services")) setExpandedKey("services");
+    queueMicrotask(() => {
+      if (pathname.startsWith("/brands")) setExpandedKey("brands");
+      else if (pathname.startsWith("/services")) setExpandedKey("services");
+    });
   }, [pathname]);
 
   function isActive(href: string) {

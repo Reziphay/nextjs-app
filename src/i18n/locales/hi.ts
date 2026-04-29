@@ -123,6 +123,7 @@ export const hiMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials": "अमान्य ईमेल या पासवर्ड।",
     "errors.validation_error": "भेजा गया डेटा सत्यापन में असफल रहा।",
     "errors.missing_token": "प्रमाणीकरण टोकन गायब है।",
@@ -410,6 +411,7 @@ export const hiMessages: Messages = {
     photo_session: "फोटो सत्र",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "आज",
     viewDay: "दिन",
     viewWorkWeek: "कार्य सप्ताह",

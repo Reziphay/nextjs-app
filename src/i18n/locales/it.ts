@@ -123,6 +123,7 @@ export const itMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials": "Email o password non validi.",
     "errors.validation_error": "I dati inviati non hanno superato la validazione.",
     "errors.missing_token": "Manca il token di autenticazione.",
@@ -407,6 +408,7 @@ export const itMessages: Messages = {
     photo_session: "Servizio fotografico",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "Oggi",
     viewDay: "Giorno",
     viewWorkWeek: "Settimana lavorativa",

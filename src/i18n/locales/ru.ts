@@ -1,4 +1,5 @@
 import type { Messages } from "../types";
+import { enMessages } from "./en";
 
 export const ruMessages: Messages = {
   metadata: {
@@ -129,6 +130,7 @@ export const ruMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials": "Неверный email или пароль.",
     "errors.validation_error": "Отправленные данные не прошли валидацию.",
     "errors.missing_token": "Токен авторизации отсутствует.",
@@ -175,6 +177,7 @@ export const ruMessages: Messages = {
       "Можно использовать общий instance `api` напрямую или generic helper `apiRequest` для типизированных запросов.",
   },
   dashboard: {
+    ...enMessages.dashboard,
     home: "Главная",
     search: "Поиск",
     profile: "Профиль",
@@ -686,6 +689,7 @@ export const ruMessages: Messages = {
     photo_session: "Фотосессия",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "Сегодня",
     viewDay: "День",
     viewWorkWeek: "Рабочая неделя",

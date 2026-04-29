@@ -123,6 +123,7 @@ export const ptMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials": "Email ou senha inválidos.",
     "errors.validation_error": "Os dados enviados falharam na validação.",
     "errors.missing_token": "O token de autenticação está ausente.",
@@ -407,6 +408,7 @@ export const ptMessages: Messages = {
     photo_session: "Sessão fotográfica",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "Hoje",
     viewDay: "Dia",
     viewWorkWeek: "Semana de trabalho",

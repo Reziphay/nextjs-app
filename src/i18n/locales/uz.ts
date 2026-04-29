@@ -123,6 +123,7 @@ export const uzMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials": "Email yoki parol noto‘g‘ri.",
     "errors.validation_error": "Yuborilgan ma’lumotlar validatsiyadan o‘tmadi.",
     "errors.missing_token": "Autentifikatsiya tokeni yetishmayapti.",
@@ -407,6 +408,7 @@ export const uzMessages: Messages = {
     photo_session: "Foto sessiya",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "Bugun",
     viewDay: "Kun",
     viewWorkWeek: "Ish haftasi",

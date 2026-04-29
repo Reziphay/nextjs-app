@@ -123,6 +123,7 @@ export const laMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials": "Inscriptio electronica vel tessera invalida est.",
     "errors.validation_error": "Data missa validationem non superaverunt.",
     "errors.missing_token": "Signum authenticationis deest.",
@@ -406,6 +407,7 @@ export const laMessages: Messages = {
     photo_session: "Sessio photographica",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "Hodie",
     viewDay: "Dies",
     viewWorkWeek: "Hebdomada laboris",

@@ -161,6 +161,7 @@ export const arMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials":
       "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
     "errors.validation_error":
@@ -214,6 +215,7 @@ export const arMessages: Messages = {
       "يمكنك استخدام نسخة `api` المشتركة مباشرة أو استدعاء المساعد العام `apiRequest` لطلبات ذات أنواع محددة.",
   },
   dashboard: {
+    ...enMessages.dashboard,
     home: "الرئيسية",
     search: "البحث",
     profile: "الملف الشخصي",
@@ -567,6 +569,7 @@ export const arMessages: Messages = {
     photo_session: "جلسة تصوير",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "اليوم",
     viewDay: "يوم",
     viewWorkWeek: "أسبوع العمل",

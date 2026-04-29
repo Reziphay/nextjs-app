@@ -153,7 +153,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
         <button
           type="button"
           onClick={onToggle}
-          aria-label={collapsed ? "Sidebar aç" : "Sidebar bağla"}
+          aria-label={collapsed ? db.openSidebar : db.closeSidebar}
           className={styles.toggleBtn}
         >
           <Icon icon="left_panel_open" size={16} color="current" className={`${styles.toggleIcon} ${collapsed ? styles.toggleIconCollapsed : ""}`} />
@@ -161,7 +161,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
 
         <div className={styles.separator} />
 
-        <nav aria-label="breadcrumb" className={styles.breadcrumb}>
+        <nav aria-label={db.breadcrumb} className={styles.breadcrumb}>
           {crumbs.map((crumb, i) => (
             <span key={`${crumb.href ?? "current"}-${crumb.label}-${i}`} className={styles.crumbItem}>
               {i > 0 ? (

@@ -161,6 +161,7 @@ export const deMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials": "Ungültige E-Mail oder ungültiges Passwort.",
     "errors.validation_error":
       "Die gesendeten Daten haben die Validierung nicht bestanden.",
@@ -214,6 +215,7 @@ export const deMessages: Messages = {
       "Sie können die gemeinsame `api`-Instanz direkt verwenden oder den generischen `apiRequest`-Helper für typisierte Requests aufrufen.",
   },
   dashboard: {
+    ...enMessages.dashboard,
     home: "Startseite",
     search: "Suche",
     profile: "Profil",
@@ -579,6 +581,7 @@ export const deMessages: Messages = {
     photo_session: "Fotosession",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "Heute",
     viewDay: "Tag",
     viewWorkWeek: "Arbeitswoche",

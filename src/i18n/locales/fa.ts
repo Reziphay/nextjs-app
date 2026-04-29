@@ -123,6 +123,7 @@ export const faMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials": "ایمیل یا رمز عبور نامعتبر است.",
     "errors.validation_error": "داده‌های ارسال‌شده اعتبارسنجی نشدند.",
     "errors.missing_token": "توکن احراز هویت وجود ندارد.",
@@ -410,6 +411,7 @@ export const faMessages: Messages = {
     photo_session: "عکاسی",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "امروز",
     viewDay: "روز",
     viewWorkWeek: "هفته کاری",

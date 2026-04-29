@@ -123,6 +123,7 @@ export const ukMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials": "Невірна електронна пошта або пароль.",
     "errors.validation_error": "Надіслані дані не пройшли валідацію.",
     "errors.missing_token": "Відсутній токен автентифікації.",
@@ -407,6 +408,7 @@ export const ukMessages: Messages = {
     photo_session: "Фотосесія",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "Сьогодні",
     viewDay: "День",
     viewWorkWeek: "Робочий тиждень",

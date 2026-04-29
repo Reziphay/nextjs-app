@@ -796,12 +796,12 @@ export function BranchPage({
                           {draft.breaks.map((br, index) => (
                             <div key={br.id ?? index} className={styles.breakRow}>
                               <Field>
-                                <FieldLabel>Start</FieldLabel>
+                                <FieldLabel>{t.branchFieldOpening}</FieldLabel>
                                 <TimeInput value={br.start} placeholder="12:00"
                                   onChange={(value) => updateBreak(index, "start", value)} />
                               </Field>
                               <Field>
-                                <FieldLabel>End</FieldLabel>
+                                <FieldLabel>{t.branchFieldClosing}</FieldLabel>
                                 <TimeInput value={br.end} placeholder="13:00"
                                   onChange={(value) => updateBreak(index, "end", value)} />
                               </Field>

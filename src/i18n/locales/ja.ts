@@ -123,6 +123,7 @@ export const jaMessages: Messages = {
     },
   },
   backendErrors: {
+    ...enMessages.backendErrors,
     "auth.invalid_credentials": "メールアドレスまたはパスワードが正しくありません。",
     "errors.validation_error": "送信されたデータはバリデーションに失敗しました。",
     "errors.missing_token": "認証トークンがありません。",
@@ -410,6 +411,7 @@ export const jaMessages: Messages = {
     photo_session: "フォトセッション",
   },
     calendar: {
+    ...enMessages.calendar,
     today: "今日",
     viewDay: "日",
     viewWorkWeek: "平日",

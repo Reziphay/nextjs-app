@@ -958,7 +958,7 @@ export function BrandForm({
                 <div className={styles.logoPreview}>
                   <Image
                     src={proxyMediaUrl(draft.logoPreviewUrl) ?? draft.logoPreviewUrl}
-                    alt="Logo preview"
+                    alt={t.fieldLogo}
                     fill
                     className={styles.previewImage}
                     sizes="(min-width: 980px) 18rem, 120px"
@@ -966,7 +966,7 @@ export function BrandForm({
                   <button
                     type="button"
                     className={styles.removePreviewBtn}
-                    aria-label="Remove logo"
+                    aria-label={`${t.deleteConfirm} ${t.fieldLogo}`}
                     onClick={handleRemoveLogo}
                   >
                     <Icon icon="close" size={12} color="current" />
@@ -1103,7 +1103,7 @@ export function BrandForm({
                       <button
                         type="button"
                         className={styles.removePreviewBtn}
-                        aria-label={`Remove gallery image ${index + 1}`}
+                        aria-label={`${t.deleteConfirm} ${t.gallery} ${index + 1}`}
                         onClick={() =>
                           isExisting
                             ? handleRemoveExistingGalleryItem(index)
@@ -1150,7 +1150,7 @@ export function BrandForm({
                         <button
                           type="button"
                           className={styles.iconBtn}
-                          aria-label={`Edit ${branch.name}`}
+                          aria-label={`${t.branchEditModalTitle}: ${branch.name}`}
                           onClick={() => handleEditBranch(index)}
                         >
                           <Icon icon="edit" size={14} color="current" />
@@ -1158,7 +1158,7 @@ export function BrandForm({
                         <button
                           type="button"
                           className={`${styles.iconBtn} ${styles.iconBtnDelete}`}
-                          aria-label={`Delete ${branch.name}`}
+                          aria-label={`${t.deleteBranch}: ${branch.name}`}
                           onClick={() => handleDeleteBranch(index)}
                         >
                           <Icon icon="delete" size={14} color="current" />

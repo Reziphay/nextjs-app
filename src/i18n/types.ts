@@ -160,6 +160,9 @@ export type Messages = {
     typeUso: string;
     typeUcr: string;
     typeAdmin: string;
+    openSidebar: string;
+    closeSidebar: string;
+    breadcrumb: string;
   };
   brands: {
     // Page titles
@@ -635,12 +638,20 @@ export type Messages = {
   };
   calendar: {
     today: string;
+    allBrands: string;
     viewDay: string;
     viewWorkWeek: string;
     viewWeek: string;
     viewMonth: string;
     filter: string;
     newReservation: string;
+    previousMonth: string;
+    nextMonth: string;
+    closeSidebar: string;
+    previousPeriod: string;
+    nextPeriod: string;
+    moreOptions: string;
+    toggleSidebar: string;
     myServices: string;
     noServicesYet: string;
     noReservationsTitle: string;

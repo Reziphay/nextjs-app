@@ -1085,7 +1085,7 @@ export function BranchModal({
                     {draft.breaks.map((branchBreak, index) => (
                       <div key={branchBreak.id ?? index} className={styles.breakRow}>
                         <Field>
-                          <FieldLabel>Start</FieldLabel>
+                          <FieldLabel>{t.branchFieldOpening}</FieldLabel>
                           <TimeInput
                             value={branchBreak.start}
                             placeholder="12:00"
@@ -1093,7 +1093,7 @@ export function BranchModal({
                           />
                         </Field>
                         <Field>
-                          <FieldLabel>End</FieldLabel>
+                          <FieldLabel>{t.branchFieldClosing}</FieldLabel>
                           <TimeInput
                             value={branchBreak.end}
                             placeholder="13:00"
