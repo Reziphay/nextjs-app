@@ -902,7 +902,6 @@ function ServiceCard({
 }) {
   const { messages } = useLocale();
   const statusLabel = getStatusLabel(service.status, copy);
-  const badgeVariant = STATUS_BADGE_VARIANT[service.status];
   const priceLabel = formatPrice(service, copy);
   const durationLabel = formatDuration(service.duration, copy.fieldDurationUnit);
   const owner = getOwnerInfo(service, brands, user);
@@ -916,6 +915,17 @@ function ServiceCard({
     ? (messages.categories[service.service_category.key as keyof typeof messages.categories] ?? service.service_category.key)
     : null;
 
+  const statusPillClass = {
+    ACTIVE: styles.cardStatusActive,
+    PENDING: styles.cardStatusPending,
+    DRAFT: styles.cardStatusDraft,
+    PAUSED: styles.cardStatusPaused,
+    REJECTED: styles.cardStatusRejected,
+    ARCHIVED: styles.cardStatusArchived,
+  }[service.status];
+
+  const brandLogoUrl = owner.isBrand ? (proxyMediaUrl(owner.brand.logo_url ?? "") || null) : null;
+
   return (
     <button type="button" className={styles.serviceCard} onClick={onClick}>
       {/* Image hero */}
@@ -927,9 +937,9 @@ function ServiceCard({
             <Icon icon="design_services" size={32} color="current" className={styles.cardHeroIcon} />
           </div>
         )}
-        {/* Status badge overlaid top-right */}
-        <div className={styles.cardStatusOverlay}>
-          <Badge variant={badgeVariant}>{statusLabel}</Badge>
+        {/* Status pill overlaid top-right */}
+        <div className={`${styles.cardStatusPill} ${statusPillClass}`}>
+          {statusLabel}
         </div>
         {/* Price pill overlaid bottom-right */}
         {priceLabel !== "—" && (
@@ -954,12 +964,17 @@ function ServiceCard({
 
         <div className={styles.cardFooter}>
           <span className={styles.cardOwner}>
-            <Icon
-              icon={owner.isBrand ? "store" : "person"}
-              size={12}
-              color="current"
-              className={styles.cardOwnerIcon}
-            />
+            {owner.isBrand ? (
+              brandLogoUrl ? (
+                <span className={styles.cardOwnerLogo}>
+                  <Image src={brandLogoUrl} alt={owner.name} fill sizes="20px" className={styles.cardOwnerLogoImg} />
+                </span>
+              ) : (
+                <Icon icon="store" size={12} color="current" className={styles.cardOwnerIcon} />
+              )
+            ) : (
+              <Icon icon="person" size={12} color="current" className={styles.cardOwnerIcon} />
+            )}
             {owner.name}
           </span>
           {branch && !owner.isBrand && (
