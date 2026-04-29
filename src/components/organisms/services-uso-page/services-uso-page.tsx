@@ -106,6 +106,7 @@ type PageCopy = {
   fieldImages: string;
   fieldImagesHint: string;
   btnSave: string;
+  btnResubmit: string;
   btnCancel: string;
   labelRejectionReason: string;
   labelCategory: string;
@@ -177,6 +178,7 @@ const EN_COPY: PageCopy = {
   fieldImages: "Photos",
   fieldImagesHint: "Add photos of your service (JPEG or PNG, max 5)",
   btnSave: "Save service",
+  btnResubmit: "Resubmit",
   btnCancel: "Cancel",
   labelRejectionReason: "Rejection reason",
   labelCategory: "Category",
@@ -249,6 +251,7 @@ const TR_COPY: PageCopy = {
   fieldImages: "Fotoğraflar",
   fieldImagesHint: "Hizmetinle ilgili fotoğraf ekle (JPEG veya PNG, max 5)",
   btnSave: "Hizmeti kaydet",
+  btnResubmit: "Yenidən göndər",
   btnCancel: "İptal",
   labelRejectionReason: "Reddedilme nedeni",
   labelCategory: "Kategori",
@@ -321,6 +324,7 @@ const AZ_COPY: PageCopy = {
   fieldImages: "Fotolar",
   fieldImagesHint: "Xidmətinlə bağlı foto əlavə et (JPEG və ya PNG, max 5)",
   btnSave: "Xidməti saxla",
+  btnResubmit: "Yenidən göndər",
   btnCancel: "Ləğv et",
   labelRejectionReason: "Rədd səbəbi",
   labelCategory: "Kateqoriya",
@@ -565,18 +569,26 @@ function ServiceFormPage({
     }));
   }
 
+  const isEditingPaused = editingService?.status === "PAUSED";
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const payload = buildPayload(form);
     setIsLoading(true);
     try {
       if (editingService) {
+        const serviceId = editingService.id;
         const updated = await updateService(
-          editingService.id,
+          serviceId,
           payload as UpdateServicePayload,
           accessToken,
         );
-        onSaved(updated, false);
+        if (isEditingPaused) {
+          const resubmitted = await submitService(updated.id, accessToken);
+          onSaved(resubmitted, false);
+        } else {
+          onSaved(updated, false);
+        }
       } else {
         const created = await createService(payload as CreateServicePayload, accessToken);
         onSaved(created, true);
@@ -601,10 +613,10 @@ function ServiceFormPage({
           type="submit"
           isLoading={isLoading}
           disabled={!form.title.trim() || isLoading}
-          icon={isLoading ? undefined : "check"}
+          icon={isLoading ? undefined : isEditingPaused ? "send" : "check"}
           className={styles.formFooterPrimary}
         >
-          {copy.btnSave}
+          {isEditingPaused ? copy.btnResubmit : copy.btnSave}
         </Button>
         <Button variant="outline" type="button" onClick={onCancel}>
           {copy.btnCancel}
@@ -1180,7 +1192,10 @@ function ServiceDetailView({
 
             {service.status === "PAUSED" && (
               <div className={styles.detailActionGroup}>
-                <Button variant="primary" icon="play_arrow" onClick={onResume} isLoading={actionLoading} className={styles.detailActionBtn}>
+                <Button variant="primary" icon="edit" onClick={onEdit} disabled={actionLoading} className={styles.detailActionBtn}>
+                  {copy.actionEdit}
+                </Button>
+                <Button variant="outline" icon="play_arrow" onClick={onResume} disabled={actionLoading} className={styles.detailActionBtn}>
                   {copy.actionResume}
                 </Button>
                 <Button variant="ghost" icon="archive" onClick={onArchive} disabled={actionLoading} className={styles.detailActionBtn}>

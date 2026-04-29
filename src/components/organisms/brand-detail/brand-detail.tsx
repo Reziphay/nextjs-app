@@ -9,6 +9,11 @@ import {
   AlertDescription,
   AlertDialog,
   AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
 } from "@/components/atoms";
 import { Button } from "@/components/atoms/button";
 import { Input } from "@/components/atoms/input";
@@ -421,6 +426,11 @@ export function BrandDetail({
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [deletingServiceId, setDeletingServiceId] = useState<string | null>(null);
   const [deletingBranchId, setDeletingBranchId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<
+    | { type: "service"; item: Service }
+    | { type: "branch"; item: Branch }
+    | null
+  >(null);
 
   const isOwner = Boolean(currentUserId && brandState.owner_id === currentUserId);
   const categories = useMemo(
@@ -686,20 +696,9 @@ export function BrandDetail({
     router.push(`/services?action=edit&id=${svc.id}`);
   }
 
-  async function handleDeleteService(svc: Service, e: React.MouseEvent) {
+  function handleDeleteService(svc: Service, e: React.MouseEvent) {
     e.stopPropagation();
-    const token = session.accessToken;
-    if (!token) return;
-    if (!window.confirm(`"${svc.title}" xidmətini silmək istədiyinizə əminsiniz?`)) return;
-    setDeletingServiceId(svc.id);
-    try {
-      await deleteService(svc.id, token);
-      setBrandServices((prev) => prev.filter((s) => s.id !== svc.id));
-    } catch {
-      // silent — service remains in list
-    } finally {
-      setDeletingServiceId(null);
-    }
+    setDeleteTarget({ type: "service", item: svc });
   }
 
   function handleEditBranch(branch: Branch, e: React.MouseEvent) {
@@ -707,22 +706,42 @@ export function BrandDetail({
     router.push(`/brands?progress=edit&id=${brandState.id}&branch=${branch.id}`);
   }
 
-  async function handleDeleteBranch(branch: Branch, e: React.MouseEvent) {
+  function handleDeleteBranch(branch: Branch, e: React.MouseEvent) {
     e.stopPropagation();
+    setDeleteTarget({ type: "branch", item: branch });
+  }
+
+  async function executeDelete() {
     const token = session.accessToken;
-    if (!token) return;
-    if (!window.confirm(`"${branch.name}" filialını silmək istədiyinizə əminsiniz?`)) return;
-    setDeletingBranchId(branch.id);
-    try {
-      await deleteBranchApi(brandState.id, branch.id, token);
-      setBrandState((prev) => ({
-        ...prev,
-        branches: (prev.branches ?? []).filter((b) => b.id !== branch.id),
-      }));
-    } catch {
-      // silent — branch remains in list
-    } finally {
-      setDeletingBranchId(null);
+    if (!token || !deleteTarget) return;
+
+    if (deleteTarget.type === "service") {
+      const svc = deleteTarget.item;
+      setDeletingServiceId(svc.id);
+      setDeleteTarget(null);
+      try {
+        await deleteService(svc.id, token);
+        setBrandServices((prev) => prev.filter((s) => s.id !== svc.id));
+      } catch {
+        // silent
+      } finally {
+        setDeletingServiceId(null);
+      }
+    } else {
+      const branch = deleteTarget.item;
+      setDeletingBranchId(branch.id);
+      setDeleteTarget(null);
+      try {
+        await deleteBranchApi(brandState.id, branch.id, token);
+        setBrandState((prev) => ({
+          ...prev,
+          branches: (prev.branches ?? []).filter((b) => b.id !== branch.id),
+        }));
+      } catch {
+        // silent
+      } finally {
+        setDeletingBranchId(null);
+      }
     }
   }
 
@@ -1694,6 +1713,32 @@ export function BrandDetail({
               </div>
             </>
           ) : null}
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {deleteTarget?.type === "service"
+                ? `"${deleteTarget.item.title}" xidmətini sil?`
+                : `"${deleteTarget?.item.name}" filialını sil?`}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t.deleteModalDescription}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteTarget(null)}>
+              {dashboard.cancel}
+            </AlertDialogCancel>
+            <Button variant="primary" onClick={executeDelete}>
+              {t.deleteConfirm}
+            </Button>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
