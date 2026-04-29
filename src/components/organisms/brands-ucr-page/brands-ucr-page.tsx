@@ -207,8 +207,24 @@ const AZ_SVC_COPY: ServiceDiscoveryCopy = {
   modalBranch: "Filial",
 };
 
+const RU_SVC_COPY: ServiceDiscoveryCopy = {
+  ...EN_SVC_COPY,
+  featuredTitle: "Популярные сервисы",
+  labelFree: "Бесплатно",
+  labelFrom: "От",
+  labelDurationUnit: "мин",
+  modalClose: "Закрыть",
+  modalDescription: "Описание",
+  modalCategory: "Категория",
+  modalPrice: "Цена",
+  modalDuration: "Длительность",
+  modalAddress: "Адрес",
+  modalBranch: "Филиал",
+};
+
 function getSvcCopy(locale: string): ServiceDiscoveryCopy {
   if (locale.startsWith("az")) return AZ_SVC_COPY;
+  if (locale.startsWith("ru")) return RU_SVC_COPY;
   if (locale.startsWith("tr")) return TR_SVC_COPY;
   return EN_SVC_COPY;
 }
@@ -225,7 +241,9 @@ function formatSvcDuration(minutes: number | null, unit: string): string {
   if (minutes < 60) return `${minutes} ${unit}`;
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return m > 0 ? `${h}h ${m}${unit}` : `${h}h`;
+  const hourUnit =
+    unit === "мин" ? "ч" : unit === "dəq" ? "saat" : unit === "dk" ? "sa" : "h";
+  return m > 0 ? `${h}${hourUnit} ${m}${unit}` : `${h}${hourUnit}`;
 }
 
 export function BrandsUcrPage({ brands, ownersById, featuredServices = [] }: BrandsUcrPageProps) {

@@ -93,6 +93,14 @@ const AZ_TEAM_COPY: TeamInvitationCopy = {
   pendingLabel: "Gözləyən dəvət",
 };
 
+const RU_TEAM_COPY: TeamInvitationCopy = {
+  acceptAction: "Принять приглашение",
+  rejectAction: "Отклонить приглашение",
+  acceptedDescription: "Приглашение в команду принято.",
+  rejectedDescription: "Приглашение в команду отклонено.",
+  pendingLabel: "Ожидающее приглашение",
+};
+
 const EN_CENTER_COPY: NotificationCenterCopy = {
   streamDescription:
     "Everything appears in one timeline here. You can remove items one by one or clear the whole feed at once.",
@@ -147,9 +155,31 @@ const AZ_CENTER_COPY: NotificationCenterCopy = {
   branchLabel: "Filial",
 };
 
+const RU_CENTER_COPY: NotificationCenterCopy = {
+  streamDescription:
+    "Все уведомления отображаются здесь в одной ленте. Вы можете удалять элементы по одному или очистить всю ленту сразу.",
+  clearAllAction: "Очистить всё",
+  clearOneAction: "Удалить элемент",
+  clearAllDescription: "Все уведомления очищены.",
+  clearOneDescription: "Уведомление удалено.",
+  teamInvitationLabel: "Приглашение в команду",
+  incomingTransferLabel: "Входящая передача",
+  outgoingTransferLabel: "Исходящая передача",
+  systemNotificationLabel: "Уведомление",
+  transferFromLabel: "От",
+  transferToLabel: "Кому",
+  inviterLabel: "Пригласил",
+  brandLabel: "Бренд",
+  branchLabel: "Филиал",
+};
+
 function getTeamInvitationCopy(locale: string) {
   if (locale.startsWith("az")) {
     return AZ_TEAM_COPY;
+  }
+
+  if (locale.startsWith("ru")) {
+    return RU_TEAM_COPY;
   }
 
   if (locale.startsWith("tr")) {
@@ -162,6 +192,10 @@ function getTeamInvitationCopy(locale: string) {
 function getNotificationCenterCopy(locale: string) {
   if (locale.startsWith("az")) {
     return AZ_CENTER_COPY;
+  }
+
+  if (locale.startsWith("ru")) {
+    return RU_CENTER_COPY;
   }
 
   if (locale.startsWith("tr")) {

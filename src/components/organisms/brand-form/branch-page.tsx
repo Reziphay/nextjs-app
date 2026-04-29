@@ -246,8 +246,56 @@ const AZ_COPY: StudioCopy = {
   teamCreatedAfterSave: "Filial yadda saxlandıqdan sonra komanda bölməsi açılır.",
 };
 
+const RU_COPY: StudioCopy = {
+  ...EN_COPY,
+  subtitleNew: "Заполните данные филиала и сохраните, когда всё готово.",
+  subtitleEdit: "Обновите данные, фото и команду этого филиала.",
+  visualTitle: "Фото филиала",
+  visualDescription: "Необязательно. Если добавить фото, оно заменит стандартную иконку в списке филиалов.",
+  visualAddAction: "Добавить фото",
+  visualReplaceAction: "Заменить фото",
+  visualRemoveAction: "Удалить",
+  visualReadyBadge: "Фото готово",
+  visualEmptyBadge: "Нет фото",
+  teamTitle: "Команда филиала",
+  teamDescription: "Управляйте людьми, работающими в этом филиале.",
+  teamUnlockedTitle: "Команда станет доступна после сохранения филиала",
+  teamUnlockedBody: "Сначала сохраните филиал, затем сможете приглашать сюда людей.",
+  teamLoading: "Команда филиала загружается…",
+  teamError: "Не удалось загрузить команду филиала.",
+  retryTeam: "Повторить",
+  searchLabel: "Найти владельца сервиса",
+  searchHint: "Ищите по имени, email или телефону. Принятые и ожидающие участники скрыты.",
+  searchPlaceholder: "Поиск по имени, email или телефону",
+  searchIdle: "Начните вводить, чтобы искать USO пользователей.",
+  searchLoading: "Идёт поиск…",
+  searchReady: "Выберите пользователя, чтобы отправить приглашение в филиал.",
+  searchEmpty: "Подходящие пользователи не найдены.",
+  inviteAction: "Пригласить",
+  inviteSuccess: "Приглашение отправлено.",
+  removeAction: "Удалить",
+  removeSuccess: "Участник обновлён.",
+  reinviteAction: "Пригласить снова",
+  reinviteSuccess: "Приглашение отправлено снова.",
+  cancelInviteAction: "Отменить приглашение",
+  acceptedTitle: "Активные участники",
+  pendingTitle: "Ожидающие приглашения",
+  archiveTitle: "Архив",
+  noAccepted: "Сейчас здесь указан только владелец.",
+  noPending: "Ожидающих приглашений нет.",
+  noArchive: "Отклонённые и удалённые участники появятся здесь.",
+  ownerRole: "Владелец",
+  memberRole: "Участник",
+  pendingStatus: "Ожидает",
+  rejectedStatus: "Отклонён",
+  removedStatus: "Удалён",
+  availabilitySection: "Режим работы",
+  teamCreatedAfterSave: "Раздел команды откроется после сохранения филиала.",
+};
+
 function getCopy(locale: string) {
   if (locale.startsWith("az")) return AZ_COPY;
+  if (locale.startsWith("ru")) return RU_COPY;
   if (locale.startsWith("tr")) return TR_COPY;
   return EN_COPY;
 }

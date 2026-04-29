@@ -292,8 +292,65 @@ const AZ_COPY: StudioCopy = {
   teamLiveBadge: "Aktivdir",
 };
 
+const RU_COPY: StudioCopy = {
+  ...EN_COPY,
+  subtitleNew: "Заполните данные филиала и сохраните, когда всё готово.",
+  subtitleEdit: "Обновите данные, фото и команду этого филиала здесь.",
+  visualTitle: "Визуальный профиль филиала",
+  visualDescription:
+    "Это фото необязательно. Если добавить его, оно заменит стандартную иконку в списке филиалов.",
+  visualPendingTitle: "Добавить фото филиала",
+  visualPendingBody:
+    "Выберите одно фото, обрежьте его в квадратной рамке, и мы используем его как изображение филиала.",
+  visualAddAction: "Добавить фото филиала",
+  visualReplaceAction: "Заменить фото",
+  visualRemoveAction: "Удалить фото",
+  visualReadyBadge: "Фото готово",
+  visualEmptyBadge: "Нет фото",
+  teamTitle: "Команда филиала",
+  teamDescription:
+    "Управляйте людьми, работающими в этом филиале.",
+  teamUnlockedTitle: "Команда станет доступна после сохранения филиала",
+  teamUnlockedBody:
+    "Сначала сохраните филиал, затем сможете приглашать сюда людей.",
+  teamLoading: "Команда филиала загружается...",
+  teamError: "Не удалось загрузить команду филиала.",
+  retryTeam: "Повторить команду",
+  searchLabel: "Найти владельца сервиса",
+  searchHint:
+    "Ищите по имени, email или телефону. Принятые и ожидающие участники скрыты из результатов.",
+  searchPlaceholder: "Поиск по имени, email или телефону",
+  searchIdle: "Начните вводить, чтобы искать USO пользователей.",
+  searchLoading: "Идёт поиск пользователей...",
+  searchReady: "Выберите пользователя, чтобы отправить приглашение в филиал.",
+  searchEmpty: "Для этого филиала подходящие пользователи не найдены.",
+  inviteAction: "Пригласить в филиал",
+  inviteSuccess: "Приглашение в команду филиала отправлено.",
+  removeAction: "Удалить из филиала",
+  removeSuccess: "Участие в команде филиала обновлено.",
+  reinviteAction: "Пригласить снова",
+  reinviteSuccess: "Приглашение отправлено снова.",
+  cancelInviteAction: "Отменить приглашение",
+  acceptedTitle: "Принятая команда",
+  pendingTitle: "Ожидающие приглашения",
+  archiveTitle: "Архивные состояния",
+  noAccepted: "Сейчас здесь указан только владелец.",
+  noPending: "Ожидающих приглашений пока нет.",
+  noArchive: "Отклонённые и удалённые участники появятся здесь.",
+  ownerRole: "Владелец",
+  memberRole: "Участник",
+  pendingStatus: "Ожидает",
+  rejectedStatus: "Отклонён",
+  removedStatus: "Удалён",
+  branchIdentityTitle: "Профиль филиала",
+  teamCreatedAfterSave: "Раздел команды откроется после сохранения филиала.",
+  coverPlannedBadge: "Фото",
+  teamLiveBadge: "Активно",
+};
+
 function getCopy(locale: string) {
   if (locale.startsWith("az")) return AZ_COPY;
+  if (locale.startsWith("ru")) return RU_COPY;
   if (locale.startsWith("tr")) return TR_COPY;
   return EN_COPY;
 }

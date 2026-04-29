@@ -361,8 +361,84 @@ const AZ_COPY: PageCopy = {
   noDescription: "Təsvir yoxdur.",
 };
 
+const RU_COPY: PageCopy = {
+  ...EN_COPY,
+  pageTitle: "Мои сервисы",
+  createService: "Создать сервис",
+  emptyTitle: "Сервисов пока нет",
+  emptyDescription: "Создайте первый сервис, чтобы предложить его клиентам.",
+  statusDraft: "Черновик",
+  statusPending: "На проверке",
+  statusActive: "Активен",
+  statusRejected: "Отклонён",
+  statusPaused: "На паузе",
+  statusArchived: "В архиве",
+  actionEdit: "Редактировать",
+  actionSubmit: "Отправить на проверку",
+  actionDelete: "Удалить",
+  actionResubmit: "Отправить снова",
+  actionPause: "Поставить на паузу",
+  actionResume: "Возобновить",
+  actionArchive: "Архивировать",
+  formTitleCreate: "Создать сервис",
+  formTitleEdit: "Редактировать сервис",
+  fieldTitle: "Название",
+  fieldTitlePlaceholder: "например, Стрижка и укладка",
+  fieldDescription: "Описание",
+  fieldDescriptionPlaceholder: "Опишите ваш сервис…",
+  fieldCategory: "Категория",
+  fieldCategoryPlaceholder: "например, Волосы, Ногти, Массаж",
+  fieldContext: "Контекст сервиса",
+  contextIndividual: "Оказывается по моему адресу",
+  contextBranch: "Сервис привязан к филиалу",
+  fieldAddress: "Адрес",
+  fieldAddressPlaceholder: "Где оказывается сервис",
+  fieldBrand: "Бренд",
+  fieldBrandPlaceholder: "Выберите бренд",
+  fieldBranch: "Филиал",
+  fieldBranchPlaceholder: "Выберите филиал",
+  fieldDuration: "Длительность",
+  fieldDurationPlaceholder: "например, 60",
+  fieldDurationUnit: "мин",
+  fieldPriceType: "Цена и длительность",
+  priceTypeFixed: "Фиксированная",
+  priceTypeStartingFrom: "От",
+  priceTypeFree: "Бесплатно",
+  fieldPrice: "Цена",
+  fieldImages: "Фото",
+  fieldImagesHint: "Добавьте фото сервиса (JPEG или PNG, максимум 5)",
+  fieldImagesUploadHint: "JPEG · PNG · максимум 5",
+  removePhotoLabel: "Удалить фото",
+  servicePhotoAlt: "Фото сервиса",
+  btnSave: "Сохранить сервис",
+  btnResubmit: "Отправить снова",
+  btnCancel: "Отмена",
+  labelRejectionReason: "Причина отклонения",
+  labelCategory: "Категория",
+  labelDuration: "Длительность",
+  labelPrice: "Цена",
+  labelBranch: "Филиал",
+  labelIndividual: "Индивидуально",
+  labelOwner: "Владелец",
+  successCreate: "Сервис создан.",
+  successUpdate: "Сервис обновлён.",
+  successDelete: "Сервис удалён.",
+  successSubmit: "Отправлено на проверку.",
+  successPause: "Сервис поставлен на паузу.",
+  successResume: "Сервис возобновлён.",
+  successArchive: "Сервис архивирован.",
+  errorGeneric: "Что-то пошло не так. Попробуйте ещё раз.",
+  confirmDelete: "Вы уверены, что хотите удалить этот сервис?",
+  pendingNote: "На проверке — действия недоступны.",
+  selectBrandFirst: "Сначала выберите бренд",
+  detailInfo: "Детали",
+  detailActions: "Действия",
+  noDescription: "Описание не добавлено.",
+};
+
 function getCopy(locale: string): PageCopy {
   if (locale.startsWith("az")) return AZ_COPY;
+  if (locale.startsWith("ru")) return RU_COPY;
   if (locale.startsWith("tr")) return TR_COPY;
   return EN_COPY;
 }
@@ -391,7 +467,9 @@ function formatDuration(minutes: number | null, unit: string): string {
   if (minutes < 60) return `${minutes} ${unit}`;
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return m > 0 ? `${h}h ${m}${unit}` : `${h}h`;
+  const hourUnit =
+    unit === "мин" ? "ч" : unit === "dəq" ? "saat" : unit === "dk" ? "sa" : "h";
+  return m > 0 ? `${h}${hourUnit} ${m}${unit}` : `${h}${hourUnit}`;
 }
 
 function getStatusLabel(status: ServiceStatus, copy: PageCopy): string {

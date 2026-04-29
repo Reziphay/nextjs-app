@@ -151,8 +151,36 @@ const AZ_SERVICES_COPY: ServicesCopy = {
   tableDuration: "Müddət",
 };
 
+const RU_SERVICES_COPY: ServicesCopy = {
+  ...EN_SERVICES_COPY,
+  sectionTitle: "Сервисы",
+  emptyState: "У этого бренда пока нет активных сервисов.",
+  loadingState: "Сервисы загружаются…",
+  labelFree: "Бесплатно",
+  labelFrom: "От",
+  labelDurationUnit: "мин",
+  viewService: "Посмотреть сервис",
+  modalTitle: "Детали сервиса",
+  modalDescription: "Описание",
+  modalCategory: "Категория",
+  modalPrice: "Цена",
+  modalDuration: "Длительность",
+  modalAddress: "Адрес",
+  modalBranch: "Филиал",
+  modalIndividual: "Индивидуально",
+  modalClose: "Закрыть",
+  addService: "Добавить сервис",
+  actionEdit: "Редактировать",
+  actionDelete: "Удалить",
+  tableService: "Сервис",
+  tableBranch: "Филиал",
+  tablePrice: "Цена",
+  tableDuration: "Длительность",
+};
+
 function getServicesCopy(locale: string): ServicesCopy {
   if (locale.startsWith("az")) return AZ_SERVICES_COPY;
+  if (locale.startsWith("ru")) return RU_SERVICES_COPY;
   if (locale.startsWith("tr")) return TR_SERVICES_COPY;
   return EN_SERVICES_COPY;
 }
@@ -169,7 +197,9 @@ function formatServiceDuration(minutes: number | null, unit: string): string {
   if (minutes < 60) return `${minutes} ${unit}`;
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return m > 0 ? `${h}h ${m}${unit}` : `${h}h`;
+  const hourUnit =
+    unit === "мин" ? "ч" : unit === "dəq" ? "saat" : unit === "dk" ? "sa" : "h";
+  return m > 0 ? `${h}${hourUnit} ${m}${unit}` : `${h}${hourUnit}`;
 }
 
 type BranchStudioCopy = {
@@ -268,8 +298,30 @@ const AZ_BRANCH_STUDIO_COPY: BranchStudioCopy = {
   branchTeamBadge: "Komanda",
 };
 
+const RU_BRANCH_STUDIO_COPY: BranchStudioCopy = {
+  rowHint: "Нажмите на строку филиала, чтобы посмотреть детали.",
+  branchVisualTitle: "Фото филиала",
+  branchVisualLead: "Фото и краткая информация об этом филиале.",
+  branchVisualHint: "Фото филиала",
+  branchVisualEmptyHint: "Для этого филиала фото пока не добавлено.",
+  branchTeamTitle: "Команда филиала",
+  branchTeamLead: "Люди, работающие в этом филиале.",
+  branchTeamEmpty: "Сейчас здесь указан только владелец.",
+  branchTeamLoading: "Команда филиала загружается...",
+  branchTeamError: "Не удалось загрузить данные команды филиала.",
+  acceptedShort: "Приняты",
+  pendingShort: "Ожидают",
+  archivedShort: "Архив",
+  ownerShort: "Владелец",
+  memberShort: "Участник",
+  branchPhotoBadge: "Нет фото",
+  branchPhotoReadyBadge: "Фото готово",
+  branchTeamBadge: "Команда",
+};
+
 function getBranchStudioCopy(locale: string) {
   if (locale.startsWith("az")) return AZ_BRANCH_STUDIO_COPY;
+  if (locale.startsWith("ru")) return RU_BRANCH_STUDIO_COPY;
   if (locale.startsWith("tr")) return TR_BRANCH_STUDIO_COPY;
   return EN_BRANCH_STUDIO_COPY;
 }
