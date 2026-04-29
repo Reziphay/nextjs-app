@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/atoms/alert-dialog";
 import { Button } from "@/components/atoms/button";
-import { ImageCropModal } from "@/components/atoms/image-crop-modal/image-crop-modal";
+import { AvatarCropDialog } from "@/components/molecules/avatar-crop-dialog/avatar-crop-dialog";
 import {
   Combobox,
   type ComboboxOption,
@@ -1455,11 +1455,12 @@ export function BranchModal({
         </AlertDialogFooter>
       </AlertDialogContent>
       {cropTarget ? (
-        <ImageCropModal
+        <AvatarCropDialog
           file={cropTarget.file}
           aspectRatio={cropTarget.aspectRatio}
-          onCrop={handleVisualCrop}
-          onCancel={() => setCropTarget(null)}
+          open={true}
+          onConfirm={handleVisualCrop}
+          onClose={() => setCropTarget(null)}
         />
       ) : null}
     </AlertDialog>

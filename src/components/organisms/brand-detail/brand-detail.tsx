@@ -18,10 +18,11 @@ import { useLocale } from "@/components/providers/locale-provider";
 import {
   fetchBrandTeamWorkspace,
   submitBrandRating,
+  deleteBranchApi,
   type BrandTeamWorkspace,
   type TeamWorkspaceMember,
 } from "@/lib/brands-api";
-import { fetchPublicServices } from "@/lib/services-api";
+import { fetchPublicServices, deleteService } from "@/lib/services-api";
 import { translateBackendErrorMessage } from "@/lib/backend-errors";
 import { proxyMediaUrl } from "@/lib/media";
 import { selectAuthSession } from "@/store/auth";
@@ -56,11 +57,16 @@ type ServicesCopy = {
   modalBranch: string;
   modalIndividual: string;
   modalClose: string;
+  addService: string;
+  tableService: string;
+  tableBranch: string;
+  tablePrice: string;
+  tableDuration: string;
 };
 
 const EN_SERVICES_COPY: ServicesCopy = {
   sectionTitle: "Services",
-  emptyState: "No active services at this branch.",
+  emptyState: "No active services at this brand yet.",
   loadingState: "Loading services…",
   labelFree: "Free",
   labelFrom: "From",
@@ -75,12 +81,17 @@ const EN_SERVICES_COPY: ServicesCopy = {
   modalBranch: "Branch",
   modalIndividual: "Individual",
   modalClose: "Close",
+  addService: "Add service",
+  tableService: "Service",
+  tableBranch: "Branch",
+  tablePrice: "Price",
+  tableDuration: "Duration",
 };
 
 const TR_SERVICES_COPY: ServicesCopy = {
   ...EN_SERVICES_COPY,
   sectionTitle: "Hizmetler",
-  emptyState: "Bu şubede aktif hizmet bulunmuyor.",
+  emptyState: "Bu markaya ait aktif hizmet bulunmuyor.",
   loadingState: "Hizmetler yükleniyor…",
   labelFree: "Ücretsiz",
   labelFrom: "Başlangıç",
@@ -95,12 +106,17 @@ const TR_SERVICES_COPY: ServicesCopy = {
   modalBranch: "Şube",
   modalIndividual: "Bireysel",
   modalClose: "Kapat",
+  addService: "Hizmet ekle",
+  tableService: "Hizmet",
+  tableBranch: "Şube",
+  tablePrice: "Fiyat",
+  tableDuration: "Süre",
 };
 
 const AZ_SERVICES_COPY: ServicesCopy = {
   ...EN_SERVICES_COPY,
   sectionTitle: "Xidmətlər",
-  emptyState: "Bu filialda aktiv xidmət yoxdur.",
+  emptyState: "Bu brenda aid aktiv xidmət yoxdur.",
   loadingState: "Xidmətlər yüklənir…",
   labelFree: "Pulsuz",
   labelFrom: "Başlangıcdan",
@@ -115,6 +131,11 @@ const AZ_SERVICES_COPY: ServicesCopy = {
   modalBranch: "Filial",
   modalIndividual: "Fərdi",
   modalClose: "Bağla",
+  addService: "Xidmət əlavə et",
+  tableService: "Xidmət",
+  tableBranch: "Filial",
+  tablePrice: "Qiymət",
+  tableDuration: "Müddət",
 };
 
 function getServicesCopy(locale: string): ServicesCopy {
@@ -398,6 +419,8 @@ export function BrandDetail({
   const [brandServices, setBrandServices] = useState<Service[]>([]);
   const [servicesState, setServicesState] = useState<"idle" | "loading" | "ready">("idle");
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [deletingServiceId, setDeletingServiceId] = useState<string | null>(null);
+  const [deletingBranchId, setDeletingBranchId] = useState<string | null>(null);
 
   const isOwner = Boolean(currentUserId && brandState.owner_id === currentUserId);
   const categories = useMemo(
@@ -658,6 +681,51 @@ export function BrandDetail({
     router.push(`/brands?progress=edit&id=${brandState.id}`);
   }
 
+  function handleEditService(svc: Service, e: React.MouseEvent) {
+    e.stopPropagation();
+    router.push(`/services?action=edit&id=${svc.id}`);
+  }
+
+  async function handleDeleteService(svc: Service, e: React.MouseEvent) {
+    e.stopPropagation();
+    const token = session.accessToken;
+    if (!token) return;
+    if (!window.confirm(`"${svc.title}" xidmətini silmək istədiyinizə əminsiniz?`)) return;
+    setDeletingServiceId(svc.id);
+    try {
+      await deleteService(svc.id, token);
+      setBrandServices((prev) => prev.filter((s) => s.id !== svc.id));
+    } catch {
+      // silent — service remains in list
+    } finally {
+      setDeletingServiceId(null);
+    }
+  }
+
+  function handleEditBranch(branch: Branch, e: React.MouseEvent) {
+    e.stopPropagation();
+    router.push(`/brands?progress=edit&id=${brandState.id}&branch=${branch.id}`);
+  }
+
+  async function handleDeleteBranch(branch: Branch, e: React.MouseEvent) {
+    e.stopPropagation();
+    const token = session.accessToken;
+    if (!token) return;
+    if (!window.confirm(`"${branch.name}" filialını silmək istədiyinizə əminsiniz?`)) return;
+    setDeletingBranchId(branch.id);
+    try {
+      await deleteBranchApi(brandState.id, branch.id, token);
+      setBrandState((prev) => ({
+        ...prev,
+        branches: (prev.branches ?? []).filter((b) => b.id !== branch.id),
+      }));
+    } catch {
+      // silent — branch remains in list
+    } finally {
+      setDeletingBranchId(null);
+    }
+  }
+
   async function handleRate(value: number) {
     const accessToken = session.accessToken;
     if (!accessToken) {
@@ -793,6 +861,7 @@ export function BrandDetail({
                 label={t.brandCardOwnerLabel}
                 subtitle={ownerSubtitle}
                 className={styles.ownerProfile}
+                priority
               />
             </div>
           ) : null}
@@ -852,126 +921,6 @@ export function BrandDetail({
             </div>
           </div>
         </aside>
-      </section>
-
-      <section className={styles.controlPanel}>
-        <div className={styles.filterTabs} role="tablist" aria-label={t.branchesTitle}>
-          {([
-            ["all", t.detailFilterAllBranches],
-            ["open247", t.detailFilterOpen247],
-            ["withContact", t.detailFilterWithContact],
-          ] as const).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              role="tab"
-              aria-selected={branchFilter === value}
-              className={`${styles.filterTab} ${branchFilter === value ? styles.filterTabActive : ""}`}
-              onClick={() => setBranchFilter(value)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <label className={styles.searchField}>
-          <Icon icon="search" size={18} color="current" className={styles.searchIcon} />
-          <Input
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder={t.detailSearchPlaceholder}
-            className={styles.searchInput}
-            aria-label={t.detailSearchPlaceholder}
-          />
-        </label>
-      </section>
-
-      <section className={styles.branchPanel}>
-        <div className={styles.tableHead}>
-          <span>{t.detailTableBranch}</span>
-          <span>{t.detailTableAddress}</span>
-          <span>{t.detailTableAvailability}</span>
-          <span>{t.detailTableContact}</span>
-        </div>
-
-        <div className={styles.tableBody}>
-          {filteredBranches.length === 0 ? (
-            <div className={styles.emptyState}>
-              {branches.length === 0 ? t.noBranches : t.detailNoMatchingBranches}
-            </div>
-          ) : (
-            filteredBranches.map((branch) => {
-              const branchCoverUrl = proxyMediaUrl(branch.cover_url ?? null);
-
-              return (
-                <button
-                  key={branch.id}
-                  type="button"
-                  className={styles.branchRow}
-                  onClick={() => setSelectedBranch(branch)}
-                  aria-label={`${branch.name} — ${t.detailBranchOpenDetails}`}
-                >
-                  <div className={styles.branchIdentity}>
-                    {branchCoverUrl ? (
-                      <div className={styles.branchCoverThumb}>
-                        <Image
-                          src={branchCoverUrl}
-                          alt={`${branch.name} cover`}
-                          fill
-                          className={styles.branchCoverThumbImage}
-                          sizes="64px"
-                        />
-                      </div>
-                    ) : (
-                      <div className={styles.branchIconBox}>
-                        <Icon icon="account_tree" size={24} color="current" />
-                      </div>
-                    )}
-                    <div className={styles.branchIdentityText}>
-                      <p className={styles.branchName}>{branch.name}</p>
-                      <p className={styles.branchNote}>{studioCopy.rowHint}</p>
-                    </div>
-                  </div>
-
-                  <div className={`${styles.branchCell} ${styles.branchAddressCell}`}>
-                    <p className={styles.branchAddress}>{getBranchAddress(branch)}</p>
-                  </div>
-
-                  <div className={`${styles.branchCell} ${styles.branchAvailabilityCell}`}>
-                    <span
-                      className={`${styles.availabilityBadge} ${branch.is_24_7 ? styles.availabilityLive : styles.availabilityMuted}`}
-                    >
-                      {getBranchAvailability(branch, t.branchField247)}
-                    </span>
-                  </div>
-
-                  <div className={`${styles.branchCell} ${styles.branchContactCell}`}>
-                    {hasBranchContact(branch) ? (
-                      <div className={styles.contactStack}>
-                        {branch.phone ? <span>{branch.phone}</span> : null}
-                        {branch.email ? <span>{branch.email}</span> : null}
-                      </div>
-                    ) : (
-                      <span className={styles.branchMuted}>—</span>
-                    )}
-                  </div>
-                </button>
-              );
-            })
-          )}
-        </div>
-      </section>
-
-      <section className={styles.metricsGrid}>
-        {stats.map((item) => (
-          <div key={item.label} className={styles.metricCard}>
-            <span className={styles.metricLabel}>{item.label}</span>
-            <div className={styles.metricValueRow}>
-              <strong className={styles.metricValue}>{item.value}</strong>
-              {item.hint ? <span className={styles.metricHint}>{item.hint}</span> : null}
-            </div>
-          </div>
-        ))}
       </section>
 
       <section className={styles.galleryPanel}>
@@ -1081,58 +1030,308 @@ export function BrandDetail({
 
       <section className={styles.servicesPanel}>
         <div className={styles.servicesPanelHeader}>
-          <h2 className={styles.servicesPanelTitle}>{servicesCopy.sectionTitle}</h2>
+          <div className={styles.servicesPanelTitleGroup}>
+            <h2 className={styles.servicesPanelTitle}>{servicesCopy.sectionTitle}</h2>
+            {brandServices.length > 0 ? (
+              <span className={styles.servicesCount}>{brandServices.length}</span>
+            ) : null}
+          </div>
+          {isOwner ? (
+            <Button
+              variant="primary"
+              size="small"
+              icon="add"
+              onClick={() => router.push(`/services?action=create&brand=${brandState.id}`)}
+            >
+              {servicesCopy.addService}
+            </Button>
+          ) : null}
         </div>
 
         {servicesState === "loading" ? (
           <div className={styles.emptyState}>{servicesCopy.loadingState}</div>
         ) : brandServices.length === 0 ? (
-          <div className={styles.emptyState}>{servicesCopy.emptyState}</div>
+          <div className={styles.emptyStateServices}>
+            <Icon icon="design_services" size={32} color="current" className={styles.emptyStateServicesIcon} />
+            <p className={styles.emptyStateServicesText}>{servicesCopy.emptyState}</p>
+            {isOwner ? (
+              <Button
+                variant="secondary"
+                size="small"
+                icon="add"
+                onClick={() => router.push(`/services?action=create&brand=${brandState.id}`)}
+              >
+                {servicesCopy.addService}
+              </Button>
+            ) : null}
+          </div>
         ) : (
-          <div className={styles.servicesGrid}>
-            {brandServices.map((svc) => {
-              const priceLabel = formatServicePrice(svc, servicesCopy);
-              const durationLabel = formatServiceDuration(svc.duration, servicesCopy.labelDurationUnit);
-              const firstImg = svc.images[0];
-              const imgUrl = firstImg ? proxyMediaUrl(firstImg.url) : null;
+          <>
+            <div className={styles.servicesTableHead}>
+              <span>{servicesCopy.tableService}</span>
+              <span>{servicesCopy.tableBranch}</span>
+              <span>{servicesCopy.tablePrice}</span>
+              <span>{servicesCopy.tableDuration}</span>
+            </div>
+            <div className={styles.servicesTableBody}>
+              {brandServices.map((svc) => {
+                const priceLabel = formatServicePrice(svc, servicesCopy);
+                const durationLabel = formatServiceDuration(svc.duration, servicesCopy.labelDurationUnit);
+                const firstImg = svc.images[0];
+                const imgUrl = firstImg ? proxyMediaUrl(firstImg.url) : null;
+                const branchName = svc.branch_id
+                  ? (branches.find((b) => b.id === svc.branch_id)?.name ?? "—")
+                  : servicesCopy.modalIndividual;
+
+                return (
+                  <div
+                    key={svc.id}
+                    role="button"
+                    tabIndex={0}
+                    className={styles.serviceRow}
+                    onClick={() => setSelectedService(svc)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSelectedService(svc); }}
+                    aria-label={svc.title}
+                  >
+                    <div className={styles.serviceIdentity}>
+                      {imgUrl ? (
+                        <div className={styles.serviceThumb}>
+                          <Image
+                            src={imgUrl}
+                            alt={svc.title}
+                            fill
+                            className={styles.serviceThumbImage}
+                            sizes="56px"
+                          />
+                        </div>
+                      ) : (
+                        <div className={styles.serviceThumbPlaceholder}>
+                          <Icon icon="design_services" size={22} color="current" />
+                        </div>
+                      )}
+                      <div className={styles.serviceIdentityText}>
+                        <p className={styles.serviceName}>{svc.title}</p>
+                        {svc.service_category ? (
+                          <span className={styles.serviceCategory}>
+                            {messages.categories[svc.service_category.key as keyof typeof messages.categories] ?? svc.service_category.key}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className={`${styles.serviceCell} ${styles.serviceBranchCell}`}>
+                      <span className={styles.serviceBranchName}>{branchName}</span>
+                    </div>
+
+                    <div className={`${styles.serviceCell} ${styles.servicePriceCell}`}>
+                      <span className={styles.servicePricePill}>{priceLabel}</span>
+                    </div>
+
+                    <div className={`${styles.serviceCell} ${styles.serviceDurationCell}`}>
+                      {durationLabel !== "—" ? (
+                        <span className={styles.serviceDurationPill}>
+                          <Icon icon="schedule" size={13} color="current" />
+                          {durationLabel}
+                        </span>
+                      ) : (
+                        <span className={styles.serviceMuted}>—</span>
+                      )}
+                    </div>
+
+                    {isOwner ? (
+                      <div className={styles.rowActions} onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          className={styles.rowActionBtn}
+                          onClick={(e) => handleEditService(svc, e)}
+                          aria-label="Edit service"
+                          title="Edit"
+                        >
+                          <Icon icon="edit" size={15} color="current" />
+                        </button>
+                        <button
+                          type="button"
+                          className={`${styles.rowActionBtn} ${styles.rowActionBtnDanger}`}
+                          onClick={(e) => handleDeleteService(svc, e)}
+                          disabled={deletingServiceId === svc.id}
+                          aria-label="Delete service"
+                          title="Delete"
+                        >
+                          <Icon icon="delete" size={15} color="current" />
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </section>
+
+      <div className={styles.branchesSectionHeader}>
+        <div className={styles.branchesSectionTitleGroup}>
+          <h2 className={styles.branchesSectionTitle}>{t.branchesTitle}</h2>
+          {branches.length > 0 ? (
+            <span className={styles.branchesCount}>{branches.length}</span>
+          ) : null}
+        </div>
+        {isOwner ? (
+          <Button
+            variant="primary"
+            size="small"
+            icon="add"
+            onClick={() => router.push(`/brands?progress=edit&id=${brandState.id}&addBranch=1`)}
+          >
+            {t.addBranch}
+          </Button>
+        ) : null}
+      </div>
+
+      <section className={styles.controlPanel}>
+        <div className={styles.filterTabs} role="tablist" aria-label={t.branchesTitle}>
+          {([
+            ["all", t.detailFilterAllBranches],
+            ["open247", t.detailFilterOpen247],
+            ["withContact", t.detailFilterWithContact],
+          ] as const).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              role="tab"
+              aria-selected={branchFilter === value}
+              className={`${styles.filterTab} ${branchFilter === value ? styles.filterTabActive : ""}`}
+              onClick={() => setBranchFilter(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <label className={styles.searchField}>
+          <Icon icon="search" size={18} color="current" className={styles.searchIcon} />
+          <Input
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder={t.detailSearchPlaceholder}
+            className={styles.searchInput}
+            aria-label={t.detailSearchPlaceholder}
+          />
+        </label>
+      </section>
+
+      <section className={styles.branchPanel}>
+        <div className={styles.tableHead}>
+          <span>{t.detailTableBranch}</span>
+          <span>{t.detailTableAddress}</span>
+          <span>{t.detailTableAvailability}</span>
+          <span>{t.detailTableContact}</span>
+        </div>
+
+        <div className={styles.tableBody}>
+          {filteredBranches.length === 0 ? (
+            <div className={styles.emptyState}>
+              {branches.length === 0 ? t.noBranches : t.detailNoMatchingBranches}
+            </div>
+          ) : (
+            filteredBranches.map((branch) => {
+              const branchCoverUrl = proxyMediaUrl(branch.cover_url ?? null);
 
               return (
-                <button
-                  key={svc.id}
-                  type="button"
-                  className={styles.serviceCard}
-                  onClick={() => setSelectedService(svc)}
+                <div
+                  key={branch.id}
+                  role="button"
+                  tabIndex={0}
+                  className={styles.branchRow}
+                  onClick={() => setSelectedBranch(branch)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSelectedBranch(branch); }}
+                  aria-label={`${branch.name} — ${t.detailBranchOpenDetails}`}
                 >
-                  {imgUrl ? (
-                    <div className={styles.serviceCardThumb}>
-                      <Image
-                        src={imgUrl}
-                        alt={svc.title}
-                        fill
-                        className={styles.serviceCardThumbImage}
-                        sizes="64px"
-                      />
-                    </div>
-                  ) : (
-                    <div className={styles.serviceCardThumbPlaceholder}>
-                      <Icon icon="design_services" size={20} color="current" />
-                    </div>
-                  )}
-                  <div className={styles.serviceCardBody}>
-                    <p className={styles.serviceCardTitle}>{svc.title}</p>
-                    {svc.service_category ? (
-                      <span className={styles.serviceCardCategory}>{messages.categories[svc.service_category.key as keyof typeof messages.categories] ?? svc.service_category.key}</span>
-                    ) : null}
-                    <div className={styles.serviceCardMeta}>
-                      <span>{priceLabel}</span>
-                      {durationLabel !== "—" ? <span>{durationLabel}</span> : null}
+                  <div className={styles.branchIdentity}>
+                    {branchCoverUrl ? (
+                      <div className={styles.branchCoverThumb}>
+                        <Image
+                          src={branchCoverUrl}
+                          alt={`${branch.name} cover`}
+                          fill
+                          className={styles.branchCoverThumbImage}
+                          sizes="64px"
+                        />
+                      </div>
+                    ) : (
+                      <div className={styles.branchIconBox}>
+                        <Icon icon="account_tree" size={24} color="current" />
+                      </div>
+                    )}
+                    <div className={styles.branchIdentityText}>
+                      <p className={styles.branchName}>{branch.name}</p>
+                      <p className={styles.branchNote}>{studioCopy.rowHint}</p>
                     </div>
                   </div>
-                </button>
+
+                  <div className={`${styles.branchCell} ${styles.branchAddressCell}`}>
+                    <p className={styles.branchAddress}>{getBranchAddress(branch)}</p>
+                  </div>
+
+                  <div className={`${styles.branchCell} ${styles.branchAvailabilityCell}`}>
+                    <span
+                      className={`${styles.availabilityBadge} ${branch.is_24_7 ? styles.availabilityLive : styles.availabilityMuted}`}
+                    >
+                      {getBranchAvailability(branch, t.branchField247)}
+                    </span>
+                  </div>
+
+                  <div className={`${styles.branchCell} ${styles.branchContactCell}`}>
+                    {hasBranchContact(branch) ? (
+                      <div className={styles.contactStack}>
+                        {branch.phone ? <span>{branch.phone}</span> : null}
+                        {branch.email ? <span>{branch.email}</span> : null}
+                      </div>
+                    ) : (
+                      <span className={styles.branchMuted}>—</span>
+                    )}
+                  </div>
+
+                  {isOwner ? (
+                    <div className={styles.rowActions} onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        className={styles.rowActionBtn}
+                        onClick={(e) => handleEditBranch(branch, e)}
+                        aria-label="Edit branch"
+                        title="Edit"
+                      >
+                        <Icon icon="edit" size={15} color="current" />
+                      </button>
+                      <button
+                        type="button"
+                        className={`${styles.rowActionBtn} ${styles.rowActionBtnDanger}`}
+                        onClick={(e) => handleDeleteBranch(branch, e)}
+                        disabled={deletingBranchId === branch.id}
+                        aria-label="Delete branch"
+                        title="Delete"
+                      >
+                        <Icon icon="delete" size={15} color="current" />
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               );
-            })}
+            })
+          )}
+        </div>
+      </section>
+
+      <section className={styles.metricsGrid}>
+        {stats.map((item) => (
+          <div key={item.label} className={styles.metricCard}>
+            <span className={styles.metricLabel}>{item.label}</span>
+            <div className={styles.metricValueRow}>
+              <strong className={styles.metricValue}>{item.value}</strong>
+              {item.hint ? <span className={styles.metricHint}>{item.hint}</span> : null}
+            </div>
           </div>
-        )}
+        ))}
       </section>
 
       <AlertDialog

@@ -13,7 +13,7 @@ import {
   Input,
 } from "@/components/atoms";
 import { Combobox, type ComboboxOption } from "@/components/atoms/combobox";
-import { ImageCropModal } from "@/components/atoms/image-crop-modal/image-crop-modal";
+import { AvatarCropDialog } from "@/components/molecules/avatar-crop-dialog/avatar-crop-dialog";
 import { Switch } from "@/components/atoms/switch";
 import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
@@ -489,6 +489,7 @@ type ServiceFormPageProps = {
   serviceCategories: ServiceCategory[];
   accessToken: string;
   editingService: Service | null;
+  initialBrandId?: string;
   onSaved: (service: Service, isNew: boolean) => void;
   onCancel: () => void;
 };
@@ -501,11 +502,16 @@ function ServiceFormPage({
   serviceCategories,
   accessToken,
   editingService,
+  initialBrandId,
   onSaved,
   onCancel,
 }: ServiceFormPageProps) {
   const { messages } = useLocale();
-  const initialData = editingService ? serviceToFormState(editingService, brands) : DEFAULT_FORM;
+  const initialData = editingService
+    ? serviceToFormState(editingService, brands)
+    : initialBrandId
+      ? { ...DEFAULT_FORM, brandId: initialBrandId, contextType: "branch" as const }
+      : DEFAULT_FORM;
   const [form, setForm] = useState<ServiceFormState>(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -855,11 +861,12 @@ function ServiceFormPage({
       </form>
 
       {cropTarget ? (
-        <ImageCropModal
+        <AvatarCropDialog
           file={cropTarget.file}
           aspectRatio="16:9"
-          onCrop={handleCropDone}
-          onCancel={() => setCropTarget(null)}
+          open={true}
+          onConfirm={handleCropDone}
+          onClose={() => setCropTarget(null)}
         />
       ) : null}
     </div>
@@ -1207,11 +1214,20 @@ export function ServicesUsoPage({
   const initialService = initialServiceId
     ? initialServices.find((s) => s.id === initialServiceId) ?? null
     : null;
+  const initialAction = searchParams.get("action");
+  const initialBrandId = searchParams.get("brand") ?? undefined;
+
+  const isEditAction = initialAction === "edit" && Boolean(initialService);
 
   const [view, setView] = useState<"list" | "detail" | "form">(
-    initialService ? "detail" : "list",
+    isEditAction ? "form" : initialService ? "detail" : initialAction === "create" ? "form" : "list",
   );
-  const [viewService, setViewService] = useState<Service | null>(initialService);
+  const [viewService, setViewService] = useState<Service | null>(
+    isEditAction ? null : initialService,
+  );
+  const [createBrandId, setCreateBrandId] = useState<string | undefined>(
+    initialAction === "create" ? initialBrandId : undefined,
+  );
 
   useEffect(() => {
     const id = searchParams.get("id");
@@ -1222,7 +1238,9 @@ export function ServicesUsoPage({
       setView("detail");
     }
   }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
-  const [editingService, setEditingService] = useState<Service | null>(null);
+  const [editingService, setEditingService] = useState<Service | null>(
+    isEditAction ? initialService : null,
+  );
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
@@ -1231,8 +1249,9 @@ export function ServicesUsoPage({
     setView("detail");
   }
 
-  function openCreate() {
+  function openCreate(brandId?: string) {
     setEditingService(null);
+    setCreateBrandId(brandId);
     setView("form");
   }
 
@@ -1250,6 +1269,7 @@ export function ServicesUsoPage({
   function backToList() {
     setViewService(null);
     setEditingService(null);
+    setCreateBrandId(undefined);
     setView("list");
   }
 
@@ -1312,12 +1332,13 @@ export function ServicesUsoPage({
   if (view === "form") {
     return (
       <ServiceFormPage
-        key={editingService?.id ?? "create"}
+        key={editingService?.id ?? `create-${createBrandId ?? ""}`}
         copy={copy}
         brands={brands}
         serviceCategories={serviceCategories}
         accessToken={accessToken}
         editingService={editingService}
+        initialBrandId={editingService ? undefined : createBrandId}
         onSaved={(service, isNew) => {
           if (isNew) {
             setServices((prev) => [service, ...prev]);
@@ -1360,7 +1381,7 @@ export function ServicesUsoPage({
     <div className={styles.wrapper}>
       <div className={styles.pageHeader}>
         <h1 className={styles.title}>{copy.pageTitle}</h1>
-        <Button variant="primary" icon="add" onClick={openCreate}>
+        <Button variant="primary" icon="add" onClick={() => openCreate()}>
           {copy.createService}
         </Button>
       </div>
@@ -1383,7 +1404,7 @@ export function ServicesUsoPage({
           </div>
           <p className={styles.emptyTitle}>{copy.emptyTitle}</p>
           <p className={styles.emptyDescription}>{copy.emptyDescription}</p>
-          <Button variant="primary" icon="add" onClick={openCreate}>
+          <Button variant="primary" icon="add" onClick={() => openCreate()}>
             {copy.createService}
           </Button>
         </div>
