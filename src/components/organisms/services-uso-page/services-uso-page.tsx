@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useEffect } from "react";
+import { type ReactNode, useMemo, useRef, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -1149,12 +1149,13 @@ function ServiceCard({
 
 // ─── Service Detail View ──────────────────────────────────────────────────────
 
-function ServiceDetailView({
+export function ServiceDetailView({
   service,
   copy,
   brands,
   user,
   actionLoading,
+  actionSlot,
   onBack,
   onEdit,
   onSubmit,
@@ -1170,6 +1171,7 @@ function ServiceDetailView({
   brands: Brand[];
   user: AuthenticatedUser;
   actionLoading: boolean;
+  actionSlot?: ReactNode;
   onBack: () => void;
   onEdit: () => void;
   onSubmit: () => void;
@@ -1338,11 +1340,13 @@ function ServiceDetailView({
           <div className={styles.detailActionsCard}>
             <h2 className={styles.detailSidebarTitle}>{copy.detailActions}</h2>
 
-            {service.status === "PENDING" && (
+            {actionSlot ? (
+              <div className={styles.detailActionGroup}>{actionSlot}</div>
+            ) : service.status === "PENDING" ? (
               <p className={styles.pendingNote}>{copy.pendingNote}</p>
-            )}
+            ) : null}
 
-            {service.status === "DRAFT" && (
+            {!actionSlot && service.status === "DRAFT" && (
               <div className={styles.detailActionGroup}>
                 <Button variant="primary" icon="send" onClick={onSubmit} isLoading={actionLoading} className={styles.detailActionBtn}>
                   {copy.actionSubmit}
@@ -1356,7 +1360,7 @@ function ServiceDetailView({
               </div>
             )}
 
-            {service.status === "REJECTED" && (
+            {!actionSlot && service.status === "REJECTED" && (
               <div className={styles.detailActionGroup}>
                 <Button variant="outline" icon="edit" onClick={onEdit} disabled={actionLoading} className={styles.detailActionBtn}>
                   {copy.actionEdit}
@@ -1367,7 +1371,7 @@ function ServiceDetailView({
               </div>
             )}
 
-            {service.status === "ACTIVE" && (
+            {!actionSlot && service.status === "ACTIVE" && (
               <div className={styles.detailActionGroup}>
                 <Button variant="outline" icon="pause" onClick={onPause} isLoading={actionLoading} className={styles.detailActionBtn}>
                   {copy.actionPause}
@@ -1378,7 +1382,7 @@ function ServiceDetailView({
               </div>
             )}
 
-            {service.status === "PAUSED" && (
+            {!actionSlot && service.status === "PAUSED" && (
               <div className={styles.detailActionGroup}>
                 <Button variant="primary" icon="edit" onClick={onEdit} disabled={actionLoading} className={styles.detailActionBtn}>
                   {copy.actionEdit}
@@ -1392,7 +1396,7 @@ function ServiceDetailView({
               </div>
             )}
 
-            {service.status === "ARCHIVED" && (
+            {!actionSlot && service.status === "ARCHIVED" && (
               <div className={styles.detailActionGroup}>
                 <Button variant="outline" icon="autorenew" onClick={onUnarchive} isLoading={actionLoading} className={styles.detailActionBtn}>
                   {copy.actionUnarchive}
@@ -1403,6 +1407,44 @@ function ServiceDetailView({
         </div>
       </div>
     </div>
+  );
+}
+
+export function ServiceReadOnlyDetailView({
+  service,
+  brands,
+  user,
+  actionSlot,
+  onBack,
+}: {
+  service: Service;
+  brands: Brand[];
+  user: AuthenticatedUser;
+  actionSlot?: ReactNode;
+  onBack: () => void;
+}) {
+  const { locale } = useLocale();
+  const copy = useMemo(() => getCopy(locale), [locale]);
+  const noop = () => {};
+
+  return (
+    <ServiceDetailView
+      service={service}
+      copy={copy}
+      brands={brands}
+      user={user}
+      actionLoading={false}
+      actionSlot={actionSlot}
+      onBack={onBack}
+      onEdit={noop}
+      onSubmit={noop}
+      onResubmit={noop}
+      onDelete={noop}
+      onPause={noop}
+      onResume={noop}
+      onArchive={noop}
+      onUnarchive={noop}
+    />
   );
 }
 

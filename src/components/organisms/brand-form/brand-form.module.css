@@ -359,36 +359,21 @@
   box-shadow: 0 4px 16px var(--app-shadow-color);
 }
 
-/* ── Branches list ── */
-/* Social media */
-.socialGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem 1.25rem;
+/* Social sidebar section */
+.socialSidebarSection {
+  padding: 1rem 1.125rem;
 }
 
-.socialField {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.socialLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
+.socialSidebarTitle {
+  margin: 0 0 0.75rem;
   font-size: var(--font-size-small);
-  font-weight: 600;
-  color: var(--app-text-strong);
-  line-height: 1.4;
+  font-weight: 700;
+  color: var(--app-text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.socialIconWrap {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
+/* ── Branches list ── */
 .branchesList {
   display: flex;
   flex-direction: column;

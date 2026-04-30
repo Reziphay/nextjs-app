@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/atoms/button";
 import { Alert } from "@/components/atoms/alert";
 import { OwnerCard } from "@/components/molecules/owner-card";
-import { RichTextDisplay } from "@/components/molecules/rich-text-editor/rich-text-display";
+import { BrandDetail } from "@/components/organisms/brand-detail";
+import { ServiceReadOnlyDetailView } from "@/components/organisms/services-uso-page/services-uso-page";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useAppSelector } from "@/store/hooks";
 import { selectAuthSession } from "@/store/auth";
@@ -18,13 +19,15 @@ import {
   approveService,
   rejectService,
 } from "@/lib/moderation-api";
-import { proxyMediaUrl } from "@/lib/media";
 import type {
   QueueItem,
   ModerationBrandDetail,
   ModerationServiceDetail,
   ChecklistItem,
 } from "@/types/moderation";
+import type { Brand } from "@/types/brand";
+import type { Service } from "@/types/service";
+import type { AuthenticatedUser, PublicUserProfile } from "@/types/user_types";
 import styles from "./admin-moderation-workspace.module.css";
 
 type ActiveTab = "brand" | "service";
@@ -74,26 +77,131 @@ function formatDate(iso: string): string {
   }
 }
 
-function formatDateTime(iso?: string): string | null {
-  if (!iso) return null;
-  try {
-    return new Date(iso).toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return iso;
-  }
+function mapModerationOwnerToProfile(
+  owner: ModerationBrandDetail["owner"] | ModerationServiceDetail["owner"],
+  fallbackDate: string,
+): PublicUserProfile {
+  return {
+    id: owner.id,
+    first_name: owner.first_name,
+    last_name: owner.last_name,
+    email: owner.email,
+    type: owner.type === "ucr" || owner.type === "admin" ? owner.type : "uso",
+    avatar_url: owner.avatar_url ?? null,
+    created_at: owner.created_at ?? fallbackDate,
+    updated_at: owner.created_at ?? fallbackDate,
+  };
 }
 
-function formatPrice(value?: number | null, priceType?: string): string {
-  if (priceType === "FREE") return "Pulsuz";
-  if (typeof value !== "number") return "—";
-  const prefix = priceType === "STARTING_FROM" ? "Başlayır: " : "";
-  return `${prefix}${value.toLocaleString(undefined, { maximumFractionDigits: 2 })} AZN`;
+function mapModerationOwnerToUser(
+  owner: ModerationServiceDetail["owner"],
+): AuthenticatedUser {
+  return {
+    id: owner.id,
+    first_name: owner.first_name,
+    last_name: owner.last_name,
+    email: owner.email,
+    type: owner.type === "ucr" || owner.type === "admin" ? owner.type : "uso",
+    avatar_url: owner.avatar_url ?? null,
+    email_verified: true,
+  };
+}
+
+function mapModerationBrandToBrand(brand: ModerationBrandDetail): Brand {
+  return {
+    id: brand.id,
+    name: brand.name,
+    description: brand.description ?? undefined,
+    status: brand.status as Brand["status"],
+    owner_id: brand.owner.id,
+    logo_url: brand.logo_url ?? undefined,
+    gallery: (brand.gallery ?? []).map((item, index) => ({
+      id: `${brand.id}-gallery-${index}`,
+      media_id: `${brand.id}-gallery-media-${index}`,
+      url: item.url,
+      order: item.order ?? index,
+    })),
+    branches: (brand.branches ?? []).map((branch) => ({
+      id: branch.id,
+      brand_id: brand.id,
+      name: branch.name,
+      description: branch.description ?? undefined,
+      address1: branch.address1,
+      address2: branch.address2 ?? undefined,
+      phone: branch.phone ?? undefined,
+      email: branch.email ?? undefined,
+      is_24_7: Boolean(branch.is_24_7),
+      opening: branch.opening ?? undefined,
+      closing: branch.closing ?? undefined,
+      breaks: [],
+      cover_url: branch.cover_url ?? undefined,
+    })),
+    categories: brand.categories ?? [],
+    rating: null,
+    rating_count: 0,
+    my_rating: null,
+    created_at: brand.created_at,
+    updated_at: brand.updated_at ?? brand.created_at,
+  };
+}
+
+function mapServiceBrandToBrand(service: ModerationServiceDetail): Brand | null {
+  const brand = service.branch?.brand;
+  if (!brand || !service.branch) return null;
+
+  return {
+    id: brand.id,
+    name: brand.name,
+    description: undefined,
+    status: "ACTIVE",
+    owner_id: service.owner.id,
+    logo_url: brand.logo_url ?? undefined,
+    gallery: [],
+    branches: [
+      {
+        id: service.branch.id,
+        brand_id: brand.id,
+        name: service.branch.name,
+        address1: service.branch.address1,
+        address2: service.branch.address2 ?? undefined,
+        is_24_7: false,
+        breaks: [],
+      },
+    ],
+    categories: [],
+    rating: brand.rating ?? null,
+    rating_count: brand.rating_count ?? 0,
+    my_rating: null,
+    created_at: service.created_at,
+    updated_at: service.updated_at ?? service.created_at,
+  };
+}
+
+function mapModerationServiceToService(service: ModerationServiceDetail): Service {
+  return {
+    id: service.id,
+    title: service.title,
+    description: service.description ?? undefined,
+    owner_id: service.owner.id,
+    branch_id: service.branch?.id ?? null,
+    service_category_id: service.service_category_id ?? service.service_category?.id ?? null,
+    service_category: service.service_category ?? null,
+    price: service.price ?? null,
+    price_type: service.price_type === "STARTING_FROM" || service.price_type === "FREE" ? service.price_type : "FIXED",
+    duration: service.duration ?? null,
+    address: service.branch
+      ? [service.branch.address1, service.branch.address2].filter(Boolean).join(", ")
+      : (service.address ?? undefined),
+    status: service.status as Service["status"],
+    images: (service.images ?? []).map((item, index) => ({
+      id: `${service.id}-image-${index}`,
+      media_id: `${service.id}-image-media-${index}`,
+      order: index,
+      url: item.url,
+    })),
+    created_at: service.created_at,
+    updated_at: service.updated_at ?? service.created_at,
+  };
 }
 
 export function AdminModerationWorkspace() {
@@ -104,14 +212,7 @@ export function AdminModerationWorkspace() {
   const { accessToken } = useAppSelector(selectAuthSession);
   const decisionLabel = locale === "az" ? "Qərar" : "Decision";
   const closeLabel = locale === "az" ? "Bağla" : "Close";
-  const detailsLabel = locale === "az" ? "Detallar" : "Details";
   const addressLabel = locale === "az" ? "Ünvan" : "Address";
-  const branchLabel = locale === "az" ? "Filial" : "Branch";
-  const createdLabel = locale === "az" ? "Yaradılma" : "Created";
-  const updatedLabel = locale === "az" ? "Yenilənmə" : "Updated";
-  const priceLabel = locale === "az" ? "Qiymət" : "Price";
-  const durationLabel = locale === "az" ? "Müddət" : "Duration";
-  const noDescriptionLabel = locale === "az" ? "Təsvir yoxdur." : "No description.";
   const brandRoleLabel = locale === "az" ? "Brend" : "Brand";
   const providerRoleLabel = "Provider";
 
@@ -476,43 +577,16 @@ export function AdminModerationWorkspace() {
         ? detail.data.title
         : "…";
 
-  const entityDescription =
-    detail?.type === "brand"
-      ? detail.data.description
-      : detail?.type === "service"
-        ? detail.data.description
-        : undefined;
-
-  const entityCategory =
-    detail?.type === "brand"
-      ? (() => {
-          const cat = detail.data.categories?.[0];
-          return cat ? (messages.categories[cat.key as keyof typeof messages.categories] ?? cat.key) : undefined;
-        })()
-      : detail?.type === "service"
-        ? (() => {
-            const cat = detail.data.service_category;
-            return cat ? (messages.categories[cat.key as keyof typeof messages.categories] ?? cat.key) : undefined;
-          })()
-        : undefined;
-
-  const entityOwner = detail?.data.owner;
-  const serviceBranch = detail?.type === "service" ? detail.data.branch : null;
-  const serviceBrand = serviceBranch?.brand ?? null;
-  const brandBranches = detail?.type === "brand" ? (detail.data.branches ?? []) : [];
-  const entityAddress =
-    detail?.type === "service"
-      ? serviceBranch
-        ? [serviceBranch.address1, serviceBranch.address2].filter(Boolean).join(", ")
-        : detail.data.address
-      : brandBranches.map((branch) => [branch.address1, branch.address2].filter(Boolean).join(", ")).filter(Boolean).join(" • ");
-
-  const galleryImages: string[] =
-    detail?.type === "brand"
-      ? (detail.data.gallery ?? []).map((g) => proxyMediaUrl(g.url) ?? g.url).filter(Boolean)
-      : detail?.type === "service"
-        ? (detail.data.images ?? []).map((i) => proxyMediaUrl(i.url) ?? i.url).filter(Boolean)
-        : [];
+  const decisionAction = (
+    <Button
+      variant="primary"
+      onClick={handleDecisionClick}
+      disabled={actionStatus === "loading" || actionStatus === "success"}
+      icon="rule"
+    >
+      {decisionLabel}
+    </Button>
+  );
 
   return (
     <div className={styles.wrapper}>
@@ -601,124 +675,21 @@ export function AdminModerationWorkspace() {
           ))}
         </div>
       ) : detail ? (
-        <div className={styles.reviewShell}>
-          <div className={styles.reviewMain}>
-            {galleryImages.length > 0 ? (
-              <div className={styles.heroMedia}>
-                <img src={galleryImages[0]} alt={entityTitle} className={styles.heroImage} />
-                {galleryImages.length > 1 && (
-                  <div className={styles.thumbnailRow}>
-                    {galleryImages.slice(1).map((url, idx) => (
-                      <img key={idx} src={url} alt={`${entityTitle} ${idx + 2}`} className={styles.thumbnailImage} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : detail.type === "brand" && detail.data.logo_url ? (
-              <div className={styles.logoHero}>
-                <img src={detail.data.logo_url} alt={detail.data.name} className={styles.logoImg} />
-              </div>
-            ) : (
-              <div className={styles.heroPlaceholder}>{entityTitle}</div>
-            )}
-
-            <div className={styles.detailSection}>
-              <p className={styles.detailLabel}>{messages.brands.fieldDescription}</p>
-              <RichTextDisplay
-                html={entityDescription ?? ""}
-                className={styles.detailValue}
-                emptyFallback={noDescriptionLabel}
-              />
-            </div>
-
-            {detail.type === "brand" && brandBranches.length > 0 && (
-              <div className={styles.branchList}>
-                <p className={styles.detailLabel}>{branchLabel}</p>
-                {brandBranches.map((branch) => (
-                  <div key={branch.id} className={styles.branchItem}>
-                    <strong>{branch.name}</strong>
-                    <span>{[branch.address1, branch.address2].filter(Boolean).join(", ")}</span>
-                    {(branch.phone || branch.email) && (
-                      <small>{[branch.phone, branch.email].filter(Boolean).join(" • ")}</small>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <aside className={styles.reviewSidebar}>
-            <div className={styles.detailCard}>
-              <h2 className={styles.sidebarTitle}>{detailsLabel}</h2>
-              <dl className={styles.detailDl}>
-                {entityCategory && (
-                  <>
-                    <dt>{t.categoryLabel}</dt>
-                    <dd><span className={styles.detailChip}>{entityCategory}</span></dd>
-                  </>
-                )}
-                {detail.type === "service" && (
-                  <>
-                    <dt>{priceLabel}</dt>
-                    <dd>{formatPrice(detail.data.price, detail.data.price_type)}</dd>
-                    <dt>{durationLabel}</dt>
-                    <dd>{detail.data.duration ? `${detail.data.duration} dəq` : "—"}</dd>
-                  </>
-                )}
-                {serviceBranch && (
-                  <>
-                    <dt>{branchLabel}</dt>
-                    <dd>{serviceBranch.name}</dd>
-                  </>
-                )}
-                {entityAddress && (
-                  <>
-                    <dt>{addressLabel}</dt>
-                    <dd>{entityAddress}</dd>
-                  </>
-                )}
-                <dt>{createdLabel}</dt>
-                <dd>{formatDateTime(detail.data.created_at)}</dd>
-                <dt>{updatedLabel}</dt>
-                <dd>{formatDateTime(detail.data.updated_at)}</dd>
-              </dl>
-
-              <div className={styles.detailOwnerCardWrap}>
-                {detail.type === "service" && serviceBrand ? (
-                  <OwnerCard
-                    roleLabel={brandRoleLabel}
-                    name={serviceBrand.name}
-                    href={`/brands?id=${serviceBrand.id}`}
-                    logoUrl={serviceBrand.logo_url}
-                    rating={serviceBrand.rating}
-                    ratingCount={serviceBrand.rating_count}
-                  />
-                ) : entityOwner ? (
-                  <OwnerCard
-                    roleLabel={providerRoleLabel}
-                    name={getOwnerName(entityOwner)}
-                    href={`/account?id=${entityOwner.id}`}
-                    avatarUrl={entityOwner.avatar_url}
-                    initials={getInitials(entityOwner)}
-                    subtitle={entityOwner.email}
-                  />
-                ) : null}
-              </div>
-            </div>
-            <div className={styles.detailCard}>
-              <div className={styles.actionBar}>
-                <Button
-                  variant="primary"
-                  onClick={handleDecisionClick}
-                  disabled={actionStatus === "loading" || actionStatus === "success"}
-                  icon="rule"
-                >
-                  {decisionLabel}
-                </Button>
-              </div>
-            </div>
-          </aside>
-        </div>
+        detail.type === "brand" ? (
+          <BrandDetail
+            brand={mapModerationBrandToBrand(detail.data)}
+            owner={mapModerationOwnerToProfile(detail.data.owner, detail.data.created_at)}
+            actionSlot={decisionAction}
+          />
+        ) : (
+          <ServiceReadOnlyDetailView
+            service={mapModerationServiceToService(detail.data)}
+            brands={mapServiceBrandToBrand(detail.data) ? [mapServiceBrandToBrand(detail.data)!] : []}
+            user={mapModerationOwnerToUser(detail.data.owner)}
+            actionSlot={decisionAction}
+            onBack={handleBack}
+          />
+        )
       ) : null}
     </div>
   );

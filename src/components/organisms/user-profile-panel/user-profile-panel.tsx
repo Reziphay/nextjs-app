@@ -48,6 +48,11 @@ import {
   uploadAccountAvatar,
 } from "@/store/account";
 import { SocialIcon, SOCIAL_COLORS } from "@/components/atoms/social-icon/social-icon";
+import {
+  SocialLinksEditor,
+  type SocialLinksEditorRef,
+} from "@/components/molecules/social-links-editor/social-links-editor";
+import { socialFieldsToUrls, socialUrlsToFields } from "@/lib/social-url";
 import type { AccountUserProfile, Brand, UserProfile } from "@/types";
 import styles from "./user-profile-panel.module.css";
 
@@ -104,8 +109,28 @@ export function UserProfilePanel({
     [locale],
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const socialLinksEditorRef = useRef<SocialLinksEditorRef>(null);
   const [pendingCropImage, setPendingCropImage] =
     useState<PendingCropImage>(null);
+  const [socialLinks, setSocialLinks] = useState<string[]>(() =>
+    draft ? socialFieldsToUrls(draft) : [],
+  );
+
+  // Keep local social links in sync when editing starts or draft is reset
+  useEffect(() => {
+    if (isEditing && draft) {
+      setSocialLinks(socialFieldsToUrls(draft));
+    }
+  }, [isEditing]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleSocialLinksChange(urls: string[]) {
+    setSocialLinks(urls);
+    const fields = socialUrlsToFields(urls);
+    const keys = Object.keys(fields) as Array<keyof typeof fields>;
+    for (const field of keys) {
+      dispatch(setAccountDraftField({ field, value: fields[field] }));
+    }
+  }
 
   useEffect(() => {
     if (!canEdit || !hasPrivateProfileFields(user)) {
@@ -149,6 +174,12 @@ export function UserProfilePanel({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    // Flush any URL typed in the social links input but not yet committed.
+    // onBlur is unreliable across browsers (e.g. Safari doesn't blur inputs
+    // when a submit button is clicked), so we commit explicitly here first.
+    // Redux dispatch inside flush() is synchronous, so the draft is updated
+    // before submitAccountUpdate reads it below.
+    socialLinksEditorRef.current?.flush();
 
     try {
       await dispatch(submitAccountUpdate({ locale })).unwrap();
@@ -559,42 +590,20 @@ export function UserProfilePanel({
 
               <div className={styles.socialSection}>
                 <h3 className={styles.socialSectionTitle}>{p.socialSection}</h3>
-                <div className={styles.socialGrid}>
-                  {(
-                    [
-                      { field: "instagram_url", platform: "instagram", label: p.socialInstagram },
-                      { field: "facebook_url", platform: "facebook", label: p.socialFacebook },
-                      { field: "youtube_url", platform: "youtube", label: p.socialYoutube },
-                      { field: "whatsapp_url", platform: "whatsapp", label: p.socialWhatsapp },
-                      { field: "linkedin_url", platform: "linkedin", label: p.socialLinkedin },
-                      { field: "x_url", platform: "x", label: p.socialX },
-                      { field: "website_url", platform: "website", label: p.socialWebsite },
-                    ] as const
-                  ).map(({ field, platform, label }) => (
-                    <Field key={field} className={styles.socialField}>
-                      <FieldLabel htmlFor={`account_${field}`}>
-                        <span
-                          className={styles.socialIconWrap}
-                          style={{ color: SOCIAL_COLORS[platform] }}
-                        >
-                          <SocialIcon platform={platform} size={15} />
-                        </span>
-                        {label}
-                      </FieldLabel>
-                      <Input
-                        id={`account_${field}`}
-                        type="url"
-                        value={draft[field]}
-                        placeholder={p.socialUrlPlaceholder}
-                        onChange={(e) =>
-                          dispatch(
-                            setAccountDraftField({ field, value: e.target.value }),
-                          )
-                        }
-                      />
-                    </Field>
-                  ))}
-                </div>
+                <SocialLinksEditor
+                  ref={socialLinksEditorRef}
+                  value={socialLinks}
+                  onChange={handleSocialLinksChange}
+                  messages={{
+                    addPlaceholder: p.socialUrlPlaceholder,
+                    addButton: p.socialAddLink,
+                    removeLabel: p.socialRemoveLink,
+                    errorInvalidFormat: p.socialUrlErrorInvalidFormat,
+                    errorInvalidProtocol: p.socialUrlErrorInvalidProtocol,
+                    errorTooLong: p.socialUrlErrorTooLong,
+                    errorInvalidChars: p.socialUrlErrorInvalidChars,
+                  }}
+                />
               </div>
 
               <div className={styles.formActions}>

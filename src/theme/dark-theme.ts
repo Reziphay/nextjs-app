@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 // Near-white buttons, clearly separated dark surfaces, sky-blue accent for focus/highlights only
 const palette = [
   "#0a0a0a", "#1c1c1c", "#2b2b2b",  // blacks: deepest canvas → card/panel → inner surface / hover
-  "#d4d4d4", "#f5f5f5", "#38bdf8",  // primaries: pressed off-white → near-white button → sky accent
+  "#d4d4d4", "#f5f5f5", "#9159da",  // primaries: pressed off-white → near-white button → sky accent
   "#6b6b6b", "#a3a3a3", "#e5e5e5",  // whites: muted text → base text → strong text
 ];
 

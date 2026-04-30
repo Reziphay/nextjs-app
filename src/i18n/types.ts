@@ -366,6 +366,12 @@ export type Messages = {
     socialLinkedin: string;
     socialX: string;
     socialUrlPlaceholder: string;
+    socialAddLink: string;
+    socialRemoveLink: string;
+    socialUrlErrorInvalidFormat: string;
+    socialUrlErrorInvalidProtocol: string;
+    socialUrlErrorTooLong: string;
+    socialUrlErrorInvalidChars: string;
   };
   landing: {
     hero: {
@@ -655,6 +661,12 @@ export type Messages = {
     socialLinkedin: string;
     socialX: string;
     socialUrlPlaceholder: string;
+    socialAddLink: string;
+    socialRemoveLink: string;
+    socialUrlErrorInvalidFormat: string;
+    socialUrlErrorInvalidProtocol: string;
+    socialUrlErrorTooLong: string;
+    socialUrlErrorInvalidChars: string;
   };
   calendar: {
     today: string;

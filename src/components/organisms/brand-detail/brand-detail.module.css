@@ -279,6 +279,16 @@
   min-width: 13rem;
 }
 
+.moderationActionCard {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem;
+  border-radius: var(--general-border-radius);
+  border: 1px solid color-mix(in srgb, var(--brand-border) 78%, transparent);
+  background: color-mix(in srgb, var(--brand-surface-base) 96%, transparent);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--brand-shadow-base) 12%, transparent);
+}
+
 .logoCard {
   display: flex;
   flex-direction: column;

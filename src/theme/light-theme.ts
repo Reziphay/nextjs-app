@@ -5,7 +5,7 @@ import type { CSSProperties } from "react";
 // Near-black charcoal buttons, clean white surfaces, sky-blue accent for focus/highlights only
 const palette = [
   "#080808", "#1c1c1c", "#6b6b6b",  // blacks: richest dark → body text → muted
-  "#000000", "#141414", "#0ea5e9",  // primaries: pressed black → charcoal button → sky accent
+  "#000000", "#141414", "#9159da",  // primaries: pressed black → charcoal button → sky accent
   "#ffffff", "#f0f0f0", "#f8f8f8",  // whites: surface white → canvas gray → input/hover bg
 ];
 

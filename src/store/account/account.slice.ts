@@ -173,6 +173,13 @@ function normalizeDraft(values: AccountProfileDraft): AccountProfileDraft {
     country: values.country.trim(),
     email: values.email.trim().toLowerCase(),
     phone: values.phone.trim(),
+    instagram_url: values.instagram_url.trim(),
+    facebook_url: values.facebook_url.trim(),
+    youtube_url: values.youtube_url.trim(),
+    whatsapp_url: values.whatsapp_url.trim(),
+    linkedin_url: values.linkedin_url.trim(),
+    x_url: values.x_url.trim(),
+    website_url: values.website_url.trim(),
   };
 }
 

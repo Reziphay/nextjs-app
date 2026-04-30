@@ -397,6 +397,12 @@ export const azMessages: Messages = {
     socialLinkedin: "LinkedIn",
     socialX: "X (Twitter)",
     socialUrlPlaceholder: "https://",
+    socialAddLink: "Link əlavə et",
+    socialRemoveLink: "Linki sil",
+    socialUrlErrorInvalidFormat: "Yanlış URL formatı",
+    socialUrlErrorInvalidProtocol: "URL https:// və ya http:// ilə başlamalıdır",
+    socialUrlErrorTooLong: "URL çox uzundur (maksimum 500 simvol)",
+    socialUrlErrorInvalidChars: "URL yanlış simvollar ehtiva edir",
   },
   landing: {
     hero: {
@@ -693,6 +699,12 @@ export const azMessages: Messages = {
     socialLinkedin: "LinkedIn",
     socialX: "X (Twitter)",
     socialUrlPlaceholder: "https://",
+    socialAddLink: "Link əlavə et",
+    socialRemoveLink: "Linki sil",
+    socialUrlErrorInvalidFormat: "Yanlış URL formatı",
+    socialUrlErrorInvalidProtocol: "URL https:// və ya http:// ilə başlamalıdır",
+    socialUrlErrorTooLong: "URL çox uzundur (maksimum 500 simvol)",
+    socialUrlErrorInvalidChars: "URL yanlış simvollar ehtiva edir",
   },
   categories: {
     food_beverage: "Yemək & İçki",

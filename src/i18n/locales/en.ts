@@ -397,6 +397,12 @@ export const enMessages: Messages = {
     socialLinkedin: "LinkedIn",
     socialX: "X (Twitter)",
     socialUrlPlaceholder: "https://",
+    socialAddLink: "Add link",
+    socialRemoveLink: "Remove link",
+    socialUrlErrorInvalidFormat: "Invalid URL format",
+    socialUrlErrorInvalidProtocol: "URL must start with https:// or http://",
+    socialUrlErrorTooLong: "URL is too long (max 500 characters)",
+    socialUrlErrorInvalidChars: "URL contains invalid characters",
   },
   landing: {
     hero: {
@@ -692,6 +698,12 @@ export const enMessages: Messages = {
     socialLinkedin: "LinkedIn",
     socialX: "X (Twitter)",
     socialUrlPlaceholder: "https://",
+    socialAddLink: "Add link",
+    socialRemoveLink: "Remove link",
+    socialUrlErrorInvalidFormat: "Invalid URL format",
+    socialUrlErrorInvalidProtocol: "URL must start with https:// or http://",
+    socialUrlErrorTooLong: "URL is too long (max 500 characters)",
+    socialUrlErrorInvalidChars: "URL contains invalid characters",
   },
   categories: {
     food_beverage: "Food & Beverage",

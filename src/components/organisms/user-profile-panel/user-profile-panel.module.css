@@ -255,24 +255,6 @@
   text-transform: uppercase;
 }
 
-.socialGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-.socialField {
-  width: 100%;
-  min-width: 0;
-}
-
-.socialIconWrap {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-  margin-inline-end: 0.375rem;
-}
-
 .socialLinks {
   display: flex;
   align-items: center;
@@ -378,10 +360,6 @@
     width: 5rem;
     min-width: 5rem;
     min-height: 2.625rem;
-  }
-
-  .socialGrid {
-    grid-template-columns: minmax(0, 1fr);
   }
 
   .formActions {

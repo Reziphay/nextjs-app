@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { isAxiosError } from "axios";
@@ -43,6 +43,7 @@ type BrandDetailProps = {
   brand: Brand;
   currentUserId?: string;
   owner?: PublicUserProfile | null;
+  actionSlot?: ReactNode;
 };
 
 type BranchFilter = "all" | "open247" | "withContact";
@@ -461,6 +462,7 @@ export function BrandDetail({
   brand,
   currentUserId,
   owner,
+  actionSlot,
 }: BrandDetailProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -994,6 +996,10 @@ export function BrandDetail({
                 {t.editBrand}
               </Button>
             </div>
+          ) : null}
+
+          {actionSlot ? (
+            <div className={styles.moderationActionCard}>{actionSlot}</div>
           ) : null}
 
           <div className={styles.logoCard}>

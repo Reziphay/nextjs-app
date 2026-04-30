@@ -18,12 +18,14 @@ import {
   CircleUser,
   ConciergeBell,
   Download,
+  Eye,
   Gavel,
   Heart,
   Home,
   ImagePlus,
   Info,
   LayoutDashboard,
+  ListChecks,
   ListFilter,
   LoaderCircle,
   LogOut,
@@ -138,8 +140,10 @@ const iconMap: Record<string, LucideIcon> = {
   store: Store,
   unfold_more: ChevronsUpDown,
   verified: BadgeCheck,
+  visibility: Eye,
   warning: TriangleAlert,
   // aliases
+  rule: ListChecks,
   scale: Scale,
 };
 

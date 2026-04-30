@@ -73,8 +73,18 @@ export type AccountProfileDraft = Omit<UserProfileFields, "birthday"> & {
   website_url: string;
 };
 
-export type UpdateMyAccountRequestBody = Omit<AccountProfileDraft, "phone"> & {
+export type UpdateMyAccountRequestBody = Omit<
+  AccountProfileDraft,
+  "phone" | "instagram_url" | "facebook_url" | "youtube_url" | "whatsapp_url" | "linkedin_url" | "x_url" | "website_url"
+> & {
   phone: string | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  youtube_url: string | null;
+  whatsapp_url: string | null;
+  linkedin_url: string | null;
+  x_url: string | null;
+  website_url: string | null;
 };
 
 export type LoginRequestBody = {
