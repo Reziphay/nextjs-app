@@ -42,6 +42,7 @@ import {
 import { translateBackendErrorMessage } from "@/lib/backend-errors";
 import type { Brand, BrandCategory, BrandGalleryItem, Branch } from "@/types/brand";
 import { BranchPage } from "./branch-page";
+import { RichTextEditor } from "@/components/molecules/rich-text-editor/rich-text-editor";
 import styles from "./brand-form.module.css";
 
 // Branch draft preserves the server id for persisted branches
@@ -1029,12 +1030,10 @@ export function BrandForm({
               <div className={styles.fieldRow}>
                 <Field>
                   <FieldLabel>{t.fieldDescription}</FieldLabel>
-                  <textarea
-                    className={styles.textarea}
-                    value={draft.description}
+                  <RichTextEditor
+                    value={draft.description ?? ""}
+                    onChange={(html) => updateField("description", html)}
                     placeholder={t.fieldDescriptionPlaceholder}
-                    rows={4}
-                    onChange={(e) => updateField("description", e.target.value)}
                   />
                 </Field>
               </div>

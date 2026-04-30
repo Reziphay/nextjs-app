@@ -30,6 +30,7 @@ import {
 } from "@/components/atoms/input";
 import { Switch } from "@/components/atoms/switch";
 import { Icon } from "@/components/icon";
+import { RichTextEditor } from "@/components/molecules/rich-text-editor/rich-text-editor";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   fetchBranchTeamDetail,
@@ -1015,12 +1016,10 @@ export function BranchModal({
 
               <Field>
                 <FieldLabel>{t.branchFieldDescription}</FieldLabel>
-                <Input
+                <RichTextEditor
                   value={draft.description ?? ""}
                   placeholder={t.branchFieldDescriptionPlaceholder}
-                  onChange={(event) =>
-                    updateField("description", event.target.value)
-                  }
+                  onChange={(html) => updateField("description", html)}
                 />
               </Field>
 

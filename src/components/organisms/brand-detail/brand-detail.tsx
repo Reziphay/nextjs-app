@@ -35,6 +35,7 @@ import { useAppSelector } from "@/store/hooks";
 import type { Brand, Branch, BrandStatus } from "@/types/brand";
 import type { PublicUserProfile } from "@/types";
 import type { Service } from "@/types/service";
+import { RichTextDisplay } from "@/components/molecules/rich-text-editor/rich-text-display";
 import styles from "./brand-detail.module.css";
 
 type BrandDetailProps = {
@@ -883,9 +884,11 @@ export function BrandDetail({
             </span>
             <h1 className={styles.heroTitle}>{brandState.name}</h1>
           </div>
-          <p className={styles.heroDescription}>
-            {brandState.description?.trim() || t.detailDefaultDescription}
-          </p>
+          <RichTextDisplay
+            html={brandState.description ?? ""}
+            className={styles.heroDescription}
+            emptyFallback={t.detailDefaultDescription}
+          />
 
           <div className={styles.ratingSummary}>
             <StarRating rating={normalizedRating} />
@@ -1448,7 +1451,7 @@ export function BrandDetail({
                 {selectedService.description?.trim() ? (
                   <div className={styles.branchDialogSection}>
                     <span className={styles.branchDialogLabel}>{servicesCopy.modalDescription}</span>
-                    <p className={styles.branchDialogText}>{selectedService.description.trim()}</p>
+                    <RichTextDisplay html={selectedService.description} className={styles.branchDialogText} />
                   </div>
                 ) : null}
 
@@ -1697,9 +1700,10 @@ export function BrandDetail({
                     <span className={styles.branchDialogLabel}>
                       {t.branchFieldDescription}
                     </span>
-                    <p className={styles.branchDialogText}>
-                      {selectedBranch.description.trim()}
-                    </p>
+                    <RichTextDisplay
+                      html={selectedBranch.description}
+                      className={styles.branchDialogText}
+                    />
                   </div>
                 ) : null}
 

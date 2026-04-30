@@ -21,6 +21,7 @@ import {
 } from "@/components/atoms/input";
 import { Switch } from "@/components/atoms/switch";
 import { Icon } from "@/components/icon";
+import { RichTextEditor } from "@/components/molecules/rich-text-editor/rich-text-editor";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   fetchBranchTeamDetail,
@@ -730,12 +731,10 @@ export function BranchPage({
                     <div className={styles.fieldRow}>
                       <Field>
                         <FieldLabel>{t.branchFieldDescription}</FieldLabel>
-                        <textarea
-                          className={styles.textarea}
+                        <RichTextEditor
                           value={draft.description ?? ""}
                           placeholder={t.branchFieldDescriptionPlaceholder}
-                          rows={4}
-                          onChange={(e) => updateField("description", e.target.value)}
+                          onChange={(html) => updateField("description", html)}
                         />
                       </Field>
                     </div>

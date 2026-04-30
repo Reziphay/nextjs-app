@@ -36,6 +36,8 @@ import type { Brand, Branch } from "@/types/brand";
 import type { Service, ServiceCategory, ServiceStatus, PriceType } from "@/types/service";
 import type { AuthenticatedUser } from "@/types/user_types";
 import { OwnerCard } from "@/components/molecules/owner-card";
+import { RichTextEditor } from "@/components/molecules/rich-text-editor/rich-text-editor";
+import { RichTextDisplay } from "@/components/molecules/rich-text-editor/rich-text-display";
 import styles from "./services-uso-page.module.css";
 
 type ServicesUsoPageProps = {
@@ -846,7 +848,12 @@ function ServiceFormPage({
               <div className={styles.fieldRow}>
                 <Field>
                   <FieldLabel>{copy.fieldDescription}</FieldLabel>
-                  <textarea className={styles.textarea} value={form.description} onChange={(e) => setField("description", e.target.value)} placeholder={copy.fieldDescriptionPlaceholder} rows={4} />
+                  <RichTextEditor
+                    value={form.description}
+                    onChange={(html) => setField("description", html)}
+                    placeholder={copy.fieldDescriptionPlaceholder}
+                    disabled={isLoading}
+                  />
                 </Field>
               </div>
 
@@ -1249,9 +1256,11 @@ function ServiceDetailView({
 
           {/* Description */}
           <div className={styles.detailSection}>
-            <p className={styles.detailDescription}>
-              {service.description || <em className={styles.noDescription}>{copy.noDescription}</em>}
-            </p>
+            <RichTextDisplay
+              html={service.description ?? ""}
+              className={styles.detailDescription}
+              emptyFallback={copy.noDescription}
+            />
           </div>
 
           {/* Rejection reason */}
