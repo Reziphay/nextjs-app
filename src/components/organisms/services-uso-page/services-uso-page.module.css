@@ -604,21 +604,42 @@
   font-style: italic;
 }
 
-.draftBanner {
+.statusBanner {
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   border-radius: var(--general-border-radius-medium);
-  background: var(--app-warning-bg, color-mix(in srgb, var(--app-warning) 12%, transparent));
-  border: 1px solid color-mix(in srgb, var(--app-warning) 30%, transparent);
-  color: color-mix(in srgb, var(--app-warning) 70%, var(--app-text-strong));
   font-size: var(--font-size-small);
   line-height: 1.5;
   margin: 0 0 1rem;
 }
 
-.draftBannerIcon {
+.statusBanner_warning {
+  background: var(--app-warning-bg, color-mix(in srgb, var(--app-warning) 12%, transparent));
+  border: 1px solid color-mix(in srgb, var(--app-warning) 30%, transparent);
+  color: color-mix(in srgb, var(--app-warning) 70%, var(--app-text-strong));
+}
+
+.statusBanner_error {
+  background: var(--app-error-bg, color-mix(in srgb, var(--app-error) 10%, transparent));
+  border: 1px solid color-mix(in srgb, var(--app-error) 25%, transparent);
+  color: color-mix(in srgb, var(--app-error) 75%, var(--app-text-strong));
+}
+
+.statusBanner_info {
+  background: color-mix(in srgb, var(--app-primary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--app-primary) 20%, transparent);
+  color: color-mix(in srgb, var(--app-primary) 80%, var(--app-text-strong));
+}
+
+.statusBanner_muted {
+  background: var(--app-bg-surface-strong);
+  border: 1px solid var(--app-border-soft);
+  color: var(--app-text-muted);
+}
+
+.statusBannerIcon {
   flex-shrink: 0;
   margin-top: 0.1rem;
 }

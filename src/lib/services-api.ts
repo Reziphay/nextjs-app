@@ -168,6 +168,20 @@ export async function archiveService(
   return normalizeService(service);
 }
 
+export async function unarchiveService(
+  id: string,
+  accessToken: string,
+): Promise<Service> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ service: Service }>>({
+    url: `/services/${id}/unarchive`,
+    method: "POST",
+  });
+  const service = response.data?.data?.service;
+  if (!service) throw new Error("Invalid response from unarchive service API");
+  return normalizeService(service);
+}
+
 export async function fetchServiceCategories(
   accessToken?: string,
 ): Promise<ServiceCategory[]> {

@@ -26,6 +26,7 @@ import {
   pauseService,
   resumeService,
   archiveService,
+  unarchiveService,
   uploadServiceMedia,
   type CreateServicePayload,
   type UpdateServicePayload,
@@ -78,6 +79,7 @@ type PageCopy = {
   actionPause: string;
   actionResume: string;
   actionArchive: string;
+  actionUnarchive: string;
   formTitleCreate: string;
   formTitleEdit: string;
   fieldTitle: string;
@@ -126,6 +128,7 @@ type PageCopy = {
   successPause: string;
   successResume: string;
   successArchive: string;
+  successUnarchive: string;
   errorGeneric: string;
   confirmDelete: string;
   pendingNote: string;
@@ -157,6 +160,7 @@ const EN_COPY: PageCopy = {
   actionPause: "Pause",
   actionResume: "Resume",
   actionArchive: "Archive",
+  actionUnarchive: "Unarchive",
   formTitleCreate: "Create service",
   formTitleEdit: "Edit service",
   fieldTitle: "Title",
@@ -205,10 +209,14 @@ const EN_COPY: PageCopy = {
   successPause: "Service paused.",
   successResume: "Service resumed.",
   successArchive: "Service archived.",
+  successUnarchive: "Service restored to draft.",
   errorGeneric: "Something went wrong. Please try again.",
   confirmDelete: "Are you sure you want to delete this service?",
   pendingNote: "Under review — no actions available.",
   draftNote: "This service is a draft and not visible to customers yet. Submit it for review when you're ready.",
+  pausedNote: "This service is paused and currently hidden from customers.",
+  rejectedNote: "This service was rejected. Review the reason below, make corrections, and resubmit.",
+  archivedNote: "This service is archived and no longer visible to customers.",
   selectBrandFirst: "Select a brand first",
   detailInfo: "Details",
   detailActions: "Actions",
@@ -234,6 +242,7 @@ const TR_COPY: PageCopy = {
   actionPause: "Durdur",
   actionResume: "Devam et",
   actionArchive: "Arşivle",
+  actionUnarchive: "Arşivden çıkar",
   formTitleCreate: "Hizmet oluştur",
   formTitleEdit: "Hizmeti düzenle",
   fieldTitle: "Başlık",
@@ -282,10 +291,14 @@ const TR_COPY: PageCopy = {
   successPause: "Hizmet durduruldu.",
   successResume: "Hizmet devam ediyor.",
   successArchive: "Hizmet arşivlendi.",
+  successUnarchive: "Hizmet taslağa geri alındı.",
   errorGeneric: "Bir şeyler ters gitti. Lütfen tekrar dene.",
   confirmDelete: "Bu hizmeti silmek istediğinden emin misin?",
   pendingNote: "İnceleniyor — işlem yapılamaz.",
   draftNote: "Bu hizmet taslak halinde olup müşterilere henüz görünmüyor. Hazır olduğunda incelemeye gönder.",
+  pausedNote: "Bu hizmet duraklatılmış ve müşterilere gösterilmiyor.",
+  rejectedNote: "Bu hizmet reddedildi. Aşağıdaki nedeni incele, düzeltmeleri yap ve yeniden gönder.",
+  archivedNote: "Bu hizmet arşivlenmiş ve müşterilere artık görünmüyor.",
   selectBrandFirst: "Önce marka seç",
   detailInfo: "Detaylar",
   detailActions: "İşlemler",
@@ -311,6 +324,7 @@ const AZ_COPY: PageCopy = {
   actionPause: "Dayandır",
   actionResume: "Davam et",
   actionArchive: "Arxivlə",
+  actionUnarchive: "Arxivdən çıxar",
   formTitleCreate: "Xidmət yarat",
   formTitleEdit: "Xidməti redaktə et",
   fieldTitle: "Başlıq",
@@ -359,10 +373,14 @@ const AZ_COPY: PageCopy = {
   successPause: "Xidmət dayandırıldı.",
   successResume: "Xidmət davam edir.",
   successArchive: "Xidmət arxivləndi.",
+  successUnarchive: "Xidmət qaralamaya qaytarıldı.",
   errorGeneric: "Nəsə xəta baş verdi. Yenidən cəhd et.",
   confirmDelete: "Bu xidməti silmək istədiyindən əminsən?",
   pendingNote: "İcazə gözlənilir — heç bir əməliyyat mümkün deyil.",
   draftNote: "Bu xidmət qaralama halındadır və müştərilərə hələ görünmür. Hazır olduqda icazəyə göndər.",
+  pausedNote: "Bu xidmət dayandırılıb və hazırda müştərilərə göstərilmir.",
+  rejectedNote: "Bu xidmət rədd edildi. Aşağıdakı səbəbi nəzərdən keçir, düzəlişlər et və yenidən göndər.",
+  archivedNote: "Bu xidmət arxivlənib və artıq müştərilərə görünmür.",
   selectBrandFirst: "Əvvəlcə brend seç",
   detailInfo: "Təfərrüatlar",
   detailActions: "Əməliyyatlar",
@@ -1138,6 +1156,7 @@ function ServiceDetailView({
   onPause,
   onResume,
   onArchive,
+  onUnarchive,
 }: {
   service: Service;
   copy: PageCopy;
@@ -1152,6 +1171,7 @@ function ServiceDetailView({
   onPause: () => void;
   onResume: () => void;
   onArchive: () => void;
+  onUnarchive: () => void;
 }) {
   const { messages } = useLocale();
   const statusLabel = getStatusLabel(service.status, copy);
@@ -1167,6 +1187,16 @@ function ServiceDetailView({
 
   const images = service.images.map((img) => proxyMediaUrl(img.url) ?? img.url);
 
+  type BannerVariant = "warning" | "error" | "info" | "muted";
+  const bannerConfig: Partial<Record<typeof service.status, { msg: string; variant: BannerVariant; icon: string }>> = {
+    DRAFT:    { msg: copy.draftNote,    variant: "warning", icon: "info"     },
+    PENDING:  { msg: copy.pendingNote,  variant: "info",    icon: "schedule" },
+    PAUSED:   { msg: copy.pausedNote,   variant: "warning", icon: "info"     },
+    REJECTED: { msg: copy.rejectedNote, variant: "error",   icon: "error"    },
+    ARCHIVED: { msg: copy.archivedNote, variant: "muted",   icon: "archive"  },
+  };
+  const banner = bannerConfig[service.status] ?? null;
+
   return (
     <div className={styles.detailWrapper}>
       {/* Sticky header */}
@@ -1178,10 +1208,10 @@ function ServiceDetailView({
         </div>
       </div>
 
-      {service.status === "DRAFT" && (
-        <div className={styles.draftBanner}>
-          <Icon icon="info" size={15} color="current" className={styles.draftBannerIcon} />
-          <span>{copy.draftNote}</span>
+      {banner !== null && (
+        <div className={`${styles.statusBanner} ${styles[`statusBanner_${banner.variant}`]}`}>
+          <Icon icon={banner.icon} size={15} color="current" className={styles.statusBannerIcon} />
+          <span>{banner.msg}</span>
         </div>
       )}
 
@@ -1352,6 +1382,14 @@ function ServiceDetailView({
                 </Button>
               </div>
             )}
+
+            {service.status === "ARCHIVED" && (
+              <div className={styles.detailActionGroup}>
+                <Button variant="outline" icon="autorenew" onClick={onUnarchive} isLoading={actionLoading} className={styles.detailActionBtn}>
+                  {copy.actionUnarchive}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1465,7 +1503,7 @@ export function ServicesUsoPage({
 
   async function handleLifecycle(
     service: Service,
-    action: "submit" | "resubmit" | "pause" | "resume" | "archive",
+    action: "submit" | "resubmit" | "pause" | "resume" | "archive" | "unarchive",
   ) {
     setActionLoadingId(service.id);
     try {
@@ -1480,6 +1518,9 @@ export function ServicesUsoPage({
       } else if (action === "resume") {
         updated = await resumeService(service.id, accessToken);
         successMsg = copy.successResume;
+      } else if (action === "unarchive") {
+        updated = await unarchiveService(service.id, accessToken);
+        successMsg = copy.successUnarchive;
       } else {
         updated = await archiveService(service.id, accessToken);
         successMsg = copy.successArchive;
@@ -1541,6 +1582,7 @@ export function ServicesUsoPage({
         onPause={() => handleLifecycle(liveService, "pause")}
         onResume={() => handleLifecycle(liveService, "resume")}
         onArchive={() => handleLifecycle(liveService, "archive")}
+        onUnarchive={() => handleLifecycle(liveService, "unarchive")}
       />
     );
   }
