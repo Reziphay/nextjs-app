@@ -20,6 +20,31 @@
   box-shadow: 0 2px 8px var(--app-shadow-card-soft);
 }
 
+.disabled {
+  cursor: default;
+}
+
+.disabled:hover {
+  background: var(--app-bg-surface-strong);
+  border-color: var(--app-border-soft);
+  box-shadow: none;
+}
+
+.compact {
+  width: 100%;
+  min-width: 0;
+  gap: 0.55rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.compact:hover {
+  background: var(--app-bg-surface-strong);
+  box-shadow: none;
+}
+
 /* Avatar area */
 .avatar {
   flex-shrink: 0;
@@ -44,6 +69,12 @@
   height: 3rem !important;
 }
 
+.compact .logoWrap,
+.compact .userAvatar {
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+}
+
 /* Info column */
 .info {
   flex: 1;
@@ -62,6 +93,10 @@
   line-height: 1.2;
 }
 
+.compact .roleLabel {
+  display: none;
+}
+
 .name {
   color: var(--app-text-strong);
   font-size: var(--font-size-base);
@@ -70,6 +105,25 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.compact .name {
+  font-size: var(--font-size-small);
+  line-height: 1.2;
+}
+
+.compact .subtitle,
+.compact .ratingValue,
+.compact .ratingCount {
+  font-size: 0.7rem;
+}
+
+.compact .chevron {
+  display: none;
+}
+
+.disabled .chevron {
+  display: none;
 }
 
 .rating {

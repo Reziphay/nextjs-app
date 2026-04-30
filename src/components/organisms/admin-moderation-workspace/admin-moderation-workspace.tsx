@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/atoms/button";
 import { Alert } from "@/components/atoms/alert";
+import { OwnerCard } from "@/components/molecules/owner-card";
+import { RichTextDisplay } from "@/components/molecules/rich-text-editor/rich-text-display";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useAppSelector } from "@/store/hooks";
 import { selectAuthSession } from "@/store/auth";
@@ -15,6 +18,7 @@ import {
   approveService,
   rejectService,
 } from "@/lib/moderation-api";
+import { proxyMediaUrl } from "@/lib/media";
 import type {
   QueueItem,
   ModerationBrandDetail,
@@ -32,6 +36,32 @@ type DetailState =
   | { type: "service"; data: ModerationServiceDetail }
   | null;
 
+function tabToProgress(tab: ActiveTab): "brands" | "services" {
+  return tab === "service" ? "services" : "brands";
+}
+
+function progressToTab(progress: string | null): ActiveTab {
+  return progress === "services" ? "service" : "brand";
+}
+
+function isValidProgress(progress: string | null): progress is "brands" | "services" {
+  return progress === "brands" || progress === "services";
+}
+
+function moderationHref(tab: ActiveTab, id?: string): string {
+  const params = new URLSearchParams({ progress: tabToProgress(tab) });
+  if (id) params.set("id", id);
+  return `/moderation?${params.toString()}`;
+}
+
+function getInitials(owner: QueueItem["owner"]): string {
+  return `${owner.first_name[0] ?? ""}${owner.last_name[0] ?? ""}`.toUpperCase() || "?";
+}
+
+function getOwnerName(owner: QueueItem["owner"]): string {
+  return `${owner.first_name} ${owner.last_name}`.trim() || owner.email;
+}
+
 function formatDate(iso: string): string {
   try {
     return new Date(iso).toLocaleDateString(undefined, {
@@ -44,10 +74,46 @@ function formatDate(iso: string): string {
   }
 }
 
+function formatDateTime(iso?: string): string | null {
+  if (!iso) return null;
+  try {
+    return new Date(iso).toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
+}
+
+function formatPrice(value?: number | null, priceType?: string): string {
+  if (priceType === "FREE") return "Pulsuz";
+  if (typeof value !== "number") return "—";
+  const prefix = priceType === "STARTING_FROM" ? "Başlayır: " : "";
+  return `${prefix}${value.toLocaleString(undefined, { maximumFractionDigits: 2 })} AZN`;
+}
+
 export function AdminModerationWorkspace() {
-  const { messages } = useLocale();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { locale, messages } = useLocale();
   const t = messages.moderation;
   const { accessToken } = useAppSelector(selectAuthSession);
+  const decisionLabel = locale === "az" ? "Qərar" : "Decision";
+  const closeLabel = locale === "az" ? "Bağla" : "Close";
+  const detailsLabel = locale === "az" ? "Detallar" : "Details";
+  const addressLabel = locale === "az" ? "Ünvan" : "Address";
+  const branchLabel = locale === "az" ? "Filial" : "Branch";
+  const createdLabel = locale === "az" ? "Yaradılma" : "Created";
+  const updatedLabel = locale === "az" ? "Yenilənmə" : "Updated";
+  const priceLabel = locale === "az" ? "Qiymət" : "Price";
+  const durationLabel = locale === "az" ? "Müddət" : "Duration";
+  const noDescriptionLabel = locale === "az" ? "Təsvir yoxdur." : "No description.";
+  const brandRoleLabel = locale === "az" ? "Brend" : "Brand";
+  const providerRoleLabel = "Provider";
 
   // Queue state
   const [activeTab, setActiveTab] = useState<ActiveTab>("brand");
@@ -64,16 +130,27 @@ export function AdminModerationWorkspace() {
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
 
   // Reject flow
-  const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectionError, setRejectionError] = useState<string | null>(null);
 
-  // Approve confirm
-  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  // Decision modal
+  const [showDecisionModal, setShowDecisionModal] = useState(false);
 
   // Action feedback
   const [actionStatus, setActionStatus] = useState<ActionStatus>("idle");
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+  const progressParam = searchParams.get("progress");
+  const detailIdParam = searchParams.get("id");
+
+  const resetDetailState = useCallback(() => {
+    setViewMode("queue");
+    setDetail(null);
+    setRejectionReason("");
+    setRejectionError(null);
+    setShowDecisionModal(false);
+    setActionStatus("idle");
+    setActionFeedback(null);
+  }, []);
 
   // ── Load queue ──────────────────────────────────────────────────────────
 
@@ -99,26 +176,25 @@ export function AdminModerationWorkspace() {
 
   // ── Open review detail ───────────────────────────────────────────────────
 
-  async function handleReview(item: QueueItem) {
+  const openDetailByType = useCallback(async (type: ActiveTab, id: string) => {
     if (!accessToken) return;
     setDetailLoading(true);
     setViewMode("detail");
     setDetail(null);
     setChecklist([]);
-    setShowRejectForm(false);
     setRejectionReason("");
     setRejectionError(null);
-    setShowApproveConfirm(false);
+    setShowDecisionModal(false);
     setActionStatus("idle");
     setActionFeedback(null);
 
     try {
-      if (item.type === "brand") {
-        const brand = await fetchBrandForReview(item.id, accessToken);
+      if (type === "brand") {
+        const brand = await fetchBrandForReview(id, accessToken);
         setDetail({ type: "brand", data: brand });
         setChecklist(brand.checklist ?? []);
       } else {
-        const service = await fetchServiceForReview(item.id, accessToken);
+        const service = await fetchServiceForReview(id, accessToken);
         setDetail({ type: "service", data: service });
         setChecklist(service.checklist ?? []);
       }
@@ -128,19 +204,42 @@ export function AdminModerationWorkspace() {
     } finally {
       setDetailLoading(false);
     }
+  }, [accessToken, t.actionError]);
+
+  useEffect(() => {
+    if (!isValidProgress(progressParam)) {
+      router.replace(moderationHref("brand"));
+      return;
+    }
+
+    const nextTab = progressToTab(progressParam);
+    setActiveTab(nextTab);
+
+    if (!detailIdParam) {
+      resetDetailState();
+      return;
+    }
+
+    void openDetailByType(nextTab, detailIdParam);
+  }, [detailIdParam, openDetailByType, progressParam, resetDetailState, router]);
+
+  function handleTabChange(tab: ActiveTab) {
+    setActiveTab(tab);
+    resetDetailState();
+    router.push(moderationHref(tab));
+  }
+
+  function handleReview(item: QueueItem) {
+    const nextTab = item.type === "service" ? "service" : "brand";
+    setActiveTab(nextTab);
+    router.push(moderationHref(nextTab, item.id));
   }
 
   // ── Back to queue ────────────────────────────────────────────────────────
 
   function handleBack() {
-    setViewMode("queue");
-    setDetail(null);
-    setShowRejectForm(false);
-    setRejectionReason("");
-    setRejectionError(null);
-    setShowApproveConfirm(false);
-    setActionStatus("idle");
-    setActionFeedback(null);
+    resetDetailState();
+    router.push(moderationHref(activeTab));
   }
 
   // ── Checklist toggle ─────────────────────────────────────────────────────
@@ -202,25 +301,15 @@ export function AdminModerationWorkspace() {
     }
   }
 
-  // ── Approve flow ──────────────────────────────────────────────────────────
-
-  function handleApproveClick() {
-    setShowRejectForm(false);
-    setShowApproveConfirm(true);
+  function handleDecisionClick() {
+    setShowDecisionModal(true);
+    setRejectionReason("");
+    setRejectionError(null);
   }
 
   async function handleApproveConfirm() {
-    setShowApproveConfirm(false);
+    setShowDecisionModal(false);
     await handleAction("approve");
-  }
-
-  // ── Reject flow ───────────────────────────────────────────────────────────
-
-  function handleRejectClick() {
-    setShowApproveConfirm(false);
-    setShowRejectForm(true);
-    setRejectionReason("");
-    setRejectionError(null);
   }
 
   async function handleRejectConfirm() {
@@ -234,13 +323,43 @@ export function AdminModerationWorkspace() {
 
   // ── Render helpers ────────────────────────────────────────────────────────
 
-  function renderOwnerCell(owner: QueueItem["owner"]) {
-    return (
-      <div>
-        <div className={styles.ownerName}>
-          {owner.first_name} {owner.last_name}
+  function getCategoryLabel(item: QueueItem): string {
+    const category =
+      item.type === "service"
+        ? item.service_category
+        : item.categories?.[0] ?? null;
+    if (!category) return "—";
+    return messages.categories[category.key as keyof typeof messages.categories] ?? category.key;
+  }
+
+  function renderOwnerCell(item: QueueItem) {
+    if (item.type === "service" && item.brand) {
+      return (
+        <div className={styles.ownerCell}>
+          <OwnerCard
+            roleLabel={brandRoleLabel}
+            name={item.brand.name}
+            href={`/brands?id=${item.brand.id}`}
+            logoUrl={item.brand.logo_url}
+            rating={item.brand.rating}
+            ratingCount={item.brand.rating_count}
+            compact
+          />
         </div>
-        <div className={styles.ownerEmail}>{owner.email}</div>
+      );
+    }
+
+    return (
+      <div className={styles.ownerCell}>
+        <OwnerCard
+          roleLabel={providerRoleLabel}
+          name={getOwnerName(item.owner)}
+          href={`/account?id=${item.owner.id}`}
+          avatarUrl={item.owner.avatar_url}
+          initials={getInitials(item.owner)}
+          subtitle={item.owner.email}
+          compact
+        />
       </div>
     );
   }
@@ -265,14 +384,14 @@ export function AdminModerationWorkspace() {
           <button
             type="button"
             className={[styles.tab, activeTab === "brand" ? styles.tabActive : ""].join(" ")}
-            onClick={() => setActiveTab("brand")}
+            onClick={() => handleTabChange("brand")}
           >
             {t.tabBrands}
           </button>
           <button
             type="button"
             className={[styles.tab, activeTab === "service" ? styles.tabActive : ""].join(" ")}
-            onClick={() => setActiveTab("service")}
+            onClick={() => handleTabChange("service")}
           >
             {t.tabServices}
           </button>
@@ -292,11 +411,26 @@ export function AdminModerationWorkspace() {
           </div>
         ) : (
           <div className={styles.tableWrapper}>
-            <table className={styles.table}>
+            <table
+              className={[
+                styles.table,
+                activeTab === "service" ? styles.tableService : styles.tableBrand,
+              ].join(" ")}
+            >
+              <colgroup>
+                <col className={styles.colOwnerWidth} />
+                <col className={styles.colNameWidth} />
+                <col className={styles.colCategoryWidth} />
+                {activeTab === "service" && <col className={styles.colAddressWidth} />}
+                <col className={styles.colDateWidth} />
+                <col className={styles.colActionWidth} />
+              </colgroup>
               <thead>
                 <tr>
-                  <th>{t.colName}</th>
                   <th>{t.colOwner}</th>
+                  <th>{t.colName}</th>
+                  <th>{t.categoryLabel}</th>
+                  {activeTab === "service" && <th>{addressLabel}</th>}
                   <th>{t.colSubmitted}</th>
                   <th className={styles.colAction}>{t.colAction}</th>
                 </tr>
@@ -304,17 +438,24 @@ export function AdminModerationWorkspace() {
               <tbody>
                 {filteredQueue.map((item) => (
                   <tr key={item.id}>
+                    <td>{renderOwnerCell(item)}</td>
                     <td className={styles.colName}>{item.title}</td>
-                    <td>{renderOwnerCell(item.owner)}</td>
+                    <td className={styles.colMeta}>{getCategoryLabel(item)}</td>
+                    {activeTab === "service" && (
+                      <td className={styles.colAddress}>{item.address || "—"}</td>
+                    )}
                     <td className={styles.colDate}>{formatDate(item.created_at)}</td>
                     <td className={styles.colAction}>
-                      <Button
-                        size="small"
-                        variant="outline"
-                        onClick={() => handleReview(item)}
-                      >
-                        {t.reviewButton}
-                      </Button>
+                      <div className={styles.actionCell}>
+                        <Button
+                          size="small"
+                          variant="outline"
+                          icon="visibility"
+                          onClick={() => handleReview(item)}
+                        >
+                          {t.reviewButton}
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -356,37 +497,73 @@ export function AdminModerationWorkspace() {
         : undefined;
 
   const entityOwner = detail?.data.owner;
+  const serviceBranch = detail?.type === "service" ? detail.data.branch : null;
+  const serviceBrand = serviceBranch?.brand ?? null;
+  const brandBranches = detail?.type === "brand" ? (detail.data.branches ?? []) : [];
+  const entityAddress =
+    detail?.type === "service"
+      ? serviceBranch
+        ? [serviceBranch.address1, serviceBranch.address2].filter(Boolean).join(", ")
+        : detail.data.address
+      : brandBranches.map((branch) => [branch.address1, branch.address2].filter(Boolean).join(", ")).filter(Boolean).join(" • ");
 
   const galleryImages: string[] =
     detail?.type === "brand"
-      ? (detail.data.gallery ?? []).map((g) => g.url).filter(Boolean)
+      ? (detail.data.gallery ?? []).map((g) => proxyMediaUrl(g.url) ?? g.url).filter(Boolean)
       : detail?.type === "service"
-        ? (detail.data.images ?? []).map((i) => i.url).filter(Boolean)
+        ? (detail.data.images ?? []).map((i) => proxyMediaUrl(i.url) ?? i.url).filter(Boolean)
         : [];
 
   return (
     <div className={styles.wrapper}>
-      {/* Approve confirm modal */}
-      {showApproveConfirm && (
+      {showDecisionModal && (
         <div className={styles.overlay}>
           <div className={styles.modal}>
-            <h2 className={styles.modalTitle}>{t.approveConfirmTitle}</h2>
+            <h2 className={styles.modalTitle}>{decisionLabel}</h2>
             <p className={styles.modalDescription}>{t.approveConfirmDescription}</p>
-            <div className={styles.modalActions}>
-              <Button
-                variant="outline"
-                size="small"
-                onClick={() => setShowApproveConfirm(false)}
+
+            {checklist.length > 0 && (
+              <div className={styles.modalChecklist}>
+                <p className={styles.detailLabel}>{t.checklistTitle}</p>
+                {checklist.map((item) => (
+                  <button
+                    type="button"
+                    key={item.key}
+                    className={styles.checklistItem}
+                    onClick={() => toggleChecklist(item.key)}
+                  >
+                    <span className={styles.checklistLabel}>{item.label}</span>
+                    <span className={item.passed ? styles.checklistPassed : styles.checklistFailed}>
+                      {item.passed ? t.checklistPassed : t.checklistFailed}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <label className={styles.rejectForm}>
+              <span className={styles.detailLabel}>{t.rejectReasonLabel}</span>
+              <textarea
+                className={styles.rejectTextarea}
+                placeholder={t.rejectReasonPlaceholder}
+                value={rejectionReason}
+                onChange={(e) => {
+                  setRejectionReason(e.target.value);
+                  if (rejectionError) setRejectionError(null);
+                }}
                 disabled={actionStatus === "loading"}
-              >
-                {messages.dashboard.cancel}
+              />
+              {rejectionError && <span className={styles.rejectError}>{rejectionError}</span>}
+            </label>
+
+            <div className={styles.modalActions}>
+              <Button variant="outline" size="small" onClick={() => setShowDecisionModal(false)} disabled={actionStatus === "loading"}>
+                {closeLabel}
               </Button>
-              <Button
-                variant="primary"
-                size="small"
-                onClick={handleApproveConfirm}
-                isLoading={actionStatus === "loading"}
-              >
+              <Button variant="destructive" size="small" onClick={handleRejectConfirm} isLoading={actionStatus === "loading"}>
+                {t.rejectButton}
+              </Button>
+              <Button variant="primary" size="small" onClick={handleApproveConfirm} isLoading={actionStatus === "loading"}>
                 {t.approveButton}
               </Button>
             </div>
@@ -424,162 +601,123 @@ export function AdminModerationWorkspace() {
           ))}
         </div>
       ) : detail ? (
-        <div className={styles.detailGrid}>
-          {/* Left column: entity info */}
-          <div className={styles.detailCard}>
-            {/* Logo (brand only) */}
-            {detail.type === "brand" && detail.data.logo_url && (
-              <div className={styles.detailSection}>
-                <img
-                  src={detail.data.logo_url}
-                  alt={detail.data.name}
-                  className={styles.logoImg}
-                />
+        <div className={styles.reviewShell}>
+          <div className={styles.reviewMain}>
+            {galleryImages.length > 0 ? (
+              <div className={styles.heroMedia}>
+                <img src={galleryImages[0]} alt={entityTitle} className={styles.heroImage} />
+                {galleryImages.length > 1 && (
+                  <div className={styles.thumbnailRow}>
+                    {galleryImages.slice(1).map((url, idx) => (
+                      <img key={idx} src={url} alt={`${entityTitle} ${idx + 2}`} className={styles.thumbnailImage} />
+                    ))}
+                  </div>
+                )}
               </div>
+            ) : detail.type === "brand" && detail.data.logo_url ? (
+              <div className={styles.logoHero}>
+                <img src={detail.data.logo_url} alt={detail.data.name} className={styles.logoImg} />
+              </div>
+            ) : (
+              <div className={styles.heroPlaceholder}>{entityTitle}</div>
             )}
 
-            {/* Description */}
-            {entityDescription && (
-              <div className={styles.detailSection}>
-                <p className={styles.detailLabel}>{messages.brands.fieldDescription}</p>
-                <p className={styles.detailValue}>{entityDescription}</p>
-              </div>
-            )}
-
-            {/* Category */}
-            {entityCategory && (
-              <div className={styles.detailSection}>
-                <p className={styles.detailLabel}>{t.categoryLabel}</p>
-                <p className={styles.detailValue}>{entityCategory}</p>
-              </div>
-            )}
-
-            {/* Owner */}
-            {entityOwner && (
-              <div className={styles.detailSection}>
-                <p className={styles.detailLabel}>{t.ownerLabel}</p>
-                <p className={[styles.detailValue, styles.detailValueStrong].join(" ")}>
-                  {entityOwner.first_name} {entityOwner.last_name}
-                </p>
-                <p className={styles.detailValue}>{entityOwner.email}</p>
-              </div>
-            )}
-
-            {/* Submitted date */}
             <div className={styles.detailSection}>
-              <p className={styles.detailLabel}>{t.submittedLabel}</p>
-              <p className={styles.detailValue}>{formatDate(detail.data.created_at)}</p>
+              <p className={styles.detailLabel}>{messages.brands.fieldDescription}</p>
+              <RichTextDisplay
+                html={entityDescription ?? ""}
+                className={styles.detailValue}
+                emptyFallback={noDescriptionLabel}
+              />
             </div>
 
-            {/* Gallery */}
-            {galleryImages.length > 0 && (
-              <div className={styles.detailSection}>
-                <p className={styles.detailLabel}>{messages.brands.gallery}</p>
-                <div className={styles.gallery}>
-                  {galleryImages.map((url, idx) => (
-                    <img
-                      key={idx}
-                      src={url}
-                      alt={`${entityTitle} ${idx + 1}`}
-                      className={styles.galleryImg}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right column: checklist + actions */}
-          <div>
-            {/* Checklist */}
-            {checklist.length > 0 && (
-              <div className={styles.detailCard} style={{ marginBottom: "1rem" }}>
-                <p className={styles.detailLabel}>{t.checklistTitle}</p>
-                {checklist.map((item) => (
-                  <div
-                    key={item.key}
-                    className={styles.checklistItem}
-                    onClick={() => toggleChecklist(item.key)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => e.key === "Enter" && toggleChecklist(item.key)}
-                  >
-                    <span className={styles.checklistLabel}>{item.label}</span>
-                    <span className={item.passed ? styles.checklistPassed : styles.checklistFailed}>
-                      {item.passed ? t.checklistPassed : t.checklistFailed}
-                    </span>
+            {detail.type === "brand" && brandBranches.length > 0 && (
+              <div className={styles.branchList}>
+                <p className={styles.detailLabel}>{branchLabel}</p>
+                {brandBranches.map((branch) => (
+                  <div key={branch.id} className={styles.branchItem}>
+                    <strong>{branch.name}</strong>
+                    <span>{[branch.address1, branch.address2].filter(Boolean).join(", ")}</span>
+                    {(branch.phone || branch.email) && (
+                      <small>{[branch.phone, branch.email].filter(Boolean).join(" • ")}</small>
+                    )}
                   </div>
                 ))}
               </div>
             )}
+          </div>
 
-            {/* Reject form */}
-            {showRejectForm && (
-              <div className={styles.detailCard} style={{ marginBottom: "1rem" }}>
-                <p className={styles.detailLabel}>{t.rejectConfirmTitle}</p>
-                <div className={styles.rejectForm}>
-                  <label>
-                    <p className={styles.detailLabel} style={{ marginBottom: "0.375rem" }}>
-                      {t.rejectReasonLabel}
-                    </p>
-                    <textarea
-                      className={styles.rejectTextarea}
-                      placeholder={t.rejectReasonPlaceholder}
-                      value={rejectionReason}
-                      onChange={(e) => {
-                        setRejectionReason(e.target.value);
-                        if (rejectionError) setRejectionError(null);
-                      }}
-                      disabled={actionStatus === "loading"}
-                    />
-                  </label>
-                  {rejectionError && (
-                    <p className={styles.rejectError}>{rejectionError}</p>
-                  )}
-                  <div className={styles.rejectActions}>
-                    <Button
-                      variant="outline"
-                      size="small"
-                      onClick={() => setShowRejectForm(false)}
-                      disabled={actionStatus === "loading"}
-                    >
-                      {messages.dashboard.cancel}
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="small"
-                      onClick={handleRejectConfirm}
-                      isLoading={actionStatus === "loading"}
-                    >
-                      {t.rejectButton}
-                    </Button>
-                  </div>
-                </div>
+          <aside className={styles.reviewSidebar}>
+            <div className={styles.detailCard}>
+              <h2 className={styles.sidebarTitle}>{detailsLabel}</h2>
+              <dl className={styles.detailDl}>
+                {entityCategory && (
+                  <>
+                    <dt>{t.categoryLabel}</dt>
+                    <dd><span className={styles.detailChip}>{entityCategory}</span></dd>
+                  </>
+                )}
+                {detail.type === "service" && (
+                  <>
+                    <dt>{priceLabel}</dt>
+                    <dd>{formatPrice(detail.data.price, detail.data.price_type)}</dd>
+                    <dt>{durationLabel}</dt>
+                    <dd>{detail.data.duration ? `${detail.data.duration} dəq` : "—"}</dd>
+                  </>
+                )}
+                {serviceBranch && (
+                  <>
+                    <dt>{branchLabel}</dt>
+                    <dd>{serviceBranch.name}</dd>
+                  </>
+                )}
+                {entityAddress && (
+                  <>
+                    <dt>{addressLabel}</dt>
+                    <dd>{entityAddress}</dd>
+                  </>
+                )}
+                <dt>{createdLabel}</dt>
+                <dd>{formatDateTime(detail.data.created_at)}</dd>
+                <dt>{updatedLabel}</dt>
+                <dd>{formatDateTime(detail.data.updated_at)}</dd>
+              </dl>
+
+              <div className={styles.detailOwnerCardWrap}>
+                {detail.type === "service" && serviceBrand ? (
+                  <OwnerCard
+                    roleLabel={brandRoleLabel}
+                    name={serviceBrand.name}
+                    href={`/brands?id=${serviceBrand.id}`}
+                    logoUrl={serviceBrand.logo_url}
+                    rating={serviceBrand.rating}
+                    ratingCount={serviceBrand.rating_count}
+                  />
+                ) : entityOwner ? (
+                  <OwnerCard
+                    roleLabel={providerRoleLabel}
+                    name={getOwnerName(entityOwner)}
+                    href={`/account?id=${entityOwner.id}`}
+                    avatarUrl={entityOwner.avatar_url}
+                    initials={getInitials(entityOwner)}
+                    subtitle={entityOwner.email}
+                  />
+                ) : null}
               </div>
-            )}
-
-            {/* Action bar */}
-            {!showRejectForm && (
+            </div>
+            <div className={styles.detailCard}>
               <div className={styles.actionBar}>
                 <Button
                   variant="primary"
-                  onClick={handleApproveClick}
+                  onClick={handleDecisionClick}
                   disabled={actionStatus === "loading" || actionStatus === "success"}
-                  icon="check_circle"
+                  icon="rule"
                 >
-                  {t.approveButton}
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleRejectClick}
-                  disabled={actionStatus === "loading" || actionStatus === "success"}
-                  icon="cancel"
-                >
-                  {t.rejectButton}
+                  {decisionLabel}
                 </Button>
               </div>
-            )}
-          </div>
+            </div>
+          </aside>
         </div>
       ) : null}
     </div>

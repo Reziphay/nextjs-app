@@ -4,6 +4,11 @@
   display: flex;
   flex-direction: column;
   gap: 1.714rem;
+  position: relative;
+  left: 50%;
+  width: min(calc(100vw - 30rem), 90rem);
+  max-width: calc(100vw - 4rem);
+  transform: translateX(-50%);
 }
 
 .pageHeader {
@@ -67,7 +72,7 @@
 /* ─── Queue Table ────────────────────────────────────────────────────────── */
 
 .tableWrapper {
-  overflow-x: auto;
+  overflow: hidden;
   border-radius: var(--general-border-radius-card);
   border: 1px solid var(--app-border-soft);
   background: var(--app-bg-surface);
@@ -77,10 +82,55 @@
   width: 100%;
   border-collapse: collapse;
   font-size: var(--font-size-small);
+  table-layout: fixed;
+}
+
+.tableService .colOwnerWidth {
+  width: 20%;
+}
+
+.tableService .colNameWidth {
+  width: 17%;
+}
+
+.tableService .colCategoryWidth {
+  width: 17%;
+}
+
+.tableService .colAddressWidth {
+  width: 21%;
+}
+
+.tableService .colDateWidth {
+  width: 15%;
+}
+
+.tableService .colActionWidth {
+  width: 9.5rem;
+}
+
+.tableBrand .colOwnerWidth {
+  width: 25%;
+}
+
+.tableBrand .colNameWidth {
+  width: 29%;
+}
+
+.tableBrand .colCategoryWidth {
+  width: 23%;
+}
+
+.tableBrand .colDateWidth {
+  width: 16%;
+}
+
+.tableBrand .colActionWidth {
+  width: 9.5rem;
 }
 
 .table th {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1.1rem;
   text-align: left;
   color: var(--app-text-muted);
   font-weight: 600;
@@ -93,7 +143,7 @@
 }
 
 .table td {
-  padding: 0.875rem 1rem;
+  padding: 0.6rem 1.1rem;
   color: var(--app-text-base);
   border-bottom: 1px solid var(--app-border-soft);
   vertical-align: middle;
@@ -110,17 +160,15 @@
 .colName {
   font-weight: 500;
   color: var(--app-text-strong);
+  overflow-wrap: anywhere;
 }
 
-.ownerName {
-  font-weight: 500;
-  color: var(--app-text-base);
+.ownerCell {
+  width: min(100%, 16rem);
 }
 
-.ownerEmail {
-  color: var(--app-text-muted);
-  font-size: 0.75rem;
-  margin-top: 0.125rem;
+.ownerCell :global(a) {
+  min-height: 3.1rem;
 }
 
 .colDate {
@@ -128,9 +176,51 @@
   white-space: nowrap;
 }
 
+.colMeta {
+  color: var(--app-text-base);
+  overflow-wrap: anywhere;
+}
+
+.colAddress {
+  color: var(--app-text-muted);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
 .colAction {
-  text-align: right;
+  text-align: center;
   white-space: nowrap;
+}
+
+.table th.colAction,
+.table td.colAction {
+  padding-inline: 0.75rem;
+  text-align: center;
+}
+
+.actionCell {
+  display: grid;
+  place-items: center;
+  width: 100%;
+}
+
+@media (max-width: 90rem) {
+  .wrapper {
+    width: 100%;
+    max-width: 100%;
+    left: auto;
+    transform: none;
+  }
+}
+
+@media (max-width: 58rem) {
+  .tableWrapper {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 52rem;
+  }
 }
 
 /* ─── Skeleton ───────────────────────────────────────────────────────────── */
@@ -198,15 +288,40 @@
   letter-spacing: -0.025em;
 }
 
-.detailGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
+.reviewShell {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-@media (min-width: 900px) {
-  .detailGrid {
-    grid-template-columns: 2fr 1fr;
+.reviewMain {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.reviewSidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 960px) {
+  .reviewShell {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .reviewMain {
+    flex: 1;
+  }
+
+  .reviewSidebar {
+    width: 21rem;
+    min-width: 19rem;
+    position: sticky;
+    top: 5rem;
   }
 }
 
@@ -218,6 +333,13 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.sidebarTitle {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: var(--font-size-base);
+  font-weight: 700;
 }
 
 .detailSection {
@@ -247,6 +369,45 @@
   color: var(--app-text-strong);
 }
 
+.detailDl {
+  display: grid;
+  grid-template-columns: minmax(6rem, 0.45fr) 1fr;
+  gap: 0.75rem 1rem;
+  margin: 0;
+}
+
+.detailDl dt {
+  color: var(--app-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.detailDl dd {
+  margin: 0;
+  color: var(--app-text-base);
+  font-size: var(--font-size-small);
+  line-height: 1.45;
+}
+
+.detailChip {
+  display: inline-flex;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--general-border-radius-pill);
+  background: var(--app-bg-surface-strong);
+  border: 1px solid var(--app-border-soft);
+  color: var(--app-text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.detailOwnerCardWrap {
+  margin-top: 0.25rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--app-border-soft);
+}
+
 /* ─── Gallery ─────────────────────────────────────────────────────────────── */
 
 .gallery {
@@ -264,11 +425,82 @@
 }
 
 .logoImg {
-  width: 4rem;
-  height: 4rem;
+  width: 6rem;
+  height: 6rem;
   object-fit: cover;
   border-radius: calc(var(--general-border-radius-card) / 2);
   border: 1px solid var(--app-border-soft);
+}
+
+.heroMedia {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.heroImage {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-card);
+  background: var(--app-bg-surface-strong);
+}
+
+.thumbnailRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
+  gap: 0.5rem;
+}
+
+.thumbnailImage {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid var(--app-border-soft);
+  border-radius: calc(var(--general-border-radius-card) / 2);
+}
+
+.logoHero,
+.heroPlaceholder {
+  display: flex;
+  min-height: 14rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--general-border-radius-card);
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface-strong);
+}
+
+.heroPlaceholder {
+  color: var(--app-text-muted);
+  font-weight: 700;
+}
+
+.branchList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.branchItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-card);
+  background: var(--app-bg-surface);
+}
+
+.branchItem strong {
+  color: var(--app-text-strong);
+}
+
+.branchItem span,
+.branchItem small {
+  color: var(--app-text-muted);
+  line-height: 1.4;
 }
 
 /* ─── Checklist ───────────────────────────────────────────────────────────── */
@@ -276,10 +508,14 @@
 .checklistItem {
   display: flex;
   align-items: center;
+  width: 100%;
   gap: 0.75rem;
   padding: 0.625rem 0;
+  background: transparent;
+  border: 0;
   border-bottom: 1px solid var(--app-border-soft);
   cursor: pointer;
+  text-align: left;
 }
 
 .checklistItem:last-child {
@@ -310,8 +546,6 @@
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
-  padding-top: 1rem;
-  border-top: 1px solid var(--app-border-soft);
 }
 
 /* ─── Reject Form ─────────────────────────────────────────────────────────── */
@@ -397,6 +631,11 @@
   flex-direction: column;
   gap: 1rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+}
+
+.modalChecklist {
+  display: flex;
+  flex-direction: column;
 }
 
 .modalTitle {

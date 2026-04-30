@@ -12,6 +12,7 @@ import {
   fetchBrandTeamWorkspace,
 } from "@/lib/brands-api";
 import { fetchPublicServices } from "@/lib/services-api";
+import { fetchBrandForReview } from "@/lib/moderation-api";
 import { BrandsUsoPage } from "@/components/organisms/brands-uso-page";
 import { BrandsUcrPage } from "@/components/organisms/brands-ucr-page";
 import { BrandDetail } from "@/components/organisms/brand-detail";
@@ -21,7 +22,8 @@ import { fetchUserProfileById } from "@/lib/users-api";
 import { getMessages } from "@/i18n/config";
 import { getServerLocale } from "@/i18n/server";
 import { buildPageTitle } from "@/lib/page-metadata";
-import type { Brand, PublicUserProfile } from "@/types";
+import type { Brand, BrandStatus, PublicUserProfile } from "@/types";
+import type { ModerationBrandDetail } from "@/types/moderation";
 
 type BrandsPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -59,6 +61,57 @@ async function fetchBrandOwnersById(
       ): entry is readonly [string, PublicUserProfile] => entry !== null,
     ),
   );
+}
+
+function mapModerationBrandToBrand(brand: ModerationBrandDetail): Brand {
+  return {
+    id: brand.id,
+    name: brand.name,
+    description: brand.description ?? undefined,
+    status: brand.status as BrandStatus,
+    owner_id: brand.owner.id,
+    logo_url: brand.logo_url ?? undefined,
+    gallery: (brand.gallery ?? []).map((item, index) => ({
+      id: `${brand.id}-gallery-${index}`,
+      media_id: `${brand.id}-gallery-media-${index}`,
+      url: item.url,
+      order: item.order ?? index,
+    })),
+    branches: (brand.branches ?? []).map((branch) => ({
+      id: branch.id,
+      brand_id: brand.id,
+      name: branch.name,
+      description: branch.description ?? undefined,
+      address1: branch.address1,
+      address2: branch.address2 ?? undefined,
+      phone: branch.phone ?? undefined,
+      email: branch.email ?? undefined,
+      is_24_7: branch.is_24_7 ?? false,
+      opening: branch.opening ?? undefined,
+      closing: branch.closing ?? undefined,
+      breaks: [],
+      cover_url: branch.cover_url ?? undefined,
+    })),
+    categories: brand.categories ?? [],
+    rating: null,
+    rating_count: 0,
+    my_rating: null,
+    created_at: brand.created_at,
+    updated_at: brand.updated_at ?? brand.created_at,
+  };
+}
+
+function mapModerationBrandOwnerToProfile(brand: ModerationBrandDetail): PublicUserProfile {
+  return {
+    id: brand.owner.id,
+    first_name: brand.owner.first_name,
+    last_name: brand.owner.last_name,
+    email: brand.owner.email,
+    type: "uso",
+    avatar_url: brand.owner.avatar_url ?? null,
+    created_at: brand.owner.created_at ?? brand.created_at,
+    updated_at: brand.owner.created_at ?? brand.created_at,
+  };
 }
 
 export async function generateMetadata({
@@ -196,6 +249,26 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
 
   // ── Brand detail view (?id=<brand_id>) ────────────────────────────────────
   if (brandId && !progress) {
+    if (user.type === "admin") {
+      const moderationBrand = await fetchBrandForReview(brandId, accessToken).catch(() => null);
+
+      if (!moderationBrand) {
+        return (
+          <div style={{ padding: "2rem", color: "var(--app-text-muted)", fontSize: "var(--font-size-small)" }}>
+            Brand not found.
+          </div>
+        );
+      }
+
+      return (
+        <BrandDetail
+          brand={mapModerationBrandToBrand(moderationBrand)}
+          currentUserId={user.id}
+          owner={mapModerationBrandOwnerToProfile(moderationBrand)}
+        />
+      );
+    }
+
     const brand = await fetchBrandById(brandId, accessToken).catch(() => null);
 
     if (!brand) {

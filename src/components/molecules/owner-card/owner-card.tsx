@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import type { ReactNode } from "react";
 import { Icon } from "@/components/icon";
 import { UserAvatar } from "@/components/molecules/user-avatar/user-avatar";
 import { proxyMediaUrl } from "@/lib/media";
@@ -10,7 +11,7 @@ import styles from "./owner-card.module.css";
 type OwnerCardProps = {
   roleLabel: string;
   name: string;
-  href: string;
+  href?: string;
   // Brand variant
   logoUrl?: string | null;
   rating?: number | null;
@@ -19,6 +20,8 @@ type OwnerCardProps = {
   avatarUrl?: string | null;
   initials?: string;
   subtitle?: string;
+  compact?: boolean;
+  disabled?: boolean;
 };
 
 function StarRating({ rating, count }: { rating: number; count: number }) {
@@ -43,13 +46,20 @@ export function OwnerCard({
   avatarUrl,
   initials = "?",
   subtitle,
+  compact = false,
+  disabled = false,
 }: OwnerCardProps) {
   const proxiedLogo = proxyMediaUrl(logoUrl ?? undefined);
   const hasBrandLogo = !!proxiedLogo;
   const hasRating = typeof rating === "number" && rating > 0;
+  const className = [
+    styles.card,
+    compact ? styles.compact : "",
+    disabled ? styles.disabled : "",
+  ].filter(Boolean).join(" ");
 
-  return (
-    <Link href={href} className={styles.card}>
+  const content: ReactNode = (
+    <>
       <div className={styles.avatar}>
         {hasBrandLogo ? (
           <div className={styles.logoWrap}>
@@ -65,7 +75,7 @@ export function OwnerCard({
           <UserAvatar
             initials={initials}
             src={avatarUrl}
-            size="md"
+            size={compact ? "sm" : "md"}
             className={styles.userAvatar}
           />
         )}
@@ -83,6 +93,20 @@ export function OwnerCard({
       </div>
 
       <Icon icon="chevron_right" size={16} color="current" className={styles.chevron} />
+    </>
+  );
+
+  if (disabled || !href) {
+    return (
+      <div className={className} aria-disabled="true">
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <Link href={href} className={className}>
+      {content}
     </Link>
   );
 }
