@@ -51,18 +51,25 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
   const [brands, setBrands] = useState<Brand[]>([]);
   const [services, setServices] = useState<Service[]>([]);
 
+  function loadSidebarData() {
+    if (!user || !accessToken || user.type !== "uso") return;
+    fetchMyBrands(accessToken).then(setBrands).catch(() => setBrands([]));
+    fetchMyServices(accessToken).then(setServices).catch(() => setServices([]));
+  }
+
   useEffect(() => {
-    if (!user || !accessToken) return;
-    if (user.type !== "uso") return;
+    loadSidebarData();
+  }, [user, accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    fetchMyBrands(accessToken)
-      .then(setBrands)
-      .catch(() => setBrands([]));
-
-    fetchMyServices(accessToken)
-      .then(setServices)
-      .catch(() => setServices([]));
-  }, [user, accessToken]);
+  useEffect(() => {
+    const handler = () => loadSidebarData();
+    window.addEventListener("reziphay:services-changed", handler);
+    window.addEventListener("reziphay:brands-changed", handler);
+    return () => {
+      window.removeEventListener("reziphay:services-changed", handler);
+      window.removeEventListener("reziphay:brands-changed", handler);
+    };
+  }, [user, accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Expanded sub-menu state — auto-follows route
   const [expandedKey, setExpandedKey] = useState<string | null>(() => {

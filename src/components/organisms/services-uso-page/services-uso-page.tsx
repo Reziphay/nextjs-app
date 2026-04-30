@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { isAxiosError } from "axios";
 import {
   Badge,
@@ -128,6 +129,10 @@ type PageCopy = {
   errorGeneric: string;
   confirmDelete: string;
   pendingNote: string;
+  draftNote: string;
+  pausedNote: string;
+  rejectedNote: string;
+  archivedNote: string;
   selectBrandFirst: string;
   detailInfo: string;
   detailActions: string;
@@ -203,6 +208,7 @@ const EN_COPY: PageCopy = {
   errorGeneric: "Something went wrong. Please try again.",
   confirmDelete: "Are you sure you want to delete this service?",
   pendingNote: "Under review — no actions available.",
+  draftNote: "This service is a draft and not visible to customers yet. Submit it for review when you're ready.",
   selectBrandFirst: "Select a brand first",
   detailInfo: "Details",
   detailActions: "Actions",
@@ -279,6 +285,7 @@ const TR_COPY: PageCopy = {
   errorGeneric: "Bir şeyler ters gitti. Lütfen tekrar dene.",
   confirmDelete: "Bu hizmeti silmek istediğinden emin misin?",
   pendingNote: "İnceleniyor — işlem yapılamaz.",
+  draftNote: "Bu hizmet taslak halinde olup müşterilere henüz görünmüyor. Hazır olduğunda incelemeye gönder.",
   selectBrandFirst: "Önce marka seç",
   detailInfo: "Detaylar",
   detailActions: "İşlemler",
@@ -355,6 +362,7 @@ const AZ_COPY: PageCopy = {
   errorGeneric: "Nəsə xəta baş verdi. Yenidən cəhd et.",
   confirmDelete: "Bu xidməti silmək istədiyindən əminsən?",
   pendingNote: "İcazə gözlənilir — heç bir əməliyyat mümkün deyil.",
+  draftNote: "Bu xidmət qaralama halındadır və müştərilərə hələ görünmür. Hazır olduqda icazəyə göndər.",
   selectBrandFirst: "Əvvəlcə brend seç",
   detailInfo: "Təfərrüatlar",
   detailActions: "Əməliyyatlar",
@@ -430,6 +438,8 @@ const RU_COPY: PageCopy = {
   errorGeneric: "Что-то пошло не так. Попробуйте ещё раз.",
   confirmDelete: "Вы уверены, что хотите удалить этот сервис?",
   pendingNote: "На проверке — действия недоступны.",
+  draftNote:
+    "Этот сервис находится в черновике и пока не виден клиентам. Отправьте его на проверку, когда будете готовы.",
   selectBrandFirst: "Сначала выберите бренд",
   detailInfo: "Детали",
   detailActions: "Действия",
@@ -1014,10 +1024,27 @@ function ServiceCard({
     ARCHIVED: styles.cardStatusArchived,
   }[service.status];
 
+  const statusIcon: Record<typeof service.status, string> = {
+    ACTIVE: "check_circle",
+    PENDING: "schedule",
+    DRAFT: "edit",
+    PAUSED: "pause",
+    REJECTED: "error",
+    ARCHIVED: "archive",
+  };
+
   const brandLogoUrl = owner.isBrand ? (proxyMediaUrl(owner.brand.logo_url ?? "") || null) : null;
 
+  const ownerHref = owner.isBrand ? `/brands?id=${owner.brand.id}` : "/account";
+
   return (
-    <button type="button" className={styles.serviceCard} onClick={onClick}>
+    <div
+      role="button"
+      tabIndex={0}
+      className={styles.serviceCard}
+      onClick={onClick}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onClick(); }}
+    >
       {/* Image hero */}
       <div className={styles.cardHero}>
         {imageUrl ? (
@@ -1029,11 +1056,13 @@ function ServiceCard({
         )}
         {/* Status pill overlaid top-right */}
         <div className={`${styles.cardStatusPill} ${statusPillClass}`}>
+          <Icon icon={statusIcon[service.status]} size={11} color="current" />
           {statusLabel}
         </div>
         {/* Price pill overlaid bottom-right */}
         {priceLabel !== "—" && (
           <div className={styles.cardPricePill}>
+            <Icon icon="sell" size={11} color="current" />
             {priceLabel}
           </div>
         )}
@@ -1044,7 +1073,10 @@ function ServiceCard({
         <div className={styles.cardTitleRow}>
           <h3 className={styles.cardTitle}>{service.title}</h3>
           {durationLabel !== "—" && (
-            <span className={styles.cardDurationPill}>{durationLabel}</span>
+            <span className={styles.cardDurationPill}>
+              <Icon icon="schedule" size={11} color="current" />
+              {durationLabel}
+            </span>
           )}
         </div>
 
@@ -1053,7 +1085,12 @@ function ServiceCard({
         )}
 
         <div className={styles.cardFooter}>
-          <span className={styles.cardOwner}>
+          <Link
+            href={ownerHref}
+            className={styles.cardOwner}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             {owner.isBrand ? (
               brandLogoUrl ? (
                 <span className={styles.cardOwnerLogo}>
@@ -1066,7 +1103,7 @@ function ServiceCard({
               <Icon icon="person" size={12} color="current" className={styles.cardOwnerIcon} />
             )}
             {owner.name}
-          </span>
+          </Link>
           {branch && !owner.isBrand && (
             <span className={styles.cardBranch}>
               <Icon icon="location_on" size={12} color="current" />
@@ -1081,7 +1118,7 @@ function ServiceCard({
           )}
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -1140,6 +1177,13 @@ function ServiceDetailView({
           <Badge variant={badgeVariant}>{statusLabel}</Badge>
         </div>
       </div>
+
+      {service.status === "DRAFT" && (
+        <div className={styles.draftBanner}>
+          <Icon icon="info" size={15} color="current" className={styles.draftBannerIcon} />
+          <span>{copy.draftNote}</span>
+        </div>
+      )}
 
       <div className={styles.detailShell}>
         {/* Left: images + description */}
@@ -1409,6 +1453,7 @@ export function ServicesUsoPage({
     try {
       await deleteService(service.id, accessToken);
       setServices((prev) => prev.filter((s) => s.id !== service.id));
+      window.dispatchEvent(new Event("reziphay:services-changed"));
       showFeedback("success", copy.successDelete);
       backToList();
     } catch {
@@ -1441,6 +1486,7 @@ export function ServicesUsoPage({
       }
       setServices((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
       setViewService(updated);
+      window.dispatchEvent(new Event("reziphay:services-changed"));
       showFeedback("success", successMsg);
     } catch {
       showFeedback("error", copy.errorGeneric);
@@ -1462,11 +1508,13 @@ export function ServicesUsoPage({
         onSaved={(service, isNew) => {
           if (isNew) {
             setServices((prev) => [service, ...prev]);
+            window.dispatchEvent(new Event("reziphay:services-changed"));
             showFeedback("success", copy.successCreate);
             backToList();
           } else {
             setServices((prev) => prev.map((s) => (s.id === service.id ? service : s)));
             setViewService(service);
+            window.dispatchEvent(new Event("reziphay:services-changed"));
             showFeedback("success", copy.successUpdate);
             backToDetail();
           }
