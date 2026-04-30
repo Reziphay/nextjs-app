@@ -356,6 +356,16 @@ export type Messages = {
     detailGalleryNext: string;
     detailGalleryAutoplay: string;
     detailGalleryPaused: string;
+    // Social links
+    socialSection: string;
+    socialWebsite: string;
+    socialInstagram: string;
+    socialFacebook: string;
+    socialYoutube: string;
+    socialWhatsapp: string;
+    socialLinkedin: string;
+    socialX: string;
+    socialUrlPlaceholder: string;
   };
   landing: {
     hero: {
@@ -635,6 +645,16 @@ export type Messages = {
     typeUso: string;
     typeUcr: string;
     typeAdmin: string;
+    // Social links
+    socialSection: string;
+    socialWebsite: string;
+    socialInstagram: string;
+    socialFacebook: string;
+    socialYoutube: string;
+    socialWhatsapp: string;
+    socialLinkedin: string;
+    socialX: string;
+    socialUrlPlaceholder: string;
   };
   calendar: {
     today: string;

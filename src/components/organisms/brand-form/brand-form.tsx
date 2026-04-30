@@ -21,6 +21,7 @@ import {
   AlertDialogCancel,
 } from "@/components/atoms/alert-dialog";
 import { Icon } from "@/components/icon";
+import { SocialIcon, SOCIAL_COLORS } from "@/components/atoms/social-icon/social-icon";
 import { Switch } from "@/components/atoms/switch";
 import { useLocale } from "@/components/providers/locale-provider";
 import { proxyMediaUrl } from "@/lib/media";
@@ -77,6 +78,13 @@ type BrandFormDraft = {
   newGalleryFiles: File[];
   newGalleryPreviewUrls: string[];
   branches: BranchDraft[];
+  instagram_url: string;
+  facebook_url: string;
+  youtube_url: string;
+  whatsapp_url: string;
+  linkedin_url: string;
+  x_url: string;
+  website_url: string;
 };
 
 type BrandFormProps = {
@@ -99,6 +107,13 @@ function createEmptyDraft(): BrandFormDraft {
     newGalleryFiles: [],
     newGalleryPreviewUrls: [],
     branches: [],
+    instagram_url: "",
+    facebook_url: "",
+    youtube_url: "",
+    whatsapp_url: "",
+    linkedin_url: "",
+    x_url: "",
+    website_url: "",
   };
 }
 
@@ -112,6 +127,13 @@ function brandToDraft(brand: Brand): BrandFormDraft {
     logoRemoved: false,
     existingGalleryItems: (brand.gallery ?? []).slice().sort((a, b) => a.order - b.order),
     newGalleryFiles: [],
+    instagram_url: brand.instagram_url ?? "",
+    facebook_url: brand.facebook_url ?? "",
+    youtube_url: brand.youtube_url ?? "",
+    whatsapp_url: brand.whatsapp_url ?? "",
+    linkedin_url: brand.linkedin_url ?? "",
+    x_url: brand.x_url ?? "",
+    website_url: brand.website_url ?? "",
     newGalleryPreviewUrls: [],
     branches: (brand.branches ?? []).map((b) => ({
       id: b.id,
@@ -587,6 +609,13 @@ export function BrandForm({
           categoryIds: draft.category_ids,
           logo_media_id: logoMediaId,
           gallery_media_ids: allGalleryIds.length > 0 ? allGalleryIds : undefined,
+          instagram_url: draft.instagram_url.trim() || null,
+          facebook_url: draft.facebook_url.trim() || null,
+          youtube_url: draft.youtube_url.trim() || null,
+          whatsapp_url: draft.whatsapp_url.trim() || null,
+          linkedin_url: draft.linkedin_url.trim() || null,
+          x_url: draft.x_url.trim() || null,
+          website_url: draft.website_url.trim() || null,
           branches: draft.branches.map((branch, index) => ({
             name: branch.name,
             description: branch.description || undefined,
@@ -632,6 +661,13 @@ export function BrandForm({
               ? { logo_media_id: null as null }
               : {}),
           ...(galleryChanged ? { gallery_media_ids: allGalleryIds } : {}),
+          instagram_url: draft.instagram_url.trim() || null,
+          facebook_url: draft.facebook_url.trim() || null,
+          youtube_url: draft.youtube_url.trim() || null,
+          whatsapp_url: draft.whatsapp_url.trim() || null,
+          linkedin_url: draft.linkedin_url.trim() || null,
+          x_url: draft.x_url.trim() || null,
+          website_url: draft.website_url.trim() || null,
         };
         const updatedBrand = await updateBrand(currentBrand.id, payload, accessToken);
         didMutateServerState = true;
@@ -1117,10 +1153,54 @@ export function BrandForm({
               )}
             </div>
 
-            {/* ── Row 3: Branches ── */}
+            {/* ── Row 3: Social Media ── */}
             <div className={styles.formSection}>
               <div className={styles.sectionHeader}>
                 <span className={styles.stepBadge}>4</span>
+                <div className={styles.sectionHeaderText}>
+                  <h2 className={styles.sectionTitle}>{t.socialSection}</h2>
+                </div>
+              </div>
+
+              <div className={styles.socialGrid}>
+                {(
+                  [
+                    { key: "website_url",   platform: "website",   label: t.socialWebsite   },
+                    { key: "instagram_url", platform: "instagram",  label: t.socialInstagram },
+                    { key: "facebook_url",  platform: "facebook",   label: t.socialFacebook  },
+                    { key: "youtube_url",   platform: "youtube",    label: t.socialYoutube   },
+                    { key: "whatsapp_url",  platform: "whatsapp",   label: t.socialWhatsapp  },
+                    { key: "linkedin_url",  platform: "linkedin",   label: t.socialLinkedin  },
+                    { key: "x_url",         platform: "x",          label: t.socialX         },
+                  ] as const
+                ).map(({ key, platform, label }) => (
+                  <div key={key} className={styles.socialField}>
+                    <label className={styles.socialLabel}>
+                      <span
+                        className={styles.socialIconWrap}
+                        style={{ color: SOCIAL_COLORS[platform] }}
+                      >
+                        <SocialIcon platform={platform} size={18} />
+                      </span>
+                      {label}
+                    </label>
+                    <Input
+                      type="url"
+                      value={draft[key]}
+                      placeholder={t.socialUrlPlaceholder}
+                      onChange={(e) =>
+                        setDraft((prev) => ({ ...prev, [key]: e.target.value }))
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Row 4: Branches ── */}
+            <div className={styles.formSection}>
+              <div className={styles.sectionHeader}>
+                <span className={styles.stepBadge}>5</span>
                 <div className={styles.sectionHeaderText}>
                   <h2 className={styles.sectionTitle}>{t.branchesTitle}</h2>
                 </div>

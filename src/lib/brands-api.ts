@@ -1,6 +1,10 @@
 import { createApiClient } from "@/lib/api";
-import type { Brand, BrandCategory, Branch } from "@/types/brand";
+import type { Brand, BrandCategory, Branch, BrandSocialLinks } from "@/types/brand";
 import type { ApiSuccessResponse } from "@/types";
+
+export type SocialLinksPayload = {
+  [K in keyof BrandSocialLinks]?: string | null;
+};
 
 export type CreateBrandPayload = {
   name: string;
@@ -9,7 +13,7 @@ export type CreateBrandPayload = {
   logo_media_id?: string;
   gallery_media_ids?: string[];
   branches?: BranchPayload[];
-};
+} & SocialLinksPayload;
 
 export type UpdateBrandPayload = {
   name?: string;
@@ -19,7 +23,7 @@ export type UpdateBrandPayload = {
   logo_media_id?: string | null;
   /** Full ordered list of media IDs (existing + new). Omit to leave gallery unchanged. */
   gallery_media_ids?: string[];
-};
+} & SocialLinksPayload;
 
 export type BranchPayload = {
   name: string;

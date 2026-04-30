@@ -97,6 +97,31 @@
   line-height: 1.55;
 }
 
+.socialLinks {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.socialLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--app-bg-surface-strong);
+  transition: background 140ms ease, transform 120ms ease, opacity 140ms ease;
+  opacity: 0.85;
+}
+
+.socialLink:hover {
+  background: var(--app-bg-surface);
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
 .ratingSummary {
   display: flex;
   align-items: center;

@@ -47,6 +47,7 @@ import {
   removeAccountAvatar,
   uploadAccountAvatar,
 } from "@/store/account";
+import { SocialIcon, SOCIAL_COLORS } from "@/components/atoms/social-icon/social-icon";
 import type { AccountUserProfile, Brand, UserProfile } from "@/types";
 import styles from "./user-profile-panel.module.css";
 
@@ -556,6 +557,46 @@ export function UserProfilePanel({
                 </Field>
               </div>
 
+              <div className={styles.socialSection}>
+                <h3 className={styles.socialSectionTitle}>{p.socialSection}</h3>
+                <div className={styles.socialGrid}>
+                  {(
+                    [
+                      { field: "instagram_url", platform: "instagram", label: p.socialInstagram },
+                      { field: "facebook_url", platform: "facebook", label: p.socialFacebook },
+                      { field: "youtube_url", platform: "youtube", label: p.socialYoutube },
+                      { field: "whatsapp_url", platform: "whatsapp", label: p.socialWhatsapp },
+                      { field: "linkedin_url", platform: "linkedin", label: p.socialLinkedin },
+                      { field: "x_url", platform: "x", label: p.socialX },
+                      { field: "website_url", platform: "website", label: p.socialWebsite },
+                    ] as const
+                  ).map(({ field, platform, label }) => (
+                    <Field key={field} className={styles.socialField}>
+                      <FieldLabel htmlFor={`account_${field}`}>
+                        <span
+                          className={styles.socialIconWrap}
+                          style={{ color: SOCIAL_COLORS[platform] }}
+                        >
+                          <SocialIcon platform={platform} size={15} />
+                        </span>
+                        {label}
+                      </FieldLabel>
+                      <Input
+                        id={`account_${field}`}
+                        type="url"
+                        value={draft[field]}
+                        placeholder={p.socialUrlPlaceholder}
+                        onChange={(e) =>
+                          dispatch(
+                            setAccountDraftField({ field, value: e.target.value }),
+                          )
+                        }
+                      />
+                    </Field>
+                  ))}
+                </div>
+              </div>
+
               <div className={styles.formActions}>
                 <Button
                   variant="outline"
@@ -613,6 +654,41 @@ export function UserProfilePanel({
                   </div>
                 </>
               ) : null}
+              {(() => {
+                const links = [
+                  { key: "instagram_url" as const, platform: "instagram" as const, label: p.socialInstagram },
+                  { key: "facebook_url" as const, platform: "facebook" as const, label: p.socialFacebook },
+                  { key: "youtube_url" as const, platform: "youtube" as const, label: p.socialYoutube },
+                  { key: "whatsapp_url" as const, platform: "whatsapp" as const, label: p.socialWhatsapp },
+                  { key: "linkedin_url" as const, platform: "linkedin" as const, label: p.socialLinkedin },
+                  { key: "x_url" as const, platform: "x" as const, label: p.socialX },
+                  { key: "website_url" as const, platform: "website" as const, label: p.socialWebsite },
+                ];
+                const active = links.filter(({ key }) => profile[key]);
+                if (active.length === 0) return null;
+                return (
+                  <div className={styles.row}>
+                    <dt className={styles.label}>{p.socialSection}</dt>
+                    <dd className={styles.value}>
+                      <div className={styles.socialLinks}>
+                        {active.map(({ key, platform, label }) => (
+                          <a
+                            key={key}
+                            href={profile[key]!}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.socialLink}
+                            title={label}
+                            style={{ color: SOCIAL_COLORS[platform] }}
+                          >
+                            <SocialIcon platform={platform} size={18} />
+                          </a>
+                        ))}
+                      </div>
+                    </dd>
+                  </div>
+                );
+              })()}
             </dl>
           )}
         </section>

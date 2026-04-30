@@ -240,6 +240,65 @@
   color: var(--app-warning-strong);
 }
 
+.socialSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.socialSectionTitle {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.socialGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.socialField {
+  width: 100%;
+  min-width: 0;
+}
+
+.socialIconWrap {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-inline-end: 0.375rem;
+}
+
+.socialLinks {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.socialLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--app-bg-surface-strong);
+  border: 1px solid var(--app-border-soft);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  text-decoration: none;
+}
+
+.socialLink:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px color-mix(in srgb, currentColor 25%, transparent);
+}
+
 .removePhotoDialog {
   width: min(100%, 28rem);
 }
@@ -319,6 +378,10 @@
     width: 5rem;
     min-width: 5rem;
     min-height: 2.625rem;
+  }
+
+  .socialGrid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .formActions {

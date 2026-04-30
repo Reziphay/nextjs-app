@@ -35,6 +35,16 @@ export type BrandGalleryItem = {
   order: number;
 };
 
+export type BrandSocialLinks = {
+  instagram_url?: string;
+  facebook_url?: string;
+  youtube_url?: string;
+  whatsapp_url?: string;
+  linkedin_url?: string;
+  x_url?: string;
+  website_url?: string;
+};
+
 export type Brand = {
   id: string;
   name: string;
@@ -50,4 +60,4 @@ export type Brand = {
   my_rating: number | null;
   created_at: string;
   updated_at: string;
-};
+} & BrandSocialLinks;

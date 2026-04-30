@@ -39,6 +39,13 @@ const accountFieldNames = [
   "country",
   "email",
   "phone",
+  "instagram_url",
+  "facebook_url",
+  "youtube_url",
+  "whatsapp_url",
+  "linkedin_url",
+  "x_url",
+  "website_url",
 ] as const;
 
 type RequestStatus = "idle" | "loading" | "succeeded" | "failed";
@@ -93,6 +100,13 @@ function createEmptyDraft(): AccountProfileDraft {
     country: "",
     email: "",
     phone: "",
+    instagram_url: "",
+    facebook_url: "",
+    youtube_url: "",
+    whatsapp_url: "",
+    linkedin_url: "",
+    x_url: "",
+    website_url: "",
   };
 }
 
@@ -108,6 +122,13 @@ function createDraftFromProfile(profile: UserProfile | null): AccountProfileDraf
     country: normalizeCountryValue(profile.country),
     email: profile.email,
     phone: profile.phone ?? "",
+    instagram_url: profile.instagram_url ?? "",
+    facebook_url: profile.facebook_url ?? "",
+    youtube_url: profile.youtube_url ?? "",
+    whatsapp_url: profile.whatsapp_url ?? "",
+    linkedin_url: profile.linkedin_url ?? "",
+    x_url: profile.x_url ?? "",
+    website_url: profile.website_url ?? "",
   };
 }
 
@@ -494,6 +515,13 @@ export const submitAccountUpdate = createAsyncThunk<
       country: values.country,
       email: resolvedEmail,
       phone: resolvedPhone,
+      instagram_url: values.instagram_url.trim() || null,
+      facebook_url: values.facebook_url.trim() || null,
+      youtube_url: values.youtube_url.trim() || null,
+      whatsapp_url: values.whatsapp_url.trim() || null,
+      linkedin_url: values.linkedin_url.trim() || null,
+      x_url: values.x_url.trim() || null,
+      website_url: values.website_url.trim() || null,
     };
     const client = createApiClient({ accessToken, locale });
     const response = await client.patch<ApiSuccessResponse<{ user: UserProfile }>>(

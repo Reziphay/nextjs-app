@@ -36,6 +36,7 @@ import type { Brand, Branch, BrandStatus } from "@/types/brand";
 import type { PublicUserProfile } from "@/types";
 import type { Service } from "@/types/service";
 import { RichTextDisplay } from "@/components/molecules/rich-text-editor/rich-text-display";
+import { SocialIcon, SOCIAL_COLORS } from "@/components/atoms/social-icon/social-icon";
 import styles from "./brand-detail.module.css";
 
 type BrandDetailProps = {
@@ -889,6 +890,37 @@ export function BrandDetail({
             className={styles.heroDescription}
             emptyFallback={t.detailDefaultDescription}
           />
+
+          {(() => {
+            const links = [
+              { key: "website_url",   platform: "website",   label: t.socialWebsite   },
+              { key: "instagram_url", platform: "instagram",  label: t.socialInstagram },
+              { key: "facebook_url",  platform: "facebook",   label: t.socialFacebook  },
+              { key: "youtube_url",   platform: "youtube",    label: t.socialYoutube   },
+              { key: "whatsapp_url",  platform: "whatsapp",   label: t.socialWhatsapp  },
+              { key: "linkedin_url",  platform: "linkedin",   label: t.socialLinkedin  },
+              { key: "x_url",         platform: "x",          label: t.socialX         },
+            ] as const;
+            const active = links.filter(({ key }) => brandState[key]);
+            if (active.length === 0) return null;
+            return (
+              <div className={styles.socialLinks}>
+                {active.map(({ key, platform, label }) => (
+                  <a
+                    key={key}
+                    href={brandState[key]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.socialLink}
+                    title={label}
+                    style={{ color: SOCIAL_COLORS[platform] }}
+                  >
+                    <SocialIcon platform={platform} size={20} />
+                  </a>
+                ))}
+              </div>
+            );
+          })()}
 
           <div className={styles.ratingSummary}>
             <StarRating rating={normalizedRating} />
