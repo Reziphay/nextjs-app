@@ -215,6 +215,8 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
                                   ? styles.subDotActive
                                   : sub.status === "PENDING"
                                   ? styles.subDotPending
+                                  : sub.status === "REJECTED"
+                                  ? styles.subDotRejected
                                   : styles.subDotNeutral
                               }`}
                             />

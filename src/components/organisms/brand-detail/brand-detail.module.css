@@ -1402,10 +1402,12 @@
   .servicePriceCell {
     grid-area: price;
     justify-self: end;
+    justify-content: flex-end;
   }
 
   .serviceDurationCell {
     grid-area: duration;
+    justify-content: flex-start;
   }
 
   .galleryStage {
@@ -1652,7 +1654,7 @@
 
 .servicesTableHead {
   display: grid;
-  grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr) minmax(7rem, 0.8fr) minmax(8rem, 0.8fr);
+  grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr) minmax(7rem, 0.8fr) minmax(8rem, 0.8fr) auto;
   gap: 1rem;
   padding: 0.85rem 1.25rem;
   border-radius: var(--general-border-radius);
@@ -1663,6 +1665,11 @@
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.servicesTableHead span:nth-child(3),
+.servicesTableHead span:nth-child(4) {
+  justify-self: center;
 }
 
 .servicesTableBody {
@@ -1778,6 +1785,13 @@
 
 .serviceCell {
   min-width: 0;
+}
+
+.servicePriceCell,
+.serviceDurationCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .serviceBranchName {

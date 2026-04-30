@@ -359,6 +359,11 @@
   opacity: 0.85;
 }
 
+.subDotRejected {
+  background: var(--brand-error);
+  opacity: 0.9;
+}
+
 .subDotNeutral {
   background: currentColor;
   opacity: 0.35;
