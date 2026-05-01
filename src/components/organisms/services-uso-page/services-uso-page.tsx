@@ -36,6 +36,7 @@ import type { Brand, Branch } from "@/types/brand";
 import type { Service, ServiceCategory, ServiceStatus, PriceType } from "@/types/service";
 import type { AuthenticatedUser } from "@/types/user_types";
 import { OwnerCard } from "@/components/molecules/owner-card";
+import { PageSurfaceHeader } from "@/components/molecules/page-surface-header";
 import { RichTextEditor } from "@/components/molecules/rich-text-editor/rich-text-editor";
 import { RichTextDisplay } from "@/components/molecules/rich-text-editor/rich-text-display";
 import styles from "./services-uso-page.module.css";
@@ -747,17 +748,11 @@ function ServiceFormPage({
 
   return (
     <div className={styles.formWrapper}>
-      <div className={styles.formPageHeader}>
-        <Button variant="ghost" icon="arrow_back" onClick={onCancel} />
-        <div className={styles.headerMeta}>
-          <h1 className={styles.formPageTitle}>
-            {editingService ? copy.formTitleEdit : copy.formTitleCreate}
-          </h1>
-          <span className={styles.modeBadge}>
-            {editingService ? copy.actionEdit : copy.createService}
-          </span>
-        </div>
-      </div>
+      <PageSurfaceHeader
+        title={editingService ? copy.formTitleEdit : copy.formTitleCreate}
+        subtitle={editingService ? copy.actionEdit : copy.createService}
+        onBack={onCancel}
+      />
 
       {feedback ? (
         <div
@@ -1208,14 +1203,11 @@ export function ServiceDetailView({
 
   return (
     <div className={styles.detailWrapper}>
-      {/* Sticky header */}
-      <div className={styles.detailHeader}>
-        <Button variant="ghost" icon="arrow_back" onClick={onBack} />
-        <div className={styles.detailHeaderMeta}>
-          <h1 className={styles.detailTitle}>{service.title}</h1>
-          <Badge variant={badgeVariant}>{statusLabel}</Badge>
-        </div>
-      </div>
+      <PageSurfaceHeader
+        title={service.title}
+        titleAddon={<Badge variant={badgeVariant}>{statusLabel}</Badge>}
+        onBack={onBack}
+      />
 
       {banner !== null && (
         <div className={`${styles.statusBanner} ${styles[`statusBanner_${banner.variant}`]}`}>
@@ -1267,8 +1259,8 @@ export function ServiceDetailView({
 
           {/* Rejection reason */}
           {service.status === "REJECTED" && service.rejection_reason && (
-            <div className={styles.rejectionBanner}>
-              <Icon icon="info" size={14} color="current" />
+            <div className={`${styles.statusBanner} ${styles.statusBanner_error} ${styles.rejectionBanner}`}>
+              <Icon icon="error" size={15} color="current" className={styles.statusBannerIcon} />
               <span>
                 <strong>{copy.labelRejectionReason}:</strong> {service.rejection_reason}
               </span>
@@ -1505,12 +1497,6 @@ export function ServicesUsoPage({
   function openCreate(brandId?: string) {
     setEditingService(null);
     setCreateBrandId(brandId);
-    setView("form");
-  }
-
-  function openEdit(service: Service) {
-    setEditingService(service);
-    setViewService(null);
     setView("form");
   }
 

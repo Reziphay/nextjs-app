@@ -21,6 +21,7 @@ import {
   AlertDialogCancel,
 } from "@/components/atoms/alert-dialog";
 import { Icon } from "@/components/icon";
+import { PageSurfaceHeader } from "@/components/molecules/page-surface-header";
 import { SocialLinksEditor } from "@/components/molecules/social-links-editor/social-links-editor";
 import { socialFieldsToUrls, socialUrlsToFields } from "@/lib/social-url";
 import { Switch } from "@/components/atoms/switch";
@@ -917,18 +918,11 @@ export function BrandForm({
 
   return (
     <div className={styles.wrapper}>
-      {/* ── Sticky header ── */}
-      <div className={styles.pageHeader}>
-        <Button variant="ghost" icon="arrow_back" onClick={handleCancel} />
-        <div className={styles.headerMeta}>
-          <h1 className={styles.title}>
-            {mode === "create" ? t.formCreateTitle : t.formEditTitle}
-          </h1>
-          <span className={styles.modeBadge}>
-            {mode === "create" ? t.formCreateTitle : t.formEditTitle}
-          </span>
-        </div>
-      </div>
+      <PageSurfaceHeader
+        title={mode === "create" ? t.formCreateTitle : t.formEditTitle}
+        subtitle={mode === "create" ? t.formCreateTitle : t.formEditTitle}
+        onBack={handleCancel}
+      />
 
       {/* ── Verification warning ── */}
       {verificationMissing && (

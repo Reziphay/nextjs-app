@@ -40,66 +40,6 @@
   padding-bottom: 2.5rem;
 }
 
-/* ── Sticky page header — identical to brand-form .pageHeader ── */
-.pageHeader {
-  position: sticky;
-  top: 0.875rem;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
-  width: 100%;
-  min-width: 0;
-  padding: 0.875rem 0;
-  margin-bottom: 2rem;
-  background: var(--app-bg-canvas);
-  border-bottom: 1px solid var(--app-border-soft);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-
-.headerMeta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  flex: 1;
-  min-width: 0;
-}
-
-.title {
-  margin: 0;
-  color: var(--app-text-strong);
-  font-size: var(--font-size-large);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.modeBadge {
-  display: inline-flex;
-  width: fit-content;
-  max-width: 100%;
-  padding: 2px 8px;
-  border-radius: var(--general-border-radius-pill);
-  background: var(--app-bg-primary-soft);
-  border: 1px solid var(--app-border-primary-soft);
-  color: var(--app-primary);
-  font-size: var(--font-size-extra-small);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.headerActions {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  flex-shrink: 0;
-}
-
 /* ── Form + desktop shell — identical to brand-form ── */
 .form {
   display: flex;
@@ -799,16 +739,6 @@
 }
 
 @media (max-width: 640px) {
-  .pageHeader {
-    align-items: flex-start;
-  }
-
-  .title {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
-  }
-
   .formSection {
     padding: 1.25rem;
   }

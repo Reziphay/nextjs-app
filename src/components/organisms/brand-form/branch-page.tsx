@@ -21,6 +21,7 @@ import {
 } from "@/components/atoms/input";
 import { Switch } from "@/components/atoms/switch";
 import { Icon } from "@/components/icon";
+import { PageSurfaceHeader } from "@/components/molecules/page-surface-header";
 import { RichTextEditor } from "@/components/molecules/rich-text-editor/rich-text-editor";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
@@ -607,29 +608,21 @@ export function BranchPage({
         <div className={styles.scrollArea}>
           <div className={styles.wrapper}>
 
-            {/* ── Page header — same as brand-form .pageHeader ── */}
-            <div className={styles.pageHeader}>
-              <Button
-                variant="ghost"
-                size="small"
-                icon="arrow_back"
-                onClick={handleClose}
-              />
-              <div className={styles.headerMeta}>
-                <h1 className={styles.title}>{pageTitle}</h1>
-                {draft.name.trim() ? (
-                  <span className={styles.modeBadge}>{draft.name.trim()}</span>
-                ) : null}
-              </div>
-              <div className={styles.headerActions}>
+            <PageSurfaceHeader
+              title={pageTitle}
+              subtitle={draft.name.trim() || undefined}
+              onBack={handleClose}
+              actions={
+                <>
                 <Button variant="outline" size="small" onClick={handleClose}>
                   {t.branchCancel}
                 </Button>
                 <Button variant="primary" size="small" onClick={handleSave}>
                   {t.branchSave}
                 </Button>
-              </div>
-            </div>
+                </>
+              }
+            />
 
             {/* ── Two-column shell — same as brand-form .desktopShell ── */}
             <div className={styles.form}>
