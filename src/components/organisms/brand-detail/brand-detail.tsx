@@ -5,8 +5,6 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { isAxiosError } from "axios";
 import {
-  Alert,
-  AlertDescription,
   AlertDialog,
   AlertDialogContent,
   AlertDialogHeader,
@@ -36,6 +34,7 @@ import type { Brand, Branch, BrandStatus } from "@/types/brand";
 import type { PublicUserProfile } from "@/types";
 import type { Service } from "@/types/service";
 import { RichTextDisplay } from "@/components/molecules/rich-text-editor/rich-text-display";
+import { StatusBanner } from "@/components/molecules/status-banner";
 import { SocialIcon, SOCIAL_COLORS } from "@/components/atoms/social-icon/social-icon";
 import styles from "./brand-detail.module.css";
 
@@ -868,13 +867,13 @@ export function BrandDetail({
   return (
     <div className={styles.wrapper}>
       {showCreatedAlert ? (
-        <Alert variant="success" icon="check_circle" className={styles.pageAlert}>
-          <AlertDescription>{t.createSuccessDescription}</AlertDescription>
-        </Alert>
+        <StatusBanner variant="success" icon="check_circle">
+          {t.createSuccessDescription}
+        </StatusBanner>
       ) : showUpdatedAlert ? (
-        <Alert variant="success" icon="check_circle" className={styles.pageAlert}>
-          <AlertDescription>{t.updateSuccessDescription}</AlertDescription>
-        </Alert>
+        <StatusBanner variant="success" icon="check_circle">
+          {t.updateSuccessDescription}
+        </StatusBanner>
       ) : null}
 
       <section className={styles.hero}>

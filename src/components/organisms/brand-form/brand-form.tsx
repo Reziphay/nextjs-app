@@ -22,6 +22,7 @@ import {
 } from "@/components/atoms/alert-dialog";
 import { Icon } from "@/components/icon";
 import { PageSurfaceHeader } from "@/components/molecules/page-surface-header";
+import { StatusBanner } from "@/components/molecules/status-banner";
 import { SocialLinksEditor } from "@/components/molecules/social-links-editor/social-links-editor";
 import { socialFieldsToUrls, socialUrlsToFields } from "@/lib/social-url";
 import { Switch } from "@/components/atoms/switch";
@@ -926,25 +927,21 @@ export function BrandForm({
 
       {/* ── Verification warning ── */}
       {verificationMissing && (
-        <div className={`${styles.feedback} ${styles.feedbackError}`}>
+        <StatusBanner variant="error" className={styles.formBanner}>
           <strong>{t.verificationRequiredTitle}</strong>
           {" — "}
           {t.verificationRequiredDescription}
-        </div>
+        </StatusBanner>
       )}
 
       <form className={styles.form} onSubmit={handleSubmit}>
         {/* ── Feedback ── */}
         {feedback && (
-          <div
-            className={`${styles.feedback} ${
-              feedback.type === "success"
-                ? styles.feedbackSuccess
-                : styles.feedbackError
-            }`}
+          <StatusBanner
+            variant={feedback.type === "success" ? "success" : "error"}
           >
             {feedback.message}
-          </div>
+          </StatusBanner>
         )}
 
         <div className={styles.desktopShell}>

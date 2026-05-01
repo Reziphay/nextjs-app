@@ -467,32 +467,8 @@
   /* already first via JSX order — no order override needed */
 }
 
-/* ── Feedback banner ── */
-.feedback {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.625rem;
-  padding: 0.875rem 1.125rem;
-  border-radius: var(--general-border-radius-card);
-  font-size: var(--font-size-small);
-  font-weight: 500;
-  line-height: 1.5;
-}
-
-.wrapper > .feedback {
+.formBanner {
   margin-bottom: 1.25rem;
-}
-
-.feedbackSuccess {
-  background: var(--app-success-bg);
-  color: var(--app-success-strong);
-  border: 1px solid var(--app-success-border);
-}
-
-.feedbackError {
-  background: var(--app-error-bg);
-  color: var(--app-error);
-  border: 1px solid var(--app-error-border);
 }
 
 /* ── Inline field error ── */

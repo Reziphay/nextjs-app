@@ -39,6 +39,7 @@ import { OwnerCard } from "@/components/molecules/owner-card";
 import { PageSurfaceHeader } from "@/components/molecules/page-surface-header";
 import { RichTextEditor } from "@/components/molecules/rich-text-editor/rich-text-editor";
 import { RichTextDisplay } from "@/components/molecules/rich-text-editor/rich-text-display";
+import { StatusBanner, type StatusBannerVariant } from "@/components/molecules/status-banner";
 import styles from "./services-uso-page.module.css";
 
 type ServicesUsoPageProps = {
@@ -755,13 +756,9 @@ function ServiceFormPage({
       />
 
       {feedback ? (
-        <div
-          className={`${styles.feedback} ${
-            feedback.type === "success" ? styles.feedbackSuccess : styles.feedbackError
-          }`}
-        >
+        <StatusBanner variant={feedback.type === "success" ? "success" : "error"}>
           {feedback.message}
-        </div>
+        </StatusBanner>
       ) : null}
 
       <form className={styles.formBody} onSubmit={handleSubmit}>
@@ -1191,8 +1188,7 @@ export function ServiceDetailView({
 
   const images = service.images.map((img) => proxyMediaUrl(img.url) ?? img.url);
 
-  type BannerVariant = "warning" | "error" | "info" | "muted";
-  const bannerConfig: Partial<Record<typeof service.status, { msg: string; variant: BannerVariant; icon: string }>> = {
+  const bannerConfig: Partial<Record<typeof service.status, { msg: string; variant: StatusBannerVariant; icon: string }>> = {
     DRAFT:    { msg: copy.draftNote,    variant: "warning", icon: "info"     },
     PENDING:  { msg: copy.pendingNote,  variant: "info",    icon: "schedule" },
     PAUSED:   { msg: copy.pausedNote,   variant: "warning", icon: "info"     },
@@ -1210,10 +1206,9 @@ export function ServiceDetailView({
       />
 
       {banner !== null && (
-        <div className={`${styles.statusBanner} ${styles[`statusBanner_${banner.variant}`]}`}>
-          <Icon icon={banner.icon} size={15} color="current" className={styles.statusBannerIcon} />
-          <span>{banner.msg}</span>
-        </div>
+        <StatusBanner variant={banner.variant} icon={banner.icon} className={styles.detailStatusBanner}>
+          {banner.msg}
+        </StatusBanner>
       )}
 
       <div className={styles.detailShell}>
@@ -1259,12 +1254,9 @@ export function ServiceDetailView({
 
           {/* Rejection reason */}
           {service.status === "REJECTED" && service.rejection_reason && (
-            <div className={`${styles.statusBanner} ${styles.statusBanner_error} ${styles.rejectionBanner}`}>
-              <Icon icon="error" size={15} color="current" className={styles.statusBannerIcon} />
-              <span>
-                <strong>{copy.labelRejectionReason}:</strong> {service.rejection_reason}
-              </span>
-            </div>
+            <StatusBanner variant="error" icon="error" className={styles.rejectionBanner}>
+              <strong>{copy.labelRejectionReason}:</strong> {service.rejection_reason}
+            </StatusBanner>
           )}
         </div>
 
@@ -1634,14 +1626,12 @@ export function ServicesUsoPage({
       </div>
 
       {feedback ? (
-        <div
-          className={`${styles.feedbackBanner} ${
-            feedback.type === "success" ? styles.feedbackSuccess : styles.feedbackError
-          }`}
+        <StatusBanner
+          variant={feedback.type === "success" ? "success" : "error"}
+          icon={feedback.type === "success" ? "check_circle" : "error"}
         >
-          <Icon icon={feedback.type === "success" ? "check_circle" : "error"} size={16} color="current" />
-          <span>{feedback.message}</span>
-        </div>
+          {feedback.message}
+        </StatusBanner>
       ) : null}
 
       {services.length === 0 ? (

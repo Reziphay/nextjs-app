@@ -7,6 +7,7 @@ import { isAxiosError } from "axios";
 import { Button } from "@/components/atoms/button";
 import { Icon } from "@/components/icon";
 import { ProfileBox } from "@/components/molecules";
+import { StatusBanner } from "@/components/molecules/status-banner";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   acceptTeamInvitation,
@@ -448,7 +449,7 @@ export function NotificationTransferPage({
         <p className={styles.pageDescription}>{centerCopy.streamDescription}</p>
       </div>
 
-      {feedback ? <div className={styles.feedback}>{feedback}</div> : null}
+      {feedback ? <StatusBanner variant="info">{feedback}</StatusBanner> : null}
 
       <div className={styles.streamToolbar}>
         <div className={styles.streamMeta}>

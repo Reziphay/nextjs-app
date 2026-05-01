@@ -27,15 +27,6 @@
   line-height: 1.7;
 }
 
-.feedback {
-  padding: 0.875rem 1rem;
-  border-radius: var(--general-border-radius-card);
-  background: var(--app-bg-surface-strong);
-  border: 1px solid var(--app-border-soft);
-  color: var(--app-text-strong);
-  font-size: var(--font-size-small);
-}
-
 .streamToolbar {
   display: flex;
   align-items: center;

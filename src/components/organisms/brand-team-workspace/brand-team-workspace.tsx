@@ -13,6 +13,7 @@ import { Badge } from "@/components/atoms/badge";
 import { Button } from "@/components/atoms/button";
 import { Field, FieldDescription, FieldLabel, Input } from "@/components/atoms/input";
 import { Icon } from "@/components/icon";
+import { StatusBanner } from "@/components/molecules/status-banner";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   fetchBrandTeamWorkspace,
@@ -913,15 +914,9 @@ export function BrandTeamWorkspace({
         </p>
 
         {feedback ? (
-          <div
-            className={`${styles.feedback} ${
-              feedback.tone === "success"
-                ? styles.feedbackSuccess
-                : styles.feedbackError
-            }`}
-          >
+          <StatusBanner variant={feedback.tone === "success" ? "success" : "error"}>
             {feedback.message}
-          </div>
+          </StatusBanner>
         ) : null}
 
         <div className={styles.emptyActions}>
@@ -1129,15 +1124,9 @@ export function BrandTeamWorkspace({
                   </Field>
 
                   {feedback ? (
-                    <div
-                      className={`${styles.feedback} ${
-                        feedback.tone === "success"
-                          ? styles.feedbackSuccess
-                          : styles.feedbackError
-                      }`}
-                    >
+                    <StatusBanner variant={feedback.tone === "success" ? "success" : "error"}>
                       {feedback.message}
-                    </div>
+                    </StatusBanner>
                   ) : null}
 
                   <div className={styles.searchState}>

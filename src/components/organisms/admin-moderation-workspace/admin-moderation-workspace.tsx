@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/atoms/button";
-import { Alert } from "@/components/atoms/alert";
 import { OwnerCard } from "@/components/molecules/owner-card";
+import { StatusBanner } from "@/components/molecules/status-banner";
 import { BrandDetail } from "@/components/organisms/brand-detail";
 import { ServiceReadOnlyDetailView } from "@/components/organisms/services-uso-page/services-uso-page";
 import { useLocale } from "@/components/providers/locale-provider";
@@ -477,7 +477,7 @@ export function AdminModerationWorkspace() {
 
         {actionFeedback && actionStatus === "success" && (
           <div className={styles.feedback}>
-            <Alert variant="success">{actionFeedback}</Alert>
+            <StatusBanner variant="success">{actionFeedback}</StatusBanner>
           </div>
         )}
 
@@ -505,7 +505,7 @@ export function AdminModerationWorkspace() {
             ))}
           </div>
         ) : queueError ? (
-          <Alert variant="destructive">{queueError}</Alert>
+          <StatusBanner variant="error">{queueError}</StatusBanner>
         ) : filteredQueue.length === 0 ? (
           <div className={styles.empty}>
             <p className={styles.emptyTitle}>{t.queueEmpty}</p>
@@ -662,9 +662,9 @@ export function AdminModerationWorkspace() {
 
       {actionFeedback && (
         <div className={styles.feedback}>
-          <Alert variant={actionStatus === "success" ? "success" : "destructive"}>
+          <StatusBanner variant={actionStatus === "success" ? "success" : "error"}>
             {actionFeedback}
-          </Alert>
+          </StatusBanner>
         </div>
       )}
 

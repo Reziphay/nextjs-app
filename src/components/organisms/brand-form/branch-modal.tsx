@@ -31,6 +31,7 @@ import {
 import { Switch } from "@/components/atoms/switch";
 import { Icon } from "@/components/icon";
 import { RichTextEditor } from "@/components/molecules/rich-text-editor/rich-text-editor";
+import { StatusBanner } from "@/components/molecules/status-banner";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   fetchBranchTeamDetail,
@@ -1261,15 +1262,9 @@ export function BranchModal({
                 </Field>
 
                 {teamFeedback ? (
-                  <div
-                    className={`${styles.feedback} ${
-                      teamFeedback.tone === "success"
-                        ? styles.feedbackSuccess
-                        : styles.feedbackError
-                    }`}
-                  >
+                  <StatusBanner variant={teamFeedback.tone === "success" ? "success" : "error"}>
                     {teamFeedback.message}
-                  </div>
+                  </StatusBanner>
                 ) : null}
 
                 {!selectedSearchTarget ? (
