@@ -6,7 +6,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { isAxiosError } from "axios";
 import {
-  Badge,
   Button,
   Field,
   FieldLabel,
@@ -39,6 +38,7 @@ import { OwnerCard } from "@/components/molecules/owner-card";
 import { PageSurfaceHeader } from "@/components/molecules/page-surface-header";
 import { RichTextEditor } from "@/components/molecules/rich-text-editor/rich-text-editor";
 import { RichTextDisplay } from "@/components/molecules/rich-text-editor/rich-text-display";
+import { StatusBadge, type StatusBadgeTone } from "@/components/molecules/status-badge";
 import { StatusBanner, type StatusBannerVariant } from "@/components/molecules/status-banner";
 import styles from "./services-uso-page.module.css";
 
@@ -475,16 +475,22 @@ function getCopy(locale: string): PageCopy {
   return EN_COPY;
 }
 
-const STATUS_BADGE_VARIANT: Record<
-  ServiceStatus,
-  "default" | "secondary" | "destructive" | "outline"
-> = {
-  DRAFT: "secondary",
-  PENDING: "default",
-  ACTIVE: "outline",
-  REJECTED: "destructive",
-  PAUSED: "secondary",
-  ARCHIVED: "secondary",
+const SERVICE_STATUS_TONE: Record<ServiceStatus, StatusBadgeTone> = {
+  DRAFT: "muted",
+  PENDING: "warning",
+  ACTIVE: "success",
+  REJECTED: "error",
+  PAUSED: "muted",
+  ARCHIVED: "muted",
+};
+
+const SERVICE_STATUS_ICON: Record<ServiceStatus, string> = {
+  ACTIVE: "check_circle",
+  PENDING: "schedule",
+  DRAFT: "edit",
+  PAUSED: "pause",
+  REJECTED: "error",
+  ARCHIVED: "archive",
 };
 
 function formatPrice(service: Service, copy: PageCopy): string {
@@ -1032,24 +1038,6 @@ function ServiceCard({
     ? (messages.categories[service.service_category.key as keyof typeof messages.categories] ?? service.service_category.key)
     : null;
 
-  const statusPillClass = {
-    ACTIVE: styles.cardStatusActive,
-    PENDING: styles.cardStatusPending,
-    DRAFT: styles.cardStatusDraft,
-    PAUSED: styles.cardStatusPaused,
-    REJECTED: styles.cardStatusRejected,
-    ARCHIVED: styles.cardStatusArchived,
-  }[service.status];
-
-  const statusIcon: Record<typeof service.status, string> = {
-    ACTIVE: "check_circle",
-    PENDING: "schedule",
-    DRAFT: "edit",
-    PAUSED: "pause",
-    REJECTED: "error",
-    ARCHIVED: "archive",
-  };
-
   const brandLogoUrl = owner.isBrand ? (proxyMediaUrl(owner.brand.logo_url ?? "") || null) : null;
 
   const ownerHref = owner.isBrand ? `/brands?id=${owner.brand.id}` : "/account";
@@ -1072,10 +1060,14 @@ function ServiceCard({
           </div>
         )}
         {/* Status pill overlaid top-right */}
-        <div className={`${styles.cardStatusPill} ${statusPillClass}`}>
-          <Icon icon={statusIcon[service.status]} size={11} color="current" />
+        <StatusBadge
+          appearance="overlay"
+          tone={SERVICE_STATUS_TONE[service.status]}
+          icon={SERVICE_STATUS_ICON[service.status]}
+          className={styles.cardStatusPill}
+        >
           {statusLabel}
-        </div>
+        </StatusBadge>
         {/* Price pill overlaid bottom-right */}
         {priceLabel !== "—" && (
           <div className={styles.cardPricePill}>
@@ -1176,7 +1168,6 @@ export function ServiceDetailView({
 }) {
   const { messages } = useLocale();
   const statusLabel = getStatusLabel(service.status, copy);
-  const badgeVariant = STATUS_BADGE_VARIANT[service.status];
   const priceLabel = formatPrice(service, copy);
   const durationLabel = formatDuration(service.duration, copy.fieldDurationUnit);
   const owner = getOwnerInfo(service, brands, user);
@@ -1190,8 +1181,8 @@ export function ServiceDetailView({
 
   const bannerConfig: Partial<Record<typeof service.status, { msg: string; variant: StatusBannerVariant; icon: string }>> = {
     DRAFT:    { msg: copy.draftNote,    variant: "warning", icon: "info"     },
-    PENDING:  { msg: copy.pendingNote,  variant: "info",    icon: "schedule" },
-    PAUSED:   { msg: copy.pausedNote,   variant: "warning", icon: "info"     },
+    PENDING:  { msg: copy.pendingNote,  variant: "warning", icon: "schedule" },
+    PAUSED:   { msg: copy.pausedNote,   variant: "info",    icon: "pause"    },
     REJECTED: { msg: copy.rejectedNote, variant: "error",   icon: "error"    },
     ARCHIVED: { msg: copy.archivedNote, variant: "muted",   icon: "archive"  },
   };
@@ -1201,7 +1192,11 @@ export function ServiceDetailView({
     <div className={styles.detailWrapper}>
       <PageSurfaceHeader
         title={service.title}
-        titleAddon={<Badge variant={badgeVariant}>{statusLabel}</Badge>}
+        titleAddon={
+          <StatusBadge tone={SERVICE_STATUS_TONE[service.status]}>
+            {statusLabel}
+          </StatusBadge>
+        }
         onBack={onBack}
       />
 

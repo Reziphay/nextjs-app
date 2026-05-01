@@ -145,43 +145,9 @@
   top: 0.625rem;
   right: 0.625rem;
   z-index: 1;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.2rem 0.5rem 0.2rem 0.4rem;
-  border-radius: var(--general-border-radius-pill);
   font-size: 0.68rem;
-  font-weight: 700;
   letter-spacing: 0.03em;
-  white-space: nowrap;
-  color: #fff;
-}
-
-.cardStatusActive {
-  background: var(--app-success);
-}
-
-.cardStatusPending {
-  background: var(--app-warning);
-  color: rgb(0 0 0 / 0.75);
-}
-
-.cardStatusDraft {
-  background: rgb(0 0 0 / 0.45);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-
-.cardStatusPaused {
-  background: var(--app-primary);
-}
-
-.cardStatusRejected {
-  background: var(--app-error);
-}
-
-.cardStatusArchived {
-  background: rgb(0 0 0 / 0.35);
+  box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 0.14);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
