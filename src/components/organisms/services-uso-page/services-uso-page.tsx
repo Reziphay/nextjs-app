@@ -863,10 +863,10 @@ export function ServiceDetailView({
                 </>
               )}
 
-              <dt className={styles.detailDt}>{copy.fieldPrice}</dt>
+              <dt className={styles.detailDt}>{copy.labelPrice}</dt>
               <dd className={styles.detailDd}>{priceLabel}</dd>
 
-              <dt className={styles.detailDt}>{copy.fieldDuration}</dt>
+              <dt className={styles.detailDt}>{copy.labelDuration}</dt>
               <dd className={styles.detailDd}>{durationLabel}</dd>
 
               {branch && (
@@ -878,7 +878,7 @@ export function ServiceDetailView({
 
               {service.address && !branch && (
                 <>
-                  <dt className={styles.detailDt}>{copy.fieldAddress}</dt>
+                  <dt className={styles.detailDt}>{copy.labelAddress}</dt>
                   <dd className={styles.detailDd}>{service.address}</dd>
                 </>
               )}

@@ -1057,6 +1057,9 @@ export type Messages = {
     labelFree: string;
     labelFrom: string;
     labelDurationUnit: string;
+    labelDuration: string;
+    labelPrice: string;
+    labelAddress: string;
     labelRejectionReason: string;
     labelCategory: string;
     labelBranch: string;
