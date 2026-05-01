@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useMemo, useRef, useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { isAxiosError } from "axios";
@@ -1438,7 +1438,9 @@ export function ServicesUsoPage({
 }: ServicesUsoPageProps) {
   const { locale } = useLocale();
   const copy = useMemo(() => getCopy(locale), [locale]);
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const searchKey = searchParams.toString();
 
   const [services, setServices] = useState<Service[]>(initialServices);
 
@@ -1457,39 +1459,88 @@ export function ServicesUsoPage({
   const [viewService, setViewService] = useState<Service | null>(
     isEditAction ? null : initialService,
   );
+  const [editingService, setEditingService] = useState<Service | null>(
+    isEditAction ? initialService : null,
+  );
   const [createBrandId, setCreateBrandId] = useState<string | undefined>(
     initialAction === "create" ? initialBrandId : undefined,
   );
 
   useEffect(() => {
-    const id = searchParams.get("id");
-    if (!id) return;
-    const match = services.find((s) => s.id === id);
-    if (match) {
-      setViewService(match);
-      setView("detail");
+    const params = new URLSearchParams(searchKey);
+    const action = params.get("action");
+    const id = params.get("id");
+    const brandId = params.get("brand") ?? undefined;
+
+    if (action === "create") {
+      setEditingService(null);
+      setViewService(null);
+      setCreateBrandId(brandId);
+      setView("form");
+      return;
     }
-  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
-  const [editingService, setEditingService] = useState<Service | null>(
-    isEditAction ? initialService : null,
-  );
+
+    if (action === "edit" && id) {
+      const match = services.find((s) => s.id === id);
+      if (match) {
+        setEditingService(match);
+        setViewService(match);
+        setCreateBrandId(undefined);
+        setView("form");
+      }
+      return;
+    }
+
+    if (id) {
+      const match = services.find((s) => s.id === id);
+      if (match) {
+        setEditingService(null);
+        setViewService(match);
+        setCreateBrandId(undefined);
+        setView("detail");
+      }
+      return;
+    }
+
+    setEditingService(null);
+    setViewService(null);
+    setCreateBrandId(undefined);
+    setView("list");
+  }, [searchKey, services]);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
+  function pushServicesRoute(params?: { id?: string; action?: "create" | "edit"; brand?: string }) {
+    const nextParams = new URLSearchParams();
+    if (params?.id) nextParams.set("id", params.id);
+    if (params?.action) nextParams.set("action", params.action);
+    if (params?.brand) nextParams.set("brand", params.brand);
+
+    const query = nextParams.toString();
+    router.push(query ? `/services?${query}` : "/services", { scroll: false });
+  }
+
   function openDetail(service: Service) {
     setViewService(service);
+    setEditingService(null);
+    setCreateBrandId(undefined);
     setView("detail");
+    pushServicesRoute({ id: service.id });
   }
 
   function openCreate(brandId?: string) {
     setEditingService(null);
+    setViewService(null);
     setCreateBrandId(brandId);
     setView("form");
+    pushServicesRoute({ action: "create", brand: brandId });
   }
 
   function openEditFromDetail(service: Service) {
     setEditingService(service);
+    setViewService(service);
     setView("form");
+    pushServicesRoute({ id: service.id, action: "edit" });
   }
 
   function backToList() {
@@ -1497,11 +1548,16 @@ export function ServicesUsoPage({
     setEditingService(null);
     setCreateBrandId(undefined);
     setView("list");
+    pushServicesRoute();
   }
 
   function backToDetail() {
     setEditingService(null);
+    setCreateBrandId(undefined);
     setView("detail");
+    if (viewService) {
+      pushServicesRoute({ id: viewService.id });
+    }
   }
 
   function showFeedback(type: "success" | "error", message: string) {
