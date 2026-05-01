@@ -9,16 +9,7 @@ import Underline from "@tiptap/extension-underline";
 import Placeholder from "@tiptap/extension-placeholder";
 import { useEffect } from "react";
 import styles from "./rich-text-editor.module.css";
-
-const COLORS = [
-  { label: "Default", value: null },
-  { label: "Red", value: "#e53e3e" },
-  { label: "Orange", value: "#dd6b20" },
-  { label: "Green", value: "#38a169" },
-  { label: "Blue", value: "#3182ce" },
-  { label: "Purple", value: "#805ad5" },
-  { label: "Gray", value: "#718096" },
-];
+import { useLocale } from "@/components/providers/locale-provider";
 
 type RichTextEditorProps = {
   value: string;
@@ -35,6 +26,19 @@ export function RichTextEditor({
   disabled,
   className,
 }: RichTextEditorProps) {
+  const { messages } = useLocale();
+  const rt = messages.richText;
+
+  const COLORS = [
+    { label: rt.colorDefault, value: null },
+    { label: rt.colorRed, value: "#e53e3e" },
+    { label: rt.colorOrange, value: "#dd6b20" },
+    { label: rt.colorGreen, value: "#38a169" },
+    { label: rt.colorBlue, value: "#3182ce" },
+    { label: rt.colorPurple, value: "#805ad5" },
+    { label: rt.colorGray, value: "#718096" },
+  ];
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -122,7 +126,7 @@ export function RichTextEditor({
         <Button
           variant="unstyled"
           type="button"
-          title="Bold"
+          title={rt.bold}
           className={`${styles.toolBtn} ${isBold ? styles.toolBtnActive : ""}`}
           onClick={() => editor.chain().focus().toggleBold().run()}
           disabled={disabled}
@@ -133,7 +137,7 @@ export function RichTextEditor({
         <Button
           variant="unstyled"
           type="button"
-          title="Italic"
+          title={rt.italic}
           className={`${styles.toolBtn} ${isItalic ? styles.toolBtnActive : ""}`}
           onClick={() => editor.chain().focus().toggleItalic().run()}
           disabled={disabled}
@@ -144,7 +148,7 @@ export function RichTextEditor({
         <Button
           variant="unstyled"
           type="button"
-          title="Underline"
+          title={rt.underline}
           className={`${styles.toolBtn} ${isUnderline ? styles.toolBtnActive : ""}`}
           onClick={() => editor.chain().focus().toggleUnderline().run()}
           disabled={disabled}
@@ -157,7 +161,7 @@ export function RichTextEditor({
         <Button
           variant="unstyled"
           type="button"
-          title="Bullet list"
+          title={rt.bulletList}
           className={`${styles.toolBtn} ${isBulletList ? styles.toolBtnActive : ""}`}
           onClick={() => toggleList("bulletList")}
           disabled={disabled}
@@ -177,7 +181,7 @@ export function RichTextEditor({
         <Button
           variant="unstyled"
           type="button"
-          title="Ordered list"
+          title={rt.orderedList}
           className={`${styles.toolBtn} ${isOrderedList ? styles.toolBtnActive : ""}`}
           onClick={() => toggleList("orderedList")}
           disabled={disabled}

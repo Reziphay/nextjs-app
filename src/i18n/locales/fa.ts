@@ -428,4 +428,10 @@ export const faMessages: Messages = {
     timeFormat12h: "ق.ظ/ب.ظ",
     timeFormat24h: "۲۴ ساعته",
   },
+  theme: {
+    title: "پوسته",
+    system: "سیستم",
+    light: "روشن",
+    dark: "تاریک",
+  },
 };

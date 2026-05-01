@@ -47,150 +47,10 @@ type BrandDetailProps = {
 
 type BranchFilter = "all" | "open247" | "withContact";
 
-type ServicesCopy = {
-  sectionTitle: string;
-  emptyState: string;
-  loadingState: string;
-  labelFree: string;
-  labelFrom: string;
-  labelDurationUnit: string;
-  viewService: string;
-  modalTitle: string;
-  modalDescription: string;
-  modalCategory: string;
-  modalPrice: string;
-  modalDuration: string;
-  modalAddress: string;
-  modalBranch: string;
-  modalIndividual: string;
-  modalClose: string;
-  addService: string;
-  actionEdit: string;
-  actionDelete: string;
-  tableService: string;
-  tableBranch: string;
-  tablePrice: string;
-  tableDuration: string;
-};
-
-const EN_SERVICES_COPY: ServicesCopy = {
-  sectionTitle: "Services",
-  emptyState: "No active services at this brand yet.",
-  loadingState: "Loading services…",
-  labelFree: "Free",
-  labelFrom: "From",
-  labelDurationUnit: "min",
-  viewService: "View service",
-  modalTitle: "Service details",
-  modalDescription: "Description",
-  modalCategory: "Category",
-  modalPrice: "Price",
-  modalDuration: "Duration",
-  modalAddress: "Address",
-  modalBranch: "Branch",
-  modalIndividual: "Individual",
-  modalClose: "Close",
-  addService: "Add service",
-  actionEdit: "Edit",
-  actionDelete: "Delete",
-  tableService: "Service",
-  tableBranch: "Branch",
-  tablePrice: "Price",
-  tableDuration: "Duration",
-};
-
-const TR_SERVICES_COPY: ServicesCopy = {
-  ...EN_SERVICES_COPY,
-  sectionTitle: "Hizmetler",
-  emptyState: "Bu markaya ait aktif hizmet bulunmuyor.",
-  loadingState: "Hizmetler yükleniyor…",
-  labelFree: "Ücretsiz",
-  labelFrom: "Başlangıç",
-  labelDurationUnit: "dk",
-  viewService: "Hizmeti gör",
-  modalTitle: "Hizmet detayları",
-  modalDescription: "Açıklama",
-  modalCategory: "Kategori",
-  modalPrice: "Fiyat",
-  modalDuration: "Süre",
-  modalAddress: "Adres",
-  modalBranch: "Şube",
-  modalIndividual: "Bireysel",
-  modalClose: "Kapat",
-  addService: "Hizmet ekle",
-  actionEdit: "Düzenle",
-  actionDelete: "Sil",
-  tableService: "Hizmet",
-  tableBranch: "Şube",
-  tablePrice: "Fiyat",
-  tableDuration: "Süre",
-};
-
-const AZ_SERVICES_COPY: ServicesCopy = {
-  ...EN_SERVICES_COPY,
-  sectionTitle: "Xidmətlər",
-  emptyState: "Bu brenda aid aktiv xidmət yoxdur.",
-  loadingState: "Xidmətlər yüklənir…",
-  labelFree: "Pulsuz",
-  labelFrom: "Başlangıcdan",
-  labelDurationUnit: "dəq",
-  viewService: "Xidmətə bax",
-  modalTitle: "Xidmət detalları",
-  modalDescription: "Təsvir",
-  modalCategory: "Kateqoriya",
-  modalPrice: "Qiymət",
-  modalDuration: "Müddət",
-  modalAddress: "Ünvan",
-  modalBranch: "Filial",
-  modalIndividual: "Fərdi",
-  modalClose: "Bağla",
-  addService: "Xidmət əlavə et",
-  actionEdit: "Redaktə et",
-  actionDelete: "Sil",
-  tableService: "Xidmət",
-  tableBranch: "Filial",
-  tablePrice: "Qiymət",
-  tableDuration: "Müddət",
-};
-
-const RU_SERVICES_COPY: ServicesCopy = {
-  ...EN_SERVICES_COPY,
-  sectionTitle: "Сервисы",
-  emptyState: "У этого бренда пока нет активных сервисов.",
-  loadingState: "Сервисы загружаются…",
-  labelFree: "Бесплатно",
-  labelFrom: "От",
-  labelDurationUnit: "мин",
-  viewService: "Посмотреть сервис",
-  modalTitle: "Детали сервиса",
-  modalDescription: "Описание",
-  modalCategory: "Категория",
-  modalPrice: "Цена",
-  modalDuration: "Длительность",
-  modalAddress: "Адрес",
-  modalBranch: "Филиал",
-  modalIndividual: "Индивидуально",
-  modalClose: "Закрыть",
-  addService: "Добавить сервис",
-  actionEdit: "Редактировать",
-  actionDelete: "Удалить",
-  tableService: "Сервис",
-  tableBranch: "Филиал",
-  tablePrice: "Цена",
-  tableDuration: "Длительность",
-};
-
-function getServicesCopy(locale: string): ServicesCopy {
-  if (locale.startsWith("az")) return AZ_SERVICES_COPY;
-  if (locale.startsWith("ru")) return RU_SERVICES_COPY;
-  if (locale.startsWith("tr")) return TR_SERVICES_COPY;
-  return EN_SERVICES_COPY;
-}
-
-function formatServicePrice(service: Service, copy: ServicesCopy): string {
-  if (service.price_type === "FREE") return copy.labelFree;
+function formatServicePrice(service: Service, t: { serviceLabelFree: string; serviceLabelFrom: string }): string {
+  if (service.price_type === "FREE") return t.serviceLabelFree;
   if (service.price === null) return "—";
-  if (service.price_type === "STARTING_FROM") return `${copy.labelFrom} ${service.price}`;
+  if (service.price_type === "STARTING_FROM") return `${t.serviceLabelFrom} ${service.price}`;
   return String(service.price);
 }
 
@@ -204,129 +64,6 @@ function formatServiceDuration(minutes: number | null, unit: string): string {
   return m > 0 ? `${h}${hourUnit} ${m}${unit}` : `${h}${hourUnit}`;
 }
 
-type BranchStudioCopy = {
-  rowHint: string;
-  branchVisualTitle: string;
-  branchVisualLead: string;
-  branchVisualHint: string;
-  branchVisualEmptyHint: string;
-  branchTeamTitle: string;
-  branchTeamLead: string;
-  branchTeamEmpty: string;
-  branchTeamLoading: string;
-  branchTeamError: string;
-  acceptedShort: string;
-  pendingShort: string;
-  archivedShort: string;
-  ownerShort: string;
-  memberShort: string;
-  branchPhotoBadge: string;
-  branchPhotoReadyBadge: string;
-  branchTeamBadge: string;
-};
-
-const EN_BRANCH_STUDIO_COPY: BranchStudioCopy = {
-  rowHint: "Tap the branch row to view its details.",
-  branchVisualTitle: "Branch photo",
-  branchVisualLead:
-    "Photo and quick details for this branch.",
-  branchVisualHint:
-    "Branch photo",
-  branchVisualEmptyHint:
-    "No photo has been added for this branch yet.",
-  branchTeamTitle: "Branch team",
-  branchTeamLead:
-    "People working in this branch.",
-  branchTeamEmpty: "Only the owner is attached here right now.",
-  branchTeamLoading: "Loading branch team...",
-  branchTeamError: "Branch team data could not be loaded.",
-  acceptedShort: "Accepted",
-  pendingShort: "Pending",
-  archivedShort: "Archived",
-  ownerShort: "Owner",
-  memberShort: "Member",
-  branchPhotoBadge: "No photo",
-  branchPhotoReadyBadge: "Photo ready",
-  branchTeamBadge: "Team",
-};
-
-const TR_BRANCH_STUDIO_COPY: BranchStudioCopy = {
-  rowHint: "Detayları görmek için şube satırına dokun.",
-  branchVisualTitle: "Şube fotoğrafı",
-  branchVisualLead:
-    "Bu şubeye ait fotoğraf ve kısa bilgiler.",
-  branchVisualHint:
-    "Şube fotoğrafı",
-  branchVisualEmptyHint:
-    "Bu şube için henüz fotoğraf eklenmedi.",
-  branchTeamTitle: "Şube takımı",
-  branchTeamLead:
-    "Bu şubede çalışan kişiler.",
-  branchTeamEmpty: "Şimdilik burada sadece owner bağlı.",
-  branchTeamLoading: "Şube takımı yükleniyor...",
-  branchTeamError: "Şube takım verisi yüklenemedi.",
-  acceptedShort: "Kabul",
-  pendingShort: "Bekleyen",
-  archivedShort: "Arşiv",
-  ownerShort: "Sahip",
-  memberShort: "Üye",
-  branchPhotoBadge: "Foto yok",
-  branchPhotoReadyBadge: "Foto hazır",
-  branchTeamBadge: "Takım",
-};
-
-const AZ_BRANCH_STUDIO_COPY: BranchStudioCopy = {
-  rowHint: "Detalları görmək üçün filial sətrinə toxun.",
-  branchVisualTitle: "Filial fotosu",
-  branchVisualLead:
-    "Bu filiala aid foto və qısa məlumatlar.",
-  branchVisualHint:
-    "Filial fotosu",
-  branchVisualEmptyHint:
-    "Bu filial üçün hələ foto əlavə olunmayıb.",
-  branchTeamTitle: "Filial komandası",
-  branchTeamLead:
-    "Bu filialda çalışan şəxslər.",
-  branchTeamEmpty: "Hazırda burada yalnız owner qoşulub.",
-  branchTeamLoading: "Filial komandası yüklənir...",
-  branchTeamError: "Filial komanda məlumatı yüklənmədi.",
-  acceptedShort: "Qəbul",
-  pendingShort: "Gözləyən",
-  archivedShort: "Arxiv",
-  ownerShort: "Sahib",
-  memberShort: "Üzv",
-  branchPhotoBadge: "Foto yoxdur",
-  branchPhotoReadyBadge: "Foto hazırdır",
-  branchTeamBadge: "Komanda",
-};
-
-const RU_BRANCH_STUDIO_COPY: BranchStudioCopy = {
-  rowHint: "Нажмите на строку филиала, чтобы посмотреть детали.",
-  branchVisualTitle: "Фото филиала",
-  branchVisualLead: "Фото и краткая информация об этом филиале.",
-  branchVisualHint: "Фото филиала",
-  branchVisualEmptyHint: "Для этого филиала фото пока не добавлено.",
-  branchTeamTitle: "Команда филиала",
-  branchTeamLead: "Люди, работающие в этом филиале.",
-  branchTeamEmpty: "Сейчас здесь указан только владелец.",
-  branchTeamLoading: "Команда филиала загружается...",
-  branchTeamError: "Не удалось загрузить данные команды филиала.",
-  acceptedShort: "Приняты",
-  pendingShort: "Ожидают",
-  archivedShort: "Архив",
-  ownerShort: "Владелец",
-  memberShort: "Участник",
-  branchPhotoBadge: "Нет фото",
-  branchPhotoReadyBadge: "Фото готово",
-  branchTeamBadge: "Команда",
-};
-
-function getBranchStudioCopy(locale: string) {
-  if (locale.startsWith("az")) return AZ_BRANCH_STUDIO_COPY;
-  if (locale.startsWith("ru")) return RU_BRANCH_STUDIO_COPY;
-  if (locale.startsWith("tr")) return TR_BRANCH_STUDIO_COPY;
-  return EN_BRANCH_STUDIO_COPY;
-}
 
 function StarRating({ rating, max = 5 }: { rating: number; max?: number }) {
   return (
@@ -466,10 +203,8 @@ export function BrandDetail({
 }: BrandDetailProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { locale, messages } = useLocale();
+  const { messages } = useLocale();
   const t = messages.brands;
-  const studioCopy = useMemo(() => getBranchStudioCopy(locale), [locale]);
-  const servicesCopy = useMemo(() => getServicesCopy(locale), [locale]);
   const session = useAppSelector(selectAuthSession);
   const currentUser = session.user;
   const dashboard = messages.dashboard;
@@ -1155,7 +890,7 @@ export function BrandDetail({
       <section className={styles.servicesPanel}>
         <div className={styles.servicesPanelHeader}>
           <div className={styles.servicesPanelTitleGroup}>
-            <h2 className={styles.servicesPanelTitle}>{servicesCopy.sectionTitle}</h2>
+            <h2 className={styles.servicesPanelTitle}>{t.serviceSectionTitle}</h2>
             {brandServices.length > 0 ? (
               <span className={styles.servicesCount}>{brandServices.length}</span>
             ) : null}
@@ -1167,17 +902,17 @@ export function BrandDetail({
               icon="add"
               onClick={() => router.push(`/services?action=create&brand=${brandState.id}`)}
             >
-              {servicesCopy.addService}
+              {t.serviceAdd}
             </Button>
           ) : null}
         </div>
 
         {servicesState === "loading" ? (
-          <div className={styles.emptyState}>{servicesCopy.loadingState}</div>
+          <div className={styles.emptyState}>{t.serviceLoading}</div>
         ) : brandServices.length === 0 ? (
           <div className={styles.emptyStateServices}>
             <Icon icon="design_services" size={32} color="current" className={styles.emptyStateServicesIcon} />
-            <p className={styles.emptyStateServicesText}>{servicesCopy.emptyState}</p>
+            <p className={styles.emptyStateServicesText}>{t.serviceEmpty}</p>
             {isOwner ? (
               <Button
                 variant="secondary"
@@ -1185,27 +920,27 @@ export function BrandDetail({
                 icon="add"
                 onClick={() => router.push(`/services?action=create&brand=${brandState.id}`)}
               >
-                {servicesCopy.addService}
+                {t.serviceAdd}
               </Button>
             ) : null}
           </div>
         ) : (
           <>
             <div className={styles.servicesTableHead}>
-              <span>{servicesCopy.tableService}</span>
-              <span>{servicesCopy.tableBranch}</span>
-              <span>{servicesCopy.tablePrice}</span>
-              <span>{servicesCopy.tableDuration}</span>
+              <span>{t.serviceTableService}</span>
+              <span>{t.serviceTableBranch}</span>
+              <span>{t.serviceTablePrice}</span>
+              <span>{t.serviceTableDuration}</span>
             </div>
             <div className={styles.servicesTableBody}>
               {brandServices.map((svc) => {
-                const priceLabel = formatServicePrice(svc, servicesCopy);
-                const durationLabel = formatServiceDuration(svc.duration, servicesCopy.labelDurationUnit);
+                const priceLabel = formatServicePrice(svc, t);
+                const durationLabel = formatServiceDuration(svc.duration, t.serviceLabelDurationUnit);
                 const firstImg = svc.images[0];
                 const imgUrl = firstImg ? proxyMediaUrl(firstImg.url) : null;
                 const branchName = svc.branch_id
                   ? (branches.find((b) => b.id === svc.branch_id)?.name ?? "—")
-                  : servicesCopy.modalIndividual;
+                  : t.serviceModalIndividual;
 
                 return (
                   <div
@@ -1269,8 +1004,8 @@ export function BrandDetail({
                           type="button"
                           className={styles.rowActionBtn}
                           onClick={(e) => handleEditService(svc, e)}
-                          aria-label={`${servicesCopy.actionEdit}: ${svc.title}`}
-                          title={servicesCopy.actionEdit}
+                          aria-label={`${t.serviceActionEdit}: ${svc.title}`}
+                          title={t.serviceActionEdit}
                         >
                           <Icon icon="edit" size={15} color="current" />
                         </Button>
@@ -1280,8 +1015,8 @@ export function BrandDetail({
                           className={`${styles.rowActionBtn} ${styles.rowActionBtnDanger}`}
                           onClick={(e) => handleDeleteService(svc, e)}
                           disabled={deletingServiceId === svc.id}
-                          aria-label={`${servicesCopy.actionDelete}: ${svc.title}`}
-                          title={servicesCopy.actionDelete}
+                          aria-label={`${t.serviceActionDelete}: ${svc.title}`}
+                          title={t.serviceActionDelete}
                         >
                           <Icon icon="delete" size={15} color="current" />
                         </Button>
@@ -1392,7 +1127,7 @@ export function BrandDetail({
                     )}
                     <div className={styles.branchIdentityText}>
                       <p className={styles.branchName}>{branch.name}</p>
-                      <p className={styles.branchNote}>{studioCopy.rowHint}</p>
+                      <p className={styles.branchNote}>{t.branchDetailRowHint}</p>
                     </div>
                   </div>
 
@@ -1426,8 +1161,8 @@ export function BrandDetail({
                         type="button"
                         className={styles.rowActionBtn}
                         onClick={(e) => handleEditBranch(branch, e)}
-                        aria-label={`${servicesCopy.actionEdit}: ${branch.name}`}
-                        title={servicesCopy.actionEdit}
+                        aria-label={`${t.serviceActionEdit}: ${branch.name}`}
+                        title={t.serviceActionEdit}
                       >
                         <Icon icon="edit" size={15} color="current" />
                       </Button>
@@ -1437,8 +1172,8 @@ export function BrandDetail({
                         className={`${styles.rowActionBtn} ${styles.rowActionBtnDanger}`}
                         onClick={(e) => handleDeleteBranch(branch, e)}
                         disabled={deletingBranchId === branch.id}
-                        aria-label={`${servicesCopy.actionDelete}: ${branch.name}`}
-                        title={servicesCopy.actionDelete}
+                        aria-label={`${t.serviceActionDelete}: ${branch.name}`}
+                        title={t.serviceActionDelete}
                       >
                         <Icon icon="delete" size={15} color="current" />
                       </Button>
@@ -1489,7 +1224,7 @@ export function BrandDetail({
                   type="button"
                   className={styles.branchDialogClose}
                   onClick={() => setSelectedService(null)}
-                  aria-label={servicesCopy.modalClose}
+                  aria-label={t.serviceModalClose}
                 >
                   <Icon icon="close" size={18} color="current" />
                 </Button>
@@ -1498,36 +1233,36 @@ export function BrandDetail({
               <div className={styles.branchDialogBody}>
                 {selectedService.description?.trim() ? (
                   <div className={styles.branchDialogSection}>
-                    <span className={styles.branchDialogLabel}>{servicesCopy.modalDescription}</span>
+                    <span className={styles.branchDialogLabel}>{t.serviceModalDescription}</span>
                     <RichTextDisplay html={selectedService.description} className={styles.branchDialogText} />
                   </div>
                 ) : null}
 
                 <div className={styles.branchDialogGrid}>
                   <div className={styles.branchDialogItem}>
-                    <span className={styles.branchDialogLabel}>{servicesCopy.modalPrice}</span>
-                    <p className={styles.branchDialogText}>{formatServicePrice(selectedService, servicesCopy)}</p>
+                    <span className={styles.branchDialogLabel}>{t.serviceModalPrice}</span>
+                    <p className={styles.branchDialogText}>{formatServicePrice(selectedService, t)}</p>
                   </div>
 
                   {selectedService.duration ? (
                     <div className={styles.branchDialogItem}>
-                      <span className={styles.branchDialogLabel}>{servicesCopy.modalDuration}</span>
+                      <span className={styles.branchDialogLabel}>{t.serviceModalDuration}</span>
                       <p className={styles.branchDialogText}>
-                        {formatServiceDuration(selectedService.duration, servicesCopy.labelDurationUnit)}
+                        {formatServiceDuration(selectedService.duration, t.serviceLabelDurationUnit)}
                       </p>
                     </div>
                   ) : null}
 
                   {selectedService.branch_id ? (
                     <div className={styles.branchDialogItem}>
-                      <span className={styles.branchDialogLabel}>{servicesCopy.modalBranch}</span>
+                      <span className={styles.branchDialogLabel}>{t.serviceModalBranch}</span>
                       <p className={styles.branchDialogText}>
                         {branches.find((b) => b.id === selectedService.branch_id)?.name ?? selectedService.branch_id}
                       </p>
                     </div>
                   ) : selectedService.address ? (
                     <div className={styles.branchDialogItem}>
-                      <span className={styles.branchDialogLabel}>{servicesCopy.modalAddress}</span>
+                      <span className={styles.branchDialogLabel}>{t.serviceModalAddress}</span>
                       <p className={styles.branchDialogText}>{selectedService.address}</p>
                     </div>
                   ) : null}
@@ -1602,16 +1337,16 @@ export function BrandDetail({
                     <div className={styles.branchStudioCardHeader}>
                       <div>
                         <h3 className={styles.branchStudioTitle}>
-                          {studioCopy.branchVisualTitle}
+                          {t.branchDetailVisualTitle}
                         </h3>
                         <p className={styles.branchStudioLead}>
-                          {studioCopy.branchVisualLead}
+                          {t.branchDetailVisualLead}
                         </p>
                       </div>
                       <span className={styles.branchStudioBadge}>
                         {selectedBranchCoverUrl
-                          ? studioCopy.branchPhotoReadyBadge
-                          : studioCopy.branchPhotoBadge}
+                          ? t.branchDetailPhotoReady
+                          : t.branchDetailPhotoEmpty}
                       </span>
                     </div>
 
@@ -1627,7 +1362,7 @@ export function BrandDetail({
                           />
                           <div className={styles.branchVisualOverlay}>
                             <strong>{selectedBranch.name}</strong>
-                            <span>{studioCopy.branchVisualHint}</span>
+                            <span>{t.branchDetailVisualHint}</span>
                           </div>
                         </>
                       ) : (
@@ -1637,7 +1372,7 @@ export function BrandDetail({
                           </div>
                           <div className={styles.branchVisualOverlay}>
                             <strong>{selectedBranch.name}</strong>
-                            <span>{studioCopy.branchVisualEmptyHint}</span>
+                            <span>{t.branchDetailVisualEmptyHint}</span>
                           </div>
                         </>
                       )}
@@ -1648,43 +1383,43 @@ export function BrandDetail({
                     <div className={styles.branchStudioCardHeader}>
                       <div>
                         <h3 className={styles.branchStudioTitle}>
-                          {studioCopy.branchTeamTitle}
+                          {t.branchDetailTeamTitle}
                         </h3>
                         <p className={styles.branchStudioLead}>
-                          {studioCopy.branchTeamLead}
+                          {t.branchDetailTeamLead}
                         </p>
                       </div>
                       <span className={styles.branchStudioBadge}>
-                        {studioCopy.branchTeamBadge}
+                        {t.branchDetailTeamBadge}
                       </span>
                     </div>
 
                     {isOwner ? (
                       teamWorkspaceState === "loading" ? (
                         <p className={styles.branchStudioMuted}>
-                          {studioCopy.branchTeamLoading}
+                          {t.branchDetailTeamLoading}
                         </p>
                       ) : teamWorkspaceState === "error" ? (
                         <p className={styles.branchStudioMuted}>
-                          {studioCopy.branchTeamError}
+                          {t.branchDetailTeamError}
                         </p>
                       ) : (
                         <>
                           <div className={styles.branchTeamMetrics}>
                             <div className={styles.branchTeamMetric}>
-                              <span>{studioCopy.acceptedShort}</span>
+                              <span>{t.branchDetailAccepted}</span>
                               <strong>
                                 {selectedBranchTeam?.members.accepted.length ?? 0}
                               </strong>
                             </div>
                             <div className={styles.branchTeamMetric}>
-                              <span>{studioCopy.pendingShort}</span>
+                              <span>{t.branchDetailPending}</span>
                               <strong>
                                 {selectedBranchTeam?.members.pending.length ?? 0}
                               </strong>
                             </div>
                             <div className={styles.branchTeamMetric}>
-                              <span>{studioCopy.archivedShort}</span>
+                              <span>{t.branchDetailArchived}</span>
                               <strong>
                                 {(selectedBranchTeam?.members.rejected.length ?? 0) +
                                   (selectedBranchTeam?.members.removed.length ?? 0)}
@@ -1720,8 +1455,8 @@ export function BrandDetail({
                                       <strong>{formatTeamMemberName(member)}</strong>
                                       <span>
                                         {member.role === "OWNER"
-                                          ? studioCopy.ownerShort
-                                          : studioCopy.memberShort}
+                                          ? t.branchDetailOwner
+                                          : t.branchDetailMember}
                                       </span>
                                     </div>
                                   </div>
@@ -1730,14 +1465,14 @@ export function BrandDetail({
                             </div>
                           ) : (
                             <p className={styles.branchStudioMuted}>
-                              {studioCopy.branchTeamEmpty}
+                              {t.branchDetailTeamEmpty}
                             </p>
                           )}
                         </>
                       )
                     ) : (
                       <p className={styles.branchStudioMuted}>
-                        {studioCopy.branchTeamLead}
+                        {t.branchDetailTeamLead}
                       </p>
                     )}
 
@@ -1837,7 +1572,7 @@ export function BrandDetail({
           <AlertDialogHeader>
             <AlertDialogTitle>
               {deleteTarget?.type === "service"
-                ? `${servicesCopy.actionDelete}: ${deleteTarget.item.title}`
+                ? `${t.serviceActionDelete}: ${deleteTarget.item.title}`
                 : `${t.deleteBranch}: ${deleteTarget?.item.name}`}
             </AlertDialogTitle>
             <AlertDialogDescription>

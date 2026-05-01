@@ -424,4 +424,10 @@ export const laMessages: Messages = {
     timeFormat12h: "AM/PM",
     timeFormat24h: "24h",
   },
+  theme: {
+    title: "Thema",
+    system: "Systema",
+    light: "Lucidum",
+    dark: "Obscurum",
+  },
 };

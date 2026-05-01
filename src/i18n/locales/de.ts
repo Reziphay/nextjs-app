@@ -598,4 +598,10 @@ export const deMessages: Messages = {
     timeFormat12h: "AM/PM",
     timeFormat24h: "24Std",
   },
+  theme: {
+    title: "Thema",
+    system: "System",
+    light: "Hell",
+    dark: "Dunkel",
+  },
 };

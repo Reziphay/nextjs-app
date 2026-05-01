@@ -425,4 +425,10 @@ export const uzMessages: Messages = {
     timeFormat12h: "AM/PM",
     timeFormat24h: "24 soat",
   },
+  theme: {
+    title: "Mavzu",
+    system: "Tizim",
+    light: "Yorug'",
+    dark: "Qorong'u",
+  },
 };

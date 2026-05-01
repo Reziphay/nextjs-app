@@ -630,4 +630,10 @@ export const zhMessages: Messages = {
     timeFormat12h: "上午/下午",
     timeFormat24h: "24小时",
   },
+  theme: {
+    title: "主题",
+    system: "系统",
+    light: "浅色",
+    dark: "深色",
+  },
 };

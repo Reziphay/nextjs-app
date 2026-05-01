@@ -616,4 +616,10 @@ export const arMessages: Messages = {
     timeFormat12h: "ص/م",
     timeFormat24h: "٢٤ساعة",
   },
+  theme: {
+    title: "المظهر",
+    system: "النظام",
+    light: "فاتح",
+    dark: "داكن",
+  },
 };

@@ -45,166 +45,6 @@ export type TeamInvitationDetail = {
   branch_availability?: string | null;
 };
 
-type TeamInvitationCopy = {
-  acceptAction: string;
-  rejectAction: string;
-  acceptedDescription: string;
-  rejectedDescription: string;
-  pendingLabel: string;
-};
-
-type NotificationCenterCopy = {
-  streamDescription: string;
-  clearAllAction: string;
-  clearOneAction: string;
-  clearAllDescription: string;
-  clearOneDescription: string;
-  teamInvitationLabel: string;
-  incomingTransferLabel: string;
-  outgoingTransferLabel: string;
-  systemNotificationLabel: string;
-  transferFromLabel: string;
-  transferToLabel: string;
-  inviterLabel: string;
-  brandLabel: string;
-  branchLabel: string;
-};
-
-const EN_TEAM_COPY: TeamInvitationCopy = {
-  acceptAction: "Accept invite",
-  rejectAction: "Reject invite",
-  acceptedDescription: "Team invitation accepted.",
-  rejectedDescription: "Team invitation rejected.",
-  pendingLabel: "Pending invite",
-};
-
-const TR_TEAM_COPY: TeamInvitationCopy = {
-  acceptAction: "Daveti kabul et",
-  rejectAction: "Daveti reddet",
-  acceptedDescription: "Takım daveti kabul edildi.",
-  rejectedDescription: "Takım daveti reddedildi.",
-  pendingLabel: "Bekleyen davet",
-};
-
-const AZ_TEAM_COPY: TeamInvitationCopy = {
-  acceptAction: "Dəvəti qəbul et",
-  rejectAction: "Dəvəti rədd et",
-  acceptedDescription: "Komanda dəvəti qəbul edildi.",
-  rejectedDescription: "Komanda dəvəti rədd edildi.",
-  pendingLabel: "Gözləyən dəvət",
-};
-
-const RU_TEAM_COPY: TeamInvitationCopy = {
-  acceptAction: "Принять приглашение",
-  rejectAction: "Отклонить приглашение",
-  acceptedDescription: "Приглашение в команду принято.",
-  rejectedDescription: "Приглашение в команду отклонено.",
-  pendingLabel: "Ожидающее приглашение",
-};
-
-const EN_CENTER_COPY: NotificationCenterCopy = {
-  streamDescription:
-    "Everything appears in one timeline here. You can remove items one by one or clear the whole feed at once.",
-  clearAllAction: "Clear all",
-  clearOneAction: "Remove item",
-  clearAllDescription: "All notifications were cleared.",
-  clearOneDescription: "Notification removed.",
-  teamInvitationLabel: "Team invite",
-  incomingTransferLabel: "Incoming transfer",
-  outgoingTransferLabel: "Outgoing transfer",
-  systemNotificationLabel: "Notification",
-  transferFromLabel: "From",
-  transferToLabel: "To",
-  inviterLabel: "Invited by",
-  brandLabel: "Brand",
-  branchLabel: "Branch",
-};
-
-const TR_CENTER_COPY: NotificationCenterCopy = {
-  streamDescription:
-    "Her şey burada tek akışta görünür. İstersen öğeleri tek tek kaldırabilir ya da tüm listeyi bir anda temizleyebilirsin.",
-  clearAllAction: "Tümünü temizle",
-  clearOneAction: "Öğeyi kaldır",
-  clearAllDescription: "Bildirimlerin tamamı temizlendi.",
-  clearOneDescription: "Bildirim kaldırıldı.",
-  teamInvitationLabel: "Takım daveti",
-  incomingTransferLabel: "Gelen devir",
-  outgoingTransferLabel: "Giden devir",
-  systemNotificationLabel: "Bildirim",
-  transferFromLabel: "Gönderen",
-  transferToLabel: "Alıcı",
-  inviterLabel: "Davet eden",
-  brandLabel: "Marka",
-  branchLabel: "Şube",
-};
-
-const AZ_CENTER_COPY: NotificationCenterCopy = {
-  streamDescription:
-    "Hər şey burada tək axında görünür. İstəsən elementləri bir-bir silə və ya bütün siyahını bir dəfəlik təmizləyə bilərsən.",
-  clearAllAction: "Hamısını təmizlə",
-  clearOneAction: "Elementi sil",
-  clearAllDescription: "Bütün bildirişlər təmizləndi.",
-  clearOneDescription: "Bildiriş silindi.",
-  teamInvitationLabel: "Komanda dəvəti",
-  incomingTransferLabel: "Gələn köçürmə",
-  outgoingTransferLabel: "Göndərilən köçürmə",
-  systemNotificationLabel: "Bildiriş",
-  transferFromLabel: "Göndərən",
-  transferToLabel: "Alan",
-  inviterLabel: "Dəvət edən",
-  brandLabel: "Brend",
-  branchLabel: "Filial",
-};
-
-const RU_CENTER_COPY: NotificationCenterCopy = {
-  streamDescription:
-    "Все уведомления отображаются здесь в одной ленте. Вы можете удалять элементы по одному или очистить всю ленту сразу.",
-  clearAllAction: "Очистить всё",
-  clearOneAction: "Удалить элемент",
-  clearAllDescription: "Все уведомления очищены.",
-  clearOneDescription: "Уведомление удалено.",
-  teamInvitationLabel: "Приглашение в команду",
-  incomingTransferLabel: "Входящая передача",
-  outgoingTransferLabel: "Исходящая передача",
-  systemNotificationLabel: "Уведомление",
-  transferFromLabel: "От",
-  transferToLabel: "Кому",
-  inviterLabel: "Пригласил",
-  brandLabel: "Бренд",
-  branchLabel: "Филиал",
-};
-
-function getTeamInvitationCopy(locale: string) {
-  if (locale.startsWith("az")) {
-    return AZ_TEAM_COPY;
-  }
-
-  if (locale.startsWith("ru")) {
-    return RU_TEAM_COPY;
-  }
-
-  if (locale.startsWith("tr")) {
-    return TR_TEAM_COPY;
-  }
-
-  return EN_TEAM_COPY;
-}
-
-function getNotificationCenterCopy(locale: string) {
-  if (locale.startsWith("az")) {
-    return AZ_CENTER_COPY;
-  }
-
-  if (locale.startsWith("ru")) {
-    return RU_CENTER_COPY;
-  }
-
-  if (locale.startsWith("tr")) {
-    return TR_CENTER_COPY;
-  }
-
-  return EN_CENTER_COPY;
-}
 
 function formatTransferDate(value: string, locale: string) {
   const date = new Date(value);
@@ -243,17 +83,17 @@ function getKindBadgeClassName(item: NotificationFeedItem) {
 
 function getKindLabel(
   item: NotificationFeedItem,
-  copy: NotificationCenterCopy,
+  t: { notifCenterTeamInvitationLabel: string; notifCenterIncomingTransferLabel: string; notifCenterOutgoingTransferLabel: string; notifCenterSystemNotificationLabel: string },
 ) {
   switch (item.type) {
     case "team_invitation":
-      return copy.teamInvitationLabel;
+      return t.notifCenterTeamInvitationLabel;
     case "incoming_transfer":
-      return copy.incomingTransferLabel;
+      return t.notifCenterIncomingTransferLabel;
     case "outgoing_transfer":
-      return copy.outgoingTransferLabel;
+      return t.notifCenterOutgoingTransferLabel;
     default:
-      return copy.systemNotificationLabel;
+      return t.notifCenterSystemNotificationLabel;
   }
 }
 
@@ -276,8 +116,6 @@ export function NotificationTransferPage({
 }: NotificationTransferPageProps) {
   const { locale, messages } = useLocale();
   const t = messages.brands;
-  const teamCopy = useMemo(() => getTeamInvitationCopy(locale), [locale]);
-  const centerCopy = useMemo(() => getNotificationCenterCopy(locale), [locale]);
   const session = useAppSelector(selectAuthSession);
   const [feedItems, setFeedItems] = useState(initialFeed.items);
   const [loadingTransferId, setLoadingTransferId] = useState<string | null>(null);
@@ -369,13 +207,13 @@ export function NotificationTransferPage({
         setFeedItems((prev) =>
           prev.filter((feedItem) => feedItem.feed_id !== item.feed_id),
         );
-        setFeedback(teamCopy.acceptedDescription);
+        setFeedback(t.teamInviteAcceptedDescription);
       } else {
         await rejectTeamInvitation(item.data.team_member_id, accessToken);
         setFeedItems((prev) =>
           prev.filter((feedItem) => feedItem.feed_id !== item.feed_id),
         );
-        setFeedback(teamCopy.rejectedDescription);
+        setFeedback(t.teamInviteRejectedDescription);
       }
     } catch (error) {
       const translatedMessage = isAxiosError(error)
@@ -404,7 +242,7 @@ export function NotificationTransferPage({
       setFeedItems((prev) =>
         prev.filter((feedItem) => feedItem.feed_id !== item.feed_id),
       );
-      setFeedback(centerCopy.clearOneDescription);
+      setFeedback(t.notifCenterClearOneDescription);
     } catch (error) {
       const translatedMessage = isAxiosError(error)
         ? translateBackendErrorMessage(error.response?.data?.message, messages.backendErrors)
@@ -430,7 +268,7 @@ export function NotificationTransferPage({
     try {
       await clearNotificationFeed(accessToken);
       setFeedItems([]);
-      setFeedback(centerCopy.clearAllDescription);
+      setFeedback(t.notifCenterClearAllDescription);
     } catch (error) {
       const translatedMessage = isAxiosError(error)
         ? translateBackendErrorMessage(error.response?.data?.message, messages.backendErrors)
@@ -446,7 +284,7 @@ export function NotificationTransferPage({
     <div className={styles.wrapper}>
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>{messages.dashboard.notifications}</h1>
-        <p className={styles.pageDescription}>{centerCopy.streamDescription}</p>
+        <p className={styles.pageDescription}>{t.notifCenterStreamDescription}</p>
       </div>
 
       {feedback ? <StatusBanner variant="info">{feedback}</StatusBanner> : null}
@@ -464,7 +302,7 @@ export function NotificationTransferPage({
             onClick={() => void handleClearAll()}
             isLoading={clearingAll}
           >
-            {centerCopy.clearAllAction}
+            {t.notifCenterClearAllAction}
           </Button>
         ) : null}
       </div>
@@ -559,11 +397,11 @@ export function NotificationTransferPage({
                       <span
                         className={`${styles.kindBadge} ${getKindBadgeClassName(item)}`}
                       >
-                        {getKindLabel(item, centerCopy)}
+                        {getKindLabel(item, t)}
                       </span>
                       {item.type === "team_invitation" ? (
                         <span className={`${styles.statusBadge} ${styles.statusPending}`}>
-                          {teamCopy.pendingLabel}
+                          {t.teamInvitePendingLabel}
                         </span>
                       ) : null}
                       <span className={styles.dateLabel}>
@@ -577,7 +415,7 @@ export function NotificationTransferPage({
                         variant="icon"
                         size="small"
                         icon="delete"
-                        aria-label={centerCopy.clearOneAction}
+                        aria-label={t.notifCenterClearOneAction}
                         className={styles.dismissButton}
                         isLoading={clearingItemId === item.feed_id}
                         onClick={() => void handleDismiss(item)}
@@ -594,14 +432,14 @@ export function NotificationTransferPage({
                               userId={item.data.invited_by?.id}
                               name={personName}
                               avatar={imageUrl ?? "/reziphay-logo.png"}
-                              label={centerCopy.inviterLabel}
+                              label={t.notifCenterInviterLabel}
                               className={styles.detailProfileBox}
                             />
                           ) : personName ? (
                             <ProfileBox
                               name={personName}
                               avatar={imageUrl ?? "/reziphay-logo.png"}
-                              label={centerCopy.inviterLabel}
+                              label={t.notifCenterInviterLabel}
                               className={styles.detailProfileBox}
                             />
                           ) : null}
@@ -609,7 +447,7 @@ export function NotificationTransferPage({
 
                         <div className={styles.detailBlock}>
                           <span className={styles.detailLabel}>
-                            {centerCopy.brandLabel}
+                            {t.notifCenterBrandLabel}
                           </span>
                           {teamInvitationBrandHref ? (
                             <Link
@@ -685,7 +523,7 @@ export function NotificationTransferPage({
 
                         <div className={styles.detailBlock}>
                           <span className={styles.detailLabel}>
-                            {centerCopy.branchLabel}
+                            {t.notifCenterBranchLabel}
                           </span>
                           <div className={styles.detailPreviewCard}>
                             <div
@@ -750,7 +588,7 @@ export function NotificationTransferPage({
                         </div>
                         <div className={styles.personContent}>
                           <span className={styles.personLabel}>
-                            {centerCopy.transferFromLabel}
+                            {t.notifCenterTransferFromLabel}
                           </span>
                           <span className={styles.personName}>{personName}</span>
                         </div>
@@ -779,7 +617,7 @@ export function NotificationTransferPage({
                         </div>
                         <div className={styles.personContent}>
                           <span className={styles.personLabel}>
-                            {centerCopy.transferToLabel}
+                            {t.notifCenterTransferToLabel}
                           </span>
                           <span className={styles.personName}>{personName}</span>
                         </div>
@@ -795,14 +633,14 @@ export function NotificationTransferPage({
                       onClick={() => void runInvitationAction(item, "reject")}
                       disabled={loadingInvitationId === item.source_id}
                     >
-                      {teamCopy.rejectAction}
+                      {t.teamInviteRejectAction}
                     </Button>
                     <Button
                       variant="primary"
                       isLoading={loadingInvitationId === item.source_id}
                       onClick={() => void runInvitationAction(item, "accept")}
                     >
-                      {teamCopy.acceptAction}
+                      {t.teamInviteAcceptAction}
                     </Button>
                   </div>
                 ) : null}

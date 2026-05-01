@@ -425,4 +425,10 @@ export const heMessages: Messages = {
     timeFormat12h: "AM/PM",
     timeFormat24h: "24 שעות",
   },
+  theme: {
+    title: "ערכת נושא",
+    system: "מערכת",
+    light: "בהיר",
+    dark: "כהה",
+  },
 };

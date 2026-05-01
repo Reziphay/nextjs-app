@@ -598,4 +598,10 @@ export const frMessages: Messages = {
     timeFormat12h: "AM/PM",
     timeFormat24h: "24h",
   },
+  theme: {
+    title: "Thème",
+    system: "Système",
+    light: "Clair",
+    dark: "Sombre",
+  },
 };

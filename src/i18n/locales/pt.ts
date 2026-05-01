@@ -425,4 +425,10 @@ export const ptMessages: Messages = {
     timeFormat12h: "AM/PM",
     timeFormat24h: "24h",
   },
+  theme: {
+    title: "Tema",
+    system: "Sistema",
+    light: "Claro",
+    dark: "Escuro",
+  },
 };

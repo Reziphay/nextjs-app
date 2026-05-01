@@ -428,4 +428,10 @@ export const hiMessages: Messages = {
     timeFormat12h: "AM/PM",
     timeFormat24h: "24 घंटे",
   },
+  theme: {
+    title: "थीम",
+    system: "सिस्टम",
+    light: "लाइट",
+    dark: "डार्क",
+  },
 };

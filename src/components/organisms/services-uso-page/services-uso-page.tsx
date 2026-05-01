@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useMemo, useRef, useState, useEffect } from "react";
+import { type ReactNode, useRef, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,6 +18,7 @@ import { FormFooter } from "@/components/molecules/form-footer";
 import { Switch } from "@/components/atoms/switch";
 import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
+import type { Messages } from "@/i18n/types";
 import {
   createService,
   updateService,
@@ -66,416 +67,6 @@ type ServiceFormState = {
   imagePreviews: string[];
 };
 
-type PageCopy = {
-  pageTitle: string;
-  createService: string;
-  emptyTitle: string;
-  emptyDescription: string;
-  statusDraft: string;
-  statusPending: string;
-  statusActive: string;
-  statusRejected: string;
-  statusPaused: string;
-  statusArchived: string;
-  actionEdit: string;
-  actionSubmit: string;
-  actionDelete: string;
-  actionResubmit: string;
-  actionPause: string;
-  actionResume: string;
-  actionArchive: string;
-  actionUnarchive: string;
-  formTitleCreate: string;
-  formTitleEdit: string;
-  fieldTitle: string;
-  fieldTitlePlaceholder: string;
-  fieldDescription: string;
-  fieldDescriptionPlaceholder: string;
-  fieldCategory: string;
-  fieldCategoryPlaceholder: string;
-  fieldContext: string;
-  contextIndividual: string;
-  contextBranch: string;
-  fieldAddress: string;
-  fieldAddressPlaceholder: string;
-  fieldBrand: string;
-  fieldBrandPlaceholder: string;
-  fieldBranch: string;
-  fieldBranchPlaceholder: string;
-  fieldDuration: string;
-  fieldDurationPlaceholder: string;
-  fieldDurationUnit: string;
-  fieldPriceType: string;
-  priceTypeFixed: string;
-  priceTypeStartingFrom: string;
-  priceTypeFree: string;
-  fieldPrice: string;
-  fieldPricePlaceholder: string;
-  fieldImages: string;
-  fieldImagesHint: string;
-  fieldImagesUploadHint: string;
-  removePhotoLabel: string;
-  servicePhotoAlt: string;
-  btnSave: string;
-  btnResubmit: string;
-  btnCancel: string;
-  labelRejectionReason: string;
-  labelCategory: string;
-  labelDuration: string;
-  labelPrice: string;
-  labelBranch: string;
-  labelIndividual: string;
-  labelOwner: string;
-  successCreate: string;
-  successUpdate: string;
-  successDelete: string;
-  successSubmit: string;
-  successPause: string;
-  successResume: string;
-  successArchive: string;
-  successUnarchive: string;
-  errorGeneric: string;
-  confirmDelete: string;
-  pendingNote: string;
-  draftNote: string;
-  pausedNote: string;
-  rejectedNote: string;
-  archivedNote: string;
-  selectBrandFirst: string;
-  detailInfo: string;
-  detailActions: string;
-  noDescription: string;
-};
-
-const EN_COPY: PageCopy = {
-  pageTitle: "My Services",
-  createService: "Create service",
-  emptyTitle: "No services yet",
-  emptyDescription: "Create your first service to start offering it to customers.",
-  statusDraft: "Draft",
-  statusPending: "Pending",
-  statusActive: "Active",
-  statusRejected: "Rejected",
-  statusPaused: "Paused",
-  statusArchived: "Archived",
-  actionEdit: "Edit",
-  actionSubmit: "Submit for review",
-  actionDelete: "Delete",
-  actionResubmit: "Resubmit",
-  actionPause: "Pause",
-  actionResume: "Resume",
-  actionArchive: "Archive",
-  actionUnarchive: "Unarchive",
-  formTitleCreate: "Create service",
-  formTitleEdit: "Edit service",
-  fieldTitle: "Title",
-  fieldTitlePlaceholder: "e.g. Haircut & Styling",
-  fieldDescription: "Description",
-  fieldDescriptionPlaceholder: "Describe your service…",
-  fieldCategory: "Category",
-  fieldCategoryPlaceholder: "e.g. Hair, Nails, Massage",
-  fieldContext: "Service context",
-  contextIndividual: "Provided at my own location or address",
-  contextBranch: "Branch-based service",
-  fieldAddress: "Address",
-  fieldAddressPlaceholder: "Where the service is provided",
-  fieldBrand: "Brand",
-  fieldBrandPlaceholder: "Select a brand",
-  fieldBranch: "Branch",
-  fieldBranchPlaceholder: "Select a branch",
-  fieldDuration: "Duration",
-  fieldDurationPlaceholder: "e.g. 60",
-  fieldDurationUnit: "min",
-  fieldPriceType: "Pricing & duration",
-  priceTypeFixed: "Fixed",
-  priceTypeStartingFrom: "Starting from",
-  priceTypeFree: "Free",
-  fieldPrice: "Price",
-  fieldPricePlaceholder: "0.00",
-  fieldImages: "Photos",
-  fieldImagesHint: "Add photos of your service (JPEG or PNG, max 5)",
-  fieldImagesUploadHint: "JPEG · PNG · max 5",
-  removePhotoLabel: "Remove photo",
-  servicePhotoAlt: "Service photo",
-  btnSave: "Save service",
-  btnResubmit: "Resubmit",
-  btnCancel: "Cancel",
-  labelRejectionReason: "Rejection reason",
-  labelCategory: "Category",
-  labelDuration: "Duration",
-  labelPrice: "Price",
-  labelBranch: "Branch",
-  labelIndividual: "Individual",
-  labelOwner: "Owner",
-  successCreate: "Service created.",
-  successUpdate: "Service updated.",
-  successDelete: "Service deleted.",
-  successSubmit: "Submitted for review.",
-  successPause: "Service paused.",
-  successResume: "Service resumed.",
-  successArchive: "Service archived.",
-  successUnarchive: "Service restored to draft.",
-  errorGeneric: "Something went wrong. Please try again.",
-  confirmDelete: "Are you sure you want to delete this service?",
-  pendingNote: "Under review — no actions available.",
-  draftNote: "This service is a draft and not visible to customers yet. Submit it for review when you're ready.",
-  pausedNote: "This service is paused and currently hidden from customers.",
-  rejectedNote: "This service was rejected. Review the reason below, make corrections, and resubmit.",
-  archivedNote: "This service is archived and no longer visible to customers.",
-  selectBrandFirst: "Select a brand first",
-  detailInfo: "Details",
-  detailActions: "Actions",
-  noDescription: "No description provided.",
-};
-
-const TR_COPY: PageCopy = {
-  ...EN_COPY,
-  pageTitle: "Hizmetlerim",
-  createService: "Hizmet oluştur",
-  emptyTitle: "Henüz hizmet yok",
-  emptyDescription: "Müşterilere sunum yapmak için ilk hizmetini oluştur.",
-  statusDraft: "Taslak",
-  statusPending: "Beklemede",
-  statusActive: "Aktif",
-  statusRejected: "Reddedildi",
-  statusPaused: "Durduruldu",
-  statusArchived: "Arşivlendi",
-  actionEdit: "Düzenle",
-  actionSubmit: "İncelemeye gönder",
-  actionDelete: "Sil",
-  actionResubmit: "Yenidən gönder",
-  actionPause: "Durdur",
-  actionResume: "Devam et",
-  actionArchive: "Arşivle",
-  actionUnarchive: "Arşivden çıkar",
-  formTitleCreate: "Hizmet oluştur",
-  formTitleEdit: "Hizmeti düzenle",
-  fieldTitle: "Başlık",
-  fieldTitlePlaceholder: "ör. Saç Kesimi & Şekillendirme",
-  fieldDescription: "Açıklama",
-  fieldDescriptionPlaceholder: "Hizmetini açıkla…",
-  fieldCategory: "Kategori",
-  fieldCategoryPlaceholder: "ör. Saç, Tırnak, Masaj",
-  fieldContext: "Hizmet bağlamı",
-  contextIndividual: "Kendi konumum veya adresimde sunuluyor",
-  contextBranch: "Şube bazlı hizmet",
-  fieldAddress: "Adres",
-  fieldAddressPlaceholder: "Hizmetin verileceği yer",
-  fieldBrand: "Marka",
-  fieldBrandPlaceholder: "Marka seç",
-  fieldBranch: "Şube",
-  fieldBranchPlaceholder: "Şube seç",
-  fieldDuration: "Süre",
-  fieldDurationPlaceholder: "ör. 60",
-  fieldDurationUnit: "dk",
-  fieldPriceType: "Fiyatlandırma & süre",
-  priceTypeFixed: "Sabit",
-  priceTypeStartingFrom: "Başlangıç",
-  priceTypeFree: "Ücretsiz",
-  fieldPrice: "Fiyat",
-  fieldPricePlaceholder: "0.00",
-  fieldImages: "Fotoğraflar",
-  fieldImagesHint: "Hizmetinle ilgili fotoğraf ekle (JPEG veya PNG, max 5)",
-  fieldImagesUploadHint: "JPEG · PNG · maks. 5",
-  removePhotoLabel: "Fotoğrafı kaldır",
-  servicePhotoAlt: "Hizmet fotoğrafı",
-  btnSave: "Hizmeti kaydet",
-  btnResubmit: "Yenidən göndər",
-  btnCancel: "İptal",
-  labelRejectionReason: "Reddedilme nedeni",
-  labelCategory: "Kategori",
-  labelDuration: "Süre",
-  labelPrice: "Fiyat",
-  labelBranch: "Şube",
-  labelIndividual: "Bireysel",
-  labelOwner: "Sahib",
-  successCreate: "Hizmet oluşturuldu.",
-  successUpdate: "Hizmet güncellendi.",
-  successDelete: "Hizmet silindi.",
-  successSubmit: "İncelemeye gönderildi.",
-  successPause: "Hizmet durduruldu.",
-  successResume: "Hizmet devam ediyor.",
-  successArchive: "Hizmet arşivlendi.",
-  successUnarchive: "Hizmet taslağa geri alındı.",
-  errorGeneric: "Bir şeyler ters gitti. Lütfen tekrar dene.",
-  confirmDelete: "Bu hizmeti silmek istediğinden emin misin?",
-  pendingNote: "İnceleniyor — işlem yapılamaz.",
-  draftNote: "Bu hizmet taslak halinde olup müşterilere henüz görünmüyor. Hazır olduğunda incelemeye gönder.",
-  pausedNote: "Bu hizmet duraklatılmış ve müşterilere gösterilmiyor.",
-  rejectedNote: "Bu hizmet reddedildi. Aşağıdaki nedeni incele, düzeltmeleri yap ve yeniden gönder.",
-  archivedNote: "Bu hizmet arşivlenmiş ve müşterilere artık görünmüyor.",
-  selectBrandFirst: "Önce marka seç",
-  detailInfo: "Detaylar",
-  detailActions: "İşlemler",
-  noDescription: "Açıklama yok.",
-};
-
-const AZ_COPY: PageCopy = {
-  ...EN_COPY,
-  pageTitle: "Xidmətlərim",
-  createService: "Xidmət yarat",
-  emptyTitle: "Hələ xidmət yoxdur",
-  emptyDescription: "Müştərilərə təklif etmək üçün ilk xidmətini yarat.",
-  statusDraft: "Qaralama",
-  statusPending: "Gözləyir",
-  statusActive: "Aktiv",
-  statusRejected: "Rədd edildi",
-  statusPaused: "Dayandırıldı",
-  statusArchived: "Arxivləşdirildi",
-  actionEdit: "Redaktə et",
-  actionSubmit: "İcazəyə göndər",
-  actionDelete: "Sil",
-  actionResubmit: "Yenidən göndər",
-  actionPause: "Dayandır",
-  actionResume: "Davam et",
-  actionArchive: "Arxivlə",
-  actionUnarchive: "Arxivdən çıxar",
-  formTitleCreate: "Xidmət yarat",
-  formTitleEdit: "Xidməti redaktə et",
-  fieldTitle: "Başlıq",
-  fieldTitlePlaceholder: "məs. Saç kəsimi & düzəlişi",
-  fieldDescription: "Təsvir",
-  fieldDescriptionPlaceholder: "Xidmətini təsvir et…",
-  fieldCategory: "Kateqoriya",
-  fieldCategoryPlaceholder: "məs. Saç, Dırnaq, Masaj",
-  fieldContext: "Xidmət konteksti",
-  contextIndividual: "Öz lokasiyamda və ya ünvanımda təklif olunur",
-  contextBranch: "Filial əsaslı xidmət",
-  fieldAddress: "Ünvan",
-  fieldAddressPlaceholder: "Xidmətin göstəriləcəyi yer",
-  fieldBrand: "Brend",
-  fieldBrandPlaceholder: "Brend seç",
-  fieldBranch: "Filial",
-  fieldBranchPlaceholder: "Filial seç",
-  fieldDuration: "Müddət",
-  fieldDurationPlaceholder: "məs. 60",
-  fieldDurationUnit: "dəq",
-  fieldPriceType: "Qiymətləndirmə & müddət",
-  priceTypeFixed: "Sabit",
-  priceTypeStartingFrom: "Başlanğıc",
-  priceTypeFree: "Pulsuz",
-  fieldPrice: "Qiymət",
-  fieldPricePlaceholder: "0.00",
-  fieldImages: "Fotolar",
-  fieldImagesHint: "Xidmətinlə bağlı foto əlavə et (JPEG və ya PNG, max 5)",
-  fieldImagesUploadHint: "JPEG · PNG · maks. 5",
-  removePhotoLabel: "Fotonu sil",
-  servicePhotoAlt: "Xidmət fotosu",
-  btnSave: "Xidməti saxla",
-  btnResubmit: "Yenidən göndər",
-  btnCancel: "Ləğv et",
-  labelRejectionReason: "Rədd səbəbi",
-  labelCategory: "Kateqoriya",
-  labelDuration: "Müddət",
-  labelPrice: "Qiymət",
-  labelBranch: "Filial",
-  labelIndividual: "Fərdi",
-  labelOwner: "Sahib",
-  successCreate: "Xidmət yaradıldı.",
-  successUpdate: "Xidmət yeniləndi.",
-  successDelete: "Xidmət silindi.",
-  successSubmit: "İcazəyə göndərildi.",
-  successPause: "Xidmət dayandırıldı.",
-  successResume: "Xidmət davam edir.",
-  successArchive: "Xidmət arxivləndi.",
-  successUnarchive: "Xidmət qaralamaya qaytarıldı.",
-  errorGeneric: "Nəsə xəta baş verdi. Yenidən cəhd et.",
-  confirmDelete: "Bu xidməti silmək istədiyindən əminsən?",
-  pendingNote: "İcazə gözlənilir — heç bir əməliyyat mümkün deyil.",
-  draftNote: "Bu xidmət qaralama halındadır və müştərilərə hələ görünmür. Hazır olduqda icazəyə göndər.",
-  pausedNote: "Bu xidmət dayandırılıb və hazırda müştərilərə göstərilmir.",
-  rejectedNote: "Bu xidmət rədd edildi. Aşağıdakı səbəbi nəzərdən keçir, düzəlişlər et və yenidən göndər.",
-  archivedNote: "Bu xidmət arxivlənib və artıq müştərilərə görünmür.",
-  selectBrandFirst: "Əvvəlcə brend seç",
-  detailInfo: "Təfərrüatlar",
-  detailActions: "Əməliyyatlar",
-  noDescription: "Təsvir yoxdur.",
-};
-
-const RU_COPY: PageCopy = {
-  ...EN_COPY,
-  pageTitle: "Мои сервисы",
-  createService: "Создать сервис",
-  emptyTitle: "Сервисов пока нет",
-  emptyDescription: "Создайте первый сервис, чтобы предложить его клиентам.",
-  statusDraft: "Черновик",
-  statusPending: "На проверке",
-  statusActive: "Активен",
-  statusRejected: "Отклонён",
-  statusPaused: "На паузе",
-  statusArchived: "В архиве",
-  actionEdit: "Редактировать",
-  actionSubmit: "Отправить на проверку",
-  actionDelete: "Удалить",
-  actionResubmit: "Отправить снова",
-  actionPause: "Поставить на паузу",
-  actionResume: "Возобновить",
-  actionArchive: "Архивировать",
-  formTitleCreate: "Создать сервис",
-  formTitleEdit: "Редактировать сервис",
-  fieldTitle: "Название",
-  fieldTitlePlaceholder: "например, Стрижка и укладка",
-  fieldDescription: "Описание",
-  fieldDescriptionPlaceholder: "Опишите ваш сервис…",
-  fieldCategory: "Категория",
-  fieldCategoryPlaceholder: "например, Волосы, Ногти, Массаж",
-  fieldContext: "Контекст сервиса",
-  contextIndividual: "Оказывается по моему адресу",
-  contextBranch: "Сервис привязан к филиалу",
-  fieldAddress: "Адрес",
-  fieldAddressPlaceholder: "Где оказывается сервис",
-  fieldBrand: "Бренд",
-  fieldBrandPlaceholder: "Выберите бренд",
-  fieldBranch: "Филиал",
-  fieldBranchPlaceholder: "Выберите филиал",
-  fieldDuration: "Длительность",
-  fieldDurationPlaceholder: "например, 60",
-  fieldDurationUnit: "мин",
-  fieldPriceType: "Цена и длительность",
-  priceTypeFixed: "Фиксированная",
-  priceTypeStartingFrom: "От",
-  priceTypeFree: "Бесплатно",
-  fieldPrice: "Цена",
-  fieldImages: "Фото",
-  fieldImagesHint: "Добавьте фото сервиса (JPEG или PNG, максимум 5)",
-  fieldImagesUploadHint: "JPEG · PNG · максимум 5",
-  removePhotoLabel: "Удалить фото",
-  servicePhotoAlt: "Фото сервиса",
-  btnSave: "Сохранить сервис",
-  btnResubmit: "Отправить снова",
-  btnCancel: "Отмена",
-  labelRejectionReason: "Причина отклонения",
-  labelCategory: "Категория",
-  labelDuration: "Длительность",
-  labelPrice: "Цена",
-  labelBranch: "Филиал",
-  labelIndividual: "Индивидуально",
-  labelOwner: "Владелец",
-  successCreate: "Сервис создан.",
-  successUpdate: "Сервис обновлён.",
-  successDelete: "Сервис удалён.",
-  successSubmit: "Отправлено на проверку.",
-  successPause: "Сервис поставлен на паузу.",
-  successResume: "Сервис возобновлён.",
-  successArchive: "Сервис архивирован.",
-  errorGeneric: "Что-то пошло не так. Попробуйте ещё раз.",
-  confirmDelete: "Вы уверены, что хотите удалить этот сервис?",
-  pendingNote: "На проверке — действия недоступны.",
-  draftNote:
-    "Этот сервис находится в черновике и пока не виден клиентам. Отправьте его на проверку, когда будете готовы.",
-  selectBrandFirst: "Сначала выберите бренд",
-  detailInfo: "Детали",
-  detailActions: "Действия",
-  noDescription: "Описание не добавлено.",
-};
-
-function getCopy(locale: string): PageCopy {
-  if (locale.startsWith("az")) return AZ_COPY;
-  if (locale.startsWith("ru")) return RU_COPY;
-  if (locale.startsWith("tr")) return TR_COPY;
-  return EN_COPY;
-}
-
 const SERVICE_STATUS_TONE: Record<ServiceStatus, StatusBadgeTone> = {
   DRAFT: "muted",
   PENDING: "warning",
@@ -494,7 +85,7 @@ const SERVICE_STATUS_ICON: Record<ServiceStatus, string> = {
   ARCHIVED: "archive",
 };
 
-function formatPrice(service: Service, copy: PageCopy): string {
+function formatPrice(service: Service, copy: Messages["services"]): string {
   if (service.price_type === "FREE") return copy.priceTypeFree;
   if (service.price === null) return "—";
   const prefix = service.price_type === "STARTING_FROM" ? `${copy.priceTypeStartingFrom} ` : "";
@@ -511,7 +102,7 @@ function formatDuration(minutes: number | null, unit: string): string {
   return m > 0 ? `${h}${hourUnit} ${m}${unit}` : `${h}${hourUnit}`;
 }
 
-function getStatusLabel(status: ServiceStatus, copy: PageCopy): string {
+function getStatusLabel(status: ServiceStatus, copy: Messages["services"]): string {
   const map: Record<ServiceStatus, string> = {
     DRAFT: copy.statusDraft,
     PENDING: copy.statusPending,
@@ -617,7 +208,7 @@ function buildPayload(form: ServiceFormState): CreateServicePayload {
 // ─── Service Form Page ────────────────────────────────────────────────────────
 
 type ServiceFormPageProps = {
-  copy: PageCopy;
+  copy: Messages["services"];
   brands: Brand[];
   serviceCategories: ServiceCategory[];
   accessToken: string;
@@ -756,7 +347,7 @@ function ServiceFormPage({
   return (
     <div className={styles.formWrapper}>
       <PageSurfaceHeader
-        title={editingService ? copy.formTitleEdit : copy.formTitleCreate}
+        title={editingService ? copy.formEditTitle : copy.formCreateTitle}
         subtitle={editingService ? copy.actionEdit : copy.createService}
         onBack={onCancel}
       />
@@ -1019,7 +610,7 @@ function ServiceCard({
   onClick,
 }: {
   service: Service;
-  copy: PageCopy;
+  copy: Messages["services"];
   brands: Brand[];
   user: AuthenticatedUser;
   onClick: () => void;
@@ -1152,7 +743,7 @@ export function ServiceDetailView({
   onUnarchive,
 }: {
   service: Service;
-  copy: PageCopy;
+  copy: Messages["services"];
   brands: Brand[];
   user: AuthenticatedUser;
   actionLoading: boolean;
@@ -1403,8 +994,8 @@ export function ServiceReadOnlyDetailView({
   actionSlot?: ReactNode;
   onBack: () => void;
 }) {
-  const { locale } = useLocale();
-  const copy = useMemo(() => getCopy(locale), [locale]);
+  const { messages } = useLocale();
+  const copy = messages.services;
   const noop = () => {};
 
   return (
@@ -1437,8 +1028,8 @@ export function ServicesUsoPage({
   serviceCategories,
   user,
 }: ServicesUsoPageProps) {
-  const { locale } = useLocale();
-  const copy = useMemo(() => getCopy(locale), [locale]);
+  const { messages } = useLocale();
+  const copy = messages.services;
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchKey = searchParams.toString();

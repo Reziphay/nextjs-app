@@ -150,90 +150,10 @@ function buildSections(
   return sections;
 }
 
-type ServiceDiscoveryCopy = {
-  featuredTitle: string;
-  labelFree: string;
-  labelFrom: string;
-  labelDurationUnit: string;
-  modalClose: string;
-  modalDescription: string;
-  modalCategory: string;
-  modalPrice: string;
-  modalDuration: string;
-  modalAddress: string;
-  modalBranch: string;
-};
-
-const EN_SVC_COPY: ServiceDiscoveryCopy = {
-  featuredTitle: "Featured Services",
-  labelFree: "Free",
-  labelFrom: "From",
-  labelDurationUnit: "min",
-  modalClose: "Close",
-  modalDescription: "Description",
-  modalCategory: "Category",
-  modalPrice: "Price",
-  modalDuration: "Duration",
-  modalAddress: "Address",
-  modalBranch: "Branch",
-};
-
-const TR_SVC_COPY: ServiceDiscoveryCopy = {
-  ...EN_SVC_COPY,
-  featuredTitle: "Öne Çıkan Hizmetler",
-  labelFree: "Ücretsiz",
-  labelFrom: "Başlangıç",
-  labelDurationUnit: "dk",
-  modalClose: "Kapat",
-  modalDescription: "Açıklama",
-  modalCategory: "Kategori",
-  modalPrice: "Fiyat",
-  modalDuration: "Süre",
-  modalAddress: "Adres",
-  modalBranch: "Şube",
-};
-
-const AZ_SVC_COPY: ServiceDiscoveryCopy = {
-  ...EN_SVC_COPY,
-  featuredTitle: "Seçilmiş Xidmətlər",
-  labelFree: "Pulsuz",
-  labelFrom: "Başlangıcdan",
-  labelDurationUnit: "dəq",
-  modalClose: "Bağla",
-  modalDescription: "Təsvir",
-  modalCategory: "Kateqoriya",
-  modalPrice: "Qiymət",
-  modalDuration: "Müddət",
-  modalAddress: "Ünvan",
-  modalBranch: "Filial",
-};
-
-const RU_SVC_COPY: ServiceDiscoveryCopy = {
-  ...EN_SVC_COPY,
-  featuredTitle: "Популярные сервисы",
-  labelFree: "Бесплатно",
-  labelFrom: "От",
-  labelDurationUnit: "мин",
-  modalClose: "Закрыть",
-  modalDescription: "Описание",
-  modalCategory: "Категория",
-  modalPrice: "Цена",
-  modalDuration: "Длительность",
-  modalAddress: "Адрес",
-  modalBranch: "Филиал",
-};
-
-function getSvcCopy(locale: string): ServiceDiscoveryCopy {
-  if (locale.startsWith("az")) return AZ_SVC_COPY;
-  if (locale.startsWith("ru")) return RU_SVC_COPY;
-  if (locale.startsWith("tr")) return TR_SVC_COPY;
-  return EN_SVC_COPY;
-}
-
-function formatSvcPrice(service: Service, copy: ServiceDiscoveryCopy): string {
-  if (service.price_type === "FREE") return copy.labelFree;
+function formatSvcPrice(service: Service, labelFree: string, labelFrom: string): string {
+  if (service.price_type === "FREE") return labelFree;
   if (service.price === null) return "—";
-  if (service.price_type === "STARTING_FROM") return `${copy.labelFrom} ${service.price}`;
+  if (service.price_type === "STARTING_FROM") return `${labelFrom} ${service.price}`;
   return String(service.price);
 }
 
@@ -249,9 +169,8 @@ function formatSvcDuration(minutes: number | null, unit: string): string {
 
 export function BrandsUcrPage({ brands, ownersById, featuredServices = [] }: BrandsUcrPageProps) {
   const router = useRouter();
-  const { locale, messages } = useLocale();
+  const { messages } = useLocale();
   const t = messages.brands;
-  const svcCopy = getSvcCopy(locale);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
 
   function handleSelect(id: string) {
@@ -271,12 +190,12 @@ export function BrandsUcrPage({ brands, ownersById, featuredServices = [] }: Bra
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
             <Icon icon="design_services" size={18} color="current" className={styles.sectionIcon} />
-            <h2 className={styles.sectionTitle}>{svcCopy.featuredTitle}</h2>
+            <h2 className={styles.sectionTitle}>{t.ucrFeaturedServicesTitle}</h2>
           </div>
           <div className={styles.servicesGrid}>
             {topServices.map((svc) => {
-              const priceLabel = formatSvcPrice(svc, svcCopy);
-              const durationLabel = formatSvcDuration(svc.duration, svcCopy.labelDurationUnit);
+              const priceLabel = formatSvcPrice(svc, t.serviceLabelFree, t.serviceLabelFrom);
+              const durationLabel = formatSvcDuration(svc.duration, t.serviceLabelDurationUnit);
               const firstImg = svc.images[0];
               const imgUrl = firstImg ? proxyMediaUrl(firstImg.url) : null;
 
@@ -351,7 +270,7 @@ export function BrandsUcrPage({ brands, ownersById, featuredServices = [] }: Bra
                   type="button"
                   className={styles.serviceModalClose}
                   onClick={() => setSelectedService(null)}
-                  aria-label={svcCopy.modalClose}
+                  aria-label={t.serviceModalClose}
                 >
                   <Icon icon="close" size={18} color="current" />
                 </Button>
@@ -360,25 +279,25 @@ export function BrandsUcrPage({ brands, ownersById, featuredServices = [] }: Bra
               <div className={styles.serviceModalBody}>
                 {selectedService.description?.trim() ? (
                   <div className={styles.serviceModalField}>
-                    <span className={styles.serviceModalLabel}>{svcCopy.modalDescription}</span>
+                    <span className={styles.serviceModalLabel}>{t.serviceModalDescription}</span>
                     <p className={styles.serviceModalText}>{selectedService.description.trim()}</p>
                   </div>
                 ) : null}
 
                 <div className={styles.serviceModalGrid}>
                   <div className={styles.serviceModalField}>
-                    <span className={styles.serviceModalLabel}>{svcCopy.modalPrice}</span>
-                    <p className={styles.serviceModalText}>{formatSvcPrice(selectedService, svcCopy)}</p>
+                    <span className={styles.serviceModalLabel}>{t.serviceModalPrice}</span>
+                    <p className={styles.serviceModalText}>{formatSvcPrice(selectedService, t.serviceLabelFree, t.serviceLabelFrom)}</p>
                   </div>
                   {selectedService.duration ? (
                     <div className={styles.serviceModalField}>
-                      <span className={styles.serviceModalLabel}>{svcCopy.modalDuration}</span>
-                      <p className={styles.serviceModalText}>{formatSvcDuration(selectedService.duration, svcCopy.labelDurationUnit)}</p>
+                      <span className={styles.serviceModalLabel}>{t.serviceModalDuration}</span>
+                      <p className={styles.serviceModalText}>{formatSvcDuration(selectedService.duration, t.serviceLabelDurationUnit)}</p>
                     </div>
                   ) : null}
                   {selectedService.address ? (
                     <div className={styles.serviceModalField}>
-                      <span className={styles.serviceModalLabel}>{svcCopy.modalAddress}</span>
+                      <span className={styles.serviceModalLabel}>{t.serviceModalAddress}</span>
                       <p className={styles.serviceModalText}>{selectedService.address}</p>
                     </div>
                   ) : null}

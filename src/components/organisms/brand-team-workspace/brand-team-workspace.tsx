@@ -43,425 +43,14 @@ type BrandTeamWorkspaceProps = {
   initialWorkspace?: BrandTeamWorkspaceData | null;
 };
 
-type WorkspaceCopy = {
-  badge: string;
-  title: string;
-  description: string;
-  liveState: string;
-  noBranchesTitle: string;
-  noBranchesDescription: string;
-  addBranch: string;
-  editBrand: string;
-  openBrand: string;
-  branchesRailTitle: string;
-  branchesRailLead: string;
-  branchCountLabel: string;
-  branchMemberCount: string;
-  branchPendingCount: string;
-  acceptedMetric: string;
-  pendingMetric: string;
-  laneMetric: string;
-  laneMetricHint: string;
-  branchLeadLabel: string;
-  availabilityLabel: string;
-  addressLabel: string;
-  contactLabel: string;
-  noContact: string;
-  allDay: string;
-  inviteTitle: string;
-  inviteDescription: string;
-  inviteSearchLabel: string;
-  inviteSearchDescription: string;
-  inviteSearchPlaceholder: string;
-  searchIdle: string;
-  searchLoading: string;
-  searchReady: string;
-  searchEmpty: string;
-  searchError: string;
-  inviteAction: string;
-  inviteSuccess: string;
-  removeSuccess: string;
-  reinviteSuccess: string;
-  acceptedTitle: string;
-  pendingTitle: string;
-  archiveTitle: string;
-  noAccepted: string;
-  noPending: string;
-  noArchive: string;
-  ownerRole: string;
-  memberRole: string;
-  statusAccepted: string;
-  statusPending: string;
-  statusRejected: string;
-  statusRemoved: string;
-  cancelInvite: string;
-  removeMember: string;
-  restoreInvite: string;
-  reinviteMember: string;
-  liveApiBadge: string;
-  workspaceRefreshError: string;
-  workspaceLoadingTitle: string;
-  workspaceLoadingDescription: string;
-  workspaceErrorTitle: string;
-  workspaceErrorDescription: string;
-  retryWorkspace: string;
-  futureTitle: string;
-  futureDescription: string;
-  futureListOne: string;
-  futureListTwo: string;
-  futureListThree: string;
-};
-
-const EN_COPY: WorkspaceCopy = {
-  badge: "Branch team workspace",
-  title: "Build the branch roster before services launch",
-  description:
-    "Each branch already has its own team shell in the backend. Use this workspace to invite service owners into the right branch before the future service domain starts attaching ownership to them.",
-  liveState:
-    "This screen now reflects the real backend team state. Pending invitations are actionable from the invited USO's notification page.",
-  noBranchesTitle: "This brand has no branches yet",
-  noBranchesDescription:
-    "The team layer sits on top of branches. Add at least one branch first, then return here to shape the branch roster.",
-  addBranch: "Add branch",
-  editBrand: "Edit brand",
-  openBrand: "Open brand profile",
-  branchesRailTitle: "Branch lanes",
-  branchesRailLead:
-    "Teams are attached to branches, not directly to the brand. Pick a branch and decide which accepted USO members will eventually publish services there.",
-  branchCountLabel: "Branches",
-  branchMemberCount: "accepted",
-  branchPendingCount: "pending",
-  acceptedMetric: "Accepted members",
-  pendingMetric: "Pending invites",
-  laneMetric: "Future service lanes",
-  laneMetricHint: "Each accepted USO may later own multiple services inside the same branch.",
-  branchLeadLabel: "Branch owner",
-  availabilityLabel: "Availability",
-  addressLabel: "Address",
-  contactLabel: "Contact",
-  noContact: "No contact details yet",
-  allDay: "24/7",
-  inviteTitle: "Invite a USO into this branch",
-  inviteDescription:
-    "Search existing service owners and send a real team invitation. They will see the invite in Notifications and can accept or reject it there.",
-  inviteSearchLabel: "Find a service owner",
-  inviteSearchDescription:
-    "Search by name, email, or phone. Users already accepted or already pending in this branch are hidden from the results.",
-  inviteSearchPlaceholder: "Search by name, email, or phone",
-  searchIdle: "Start typing to search service owners.",
-  searchLoading: "Searching service owners...",
-  searchReady: "Select a service owner to send a real invitation.",
-  searchEmpty: "No matching service owners were found for this branch.",
-  searchError: "The search request could not be completed.",
-  inviteAction: "Send invite",
-  inviteSuccess: "Invitation sent successfully.",
-  removeSuccess: "Team member status updated successfully.",
-  reinviteSuccess: "Invitation was sent again.",
-  acceptedTitle: "Accepted roster",
-  pendingTitle: "Pending invitations",
-  archiveTitle: "Archived states",
-  noAccepted: "Only the branch owner is accepted right now.",
-  noPending: "No pending invitations yet.",
-  noArchive: "Rejected or removed invitations will appear here.",
-  ownerRole: "Owner",
-  memberRole: "Member",
-  statusAccepted: "Accepted",
-  statusPending: "Pending",
-  statusRejected: "Rejected",
-  statusRemoved: "Removed",
-  cancelInvite: "Cancel invite",
-  removeMember: "Remove member",
-  restoreInvite: "Restore invite",
-  reinviteMember: "Re-invite",
-  liveApiBadge: "Live API",
-  workspaceRefreshError: "The latest team state could not be loaded.",
-  workspaceLoadingTitle: "Loading team workspace",
-  workspaceLoadingDescription:
-    "The page is waiting for the branch team state from the backend.",
-  workspaceErrorTitle: "Team workspace could not be loaded",
-  workspaceErrorDescription:
-    "The brand exists, but the branch team data could not be loaded right now. You can retry without leaving the page.",
-  retryWorkspace: "Retry workspace",
-  futureTitle: "Service module will attach here next",
-  futureDescription:
-    "This page still does not create services. It prepares the people and branch boundaries that the future service ownership model will depend on.",
-  futureListOne: "Individual services will stay outside the brand model and attach directly to an address.",
-  futureListTwo: "Brand services will attach to a branch, not directly to the brand shell.",
-  futureListThree: "Team services will belong to accepted branch members once the service module is launched.",
-};
-
-const TR_COPY: WorkspaceCopy = {
-  ...EN_COPY,
-  badge: "Şube ekip alanı",
-  title: "Servisler açılmadan önce şube kadrosunu kur",
-  description:
-    "Her şubenin backend içinde artık kendi team kabuğu var. Bu alanı, gelecekte servis sahipliğinin bağlanacağı USO üyelerini doğru şubelere yerleştirmek için kullan.",
-  liveState:
-    "Bu ekran artık gerçek backend team durumunu gösterir. Bekleyen davetler, davet edilen USO'nun Bildirimler ekranında aksiyon alabilir.",
-  noBranchesTitle: "Bu markada henüz şube yok",
-  noBranchesDescription:
-    "Ekip katmanı şubelerin üstüne oturur. Önce en az bir şube ekleyin, sonra buraya dönüp ekip yapısını kurun.",
-  addBranch: "Şube ekle",
-  editBrand: "Markayı düzenle",
-  openBrand: "Marka profilini aç",
-  branchesRailTitle: "Şube alanları",
-  branchesRailLead:
-    "Takımlar doğrudan markaya değil, şubelere bağlanır. Bir şube seç ve ileride orada servis yayınlayacak kabul edilmiş USO üyelerini netleştir.",
-  branchCountLabel: "Şube",
-  branchMemberCount: "kabul edildi",
-  branchPendingCount: "beklemede",
-  acceptedMetric: "Kabul edilen üyeler",
-  pendingMetric: "Bekleyen davetler",
-  laneMetric: "Gelecek servis kanalları",
-  laneMetricHint:
-    "Kabul edilen her USO ileride aynı şube içinde birden fazla servisin sahibi olabilir.",
-  branchLeadLabel: "Şube sahibi",
-  availabilityLabel: "Çalışma durumu",
-  addressLabel: "Adres",
-  contactLabel: "İletişim",
-  noContact: "Henüz iletişim detayı yok",
-  allDay: "7/24",
-  inviteTitle: "Bu şubeye bir USO davet et",
-  inviteDescription:
-    "Mevcut service owner'ları ara ve gerçek team daveti gönder. Kullanıcı bu daveti Bildirimler ekranında görüp kabul ya da red verebilir.",
-  inviteSearchLabel: "Bir service owner bul",
-  inviteSearchDescription:
-    "İsim, email veya telefonla ara. Bu şubede zaten kabul edilmiş ya da bekleyen kullanıcılar sonuçlarda gizlenir.",
-  inviteSearchPlaceholder: "İsim, email veya telefon ara",
-  searchIdle: "Service owner aramak için yazmaya başlayın.",
-  searchLoading: "Service owner aranıyor...",
-  searchReady: "Gerçek bir davet göndermek için bir service owner seçin.",
-  searchEmpty: "Bu şube için eşleşen bir service owner bulunamadı.",
-  searchError: "Arama isteği tamamlanamadı.",
-  inviteAction: "Davet gönder",
-  inviteSuccess: "Davet başarıyla gönderildi.",
-  removeSuccess: "Takım üyesi durumu güncellendi.",
-  reinviteSuccess: "Davet yeniden gönderildi.",
-  acceptedTitle: "Kabul edilen kadro",
-  pendingTitle: "Bekleyen davetler",
-  archiveTitle: "Arşiv durumları",
-  noAccepted: "Şu an yalnızca şube sahibi kabul edilmiş durumda.",
-  noPending: "Henüz bekleyen davet yok.",
-  noArchive: "Reddedilen veya kaldırılan davetler burada görünür.",
-  ownerRole: "Sahip",
-  memberRole: "Üye",
-  statusAccepted: "Kabul edildi",
-  statusPending: "Beklemede",
-  statusRejected: "Reddedildi",
-  statusRemoved: "Kaldırıldı",
-  cancelInvite: "Daveti iptal et",
-  removeMember: "Üyeyi kaldır",
-  restoreInvite: "Daveti geri aç",
-  reinviteMember: "Tekrar davet et",
-  liveApiBadge: "Canlı API",
-  workspaceRefreshError: "Güncel takım durumu yüklenemedi.",
-  workspaceLoadingTitle: "Takım alanı yükleniyor",
-  workspaceLoadingDescription:
-    "Sayfa backend'den şube takım durumunu bekliyor.",
-  workspaceErrorTitle: "Takım alanı yüklenemedi",
-  workspaceErrorDescription:
-    "Brand mevcut, ancak şube takım verisi şu anda alınamadı. Sayfadan çıkmadan yeniden deneyebilirsin.",
-  retryWorkspace: "Tekrar dene",
-  futureTitle: "Servis modülü bir sonraki adımda buraya bağlanacak",
-  futureDescription:
-    "Bu sayfa hâlâ servis oluşturmaz. Sadece gelecekteki service ownership yapısının dayanacağı kişi ve şube sınırlarını hazırlar.",
-  futureListOne:
-    "Bireysel servisler brand dışında kalacak ve doğrudan bir adrese bağlanacak.",
-  futureListTwo:
-    "Brand servisleri doğrudan brand kabuğuna değil, bir şubeye bağlanacak.",
-  futureListThree:
-    "Team servisleri, servis modülü açıldığında kabul edilmiş şube üyelerine ait olacak.",
-};
-
-const AZ_COPY: WorkspaceCopy = {
-  ...EN_COPY,
-  badge: "Filial komanda sahəsi",
-  title: "Servislər açılmadan əvvəl filial heyətini qur",
-  description:
-    "Hər filial üçün backend daxilində artıq real team quruluşu var. Bu sahəni, gələcəkdə service sahibliyinin bağlanacağı USO üzvlərini doğru filiallara toplamaq üçün istifadə et.",
-  liveState:
-    "Bu ekran artıq backenddəki real team vəziyyətini göstərir. Gözləyən dəvətlər dəvət olunan USO-nun Bildirişlər səhifəsində cavablandırılır.",
-  noBranchesTitle: "Bu brenddə hələ filial yoxdur",
-  noBranchesDescription:
-    "Komanda qatını filialların üzərinə qururuq. Əvvəl ən azı bir filial əlavə et, sonra bura qayıdıb komanda quruluşunu hazırla.",
-  addBranch: "Filial əlavə et",
-  editBrand: "Brendi redaktə et",
-  openBrand: "Brend profilini aç",
-  branchesRailTitle: "Filial xətləri",
-  branchesRailLead:
-    "Komandalar birbaşa brendə yox, filiala bağlanır. Bir filial seç və gələcəkdə orada service yaradacaq qəbul olunmuş USO üzvlərini müəyyən et.",
-  branchCountLabel: "Filial",
-  branchMemberCount: "qəbul edilib",
-  branchPendingCount: "gözləyir",
-  acceptedMetric: "Qəbul olunan üzvlər",
-  pendingMetric: "Gözləyən dəvətlər",
-  laneMetric: "Gələcək service xətləri",
-  laneMetricHint:
-    "Qəbul olunan hər USO sonradan eyni filial daxilində bir neçə service sahibi ola bilər.",
-  branchLeadLabel: "Filial sahibi",
-  availabilityLabel: "İş rejimi",
-  addressLabel: "Ünvan",
-  contactLabel: "Əlaqə",
-  noContact: "Hələ əlaqə məlumatı yoxdur",
-  allDay: "24/7",
-  inviteTitle: "Bu filiala bir USO dəvət et",
-  inviteDescription:
-    "Mövcud service owner-ları axtar və real team dəvəti göndər. İstifadəçi bu dəvəti Bildirişlər səhifəsində qəbul və ya rədd edə bilər.",
-  inviteSearchLabel: "Bir service owner tap",
-  inviteSearchDescription:
-    "Ad, email və ya telefon ilə axtar. Bu filialda artıq qəbul olunmuş və ya gözləyən istifadəçilər nəticələrdə gizlənir.",
-  inviteSearchPlaceholder: "Ad, email və ya telefon axtar",
-  searchIdle: "Service owner axtarmaq üçün yazmağa başla.",
-  searchLoading: "Service owner axtarılır...",
-  searchReady: "Real dəvət göndərmək üçün bir service owner seç.",
-  searchEmpty: "Bu filial üçün uyğun service owner tapılmadı.",
-  searchError: "Axtarış sorğusu tamamlanmadı.",
-  inviteAction: "Dəvət göndər",
-  inviteSuccess: "Dəvət uğurla göndərildi.",
-  removeSuccess: "Komanda üzvünün vəziyyəti yeniləndi.",
-  reinviteSuccess: "Dəvət yenidən göndərildi.",
-  acceptedTitle: "Qəbul olunmuş heyət",
-  pendingTitle: "Gözləyən dəvətlər",
-  archiveTitle: "Arxiv vəziyyətləri",
-  noAccepted: "Hazırda yalnız filial sahibi qəbul olunub.",
-  noPending: "Hələ gözləyən dəvət yoxdur.",
-  noArchive: "Rədd olunan və ya silinən dəvətlər burada görünür.",
-  ownerRole: "Sahib",
-  memberRole: "Üzv",
-  statusAccepted: "Qəbul edildi",
-  statusPending: "Gözləyir",
-  statusRejected: "Rədd edildi",
-  statusRemoved: "Silindi",
-  cancelInvite: "Dəvəti ləğv et",
-  removeMember: "Üzvü sil",
-  restoreInvite: "Dəvəti bərpa et",
-  reinviteMember: "Yenidən dəvət et",
-  liveApiBadge: "Canlı API",
-  workspaceRefreshError: "Aktual komanda vəziyyəti yüklənmədi.",
-  workspaceLoadingTitle: "Komanda sahəsi yüklənir",
-  workspaceLoadingDescription:
-    "Səhifə backenddən filial komanda vəziyyətini gözləyir.",
-  workspaceErrorTitle: "Komanda sahəsi yüklənmədi",
-  workspaceErrorDescription:
-    "Brend mövcuddur, amma filial komanda datası hazırda alına bilmədi. Səhifədən çıxmadan yenidən yoxlaya bilərsən.",
-  retryWorkspace: "Yenidən yoxla",
-  futureTitle: "Service modulu növbəti addımda bura bağlanacaq",
-  futureDescription:
-    "Bu səhifə hələ service yaratmır. Sadəcə gələcək service ownership məntiqinin əsaslanacağı insanları və filial sərhədlərini hazırlayır.",
-  futureListOne:
-    "Fərdi servicelər brenddən kənarda qalacaq və birbaşa address-ə bağlanacaq.",
-  futureListTwo:
-    "Brend serviceləri birbaşa brend qabığına yox, konkret filiala bağlanacaq.",
-  futureListThree:
-    "Team serviceləri service modulu açıldıqda qəbul olunmuş filial üzvlərinə məxsus olacaq.",
-};
-
-const RU_COPY: WorkspaceCopy = {
-  ...EN_COPY,
-  badge: "Команда филиала",
-  title: "Соберите команду филиала до запуска сервисов",
-  description:
-    "У каждого филиала уже есть собственная командная оболочка в backend. Используйте это пространство, чтобы пригласить владельцев сервисов в нужный филиал до того, как будущий домен сервисов начнёт привязывать к ним владение.",
-  liveState:
-    "Этот экран показывает реальное состояние команды из backend. Ожидающие приглашения можно принять или отклонить на странице уведомлений приглашённого USO.",
-  noBranchesTitle: "У этого бренда пока нет филиалов",
-  noBranchesDescription:
-    "Командный слой строится поверх филиалов. Сначала добавьте хотя бы один филиал, затем вернитесь сюда, чтобы сформировать команду.",
-  addBranch: "Добавить филиал",
-  editBrand: "Редактировать бренд",
-  openBrand: "Открыть профиль бренда",
-  branchesRailTitle: "Филиалы",
-  branchesRailLead:
-    "Команды привязаны к филиалам, а не напрямую к бренду. Выберите филиал и определите, какие принятые USO позже смогут публиковать там сервисы.",
-  branchCountLabel: "Филиалы",
-  branchMemberCount: "принято",
-  branchPendingCount: "ожидают",
-  acceptedMetric: "Принятые участники",
-  pendingMetric: "Ожидающие приглашения",
-  laneMetric: "Будущие сервисные направления",
-  laneMetricHint:
-    "Каждый принятый USO позже сможет владеть несколькими сервисами внутри того же филиала.",
-  branchLeadLabel: "Владелец филиала",
-  availabilityLabel: "Режим работы",
-  addressLabel: "Адрес",
-  contactLabel: "Контакты",
-  noContact: "Контакты пока не добавлены",
-  allDay: "24/7",
-  inviteTitle: "Пригласить USO в этот филиал",
-  inviteDescription:
-    "Найдите существующих владельцев сервисов и отправьте реальное приглашение в команду. Они увидят его в уведомлениях и смогут принять или отклонить.",
-  inviteSearchLabel: "Найти владельца сервиса",
-  inviteSearchDescription:
-    "Ищите по имени, email или телефону. Пользователи, уже принятые или ожидающие в этом филиале, скрыты из результатов.",
-  inviteSearchPlaceholder: "Поиск по имени, email или телефону",
-  searchIdle: "Начните вводить, чтобы искать владельцев сервисов.",
-  searchLoading: "Идёт поиск владельцев сервисов...",
-  searchReady: "Выберите владельца сервиса, чтобы отправить приглашение.",
-  searchEmpty: "Для этого филиала подходящие владельцы сервисов не найдены.",
-  searchError: "Не удалось выполнить поисковый запрос.",
-  inviteAction: "Отправить приглашение",
-  inviteSuccess: "Приглашение успешно отправлено.",
-  removeSuccess: "Статус участника команды обновлён.",
-  reinviteSuccess: "Приглашение отправлено снова.",
-  acceptedTitle: "Принятые участники",
-  pendingTitle: "Ожидающие приглашения",
-  archiveTitle: "Архивные состояния",
-  noAccepted: "Сейчас принят только владелец филиала.",
-  noPending: "Ожидающих приглашений пока нет.",
-  noArchive: "Отклонённые или удалённые приглашения появятся здесь.",
-  ownerRole: "Владелец",
-  memberRole: "Участник",
-  statusAccepted: "Принят",
-  statusPending: "Ожидает",
-  statusRejected: "Отклонён",
-  statusRemoved: "Удалён",
-  cancelInvite: "Отменить приглашение",
-  removeMember: "Удалить участника",
-  restoreInvite: "Восстановить приглашение",
-  reinviteMember: "Пригласить снова",
-  liveApiBadge: "Live API",
-  workspaceRefreshError: "Не удалось загрузить актуальное состояние команды.",
-  workspaceLoadingTitle: "Команда загружается",
-  workspaceLoadingDescription:
-    "Страница ожидает состояние команды филиала из backend.",
-  workspaceErrorTitle: "Не удалось загрузить команду",
-  workspaceErrorDescription:
-    "Бренд существует, но данные команды филиала сейчас недоступны. Можно повторить попытку, не покидая страницу.",
-  retryWorkspace: "Повторить",
-  futureTitle: "Следующим шагом сюда подключится модуль сервисов",
-  futureDescription:
-    "Эта страница пока не создаёт сервисы. Она готовит людей и границы филиалов, от которых будет зависеть будущая модель владения сервисами.",
-  futureListOne:
-    "Индивидуальные сервисы останутся вне модели бренда и будут привязаны напрямую к адресу.",
-  futureListTwo:
-    "Сервисы бренда будут привязаны к филиалу, а не напрямую к оболочке бренда.",
-  futureListThree:
-    "Командные сервисы будут принадлежать принятым участникам филиала после запуска модуля сервисов.",
-};
-
-function getCopy(locale: string): WorkspaceCopy {
-  if (locale.startsWith("az")) {
-    return AZ_COPY;
-  }
-
-  if (locale.startsWith("ru")) {
-    return RU_COPY;
-  }
-
-  if (locale.startsWith("tr")) {
-    return TR_COPY;
-  }
-
-  return EN_COPY;
-}
 
 function formatName(firstName: string, lastName: string) {
   return `${firstName} ${lastName}`.trim();
 }
 
-function formatAvailability(branch: TeamWorkspaceBranch, copy: WorkspaceCopy) {
+function formatAvailability(branch: TeamWorkspaceBranch, allDayLabel: string) {
   if (branch.availability.is_24_7) {
-    return copy.allDay;
+    return allDayLabel;
   }
 
   if (branch.availability.opening && branch.availability.closing) {
@@ -475,16 +64,16 @@ function formatAddress(branch: TeamWorkspaceBranch) {
   return [branch.address.address1, branch.address.address2].filter(Boolean).join(", ");
 }
 
-function getStatusLabel(status: TeamMemberStatus, copy: WorkspaceCopy) {
+function getStatusLabel(status: TeamMemberStatus, t: { workspaceStatusAccepted: string; workspacePendingStatus: string; workspaceRejectedStatus: string; workspaceRemovedStatus: string }) {
   switch (status) {
     case "ACCEPTED":
-      return copy.statusAccepted;
+      return t.workspaceStatusAccepted;
     case "PENDING":
-      return copy.statusPending;
+      return t.workspacePendingStatus;
     case "REJECTED":
-      return copy.statusRejected;
+      return t.workspaceRejectedStatus;
     case "REMOVED":
-      return copy.statusRemoved;
+      return t.workspaceRemovedStatus;
     default:
       return status;
   }
@@ -543,8 +132,8 @@ export function BrandTeamWorkspace({
   initialWorkspace,
 }: BrandTeamWorkspaceProps) {
   const router = useRouter();
-  const { locale, messages } = useLocale();
-  const copy = useMemo(() => getCopy(locale), [locale]);
+  const { messages } = useLocale();
+  const t = messages.brands;
   const session = useAppSelector(selectAuthSession);
   const accessToken = session.accessToken;
   const [workspace, setWorkspace] = useState<BrandTeamWorkspaceData | null>(
@@ -706,7 +295,7 @@ export function BrandTeamWorkspace({
           tone: "error",
           message: getApiErrorMessage(
             error,
-            copy.searchError,
+            t.workspaceSearchError,
             messages.backendErrors,
           ),
         });
@@ -717,11 +306,11 @@ export function BrandTeamWorkspace({
       active = false;
       window.clearTimeout(timeoutId);
     };
-  }, [accessToken, activeBranch, copy.searchError, currentUser.id, deferredQuery, messages.backendErrors]);
+  }, [accessToken, activeBranch, t.workspaceSearchError, currentUser.id, deferredQuery, messages.backendErrors]);
 
   async function refreshWorkspace(options?: { showLoadingState?: boolean }) {
     if (!accessToken) {
-      throw new Error(copy.workspaceRefreshError);
+      throw new Error(t.workspaceRefreshError);
     }
 
     if (options?.showLoadingState) {
@@ -746,7 +335,7 @@ export function BrandTeamWorkspace({
         tone: "error",
         message: getApiErrorMessage(
           error,
-          copy.workspaceRefreshError,
+          t.workspaceRefreshError,
           messages.backendErrors,
         ),
       });
@@ -757,7 +346,7 @@ export function BrandTeamWorkspace({
     if (!accessToken || !activeBranch) {
       setFeedback({
         tone: "error",
-        message: copy.workspaceRefreshError,
+        message: t.workspaceRefreshError,
       });
       return;
     }
@@ -778,14 +367,14 @@ export function BrandTeamWorkspace({
       setSearchState("idle");
       setFeedback({
         tone: "success",
-        message: copy.inviteSuccess,
+        message: t.workspaceInviteSuccess,
       });
     } catch (error) {
       setFeedback({
         tone: "error",
         message: getApiErrorMessage(
           error,
-          copy.workspaceRefreshError,
+          t.workspaceRefreshError,
           messages.backendErrors,
         ),
       });
@@ -798,7 +387,7 @@ export function BrandTeamWorkspace({
     if (!accessToken || !activeBranch) {
       setFeedback({
         tone: "error",
-        message: copy.workspaceRefreshError,
+        message: t.workspaceRefreshError,
       });
       return;
     }
@@ -816,14 +405,14 @@ export function BrandTeamWorkspace({
       await refreshWorkspace();
       setFeedback({
         tone: "success",
-        message: copy.removeSuccess,
+        message: t.workspaceRemoveSuccess,
       });
     } catch (error) {
       setFeedback({
         tone: "error",
         message: getApiErrorMessage(
           error,
-          copy.workspaceRefreshError,
+          t.workspaceRefreshError,
           messages.backendErrors,
         ),
       });
@@ -836,7 +425,7 @@ export function BrandTeamWorkspace({
     if (!accessToken || !activeBranch) {
       setFeedback({
         tone: "error",
-        message: copy.workspaceRefreshError,
+        message: t.workspaceRefreshError,
       });
       return;
     }
@@ -854,14 +443,14 @@ export function BrandTeamWorkspace({
       await refreshWorkspace();
       setFeedback({
         tone: "success",
-        message: copy.reinviteSuccess,
+        message: t.workspaceReinviteSuccess,
       });
     } catch (error) {
       setFeedback({
         tone: "error",
         message: getApiErrorMessage(
           error,
-          copy.workspaceRefreshError,
+          t.workspaceRefreshError,
           messages.backendErrors,
         ),
       });
@@ -874,24 +463,24 @@ export function BrandTeamWorkspace({
     return (
       <div className={styles.emptyShell}>
         <Badge icon="hub" variant="outline" className={styles.heroBadge}>
-          {copy.badge}
+          {t.workspaceBadge}
         </Badge>
-        <h1 className={styles.emptyTitle}>{copy.noBranchesTitle}</h1>
-        <p className={styles.emptyDescription}>{copy.noBranchesDescription}</p>
+        <h1 className={styles.emptyTitle}>{t.workspaceNoBranchesTitle}</h1>
+        <p className={styles.emptyDescription}>{t.workspaceNoBranchesDescription}</p>
         <div className={styles.emptyActions}>
           <Button
             variant="primary"
             icon="edit_square"
             onClick={() => router.push(`/brands?progress=edit&id=${brand.id}`)}
           >
-            {copy.addBranch}
+            {t.addBranch}
           </Button>
           <Button
             variant="outline"
             icon="sell"
             onClick={() => router.push(`/brands?id=${brand.id}`)}
           >
-            {copy.openBrand}
+            {t.workspaceOpenBrand}
           </Button>
         </div>
       </div>
@@ -904,13 +493,13 @@ export function BrandTeamWorkspace({
     return (
       <div className={styles.emptyShell}>
         <Badge icon="hub" variant="outline" className={styles.heroBadge}>
-          {copy.badge}
+          {t.workspaceBadge}
         </Badge>
         <h1 className={styles.emptyTitle}>
-          {isLoading ? copy.workspaceLoadingTitle : copy.workspaceErrorTitle}
+          {isLoading ? t.workspaceLoadingTitle : t.workspaceErrorTitle}
         </h1>
         <p className={styles.emptyDescription}>
-          {isLoading ? copy.workspaceLoadingDescription : copy.workspaceErrorDescription}
+          {isLoading ? t.workspaceLoadingDescription : t.workspaceErrorDescription}
         </p>
 
         {feedback ? (
@@ -928,21 +517,21 @@ export function BrandTeamWorkspace({
               void handleRetryWorkspace();
             }}
           >
-            {copy.retryWorkspace}
+            {t.workspaceRetry}
           </Button>
           <Button
             variant="outline"
             icon="edit_square"
             onClick={() => router.push(`/brands?progress=edit&id=${brand.id}`)}
           >
-            {copy.editBrand}
+            {t.editBrand}
           </Button>
           <Button
             variant="outline"
             icon="sell"
             onClick={() => router.push(`/brands?id=${brand.id}`)}
           >
-            {copy.openBrand}
+            {t.workspaceOpenBrand}
           </Button>
         </div>
       </div>
@@ -954,10 +543,10 @@ export function BrandTeamWorkspace({
       <section className={styles.hero}>
         <div className={styles.heroText}>
           <Badge icon="groups" variant="outline" className={styles.heroBadge}>
-            {copy.badge}
+            {t.workspaceBadge}
           </Badge>
-          <h1 className={styles.heroTitle}>{copy.title}</h1>
-          <p className={styles.heroDescription}>{copy.description}</p>
+          <h1 className={styles.heroTitle}>{t.workspaceTitle}</h1>
+          <p className={styles.heroDescription}>{t.workspaceDescription}</p>
         </div>
 
         <div className={styles.heroActions}>
@@ -966,43 +555,43 @@ export function BrandTeamWorkspace({
             icon="edit_square"
             onClick={() => router.push(`/brands?progress=edit&id=${brand.id}`)}
           >
-            {copy.editBrand}
+            {t.editBrand}
           </Button>
           <Button
             variant="outline"
             icon="sell"
             onClick={() => router.push(`/brands?id=${brand.id}`)}
           >
-            {copy.openBrand}
+            {t.workspaceOpenBrand}
           </Button>
         </div>
       </section>
 
       <section className={styles.metaGrid}>
         <article className={styles.metaCard}>
-          <span className={styles.metaLabel}>{copy.branchCountLabel}</span>
+          <span className={styles.metaLabel}>{t.workspaceBranchCountLabel}</span>
           <strong className={styles.metaValue}>{branches.length}</strong>
         </article>
         <article className={styles.metaCard}>
-          <span className={styles.metaLabel}>{copy.acceptedMetric}</span>
+          <span className={styles.metaLabel}>{t.workspaceAcceptedMetric}</span>
           <strong className={styles.metaValue}>{globalMetrics.accepted}</strong>
         </article>
         <article className={styles.metaCard}>
-          <span className={styles.metaLabel}>{copy.pendingMetric}</span>
+          <span className={styles.metaLabel}>{t.workspacePendingMetric}</span>
           <strong className={styles.metaValue}>{globalMetrics.pending}</strong>
         </article>
         <article className={styles.metaCard}>
-          <span className={styles.metaLabel}>{copy.laneMetric}</span>
+          <span className={styles.metaLabel}>{t.workspaceLaneMetric}</span>
           <strong className={styles.metaValue}>{globalMetrics.accepted}</strong>
-          <p className={styles.metaHint}>{copy.laneMetricHint}</p>
+          <p className={styles.metaHint}>{t.workspaceLaneMetricHint}</p>
         </article>
       </section>
 
       <div className={styles.shell}>
         <aside className={styles.rail}>
           <div className={styles.railHeader}>
-            <h2 className={styles.railTitle}>{copy.branchesRailTitle}</h2>
-            <p className={styles.railLead}>{copy.branchesRailLead}</p>
+            <h2 className={styles.railTitle}>{t.workspaceBranchesRailTitle}</h2>
+            <p className={styles.railLead}>{t.workspaceBranchesRailLead}</p>
           </div>
 
           <div className={styles.branchList}>
@@ -1038,8 +627,8 @@ export function BrandTeamWorkspace({
                   </div>
                   <p className={styles.branchAddress}>{formatAddress(branchItem)}</p>
                   <div className={styles.branchStats}>
-                    <span>{acceptedCount} {copy.branchMemberCount}</span>
-                    <span>{pendingCount} {copy.branchPendingCount}</span>
+                    <span>{acceptedCount} {t.workspaceBranchMemberCount}</span>
+                    <span>{pendingCount} {t.workspaceBranchPendingCount}</span>
                   </div>
                 </Button>
               );
@@ -1059,27 +648,27 @@ export function BrandTeamWorkspace({
                     </p>
                   </div>
                   <Badge icon="workspace_premium" variant="outline">
-                    {copy.branchLeadLabel}: {formatName(currentUser.first_name, currentUser.last_name)}
+                    {t.workspaceBranchLeadLabel}: {formatName(currentUser.first_name, currentUser.last_name)}
                   </Badge>
                 </div>
 
                 <div className={styles.branchHeroGrid}>
                   <div className={styles.branchFact}>
-                    <span className={styles.branchFactLabel}>{copy.availabilityLabel}</span>
+                    <span className={styles.branchFactLabel}>{t.workspaceAvailabilitySection}</span>
                     <strong className={styles.branchFactValue}>
-                      {formatAvailability(activeBranch, copy)}
+                      {formatAvailability(activeBranch, t.workspaceAllDay)}
                     </strong>
                   </div>
                   <div className={styles.branchFact}>
-                    <span className={styles.branchFactLabel}>{copy.addressLabel}</span>
+                    <span className={styles.branchFactLabel}>{t.workspaceAddressLabel}</span>
                     <strong className={styles.branchFactValue}>
                       {formatAddress(activeBranch)}
                     </strong>
                   </div>
                   <div className={styles.branchFact}>
-                    <span className={styles.branchFactLabel}>{copy.contactLabel}</span>
+                    <span className={styles.branchFactLabel}>{t.workspaceContactLabel}</span>
                     <strong className={styles.branchFactValue}>
-                      {activeBrandBranch?.phone || activeBrandBranch?.email || copy.noContact}
+                      {activeBrandBranch?.phone || activeBrandBranch?.email || t.workspaceNoContact}
                     </strong>
                   </div>
                 </div>
@@ -1087,26 +676,26 @@ export function BrandTeamWorkspace({
 
               <section className={styles.banner}>
                 <Icon icon="lan" size={16} color="current" />
-                <p>{copy.liveState}</p>
+                <p>{t.workspaceLiveState}</p>
               </section>
 
               <section className={styles.section}>
                 <div className={styles.sectionHeader}>
                   <div>
-                    <h3 className={styles.sectionTitle}>{copy.inviteTitle}</h3>
-                    <p className={styles.sectionLead}>{copy.inviteDescription}</p>
+                    <h3 className={styles.sectionTitle}>{t.workspaceInviteTitle}</h3>
+                    <p className={styles.sectionLead}>{t.workspaceInviteDescription}</p>
                   </div>
                   <Badge variant="outline" icon="lan">
-                    {copy.liveApiBadge}
+                    {t.workspaceLiveApiBadge}
                   </Badge>
                 </div>
 
                 <div className={styles.invitePanel}>
                   <Field className={styles.inviteField}>
-                    <FieldLabel>{copy.inviteSearchLabel}</FieldLabel>
+                    <FieldLabel>{t.workspaceInviteSearchLabel}</FieldLabel>
                     <Input
                       value={searchQuery}
-                      placeholder={copy.inviteSearchPlaceholder}
+                      placeholder={t.workspaceInviteSearchPlaceholder}
                       onChange={(event) => {
                         const nextValue = event.target.value;
                         setSearchQuery(nextValue);
@@ -1120,7 +709,7 @@ export function BrandTeamWorkspace({
                       }}
                     />
                     <FieldDescription>
-                      {copy.inviteSearchDescription}
+                      {t.workspaceInviteSearchDescription}
                     </FieldDescription>
                   </Field>
 
@@ -1132,14 +721,14 @@ export function BrandTeamWorkspace({
 
                   <div className={styles.searchState}>
                     {searchState === "loading"
-                      ? copy.searchLoading
+                      ? t.workspaceSearchLoading
                       : searchState === "error"
-                        ? copy.searchError
+                        ? t.workspaceSearchError
                         : deferredQuery.length < 2
-                          ? copy.searchIdle
+                          ? t.workspaceSearchIdle
                           : searchResults.length === 0
-                            ? copy.searchEmpty
-                            : copy.searchReady}
+                            ? t.workspaceSearchEmpty
+                            : t.workspaceSearchReady}
                   </div>
 
                   {searchResults.length > 0 ? (
@@ -1185,7 +774,7 @@ export function BrandTeamWorkspace({
                               isLoading={inviteUserId === result.id}
                               onClick={() => handleInvite(result)}
                             >
-                              {copy.inviteAction}
+                              {t.workspaceInviteAction}
                             </Button>
                           </article>
                         );
@@ -1197,11 +786,11 @@ export function BrandTeamWorkspace({
 
               <section className={styles.section}>
                 <div className={styles.sectionHeader}>
-                  <h3 className={styles.sectionTitle}>{copy.acceptedTitle}</h3>
+                  <h3 className={styles.sectionTitle}>{t.workspaceAcceptedTitle}</h3>
                 </div>
 
                 {acceptedMembers.length === 0 ? (
-                  <div className={styles.emptyCard}>{copy.noAccepted}</div>
+                  <div className={styles.emptyCard}>{t.workspaceNoAccepted}</div>
                 ) : (
                   <div className={styles.memberGrid}>
                     {acceptedMembers.map((member) => {
@@ -1237,11 +826,11 @@ export function BrandTeamWorkspace({
                             <div className={styles.memberPills}>
                               <Badge variant="outline">
                                 {member.role === "OWNER"
-                                  ? copy.ownerRole
-                                  : copy.memberRole}
+                                  ? t.workspaceOwnerRole
+                                  : t.workspaceMemberRole}
                               </Badge>
                               <Badge variant="outline">
-                                {copy.statusAccepted}
+                                {t.workspaceStatusAccepted}
                               </Badge>
                             </div>
                           </div>
@@ -1255,7 +844,7 @@ export function BrandTeamWorkspace({
                                 isLoading={memberActionId === member.membership_id}
                                 onClick={() => handleRemove(member.membership_id)}
                               >
-                                {copy.removeMember}
+                                {t.workspaceRemoveMember}
                               </Button>
                             </div>
                           ) : null}
@@ -1268,11 +857,11 @@ export function BrandTeamWorkspace({
 
               <section className={styles.section}>
                 <div className={styles.sectionHeader}>
-                  <h3 className={styles.sectionTitle}>{copy.pendingTitle}</h3>
+                  <h3 className={styles.sectionTitle}>{t.workspacePendingTitle}</h3>
                 </div>
 
                 {pendingMembers.length === 0 ? (
-                  <div className={styles.emptyCard}>{copy.noPending}</div>
+                  <div className={styles.emptyCard}>{t.workspaceNoPending}</div>
                 ) : (
                   <div className={styles.memberGrid}>
                     {pendingMembers.map((member) => {
@@ -1307,10 +896,10 @@ export function BrandTeamWorkspace({
 
                             <div className={styles.memberPills}>
                               <Badge variant="outline">
-                                {copy.memberRole}
+                                {t.workspaceMemberRole}
                               </Badge>
                               <Badge variant="outline">
-                                {copy.statusPending}
+                                {t.workspacePendingStatus}
                               </Badge>
                             </div>
                           </div>
@@ -1323,7 +912,7 @@ export function BrandTeamWorkspace({
                               isLoading={memberActionId === member.membership_id}
                               onClick={() => handleRemove(member.membership_id)}
                             >
-                              {copy.cancelInvite}
+                              {t.workspaceCancelInvite}
                             </Button>
                           </div>
                         </article>
@@ -1335,11 +924,11 @@ export function BrandTeamWorkspace({
 
               <section className={styles.section}>
                 <div className={styles.sectionHeader}>
-                  <h3 className={styles.sectionTitle}>{copy.archiveTitle}</h3>
+                  <h3 className={styles.sectionTitle}>{t.workspaceArchiveTitle}</h3>
                 </div>
 
                 {archivedMembers.length === 0 ? (
-                  <div className={styles.emptyCard}>{copy.noArchive}</div>
+                  <div className={styles.emptyCard}>{t.workspaceNoArchive}</div>
                 ) : (
                   <div className={styles.memberGrid}>
                     {archivedMembers.map((member) => {
@@ -1374,7 +963,7 @@ export function BrandTeamWorkspace({
 
                             <div className={styles.memberPills}>
                               <Badge variant="outline">
-                                {getStatusLabel(member.status, copy)}
+                                {getStatusLabel(member.status, t)}
                               </Badge>
                             </div>
                           </div>
@@ -1388,8 +977,8 @@ export function BrandTeamWorkspace({
                               onClick={() => handleReinvite(member)}
                             >
                               {member.status === "REMOVED"
-                                ? copy.restoreInvite
-                                : copy.reinviteMember}
+                                ? t.workspaceRestoreInvite
+                                : t.workspaceReinviteMember}
                             </Button>
                           </div>
                         </article>
@@ -1405,17 +994,17 @@ export function BrandTeamWorkspace({
                     <Icon icon="room_service" size={18} color="current" />
                   </div>
                   <div>
-                    <h3 className={styles.futureTitle}>{copy.futureTitle}</h3>
+                    <h3 className={styles.futureTitle}>{t.workspaceFutureTitle}</h3>
                     <p className={styles.futureDescription}>
-                      {copy.futureDescription}
+                      {t.workspaceFutureDescription}
                     </p>
                   </div>
                 </div>
 
                 <div className={styles.futureList}>
-                  <div className={styles.futureItem}>{copy.futureListOne}</div>
-                  <div className={styles.futureItem}>{copy.futureListTwo}</div>
-                  <div className={styles.futureItem}>{copy.futureListThree}</div>
+                  <div className={styles.futureItem}>{t.workspaceFutureListOne}</div>
+                  <div className={styles.futureItem}>{t.workspaceFutureListTwo}</div>
+                  <div className={styles.futureItem}>{t.workspaceFutureListThree}</div>
                 </div>
               </section>
             </>

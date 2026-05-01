@@ -428,4 +428,10 @@ export const jaMessages: Messages = {
     timeFormat12h: "午前/午後",
     timeFormat24h: "24時間",
   },
+  theme: {
+    title: "テーマ",
+    system: "システム",
+    light: "ライト",
+    dark: "ダーク",
+  },
 };

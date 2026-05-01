@@ -425,4 +425,10 @@ export const ukMessages: Messages = {
     timeFormat12h: "AM/PM",
     timeFormat24h: "24год",
   },
+  theme: {
+    title: "Тема",
+    system: "Системна",
+    light: "Світла",
+    dark: "Темна",
+  },
 };
