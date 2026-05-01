@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
-import styles from "./form-footer.module.css";
+import styles from "./form-actions.module.css";
 
-type FormFooterProps = {
+type FormActionsProps = {
   children: ReactNode;
   layout?: "default" | "aside";
   className?: string;
 };
 
-type FormFooterSectionProps = {
+type FormActionsSectionProps = {
   children: ReactNode;
 };
 
@@ -15,7 +15,7 @@ function joinClassNames(...classNames: Array<string | undefined | false>) {
   return classNames.filter(Boolean).join(" ");
 }
 
-export function FormFooter({ children, layout = "default", className }: FormFooterProps) {
+export function FormActions({ children, layout = "default", className }: FormActionsProps) {
   return (
     <div
       className={joinClassNames(
@@ -29,10 +29,10 @@ export function FormFooter({ children, layout = "default", className }: FormFoot
   );
 }
 
-export function FormFooterSpacer() {
+export function FormActionsSpacer() {
   return <div className={styles.spacer} />;
 }
 
-export function FormFooterDanger({ children }: FormFooterSectionProps) {
+export function FormActionsDanger({ children }: FormActionsSectionProps) {
   return <div className={styles.danger}>{children}</div>;
 }

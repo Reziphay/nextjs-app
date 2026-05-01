@@ -21,7 +21,7 @@ import {
 } from "@/components/atoms/input";
 import { Switch } from "@/components/atoms/switch";
 import { Icon } from "@/components/icon";
-import { FormFooter, FormFooterSpacer } from "@/components/molecules/form-footer";
+import { FormActions, FormActionsSpacer } from "@/components/molecules/form-actions";
 import { PageSurfaceHeader } from "@/components/molecules/page-surface-header";
 import { RichTextEditor } from "@/components/molecules/rich-text-editor/rich-text-editor";
 import { StatusBanner } from "@/components/molecules/status-banner";
@@ -862,15 +862,15 @@ export function BranchPage({
 
                   {/* Mobile footer */}
                   <div className={styles.mobileFooter}>
-                    <FormFooter>
+                    <FormActions>
                       <Button variant="outline" onClick={handleClose}>
                         {t.branchCancel}
                       </Button>
-                      <FormFooterSpacer />
+                      <FormActionsSpacer />
                       <Button variant="primary" onClick={handleSave}>
                         {t.branchSave}
                       </Button>
-                    </FormFooter>
+                    </FormActions>
                   </div>
 
                 </div>

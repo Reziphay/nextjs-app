@@ -21,7 +21,7 @@ import {
   AlertDialogCancel,
 } from "@/components/atoms/alert-dialog";
 import { Icon } from "@/components/icon";
-import { FormFooter, FormFooterDanger, FormFooterSpacer } from "@/components/molecules/form-footer";
+import { FormActions, FormActionsDanger, FormActionsSpacer } from "@/components/molecules/form-actions";
 import { PageSurfaceHeader } from "@/components/molecules/page-surface-header";
 import { StatusBanner } from "@/components/molecules/status-banner";
 import { SocialLinksEditor } from "@/components/molecules/social-links-editor/social-links-editor";
@@ -851,7 +851,7 @@ export function BrandForm({
 
   function renderFormActions(layout: "default" | "aside" = "default") {
     return (
-      <FormFooter layout={layout}>
+      <FormActions layout={layout}>
         <Button
           variant="primary"
           type="submit"
@@ -873,10 +873,10 @@ export function BrandForm({
           {t.cancelForm}
         </Button>
 
-        <FormFooterSpacer />
+        <FormActionsSpacer />
 
         {mode === "edit" && (persistedBrand ?? brand) && (
-          <FormFooterDanger>
+          <FormActionsDanger>
             <Button
               variant="outline"
               type="button"
@@ -893,9 +893,9 @@ export function BrandForm({
             >
               {t.deleteBrand}
             </Button>
-          </FormFooterDanger>
+          </FormActionsDanger>
         )}
-      </FormFooter>
+      </FormActions>
     );
   }
 

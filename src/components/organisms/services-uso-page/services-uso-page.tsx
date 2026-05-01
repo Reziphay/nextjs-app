@@ -14,7 +14,7 @@ import {
 } from "@/components/atoms";
 import { Combobox, type ComboboxOption } from "@/components/atoms/combobox";
 import { AvatarCropDialog } from "@/components/molecules/avatar-crop-dialog/avatar-crop-dialog";
-import { FormFooter } from "@/components/molecules/form-footer";
+import { FormActions } from "@/components/molecules/form-actions";
 import { Switch } from "@/components/atoms/switch";
 import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
@@ -327,7 +327,7 @@ function ServiceFormPage({
 
   function renderFormActions(layout: "default" | "aside" = "default") {
     return (
-      <FormFooter layout={layout}>
+      <FormActions layout={layout}>
         <Button
           variant="primary"
           type="submit"
@@ -340,7 +340,7 @@ function ServiceFormPage({
         <Button variant="outline" type="button" onClick={onCancel}>
           {copy.btnCancel}
         </Button>
-      </FormFooter>
+      </FormActions>
     );
   }
 

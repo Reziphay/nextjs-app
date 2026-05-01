@@ -203,12 +203,12 @@ function MiniCalendar({
           {getMonthName(viewing, locale, "short")} {year}
         </span>
         <div className={styles.miniCalNav}>
-          <button className={styles.miniCalBtn} onClick={prevMonth} aria-label={previousMonthLabel}>
+          <Button variant="unstyled" className={styles.miniCalBtn} onClick={prevMonth} aria-label={previousMonthLabel}>
             <Icon icon="chevron_left" size={14} color="current" />
-          </button>
-          <button className={styles.miniCalBtn} onClick={nextMonth} aria-label={nextMonthLabel}>
+          </Button>
+          <Button variant="unstyled" className={styles.miniCalBtn} onClick={nextMonth} aria-label={nextMonthLabel}>
             <Icon icon="chevron_right" size={14} color="current" />
-          </button>
+          </Button>
         </div>
       </div>
       <div className={styles.miniCalGrid}>
@@ -222,7 +222,8 @@ function MiniCalendar({
           const isToday = isSameDay(date, today);
           const isSelected = isSameDay(date, selected);
           return (
-            <button
+            <Button
+              variant="unstyled"
               key={date.toISOString()}
               className={[
                 styles.miniCalCell,
@@ -234,7 +235,7 @@ function MiniCalendar({
               onClick={() => onSelect(date)}
             >
               {date.getDate()}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -282,13 +283,14 @@ function CalendarSidebar({
         .join(" ")}
     >
       <div className={styles.sidebarInner}>
-        <button
+        <Button
+          variant="unstyled"
           className={styles.sidebarCloseBtn}
           onClick={onClose}
           aria-label={closeSidebarLabel}
         >
           <Icon icon="close" size={18} color="current" />
-        </button>
+        </Button>
         <MiniCalendar
           selected={selected}
           today={today}
@@ -355,14 +357,15 @@ function ViewSwitcherDropdown({ view, labels, onChange }: ViewSwitcherProps) {
 
   return (
     <div className={styles.dropdownWrap} ref={ref}>
-      <button className={styles.viewSwitcherBtn} onClick={() => setOpen((o) => !o)}>
+      <Button variant="unstyled" className={styles.viewSwitcherBtn} onClick={() => setOpen((o) => !o)}>
         {labels[view]}
         <Icon icon="expand_more" size={14} color="current" />
-      </button>
+      </Button>
       {open && (
         <div className={styles.dropdownMenu}>
           {(["day", "work_week", "week", "month"] as CalendarView[]).map((v) => (
-            <button
+            <Button
+              variant="unstyled"
               key={v}
               className={[
                 styles.dropdownItem,
@@ -376,7 +379,7 @@ function ViewSwitcherDropdown({ view, labels, onChange }: ViewSwitcherProps) {
               }}
             >
               {labels[v]}
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -409,15 +412,16 @@ function BrandPickerDropdown({ brands, selectedId, onChange }: BrandPickerProps)
 
   return (
     <div className={styles.dropdownWrap} ref={ref}>
-      <button className={styles.brandPickerBtn} onClick={() => setOpen((o) => !o)}>
+      <Button variant="unstyled" className={styles.brandPickerBtn} onClick={() => setOpen((o) => !o)}>
         <span className={styles.brandPickerDot} />
         {selected?.name ?? "All brands"}
         <Icon icon="expand_more" size={14} color="current" />
-      </button>
+      </Button>
       {open && (
         <div className={styles.dropdownMenu}>
           {brands.map((b) => (
-            <button
+            <Button
+              variant="unstyled"
               key={b.id}
               className={[
                 styles.dropdownItem,
@@ -431,7 +435,7 @@ function BrandPickerDropdown({ brands, selectedId, onChange }: BrandPickerProps)
               }}
             >
               {b.name}
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -532,18 +536,20 @@ function CalendarSettingsPopup({ timeFormat, settingsTitle, settingsTimeFormatLa
       <div className={styles.settingsRow}>
         <span className={styles.settingsLabel}>{settingsTimeFormatLabel}</span>
         <div className={styles.settingsToggleGroup}>
-          <button
+          <Button
+            variant="unstyled"
             className={[styles.settingsToggleBtn, timeFormat === "12h" ? styles.settingsToggleBtnActive : ""].filter(Boolean).join(" ")}
             onClick={() => onTimeFormatChange("12h")}
           >
             {timeFormat12hLabel}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="unstyled"
             className={[styles.settingsToggleBtn, timeFormat === "24h" ? styles.settingsToggleBtnActive : ""].filter(Boolean).join(" ")}
             onClick={() => onTimeFormatChange("24h")}
           >
             {timeFormat24hLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -794,27 +800,28 @@ function CalendarToolbar({
   return (
     <div className={styles.toolbar}>
       <div className={styles.toolbarLeft}>
-        <button className={styles.todayBtn} onClick={onToday}>
+        <Button variant="unstyled" className={styles.todayBtn} onClick={onToday}>
           {todayLabel}
-        </button>
+        </Button>
 
         <div className={styles.navGroup}>
-          <button className={styles.toolbarIconBtn} onClick={onPrev} aria-label={previousPeriodLabel}>
+          <Button variant="unstyled" className={styles.toolbarIconBtn} onClick={onPrev} aria-label={previousPeriodLabel}>
             <Icon icon="chevron_left" size={18} color="current" />
-          </button>
-          <button className={styles.toolbarIconBtn} onClick={onNext} aria-label={nextPeriodLabel}>
+          </Button>
+          <Button variant="unstyled" className={styles.toolbarIconBtn} onClick={onNext} aria-label={nextPeriodLabel}>
             <Icon icon="chevron_right" size={18} color="current" />
-          </button>
+          </Button>
         </div>
 
         <div className={styles.dateLabelWrap}>
-          <button
+          <Button
+            variant="unstyled"
             className={styles.dateLabel}
             onClick={() => setDatePickerOpen((o) => !o)}
           >
             {formatDateLabel(date, view, locale)}
             <Icon icon="expand_more" size={14} color="current" />
-          </button>
+          </Button>
           {datePickerOpen && (
             <DatePickerPopup
               date={date}
@@ -831,13 +838,14 @@ function CalendarToolbar({
 
       <div className={styles.toolbarRight}>
         <div className={styles.settingsWrap} ref={settingsRef}>
-          <button
+          <Button
+            variant="unstyled"
             className={[styles.toolbarIconBtn, settingsOpen ? styles.toolbarIconBtnActive : ""].filter(Boolean).join(" ")}
             onClick={() => setSettingsOpen((o) => !o)}
             aria-label={moreOptionsLabel}
           >
             <Icon icon="more_horiz" size={18} color="current" />
-          </button>
+          </Button>
           {settingsOpen && (
             <CalendarSettingsPopup
               timeFormat={timeFormat}
@@ -853,10 +861,10 @@ function CalendarToolbar({
 
         <ViewSwitcherDropdown view={view} labels={viewLabels} onChange={onViewChange} />
 
-        <button className={styles.toolbarFilterBtn} aria-label={filterLabel}>
+        <Button variant="unstyled" className={styles.toolbarFilterBtn} aria-label={filterLabel}>
           <Icon icon="filter_list" size={16} color="current" />
           <span>{filterLabel}</span>
-        </button>
+        </Button>
 
         <BrandPickerDropdown
           brands={brands}
@@ -868,7 +876,8 @@ function CalendarToolbar({
           {newLabel}
         </Button>
 
-        <button
+        <Button
+          variant="unstyled"
           className={[
             styles.toolbarIconBtn,
             sidebarOpen ? styles.toolbarIconBtnActive : "",
@@ -879,7 +888,7 @@ function CalendarToolbar({
           aria-label={toggleSidebarLabel}
         >
           <Icon icon="right_panel_open" size={18} color="current" />
-        </button>
+        </Button>
       </div>
     </div>
   );

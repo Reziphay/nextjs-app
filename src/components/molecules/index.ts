@@ -2,7 +2,7 @@ export { AvatarCropDialog } from "./avatar-crop-dialog/avatar-crop-dialog";
 export { OwnerCard } from "./owner-card";
 export { BrandCard } from "./brand-card";
 export { FeedbackPopup } from "./feedback-popup/feedback-popup";
-export { FormFooter, FormFooterDanger, FormFooterSpacer } from "./form-footer";
+export { FormActions, FormActionsDanger, FormActionsSpacer } from "./form-actions";
 export { LanguageSwitcher } from "./language-switcher";
 export { ProfileBox } from "./profile-box";
 export { ThemeSwitcher } from "./theme-switcher";

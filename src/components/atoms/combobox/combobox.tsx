@@ -13,6 +13,7 @@ import {
   type InputHTMLAttributes,
   type ReactNode,
 } from "react";
+import { Button } from "@/components/atoms/button";
 import { Icon } from "@/components/icon";
 import styles from "./combobox.module.css";
 
@@ -251,14 +252,15 @@ export const Combobox = forwardRef<HTMLInputElement, ComboboxProps>(
                 <span key={item.value} className={styles.chip}>
                   <span>{item.label}</span>
                   {!disabled ? (
-                    <button
+                    <Button
+                      variant="unstyled"
                       type="button"
                       className={styles.chipRemove}
                       aria-label={`Remove ${item.label}`}
                       onClick={() => removeSelectedValue(item.value)}
                     >
                       <Icon icon="close" size={14} color="current" />
-                    </button>
+                    </Button>
                   ) : null}
                 </span>
               ))}
@@ -377,7 +379,8 @@ export const Combobox = forwardRef<HTMLInputElement, ComboboxProps>(
                   const isActive = effectiveHighlightedIndex === index;
 
                   return (
-                    <button
+                    <Button
+                      variant="unstyled"
                       key={item.value}
                       id={`${listboxId}-${item.value}`}
                       type="button"
@@ -417,7 +420,7 @@ export const Combobox = forwardRef<HTMLInputElement, ComboboxProps>(
                           className={styles.optionCheck}
                         />
                       ) : null}
-                    </button>
+                    </Button>
                   );
                 })
               ) : (
