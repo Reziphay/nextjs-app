@@ -482,20 +482,22 @@ export function AdminModerationWorkspace() {
         )}
 
         <div className={styles.tabs}>
-          <button
+          <Button
+            variant="unstyled"
             type="button"
             className={[styles.tab, activeTab === "brand" ? styles.tabActive : ""].join(" ")}
             onClick={() => handleTabChange("brand")}
           >
             {t.tabBrands}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="unstyled"
             type="button"
             className={[styles.tab, activeTab === "service" ? styles.tabActive : ""].join(" ")}
             onClick={() => handleTabChange("service")}
           >
             {t.tabServices}
-          </button>
+          </Button>
         </div>
 
         {queueLoading ? (
@@ -600,7 +602,8 @@ export function AdminModerationWorkspace() {
               <div className={styles.modalChecklist}>
                 <p className={styles.detailLabel}>{t.checklistTitle}</p>
                 {checklist.map((item) => (
-                  <button
+                  <Button
+                    variant="unstyled"
                     type="button"
                     key={item.key}
                     className={styles.checklistItem}
@@ -610,7 +613,7 @@ export function AdminModerationWorkspace() {
                     <span className={item.passed ? styles.checklistPassed : styles.checklistFailed}>
                       {item.passed ? t.checklistPassed : t.checklistFailed}
                     </span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}

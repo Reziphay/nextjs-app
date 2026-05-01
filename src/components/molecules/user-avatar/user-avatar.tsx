@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { Button } from "@/components/atoms/button";
 import { Icon } from "@/components/icon";
 import styles from "./user-avatar.module.css";
 
@@ -107,7 +108,8 @@ export function UserAvatar({
       </span>
 
       {editable ? (
-        <button
+        <Button
+          variant="unstyled"
           type="button"
           className={styles.editButton}
           aria-label={editLabel}
@@ -115,7 +117,7 @@ export function UserAvatar({
           onClick={onEditClick}
         >
           {renderEditIcon(isUploading)}
-        </button>
+        </Button>
       ) : null}
     </div>
   );

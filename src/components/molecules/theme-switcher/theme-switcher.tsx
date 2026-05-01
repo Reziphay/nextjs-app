@@ -1,6 +1,7 @@
 "use client";
 
 import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
+import { Button } from "@/components/atoms/button";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useTheme } from "@/components/providers/theme-provider";
 import type { Locale } from "@/i18n/config";
@@ -87,7 +88,8 @@ export function ThemeSwitcher({
           const isActive = option === theme;
 
           return (
-            <button
+            <Button
+              variant="unstyled"
               key={option}
               type="button"
               role="radio"
@@ -103,7 +105,7 @@ export function ThemeSwitcher({
               {variant === "panel" ? (
                 <span className={styles.optionLabel}>{labels[option]}</span>
               ) : null}
-            </button>
+            </Button>
           );
         })}
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEditor, EditorContent } from "@tiptap/react";
+import { Button } from "@/components/atoms/button";
 import StarterKit from "@tiptap/starter-kit";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
@@ -118,7 +119,8 @@ export function RichTextEditor({
   return (
     <div className={`${styles.wrapper}${className ? ` ${className}` : ""}${disabled ? ` ${styles.disabled}` : ""}`}>
       <div className={styles.toolbar}>
-        <button
+        <Button
+          variant="unstyled"
           type="button"
           title="Bold"
           className={`${styles.toolBtn} ${isBold ? styles.toolBtnActive : ""}`}
@@ -126,9 +128,10 @@ export function RichTextEditor({
           disabled={disabled}
         >
           <strong>B</strong>
-        </button>
+        </Button>
 
-        <button
+        <Button
+          variant="unstyled"
           type="button"
           title="Italic"
           className={`${styles.toolBtn} ${isItalic ? styles.toolBtnActive : ""}`}
@@ -136,9 +139,10 @@ export function RichTextEditor({
           disabled={disabled}
         >
           <em>I</em>
-        </button>
+        </Button>
 
-        <button
+        <Button
+          variant="unstyled"
           type="button"
           title="Underline"
           className={`${styles.toolBtn} ${isUnderline ? styles.toolBtnActive : ""}`}
@@ -146,11 +150,12 @@ export function RichTextEditor({
           disabled={disabled}
         >
           <span className={styles.underlineIcon}>U</span>
-        </button>
+        </Button>
 
         <div className={styles.separator} />
 
-        <button
+        <Button
+          variant="unstyled"
           type="button"
           title="Bullet list"
           className={`${styles.toolBtn} ${isBulletList ? styles.toolBtnActive : ""}`}
@@ -167,9 +172,10 @@ export function RichTextEditor({
               <rect x="4" y="10" width="9" height="1" rx="0.5" fill="currentColor"/>
             </svg>
           </span>
-        </button>
+        </Button>
 
-        <button
+        <Button
+          variant="unstyled"
           type="button"
           title="Ordered list"
           className={`${styles.toolBtn} ${isOrderedList ? styles.toolBtnActive : ""}`}
@@ -186,13 +192,14 @@ export function RichTextEditor({
               <rect x="5" y="10" width="8" height="1" rx="0.5" fill="currentColor"/>
             </svg>
           </span>
-        </button>
+        </Button>
 
         <div className={styles.separator} />
 
         <div className={styles.colorRow}>
           {COLORS.map((c) => (
-            <button
+            <Button
+              variant="unstyled"
               key={c.label}
               type="button"
               title={c.label}

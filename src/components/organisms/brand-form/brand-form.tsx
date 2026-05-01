@@ -21,6 +21,7 @@ import {
   AlertDialogCancel,
 } from "@/components/atoms/alert-dialog";
 import { Icon } from "@/components/icon";
+import { FormFooter, FormFooterDanger, FormFooterSpacer } from "@/components/molecules/form-footer";
 import { PageSurfaceHeader } from "@/components/molecules/page-surface-header";
 import { StatusBanner } from "@/components/molecules/status-banner";
 import { SocialLinksEditor } from "@/components/molecules/social-links-editor/social-links-editor";
@@ -848,15 +849,14 @@ export function BrandForm({
     ...draft.newGalleryPreviewUrls.map((url, i) => ({ url, isExisting: false, index: i })),
   ];
 
-  function renderFormActions(className?: string) {
+  function renderFormActions(layout: "default" | "aside" = "default") {
     return (
-      <div className={`${styles.formFooter}${className ? ` ${className}` : ""}`}>
+      <FormFooter layout={layout}>
         <Button
           variant="primary"
           type="submit"
           isLoading={isLoading}
           icon={isLoading ? undefined : "check"}
-          className={styles.formFooterPrimary}
           disabled={
             isLoading ||
             verificationMissing ||
@@ -873,10 +873,10 @@ export function BrandForm({
           {t.cancelForm}
         </Button>
 
-        <div className={styles.formFooterSpacer} />
+        <FormFooterSpacer />
 
         {mode === "edit" && (persistedBrand ?? brand) && (
-          <div className={styles.formFooterDanger}>
+          <FormFooterDanger>
             <Button
               variant="outline"
               type="button"
@@ -893,9 +893,9 @@ export function BrandForm({
             >
               {t.deleteBrand}
             </Button>
-          </div>
+          </FormFooterDanger>
         )}
-      </div>
+      </FormFooter>
     );
   }
 
@@ -966,14 +966,15 @@ export function BrandForm({
                     className={styles.previewImage}
                     sizes="(min-width: 980px) 18rem, 120px"
                   />
-                  <button
+                  <Button
+                    variant="unstyled"
                     type="button"
                     className={styles.removePreviewBtn}
                     aria-label={`${t.deleteConfirm} ${t.fieldLogo}`}
                     onClick={handleRemoveLogo}
                   >
                     <Icon icon="close" size={12} color="current" />
-                  </button>
+                  </Button>
                 </div>
               </div>
             ) : (
@@ -1018,7 +1019,7 @@ export function BrandForm({
             </div>
 
             <div className={styles.desktopAside}>
-              {renderFormActions(styles.formFooterAside)}
+              {renderFormActions("aside")}
             </div>
           </div>
 
@@ -1119,7 +1120,8 @@ export function BrandForm({
                         className={styles.previewImage}
                         sizes="200px"
                       />
-                      <button
+                      <Button
+                        variant="unstyled"
                         type="button"
                         className={styles.removePreviewBtn}
                         aria-label={`${t.deleteConfirm} ${t.gallery} ${index + 1}`}
@@ -1130,7 +1132,7 @@ export function BrandForm({
                         }
                       >
                         <Icon icon="close" size={12} color="current" />
-                      </button>
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -1166,22 +1168,24 @@ export function BrandForm({
                         </div>
                       </div>
                       <div className={styles.branchItemActions}>
-                        <button
+                        <Button
+                          variant="unstyled"
                           type="button"
                           className={styles.iconBtn}
                           aria-label={`${t.branchEditModalTitle}: ${branch.name}`}
                           onClick={() => handleEditBranch(index)}
                         >
                           <Icon icon="edit" size={14} color="current" />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="unstyled"
                           type="button"
                           className={`${styles.iconBtn} ${styles.iconBtnDelete}`}
                           aria-label={`${t.deleteBranch}: ${branch.name}`}
                           onClick={() => handleDeleteBranch(index)}
                         >
                           <Icon icon="delete" size={14} color="current" />
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ))
@@ -1336,7 +1340,8 @@ export function BrandForm({
                       {selectedTransferTarget.email}
                     </span>
                   </div>
-                  <button
+                  <Button
+                    variant="unstyled"
                     type="button"
                     onClick={() => {
                       setSelectedTransferTarget(null);
@@ -1354,7 +1359,7 @@ export function BrandForm({
                     }}
                   >
                     {t.transferChangeTarget}
-                  </button>
+                  </Button>
                 </div>
 
                 {/* Brand being transferred */}

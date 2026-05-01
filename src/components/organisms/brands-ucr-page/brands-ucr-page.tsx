@@ -6,6 +6,7 @@ import Image from "next/image";
 import { BrandCard } from "@/components/molecules/brand-card";
 import {
   AlertDialog,
+  Button,
   AlertDialogContent,
 } from "@/components/atoms";
 import { Icon } from "@/components/icon";
@@ -280,7 +281,8 @@ export function BrandsUcrPage({ brands, ownersById, featuredServices = [] }: Bra
               const imgUrl = firstImg ? proxyMediaUrl(firstImg.url) : null;
 
               return (
-                <button
+                <Button
+                  variant="unstyled"
                   key={svc.id}
                   type="button"
                   className={styles.serviceCard}
@@ -305,7 +307,7 @@ export function BrandsUcrPage({ brands, ownersById, featuredServices = [] }: Bra
                       {durationLabel ? <span>{durationLabel}</span> : null}
                     </div>
                   </div>
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -344,14 +346,15 @@ export function BrandsUcrPage({ brands, ownersById, featuredServices = [] }: Bra
                     <p className={styles.serviceModalCategory}>{messages.categories[selectedService.service_category.key as keyof typeof messages.categories] ?? selectedService.service_category.key}</p>
                   ) : null}
                 </div>
-                <button
+                <Button
+                  variant="unstyled"
                   type="button"
                   className={styles.serviceModalClose}
                   onClick={() => setSelectedService(null)}
                   aria-label={svcCopy.modalClose}
                 >
                   <Icon icon="close" size={18} color="current" />
-                </button>
+                </Button>
               </div>
 
               <div className={styles.serviceModalBody}>

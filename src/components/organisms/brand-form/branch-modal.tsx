@@ -1157,14 +1157,15 @@ export function BranchModal({
                             onChange={(value) => updateBreak(index, "end", value)}
                           />
                         </Field>
-                        <button
+                        <Button
+                          variant="unstyled"
                           type="button"
                           className={styles.removeBreakBtn}
                           aria-label={t.branchRemoveBreak}
                           onClick={() => removeBreak(index)}
                         >
                           <Icon icon="delete" size={16} color="current" />
-                        </button>
+                        </Button>
                       </div>
                     ))}
                   </div>

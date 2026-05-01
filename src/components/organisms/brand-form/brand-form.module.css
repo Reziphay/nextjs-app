@@ -439,34 +439,6 @@
   border-color: var(--app-error-border);
 }
 
-/* ── Form footer ── */
-.formFooter {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1.25rem 1.75rem;
-  border-radius: var(--general-border-radius-hero);
-  background: var(--app-bg-surface);
-  border: 1px solid var(--app-border-soft);
-  box-shadow: 0 1px 4px var(--app-shadow-card-soft);
-}
-
-.formFooterSpacer {
-  flex: 1;
-}
-
-.formFooterDanger {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  padding-left: 0.75rem;
-  border-left: 1px solid var(--app-border-soft);
-}
-
-.formFooterPrimary {
-  /* already first via JSX order — no order override needed */
-}
-
 .formBanner {
   margin-bottom: 1.25rem;
 }
@@ -517,35 +489,6 @@
     max-width: none;
   }
 
-  .formFooterAside {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 0.625rem;
-    padding: 1.125rem 1.25rem;
-  }
-
-  .formFooterAside > *:not(.formFooterSpacer):not(.formFooterDanger) {
-    width: 100%;
-  }
-
-  .formFooterAside .formFooterSpacer {
-    display: none;
-  }
-
-  .formFooterAside .formFooterDanger {
-    width: 100%;
-    padding-top: 0.75rem;
-    padding-left: 0;
-    border-top: 1px solid var(--app-border-soft);
-    border-left: none;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-  }
-
-  .formFooterAside .formFooterDanger > * {
-    width: 100%;
-  }
 }
 
 @media (max-width: 640px) {
@@ -555,39 +498,6 @@
 
   .sectionHeader {
     align-items: flex-start;
-  }
-
-  .formFooter {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 1rem 1.25rem;
-    gap: 0.625rem;
-  }
-
-  .formFooterSpacer {
-    display: none;
-  }
-
-  .formFooterDanger {
-    padding-left: 0;
-    border-left: none;
-    padding-top: 0.625rem;
-    border-top: 1px solid var(--app-border-soft);
-    justify-content: stretch;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .formFooterDanger > * {
-    width: 100%;
-  }
-
-  .formFooter > *:not(.formFooterSpacer):not(.formFooterDanger) {
-    width: 100%;
-  }
-
-  .formFooterPrimary {
-    order: -1;
   }
 
   .galleryPreviewGrid {

@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { Button } from "@/components/atoms/button";
 import { SocialIcon, SOCIAL_COLORS } from "@/components/atoms/social-icon/social-icon";
 import {
   detectSocialPlatform,
@@ -96,7 +97,8 @@ export const SocialLinksEditor = forwardRef<SocialLinksEditorRef, Props>(
                     <SocialIcon platform={platform} size={16} />
                   </span>
                   <span className={styles.itemUrl}>{url}</span>
-                  <button
+                  <Button
+                    variant="unstyled"
                     type="button"
                     className={styles.removeBtn}
                     aria-label={messages.removeLabel}
@@ -105,7 +107,7 @@ export const SocialLinksEditor = forwardRef<SocialLinksEditorRef, Props>(
                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
                       <path d="M1 1l8 8M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                     </svg>
-                  </button>
+                  </Button>
                 </li>
               );
             })}
@@ -127,14 +129,15 @@ export const SocialLinksEditor = forwardRef<SocialLinksEditorRef, Props>(
             autoComplete="off"
             spellCheck={false}
           />
-          <button
+          <Button
+            variant="unstyled"
             type="button"
             className={styles.addBtn}
             onClick={commit}
             tabIndex={-1}
           >
             {messages.addButton}
-          </button>
+          </Button>
         </div>
 
         {error && <p className={styles.errorMsg}>{error}</p>}

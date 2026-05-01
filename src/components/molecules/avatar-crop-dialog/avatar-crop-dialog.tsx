@@ -274,14 +274,15 @@ export function AvatarCropDialog({
     <AlertDialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
       <AlertDialogContent className={styles.content}>
         <div className={styles.header}>
-          <button
+          <Button
+            variant="unstyled"
             type="button"
             className={styles.closeButton}
             aria-label={p.cropPhotoCancel}
             onClick={onClose}
           >
             <Icon icon="close" size={18} color="white" />
-          </button>
+          </Button>
           <AlertDialogTitle className={styles.title}>
             {p.cropPhotoTitle}
           </AlertDialogTitle>
@@ -328,14 +329,15 @@ export function AvatarCropDialog({
             </div>
 
             <div className={styles.rangeControls}>
-              <button
+              <Button
+                variant="unstyled"
                 type="button"
                 className={styles.zoomButton}
                 aria-label={`${p.cropPhotoZoom} -`}
                 onClick={() => handleZoomStep(-1)}
               >
                 <Icon icon="remove" size={16} color="white" />
-              </button>
+              </Button>
               <input
                 className={styles.rangeInput}
                 type="range"
@@ -345,25 +347,27 @@ export function AvatarCropDialog({
                 value={zoom}
                 onChange={(event) => handleZoomChange(Number(event.target.value))}
               />
-              <button
+              <Button
+                variant="unstyled"
                 type="button"
                 className={styles.zoomButton}
                 aria-label={`${p.cropPhotoZoom} +`}
                 onClick={() => handleZoomStep(1)}
               >
                 <Icon icon="add" size={16} color="white" />
-              </button>
+              </Button>
             </div>
           </div>
 
           {onChooseDifferentPicture && (
-            <button
+            <Button
+              variant="unstyled"
               type="button"
               className={styles.changePicture}
               onClick={onChooseDifferentPicture}
             >
               {p.changePhoto}
-            </button>
+            </Button>
           )}
         </div>
 

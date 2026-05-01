@@ -87,14 +87,15 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
             return (
               <div key={brand.id} className={styles.cardWrapper}>
                 {isOwner && (
-                  <button
+                  <Button
+                    variant="unstyled"
                     type="button"
                     className={styles.editButton}
                     aria-label={`${t.editBrand}: ${brand.name}`}
                     onClick={(e) => handleEditBrand(e, brand.id)}
                   >
                     <Icon icon="edit" size={14} color="current" />
-                  </button>
+                  </Button>
                 )}
 
                 <BrandCard

@@ -393,7 +393,8 @@ function RatingButtonRow({
         const isActive = value <= (currentRating ?? 0);
 
         return (
-          <button
+          <Button
+            variant="unstyled"
             key={value}
             type="button"
             className={`${styles.ratingButton} ${isActive ? styles.ratingButtonActive : ""}`}
@@ -416,7 +417,7 @@ function RatingButtonRow({
                 }
               />
             </svg>
-          </button>
+          </Button>
         );
       })}
     </div>
@@ -1088,18 +1089,20 @@ export function BrandDetail({
                   </div>
 
                   <div className={styles.galleryControls}>
-                    <button
+                    <Button
+                      variant="unstyled"
                       type="button"
                       className={styles.galleryNav}
                       onClick={showPreviousGallerySlide}
                       aria-label={t.detailGalleryPrevious}
                     >
                       <Icon icon="arrow_back" size={18} color="current" />
-                    </button>
+                    </Button>
 
                     <div className={styles.galleryDots}>
                       {gallerySlides.map((item, index) => (
-                        <button
+                        <Button
+                          variant="unstyled"
                           key={item.id}
                           type="button"
                           className={`${styles.galleryDot} ${index === activeGalleryIndex ? styles.galleryDotActive : ""}`}
@@ -1109,14 +1112,15 @@ export function BrandDetail({
                       ))}
                     </div>
 
-                    <button
+                    <Button
+                      variant="unstyled"
                       type="button"
                       className={styles.galleryNav}
                       onClick={showNextGallerySlide}
                       aria-label={t.detailGalleryNext}
                     >
                       <Icon icon="arrow_forward" size={18} color="current" />
-                    </button>
+                    </Button>
                   </div>
                 </>
               ) : null}
@@ -1125,7 +1129,8 @@ export function BrandDetail({
             {gallerySlides.length > 1 ? (
               <div className={styles.galleryThumbRail}>
                 {gallerySlides.map((item, index) => (
-                  <button
+                  <Button
+                    variant="unstyled"
                     key={item.id}
                     type="button"
                     className={`${styles.galleryThumb} ${index === activeGalleryIndex ? styles.galleryThumbActive : ""}`}
@@ -1139,7 +1144,7 @@ export function BrandDetail({
                       className={styles.galleryThumbImage}
                       sizes="88px"
                     />
-                  </button>
+                  </Button>
                 ))}
               </div>
             ) : null}
@@ -1259,7 +1264,8 @@ export function BrandDetail({
 
                     {isOwner ? (
                       <div className={styles.rowActions} onClick={(e) => e.stopPropagation()}>
-                        <button
+                        <Button
+                          variant="unstyled"
                           type="button"
                           className={styles.rowActionBtn}
                           onClick={(e) => handleEditService(svc, e)}
@@ -1267,8 +1273,9 @@ export function BrandDetail({
                           title={servicesCopy.actionEdit}
                         >
                           <Icon icon="edit" size={15} color="current" />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="unstyled"
                           type="button"
                           className={`${styles.rowActionBtn} ${styles.rowActionBtnDanger}`}
                           onClick={(e) => handleDeleteService(svc, e)}
@@ -1277,7 +1284,7 @@ export function BrandDetail({
                           title={servicesCopy.actionDelete}
                         >
                           <Icon icon="delete" size={15} color="current" />
-                        </button>
+                        </Button>
                       </div>
                     ) : null}
                   </div>
@@ -1314,7 +1321,8 @@ export function BrandDetail({
             ["open247", t.detailFilterOpen247],
             ["withContact", t.detailFilterWithContact],
           ] as const).map(([value, label]) => (
-            <button
+            <Button
+              variant="unstyled"
               key={value}
               type="button"
               role="tab"
@@ -1323,7 +1331,7 @@ export function BrandDetail({
               onClick={() => setBranchFilter(value)}
             >
               {label}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -1413,7 +1421,8 @@ export function BrandDetail({
 
                   {isOwner ? (
                     <div className={styles.rowActions} onClick={(e) => e.stopPropagation()}>
-                      <button
+                      <Button
+                        variant="unstyled"
                         type="button"
                         className={styles.rowActionBtn}
                         onClick={(e) => handleEditBranch(branch, e)}
@@ -1421,8 +1430,9 @@ export function BrandDetail({
                         title={servicesCopy.actionEdit}
                       >
                         <Icon icon="edit" size={15} color="current" />
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="unstyled"
                         type="button"
                         className={`${styles.rowActionBtn} ${styles.rowActionBtnDanger}`}
                         onClick={(e) => handleDeleteBranch(branch, e)}
@@ -1431,7 +1441,7 @@ export function BrandDetail({
                         title={servicesCopy.actionDelete}
                       >
                         <Icon icon="delete" size={15} color="current" />
-                      </button>
+                      </Button>
                     </div>
                   ) : null}
                 </div>
@@ -1474,14 +1484,15 @@ export function BrandDetail({
                     ) : null}
                   </div>
                 </div>
-                <button
+                <Button
+                  variant="unstyled"
                   type="button"
                   className={styles.branchDialogClose}
                   onClick={() => setSelectedService(null)}
                   aria-label={servicesCopy.modalClose}
                 >
                   <Icon icon="close" size={18} color="current" />
-                </button>
+                </Button>
               </div>
 
               <div className={styles.branchDialogBody}>
@@ -1574,14 +1585,15 @@ export function BrandDetail({
                   </div>
                 </div>
 
-                <button
+                <Button
+                  variant="unstyled"
                   type="button"
                   className={styles.branchDialogClose}
                   onClick={() => setSelectedBranch(null)}
                   aria-label={dashboard.cancel}
                 >
                   <Icon icon="close" size={18} color="current" />
-                </button>
+                </Button>
               </div>
 
               <div className={styles.branchDialogBody}>

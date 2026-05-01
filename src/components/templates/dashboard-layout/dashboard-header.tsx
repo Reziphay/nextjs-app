@@ -150,14 +150,15 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
           <Logo size={20} />
         </Link>
 
-        <button
+        <Button
+          variant="unstyled"
           type="button"
           onClick={onToggle}
           aria-label={collapsed ? db.openSidebar : db.closeSidebar}
           className={styles.toggleBtn}
         >
           <Icon icon="left_panel_open" size={16} color="current" className={`${styles.toggleIcon} ${collapsed ? styles.toggleIconCollapsed : ""}`} />
-        </button>
+        </Button>
 
         <div className={styles.separator} />
 
@@ -205,7 +206,8 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
         </Link>
 
         <div ref={settingsWrapRef} className={styles.settingsWrap}>
-          <button
+          <Button
+            variant="unstyled"
             type="button"
             aria-label={db.settings}
             aria-expanded={settingsOpen}
@@ -215,7 +217,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
             onClick={() => setSettingsOpen((open) => !open)}
           >
             <Icon icon="settings" size={16} color="current" className={styles.supportIcon} />
-          </button>
+          </Button>
 
           {settingsOpen ? (
             <div

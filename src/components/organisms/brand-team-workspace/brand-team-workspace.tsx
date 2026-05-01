@@ -1011,7 +1011,8 @@ export function BrandTeamWorkspace({
               const pendingCount = branchItem.members.pending.length;
 
               return (
-                <button
+                <Button
+                  variant="unstyled"
                   key={branchItem.branch_id}
                   type="button"
                   className={`${styles.branchButton} ${
@@ -1040,7 +1041,7 @@ export function BrandTeamWorkspace({
                     <span>{acceptedCount} {copy.branchMemberCount}</span>
                     <span>{pendingCount} {copy.branchPendingCount}</span>
                   </div>
-                </button>
+                </Button>
               );
             })}
           </div>

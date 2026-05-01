@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { selectAuthSession } from "@/store/auth";
 import { useLocale } from "@/components/providers/locale-provider";
+import { Button } from "@/components/atoms/button";
 import { Logo } from "@/components/logo";
 import { Icon } from "@/components/icon";
 import { UserAvatar } from "@/components/molecules/user-avatar/user-avatar";
@@ -170,7 +171,8 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
 
               return (
                 <div key={item.href} className={styles.navGroup}>
-                  <button
+                  <Button
+                    variant="unstyled"
                     type="button"
                     aria-current={active ? "page" : undefined}
                     className={`${styles.navItem} ${active ? styles.navItemActive : ""}`}
@@ -197,7 +199,7 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
                         className={`${styles.chevronIcon} ${isExpanded ? styles.chevronExpanded : ""}`}
                       />
                     )}
-                  </button>
+                  </Button>
 
                   {/* Sub-items */}
                   {hasSubItems && isExpanded && !collapsed && (
@@ -250,7 +252,8 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
       {/* Footer */}
       <div className={styles.footer}>
         <div className={styles.userRow}>
-          <button
+          <Button
+            variant="unstyled"
             type="button"
             title={collapsed ? `${user?.first_name} ${user?.last_name}` : undefined}
             className={styles.userBtn}
@@ -274,7 +277,7 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
               <span className={styles.userEmail}>{user?.email ?? ""}</span>
             </span>
             <Icon icon="unfold_more" size={14} color="current" className={styles.chevron} />
-          </button>
+          </Button>
         </div>
       </div>
     </aside>

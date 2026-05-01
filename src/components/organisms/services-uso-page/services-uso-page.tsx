@@ -14,6 +14,7 @@ import {
 } from "@/components/atoms";
 import { Combobox, type ComboboxOption } from "@/components/atoms/combobox";
 import { AvatarCropDialog } from "@/components/molecules/avatar-crop-dialog/avatar-crop-dialog";
+import { FormFooter } from "@/components/molecules/form-footer";
 import { Switch } from "@/components/atoms/switch";
 import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
@@ -733,23 +734,22 @@ function ServiceFormPage({
 
   const showPrice = form.price_type !== "FREE";
 
-  function renderFormActions(className?: string) {
+  function renderFormActions(layout: "default" | "aside" = "default") {
     return (
-      <div className={`${styles.formFooter}${className ? ` ${className}` : ""}`}>
+      <FormFooter layout={layout}>
         <Button
           variant="primary"
           type="submit"
           isLoading={isLoading}
           disabled={!form.title.trim() || isLoading}
           icon={isLoading ? undefined : isEditingPaused ? "send" : "check"}
-          className={styles.formFooterPrimary}
         >
           {isEditingPaused ? copy.btnResubmit : copy.btnSave}
         </Button>
         <Button variant="outline" type="button" onClick={onCancel}>
           {copy.btnCancel}
         </Button>
-      </div>
+      </FormFooter>
     );
   }
 
@@ -790,14 +790,15 @@ function ServiceFormPage({
                         className={styles.previewImage}
                         sizes="200px"
                       />
-                      <button
+                      <Button
+                        variant="unstyled"
                         type="button"
                         className={styles.removePreviewBtn}
                         aria-label={`${copy.removePhotoLabel} ${index + 1}`}
                         onClick={() => removeImage(index)}
                       >
                         <Icon icon="close" size={12} color="current" />
-                      </button>
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -823,7 +824,7 @@ function ServiceFormPage({
             </div>
 
             <div className={styles.desktopAside}>
-              {renderFormActions(styles.formFooterAside)}
+              {renderFormActions("aside")}
             </div>
           </div>
 

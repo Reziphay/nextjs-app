@@ -21,6 +21,7 @@ import {
 } from "@/components/atoms/input";
 import { Switch } from "@/components/atoms/switch";
 import { Icon } from "@/components/icon";
+import { FormFooter, FormFooterSpacer } from "@/components/molecules/form-footer";
 import { PageSurfaceHeader } from "@/components/molecules/page-surface-header";
 import { RichTextEditor } from "@/components/molecules/rich-text-editor/rich-text-editor";
 import { StatusBanner } from "@/components/molecules/status-banner";
@@ -846,10 +847,10 @@ export function BranchPage({
                                 <TimeInput value={br.end} placeholder="13:00"
                                   onChange={(value) => updateBreak(index, "end", value)} />
                               </Field>
-                              <button type="button" className={styles.removeBreakBtn}
+                              <Button variant="unstyled" type="button" className={styles.removeBreakBtn}
                                 aria-label={t.branchRemoveBreak} onClick={() => removeBreak(index)}>
                                 <Icon icon="delete" size={15} color="current" />
-                              </button>
+                              </Button>
                             </div>
                           ))}
                         </div>
@@ -1099,15 +1100,15 @@ export function BranchPage({
 
                   {/* Mobile footer */}
                   <div className={styles.mobileFooter}>
-                    <div className={styles.formFooter}>
+                    <FormFooter>
                       <Button variant="outline" onClick={handleClose}>
                         {t.branchCancel}
                       </Button>
-                      <div className={styles.formFooterSpacer} />
+                      <FormFooterSpacer />
                       <Button variant="primary" onClick={handleSave}>
                         {t.branchSave}
                       </Button>
-                    </div>
+                    </FormFooter>
                   </div>
 
                 </div>
