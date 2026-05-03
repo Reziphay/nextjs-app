@@ -300,6 +300,12 @@
   color: var(--app-error);
 }
 
+.favoriteButton[data-active="true"] {
+  border-color: color-mix(in srgb, var(--app-error) 35%, var(--app-border-soft));
+  background: color-mix(in srgb, var(--app-error) 12%, var(--app-bg-surface));
+  color: var(--app-error);
+}
+
 .bannerGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -382,6 +388,13 @@
   border-radius: inherit;
 }
 
+.brandFavoriteSlot {
+  position: absolute;
+  right: 0.65rem;
+  bottom: 0.8rem;
+  z-index: 3;
+}
+
 .brandCover {
   position: relative;
   height: 8.8rem;
@@ -409,7 +422,7 @@
   align-items: center;
   gap: 0.65rem;
   min-height: 4.25rem;
-  padding: 0.72rem 0.78rem;
+  padding: 0.72rem 3rem 0.72rem 0.78rem;
 }
 
 .brandLogo {

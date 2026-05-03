@@ -6,6 +6,7 @@ import {
   fetchPublicServices,
 } from "@/lib/services-api";
 import { fetchActiveBrands, fetchBrandById, fetchMyBrands } from "@/lib/brands-api";
+import { emptyFavorites, fetchFavorites } from "@/lib/favorites-api";
 import { fetchMarketplaceFacets } from "@/lib/marketplace-api";
 import { fetchUserProfileById } from "@/lib/users-api";
 import { UsoCalendarPage } from "@/components/organisms/uso-calendar-page";
@@ -86,22 +87,33 @@ export default async function HomeDashboardPage({ searchParams }: HomePageProps)
       ? { brand_category_id: activeBrandCategoryId }
       : {};
 
-    const [services, brands, marketplaceFacets] = await Promise.all([
+    const [services, brands, marketplaceFacets, favorites] = await Promise.all([
       fetchPublicServices(serviceFilters, accessToken).catch(() => []),
       fetchActiveBrands(accessToken, brandFilters).catch(() => []),
       fetchMarketplaceFacets(accessToken).catch(() => ({
         service_categories: [],
         brand_categories: [],
       })),
+      fetchFavorites(accessToken).catch(() => emptyFavorites()),
     ]);
     const detailedBrands = await fetchDetailedBrands(brands, accessToken);
-    const ownersById = await fetchMarketplaceOwnersById(detailedBrands, services, accessToken);
+    const ownersById = await fetchMarketplaceOwnersById(
+      [...detailedBrands, ...favorites.brands, ...favorites.service_brands],
+      [...services, ...favorites.services],
+      accessToken,
+    );
 
     return (
       <UcrMarketplacePage
         user={user}
+        accessToken={accessToken}
         services={services}
         brands={detailedBrands}
+        favoriteServices={favorites.services}
+        favoriteBrands={favorites.brands}
+        favoriteServiceBrands={favorites.service_brands}
+        favoriteServiceIds={favorites.service_ids}
+        favoriteBrandIds={favorites.brand_ids}
         serviceCategories={marketplaceFacets.service_categories}
         brandCategories={marketplaceFacets.brand_categories}
         ownersById={ownersById}

@@ -315,7 +315,7 @@ function normalizeBranch(branch: Branch): Branch {
   };
 }
 
-function normalizeBrand(brand: Brand): Brand {
+export function normalizeBrand(brand: Brand): Brand {
   return {
     ...brand,
     categories: brand.categories ?? [],
@@ -327,7 +327,7 @@ function normalizeBrand(brand: Brand): Brand {
   };
 }
 
-function normalizeBrands(brands: Brand[] | undefined): Brand[] {
+export function normalizeBrands(brands: Brand[] | undefined): Brand[] {
   return (brands ?? []).map(normalizeBrand);
 }
 

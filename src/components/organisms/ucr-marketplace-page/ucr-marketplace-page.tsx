@@ -3,12 +3,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Button } from "@/components/atoms";
 import { Icon } from "@/components/icon";
 import { ServiceCard } from "@/components/organisms/services-uso-page/services-uso-page";
 import { useLocale } from "@/components/providers/locale-provider";
 import { UserAvatar } from "@/components/molecules/user-avatar/user-avatar";
+import {
+  addFavoriteBrand,
+  addFavoriteService,
+  removeFavoriteBrand,
+  removeFavoriteService,
+} from "@/lib/favorites-api";
 import { proxyMediaUrl } from "@/lib/media";
 import type { MarketplaceFacet } from "@/lib/marketplace-api";
 import type { Brand, Branch, BrandCategory, PublicUserProfile } from "@/types";
@@ -18,8 +24,14 @@ import styles from "./ucr-marketplace-page.module.css";
 
 type UcrMarketplacePageProps = {
   user: UserProfile;
+  accessToken: string;
   services: Service[];
   brands: Brand[];
+  favoriteServices: Service[];
+  favoriteBrands: Brand[];
+  favoriteServiceBrands: Brand[];
+  favoriteServiceIds: string[];
+  favoriteBrandIds: string[];
   serviceCategories: MarketplaceFacet[];
   brandCategories: MarketplaceFacet[];
   ownersById: Record<string, PublicUserProfile>;
@@ -163,9 +175,11 @@ function getProfileInitials(owner?: PublicUserProfile) {
 function BrandCard({
   brand,
   owner,
+  favoriteSlot,
 }: {
   brand: Brand;
   owner?: PublicUserProfile;
+  favoriteSlot?: ReactNode;
 }) {
   const { messages } = useLocale();
   const t = messages.marketplace;
@@ -174,6 +188,7 @@ function BrandCard({
   return (
     <article className={styles.brandCard}>
       <Link href={`/brands?id=${brand.id}`} className={styles.brandCardLink} aria-label={brand.name} />
+      {favoriteSlot ? <div className={styles.brandFavoriteSlot}>{favoriteSlot}</div> : null}
       <div className={styles.brandCover}>
         <Image src={imageForBrand(brand)} alt={brand.name} fill className={styles.brandImage} sizes="220px" />
         {brand.categories[0] ? (
@@ -211,8 +226,14 @@ function BrandCard({
 
 export function UcrMarketplacePage({
   user,
+  accessToken,
   services,
   brands,
+  favoriteServices,
+  favoriteBrands,
+  favoriteServiceBrands,
+  favoriteServiceIds,
+  favoriteBrandIds,
   serviceCategories,
   brandCategories,
   ownersById,
@@ -225,8 +246,26 @@ export function UcrMarketplacePage({
   const router = useRouter();
   const selectedServiceCategoryId = activeServiceCategoryId ?? "all";
   const selectedBrandCategoryId = activeBrandCategoryId ?? "all";
+  const [activeFavoriteServices, setActiveFavoriteServices] = useState(
+    () => new Set(favoriteServiceIds),
+  );
+  const [activeFavoriteBrands, setActiveFavoriteBrands] = useState(
+    () => new Set(favoriteBrandIds),
+  );
+  const [favoriteServiceList, setFavoriteServiceList] = useState(favoriteServices);
+  const [favoriteBrandList, setFavoriteBrandList] = useState(favoriteBrands);
 
-  const branchMap = useMemo(() => branchLookup(brands), [brands]);
+  const allKnownBrands = useMemo(
+    () => {
+      const map = new Map<string, Brand>();
+      [...brands, ...favoriteBrandList, ...favoriteServiceBrands].forEach((brand) => {
+        map.set(brand.id, brand);
+      });
+      return [...map.values()];
+    },
+    [brands, favoriteBrandList, favoriteServiceBrands],
+  );
+  const branchMap = useMemo(() => branchLookup(allKnownBrands), [allKnownBrands]);
   const serviceItems = useMemo<ServiceWithContext[]>(
     () =>
       services.map((service) => {
@@ -239,6 +278,19 @@ export function UcrMarketplacePage({
         };
       }),
     [branchMap, ownersById, services],
+  );
+  const favoriteServiceItems = useMemo<ServiceWithContext[]>(
+    () =>
+      favoriteServiceList.map((service) => {
+        const branchContext = service.branch_id ? branchMap.get(service.branch_id) : undefined;
+        return {
+          service,
+          brand: branchContext?.brand,
+          branch: branchContext?.branch,
+          owner: ownersById[service.owner_id],
+        };
+      }),
+    [branchMap, favoriteServiceList, ownersById],
   );
 
   const serviceCategoryOptions = serviceCategories;
@@ -293,16 +345,85 @@ export function UcrMarketplacePage({
     };
   }
 
-  function FavoriteButton() {
+  function setServiceFavoriteState(serviceId: string, active: boolean, serviceSnapshot?: Service) {
+    setActiveFavoriteServices((current) => {
+      const next = new Set(current);
+      if (active) next.add(serviceId);
+      else next.delete(serviceId);
+      return next;
+    });
+
+    setFavoriteServiceList((current) => {
+      if (!active) return current.filter((service) => service.id !== serviceId);
+      if (current.some((service) => service.id === serviceId)) return current;
+      const service = serviceSnapshot ?? services.find((item) => item.id === serviceId);
+      return service ? [service, ...current] : current;
+    });
+  }
+
+  function setBrandFavoriteState(brandId: string, active: boolean, brandSnapshot?: Brand) {
+    setActiveFavoriteBrands((current) => {
+      const next = new Set(current);
+      if (active) next.add(brandId);
+      else next.delete(brandId);
+      return next;
+    });
+
+    setFavoriteBrandList((current) => {
+      if (!active) return current.filter((brand) => brand.id !== brandId);
+      if (current.some((brand) => brand.id === brandId)) return current;
+      const brand = brandSnapshot ?? brands.find((item) => item.id === brandId);
+      return brand ? [brand, ...current] : current;
+    });
+  }
+
+  async function toggleServiceFavorite(serviceId: string) {
+    const nextActive = !activeFavoriteServices.has(serviceId);
+    const serviceSnapshot = [...services, ...favoriteServiceList].find((service) => service.id === serviceId);
+    setServiceFavoriteState(serviceId, nextActive, serviceSnapshot);
+    try {
+      if (nextActive) await addFavoriteService(serviceId, accessToken);
+      else await removeFavoriteService(serviceId, accessToken);
+    } catch {
+      setServiceFavoriteState(serviceId, !nextActive, serviceSnapshot);
+    }
+  }
+
+  async function toggleBrandFavorite(brandId: string) {
+    const nextActive = !activeFavoriteBrands.has(brandId);
+    const brandSnapshot = [...brands, ...favoriteBrandList].find((brand) => brand.id === brandId);
+    setBrandFavoriteState(brandId, nextActive, brandSnapshot);
+    try {
+      if (nextActive) await addFavoriteBrand(brandId, accessToken);
+      else await removeFavoriteBrand(brandId, accessToken);
+    } catch {
+      setBrandFavoriteState(brandId, !nextActive, brandSnapshot);
+    }
+  }
+
+  function FavoriteButton({
+    type,
+    id,
+    active,
+  }: {
+    type: "service" | "brand";
+    id: string;
+    active: boolean;
+  }) {
+    const label = active ? t.removeFavorite : t.addFavorite;
     return (
       <Button
         variant="unstyled"
         type="button"
         className={styles.favoriteButton}
-        aria-label={t.addFavorite}
-        title={t.addFavorite}
+        data-active={active}
+        aria-label={label}
+        title={label}
+        onClick={() => {
+          void (type === "service" ? toggleServiceFavorite(id) : toggleBrandFavorite(id));
+        }}
       >
-        <Icon icon="favorite" size={15} color="current" />
+        <Icon icon="favorite" size={15} color="current" fill={active} />
       </Button>
     );
   }
@@ -364,10 +485,16 @@ export function UcrMarketplacePage({
                 key={item.service.id}
                 service={item.service}
                 copy={serviceCopy}
-                brands={brands}
+                brands={allKnownBrands}
                 user={ownerAsCardUser(item)}
                 showStatus={false}
-                favoriteSlot={<FavoriteButton />}
+                favoriteSlot={(
+                  <FavoriteButton
+                    type="service"
+                    id={item.service.id}
+                    active={activeFavoriteServices.has(item.service.id)}
+                  />
+                )}
                 onClick={() => router.push(`/services?id=${item.service.id}`)}
               />
             ))}
@@ -398,7 +525,18 @@ export function UcrMarketplacePage({
           />
           <div className={styles.brandRail}>
             {topBrands.map((brand) => (
-              <BrandCard key={brand.id} brand={brand} owner={ownersById[brand.owner_id]} />
+              <BrandCard
+                key={brand.id}
+                brand={brand}
+                owner={ownersById[brand.owner_id]}
+                favoriteSlot={(
+                  <FavoriteButton
+                    type="brand"
+                    id={brand.id}
+                    active={activeFavoriteBrands.has(brand.id)}
+                  />
+                )}
+              />
             ))}
           </div>
         </section>
@@ -452,10 +590,16 @@ export function UcrMarketplacePage({
                 key={item.service.id}
                 service={item.service}
                 copy={serviceCopy}
-                brands={brands}
+                brands={allKnownBrands}
                 user={ownerAsCardUser(item)}
                 showStatus={false}
-                favoriteSlot={<FavoriteButton />}
+                favoriteSlot={(
+                  <FavoriteButton
+                    type="service"
+                    id={item.service.id}
+                    active={activeFavoriteServices.has(item.service.id)}
+                  />
+                )}
                 onClick={() => router.push(`/services?id=${item.service.id}`)}
               />
             ))}
@@ -472,14 +616,70 @@ export function UcrMarketplacePage({
                 key={item.service.id}
                 service={item.service}
                 copy={serviceCopy}
-                brands={brands}
+                brands={allKnownBrands}
                 user={ownerAsCardUser(item)}
                 showStatus={false}
-                favoriteSlot={<FavoriteButton />}
+                favoriteSlot={(
+                  <FavoriteButton
+                    type="service"
+                    id={item.service.id}
+                    active={activeFavoriteServices.has(item.service.id)}
+                  />
+                )}
                 onClick={() => router.push(`/services?id=${item.service.id}`)}
               />
             ))}
           </div>
+        </section>
+      ) : null}
+
+      {favoriteServiceList.length > 0 || favoriteBrandList.length > 0 ? (
+        <section className={styles.section}>
+          <SectionHeader
+            title={t.myFavorites}
+            actionHref="/favorites"
+            actionLabel={t.seeAll}
+          />
+          {favoriteServiceItems.length > 0 ? (
+            <div className={styles.serviceRail}>
+              {favoriteServiceItems.slice(0, 8).map((item) => (
+                <ServiceCard
+                  key={item.service.id}
+                  service={item.service}
+                  copy={serviceCopy}
+                  brands={allKnownBrands}
+                  user={ownerAsCardUser(item)}
+                  showStatus={false}
+                  favoriteSlot={(
+                    <FavoriteButton
+                      type="service"
+                      id={item.service.id}
+                      active={activeFavoriteServices.has(item.service.id)}
+                    />
+                  )}
+                  onClick={() => router.push(`/services?id=${item.service.id}`)}
+                />
+              ))}
+            </div>
+          ) : null}
+          {favoriteBrandList.length > 0 ? (
+            <div className={styles.brandRail}>
+              {favoriteBrandList.slice(0, 8).map((brand) => (
+                <BrandCard
+                  key={brand.id}
+                  brand={brand}
+                  owner={ownersById[brand.owner_id]}
+                  favoriteSlot={(
+                    <FavoriteButton
+                      type="brand"
+                      id={brand.id}
+                      active={activeFavoriteBrands.has(brand.id)}
+                    />
+                  )}
+                />
+              ))}
+            </div>
+          ) : null}
         </section>
       ) : null}
     </div>

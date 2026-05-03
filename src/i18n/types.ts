@@ -183,6 +183,12 @@ export type Messages = {
     allServices: string;
     allBrands: string;
     addFavorite: string;
+    removeFavorite: string;
+    myFavorites: string;
+    favoriteServices: string;
+    favoriteBrands: string;
+    noFavoritesTitle: string;
+    noFavoritesDescription: string;
     quickFilters: string;
     topRated: string;
     nearYou: string;

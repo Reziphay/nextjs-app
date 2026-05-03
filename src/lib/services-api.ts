@@ -16,7 +16,7 @@ export type CreateServicePayload = {
 
 export type UpdateServicePayload = Partial<CreateServicePayload>;
 
-function normalizeService(service: Service): Service {
+export function normalizeService(service: Service): Service {
   return {
     ...service,
     description: service.description ?? undefined,
@@ -34,7 +34,7 @@ function normalizeService(service: Service): Service {
   };
 }
 
-function normalizeServices(services: Service[] | undefined): Service[] {
+export function normalizeServices(services: Service[] | undefined): Service[] {
   return (services ?? []).map(normalizeService);
 }
 

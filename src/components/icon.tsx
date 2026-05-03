@@ -151,6 +151,7 @@ export function Icon({
   icon,
   size = 16,
   color = "black",
+  fill = false,
   className,
 }: IconProps) {
   const LucideIconComponent = iconMap[icon];
@@ -164,6 +165,7 @@ export function Icon({
       aria-hidden="true"
       size={size}
       color={iconColorMap[color]}
+      fill={fill ? "currentColor" : "none"}
       className={className}
     />
   );
