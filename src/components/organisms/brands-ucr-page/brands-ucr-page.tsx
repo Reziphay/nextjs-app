@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { BrandCard } from "@/components/molecules/brand-card";
 import {
   AlertDialog,
@@ -11,7 +12,9 @@ import {
 } from "@/components/atoms";
 import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
+import { fetchActiveBrandsPage, type PaginatedBrandMeta } from "@/lib/brands-api";
 import { proxyMediaUrl } from "@/lib/media";
+import { fetchUserProfileById } from "@/lib/users-api";
 import type { Brand } from "@/types/brand";
 import type { PublicUserProfile } from "@/types";
 import type { Service } from "@/types/service";
@@ -21,6 +24,10 @@ type BrandsUcrPageProps = {
   brands: Brand[];
   ownersById: Record<string, PublicUserProfile>;
   featuredServices?: Service[];
+  accessToken?: string;
+  initialMeta?: PaginatedBrandMeta;
+  brandCategories?: { id: string; key: string; count: number }[];
+  activeBrandCategoryId?: string;
 };
 
 type BrandSection = {
@@ -167,17 +174,79 @@ function formatSvcDuration(minutes: number | null, unit: string): string {
   return m > 0 ? `${h}${hourUnit} ${m}${unit}` : `${h}${hourUnit}`;
 }
 
-export function BrandsUcrPage({ brands, ownersById, featuredServices = [] }: BrandsUcrPageProps) {
+export function BrandsUcrPage({
+  brands,
+  ownersById,
+  featuredServices = [],
+  accessToken,
+  initialMeta,
+  brandCategories = [],
+  activeBrandCategoryId,
+}: BrandsUcrPageProps) {
   const router = useRouter();
   const { messages } = useLocale();
   const t = messages.brands;
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [brandItems, setBrandItems] = useState(brands);
+  const [ownerItemsById, setOwnerItemsById] = useState(ownersById);
+  const [page, setPage] = useState(initialMeta?.page ?? 1);
+  const [hasMore, setHasMore] = useState(initialMeta?.has_more ?? false);
+  const [loading, setLoading] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   function handleSelect(id: string) {
     router.push(`/brands?id=${id}`);
   }
 
-  const sections = buildSections(brands, t);
+  useEffect(() => {
+    if (!accessToken) return;
+    const missing = [...new Set(brandItems.map((brand) => brand.owner_id).filter((ownerId) => !ownerItemsById[ownerId]))];
+    if (missing.length === 0) return;
+
+    void Promise.all(
+      missing.map(async (ownerId) => {
+        const owner = await fetchUserProfileById(ownerId, accessToken);
+        return owner ? ([ownerId, owner] as const) : null;
+      }),
+    ).then((entries) => {
+      setOwnerItemsById((current) => ({
+        ...current,
+        ...Object.fromEntries(entries.filter((entry): entry is readonly [string, PublicUserProfile] => entry !== null)),
+      }));
+    });
+  }, [accessToken, brandItems, ownerItemsById]);
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !hasMore || !accessToken) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      const first = entries[0];
+      if (!first?.isIntersecting || loading) return;
+
+      const nextPage = page + 1;
+      setLoading(true);
+      void fetchActiveBrandsPage(accessToken, {
+        page: nextPage,
+        limit: 24,
+        ...(activeBrandCategoryId && { brand_category_id: activeBrandCategoryId }),
+      })
+        .then((result) => {
+          setBrandItems((current) => {
+            const seen = new Set(current.map((brand) => brand.id));
+            return [...current, ...result.brands.filter((brand) => !seen.has(brand.id))];
+          });
+          setPage(result.meta.page);
+          setHasMore(result.meta.has_more);
+        })
+        .finally(() => setLoading(false));
+    }, { rootMargin: "480px" });
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [accessToken, activeBrandCategoryId, hasMore, loading, page]);
+
+  const sections = buildSections(brandItems, t);
   const topServices = featuredServices.slice(0, 8);
 
   return (
@@ -185,6 +254,29 @@ export function BrandsUcrPage({ brands, ownersById, featuredServices = [] }: Bra
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>{t.discoverBrands}</h1>
       </div>
+
+      {brandCategories.length > 0 ? (
+        <section className={styles.categorySection}>
+          <Link
+            href="/brands"
+            className={styles.categoryChip}
+            data-active={!activeBrandCategoryId}
+          >
+            {messages.marketplace.allBrands}
+          </Link>
+          {brandCategories.map((category) => (
+            <Link
+              key={category.id}
+              href={`/brands?category=${category.id}`}
+              className={styles.categoryChip}
+              data-active={activeBrandCategoryId === category.id}
+            >
+              <span>{messages.categories[category.key as keyof typeof messages.categories] ?? category.key}</span>
+              <small>{category.count}</small>
+            </Link>
+          ))}
+        </section>
+      ) : null}
 
       {topServices.length > 0 ? (
         <section className={styles.section}>
@@ -246,13 +338,22 @@ export function BrandsUcrPage({ brands, ownersById, featuredServices = [] }: Bra
           </div>
           <BrandGrid
             brands={section.brands}
-            ownersById={ownersById}
+            ownersById={ownerItemsById}
             emptyLabel={t.noSectionBrands}
             reviewsSuffix={t.brandCardReviewsSuffix}
             onSelect={handleSelect}
           />
         </section>
       ))}
+
+      <div ref={sentinelRef} className={styles.sentinel}>
+        {loading ? (
+          <span className={styles.loading}>
+            <Icon icon="progress_activity" size={16} color="current" />
+            {messages.auth.login.submitting}
+          </span>
+        ) : null}
+      </div>
 
       <AlertDialog open={Boolean(selectedService)} onOpenChange={(open) => { if (!open) setSelectedService(null); }}>
         <AlertDialogContent className={styles.serviceModal}>

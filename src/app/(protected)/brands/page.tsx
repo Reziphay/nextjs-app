@@ -6,12 +6,13 @@ import { requireProtectedRouteAccess } from "@/lib/protected-route";
 import {
   fetchMyBrands,
   fetchBrandById,
-  fetchActiveBrands,
+  fetchActiveBrandsPage,
   fetchAccountBrands,
   fetchBrandCategories,
   fetchBrandTeamWorkspace,
 } from "@/lib/brands-api";
 import { fetchPublicServices } from "@/lib/services-api";
+import { fetchMarketplaceFacets } from "@/lib/marketplace-api";
 import { fetchBrandForReview } from "@/lib/moderation-api";
 import { BrandsUsoPage } from "@/components/organisms/brands-uso-page";
 import { BrandsUcrPage } from "@/components/organisms/brands-ucr-page";
@@ -357,12 +358,37 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
 
   // ── UCR default view (should only land here with ?id, handled above) ───────
   // Fallback: show the active brands gallery
-  const [brands, featuredServices] = await Promise.all([
-    fetchActiveBrands(accessToken).catch(() => []),
+  const activeBrandCategoryId =
+    getStringParam(resolvedParams, "category") ??
+    getStringParam(resolvedParams, "brand_category_id");
+  const [brandsPage, featuredServices, marketplaceFacets] = await Promise.all([
+    fetchActiveBrandsPage(accessToken, {
+      page: 1,
+      limit: 24,
+      ...(activeBrandCategoryId && { brand_category_id: activeBrandCategoryId }),
+    }).catch(() => ({
+      brands: [],
+      meta: { page: 1, limit: 24, total_count: 0, has_more: false },
+    })),
     fetchPublicServices({}, accessToken).catch(() => []),
+    fetchMarketplaceFacets(accessToken).catch(() => ({
+      service_categories: [],
+      brand_categories: [],
+    })),
   ]);
-  const ownersById = await fetchBrandOwnersById(brands, accessToken);
+  const ownersById = await fetchBrandOwnersById(brandsPage.brands, accessToken);
   const activeServices = featuredServices.filter((s) => s.status === "ACTIVE");
 
-  return <BrandsUcrPage brands={brands} ownersById={ownersById} featuredServices={activeServices} />;
+  return (
+    <BrandsUcrPage
+      key={activeBrandCategoryId ?? "all"}
+      brands={brandsPage.brands}
+      ownersById={ownersById}
+      featuredServices={activeServices}
+      accessToken={accessToken}
+      initialMeta={brandsPage.meta}
+      brandCategories={marketplaceFacets.brand_categories}
+      activeBrandCategoryId={activeBrandCategoryId}
+    />
+  );
 }

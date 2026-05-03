@@ -331,6 +331,12 @@ export function UcrMarketplacePage({
   const currentBrandCategory = brandCategoryOptions.find(
     (category) => category.id === activeBrandCategoryId,
   );
+  const servicesSeeAllHref = activeServiceCategoryId
+    ? `/services?category=${activeServiceCategoryId}`
+    : "/services";
+  const brandsSeeAllHref = activeBrandCategoryId
+    ? `/brands?category=${activeBrandCategoryId}`
+    : "/brands";
 
   function ownerAsCardUser(item: ServiceWithContext) {
     const owner = item.owner;
@@ -476,7 +482,7 @@ export function UcrMarketplacePage({
                 ? categoryLabel(currentServiceCategory, messages)
                 : t.featuredServices
             }
-            actionHref="/brands"
+            actionHref={servicesSeeAllHref}
             actionLabel={t.seeAll}
           />
           <div className={styles.serviceRail}>
@@ -520,7 +526,7 @@ export function UcrMarketplacePage({
                 ? categoryLabel(currentBrandCategory, messages)
                 : t.brandSpotlight
             }
-            actionHref="/brands"
+            actionHref={brandsSeeAllHref}
             actionLabel={t.seeAll}
           />
           <div className={styles.brandRail}>

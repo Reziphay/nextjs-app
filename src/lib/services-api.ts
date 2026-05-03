@@ -16,6 +16,13 @@ export type CreateServicePayload = {
 
 export type UpdateServicePayload = Partial<CreateServicePayload>;
 
+export type PaginatedMeta = {
+  page: number;
+  limit: number;
+  total_count: number;
+  has_more: boolean;
+};
+
 export function normalizeService(service: Service): Service {
   return {
     ...service,
@@ -67,6 +74,8 @@ export async function fetchPublicServices(
     owner_id?: string;
     direct_only?: boolean;
     q?: string;
+    page?: number;
+    limit?: number;
   },
   accessToken?: string,
 ): Promise<Service[]> {
@@ -77,6 +86,34 @@ export async function fetchPublicServices(
     params: filters ?? {},
   });
   return normalizeServices(response.data?.data?.services);
+}
+
+export async function fetchPublicServicesPage(
+  filters?: {
+    service_category_id?: string;
+    branch_id?: string;
+    owner_id?: string;
+    direct_only?: boolean;
+    q?: string;
+    page?: number;
+    limit?: number;
+  },
+  accessToken?: string,
+): Promise<{ services: Service[]; meta: PaginatedMeta }> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ services: Service[]; meta?: PaginatedMeta }>>({
+    url: "/services",
+    method: "GET",
+    params: filters ?? {},
+  });
+  const services = normalizeServices(response.data?.data?.services);
+  const meta = response.data?.data?.meta ?? {
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? services.length,
+    total_count: services.length,
+    has_more: false,
+  };
+  return { services, meta };
 }
 
 export async function createService(

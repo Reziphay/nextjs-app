@@ -41,6 +41,55 @@
   font-weight: 700;
 }
 
+.categorySection {
+  display: flex;
+  gap: 0.55rem;
+  overflow-x: auto;
+  padding: 0.25rem 0;
+  scrollbar-width: none;
+}
+
+.categorySection::-webkit-scrollbar {
+  display: none;
+}
+
+.categoryChip {
+  flex: 0 0 auto;
+  min-height: 2.35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface-strong);
+  color: var(--app-text-strong);
+  text-decoration: none;
+  font-size: var(--font-size-extra-small);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.categoryChip[data-active="true"] {
+  border-color: color-mix(in srgb, var(--app-primary) 55%, var(--app-border-soft));
+  background: var(--app-primary-faint);
+  color: var(--app-primary);
+}
+
+.categoryChip small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--app-bg-surface);
+  color: var(--app-text-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 38rem), 1fr));
@@ -252,4 +301,20 @@
 
 .serviceModalImage {
   object-fit: cover;
+}
+
+.sentinel {
+  min-height: 4rem;
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-extra-small);
+  font-weight: 800;
 }

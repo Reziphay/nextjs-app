@@ -355,6 +355,15 @@ export async function fetchBrandById(
 
 export type PublicBrandFilters = {
   brand_category_id?: string;
+  page?: number;
+  limit?: number;
+};
+
+export type PaginatedBrandMeta = {
+  page: number;
+  limit: number;
+  total_count: number;
+  has_more: boolean;
 };
 
 export async function fetchActiveBrands(
@@ -371,6 +380,31 @@ export async function fetchActiveBrands(
     },
   });
   return normalizeBrands(response.data?.data?.brands);
+}
+
+export async function fetchActiveBrandsPage(
+  accessToken?: string,
+  filters?: PublicBrandFilters,
+): Promise<{ brands: Brand[]; meta: PaginatedBrandMeta }> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ brands: Brand[]; meta?: PaginatedBrandMeta }>>({
+    url: "/brands",
+    method: "GET",
+    params: {
+      status: "ACTIVE",
+      ...(filters?.brand_category_id && { brand_category_id: filters.brand_category_id }),
+      ...(filters?.page && { page: filters.page }),
+      ...(filters?.limit && { limit: filters.limit }),
+    },
+  });
+  const brands = normalizeBrands(response.data?.data?.brands);
+  const meta = response.data?.data?.meta ?? {
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? brands.length,
+    total_count: brands.length,
+    has_more: false,
+  };
+  return { brands, meta };
 }
 
 export async function fetchAccountBrands(

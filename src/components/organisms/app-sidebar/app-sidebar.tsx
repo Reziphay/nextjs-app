@@ -26,6 +26,15 @@ type AppSidebarProps = {
   onClose?: () => void;
 };
 
+type SidebarSubItem = {
+  id: string;
+  label: string;
+  href: string;
+  status?: string;
+  icon?: string;
+  branches: { id: string; label: string; href: string }[];
+};
+
 export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -74,6 +83,7 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
 
   // Expanded sub-menu state — auto-follows route
   const [expandedKey, setExpandedKey] = useState<string | null>(() => {
+    if (user?.type === "ucr" && (pathname === "/home" || pathname.startsWith("/services") || pathname.startsWith("/brands"))) return "home";
     if (pathname.startsWith("/brands")) return "brands";
     if (pathname.startsWith("/services")) return "services";
     return null;
@@ -81,16 +91,35 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
 
   useEffect(() => {
     queueMicrotask(() => {
-      if (pathname.startsWith("/brands")) setExpandedKey("brands");
+      if (user?.type === "ucr" && (pathname === "/home" || pathname.startsWith("/services") || pathname.startsWith("/brands"))) setExpandedKey("home");
+      else if (pathname.startsWith("/brands")) setExpandedKey("brands");
       else if (pathname.startsWith("/services")) setExpandedKey("services");
     });
-  }, [pathname]);
+  }, [pathname, user?.type]);
 
   function isActive(href: string) {
     return href === "/home" ? pathname === href : pathname.startsWith(href);
   }
 
-  function getSubItems(href: string) {
+  function getSubItems(href: string): SidebarSubItem[] {
+    if (user?.type === "ucr" && href === "/home") {
+      return [
+        {
+          id: "marketplace-services",
+          label: messages.dashboard.services,
+          href: "/services",
+          icon: "room_service",
+          branches: [],
+        },
+        {
+          id: "marketplace-brands",
+          label: messages.dashboard.brands,
+          href: "/brands",
+          icon: "sell",
+          branches: [],
+        },
+      ];
+    }
     if (href === "/brands") return brands.map((b) => ({
       id: b.id,
       label: b.name,
@@ -115,12 +144,19 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
   }
 
   function isSubActive(subHref: string): boolean {
+    if (!subHref.includes("?")) return pathname === subHref;
     const subId = new URLSearchParams(subHref.split("?")[1] ?? "").get("id");
     return searchParams.get("id") === subId;
   }
 
   function handleNavClick(href: string) {
-    const subKey = href === "/brands" ? "brands" : href === "/services" ? "services" : null;
+    const subKey = user?.type === "ucr" && href === "/home"
+      ? "home"
+      : href === "/brands"
+        ? "brands"
+        : href === "/services"
+          ? "services"
+          : null;
     if (subKey) {
       if (expandedKey === subKey && isActive(href)) {
         setExpandedKey(null);
@@ -166,7 +202,12 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
               const active = isActive(item.href);
               const subItems = getSubItems(item.href);
               const hasSubItems = subItems.length > 0;
-              const isExpanded = expandedKey === (item.href === "/brands" ? "brands" : "services");
+              const groupKey = user?.type === "ucr" && item.href === "/home"
+                ? "home"
+                : item.href === "/brands"
+                  ? "brands"
+                  : "services";
+              const isExpanded = expandedKey === groupKey;
               const badge = getBadgeCount(item.href);
 
               return (
@@ -211,17 +252,21 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
                             className={`${styles.subItem} ${isSubActive(sub.href) ? styles.subItemActive : ""}`}
                             onClick={onClose}
                           >
-                            <span
-                              className={`${styles.subDot} ${
-                                sub.status === "ACTIVE"
-                                  ? styles.subDotActive
-                                  : sub.status === "PENDING"
-                                  ? styles.subDotPending
-                                  : sub.status === "REJECTED"
-                                  ? styles.subDotRejected
-                                  : styles.subDotNeutral
-                              }`}
-                            />
+                            {sub.icon ? (
+                              <Icon icon={sub.icon} size={13} color="current" className={styles.subIcon} />
+                            ) : (
+                              <span
+                                className={`${styles.subDot} ${
+                                  sub.status === "ACTIVE"
+                                    ? styles.subDotActive
+                                    : sub.status === "PENDING"
+                                    ? styles.subDotPending
+                                    : sub.status === "REJECTED"
+                                    ? styles.subDotRejected
+                                    : styles.subDotNeutral
+                                }`}
+                              />
+                            )}
                             <span className={styles.subLabel}>{sub.label}</span>
                           </Link>
                           {sub.branches && sub.branches.length > 0 && (

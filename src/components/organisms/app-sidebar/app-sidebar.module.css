@@ -369,6 +369,18 @@
   opacity: 0.35;
 }
 
+.subIcon {
+  width: 0.8125rem;
+  height: 0.8125rem;
+  flex-shrink: 0;
+  opacity: 0.72;
+}
+
+.subItemActive .subIcon,
+.subItem:hover .subIcon {
+  opacity: 1;
+}
+
 /* ── Branch sub-sub-items ── */
 .subGroup {
   display: flex;
