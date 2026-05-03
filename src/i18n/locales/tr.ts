@@ -873,6 +873,13 @@ export const trMessages: Messages = {
     brandsEmptyDescription:
       "Bu hizmet sahibinin şu anda görünür markası bulunmuyor.",
     viewMoreBrands: "Daha fazlasını gör",
+    servicesSectionTitle: "Kişisel hizmetler",
+    servicesSectionDescription:
+      "Bu hizmet sahibinin herhangi bir marka şubesine bağlı olmayan aktif hizmetleri.",
+    servicesEmptyTitle: "Henüz kişisel hizmet yok",
+    servicesEmptyDescription:
+      "Bu hizmet sahibinin şu anda görünür doğrudan hizmeti yok.",
+    viewMoreServices: "Daha fazlasını gör",
     editProfile: "Profili düzenle",
     cancelEditing: "İptal",
     saveChanges: "Değişiklikleri kaydet",

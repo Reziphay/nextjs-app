@@ -7,6 +7,7 @@ import { getServerLocale } from "@/i18n/server";
 import { fetchAccountBrands } from "@/lib/brands-api";
 import { buildPageTitle } from "@/lib/page-metadata";
 import { requireProtectedRouteAccess } from "@/lib/protected-route";
+import { fetchPublicServices } from "@/lib/services-api";
 import { fetchUserProfileById } from "@/lib/users-api";
 
 type AccountPageProps = {
@@ -73,7 +74,13 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
     notFound();
   }
 
-  const brands = await fetchAccountBrands(requestedUserId, accessToken).catch(() => []);
+  const [brands, services] = await Promise.all([
+    fetchAccountBrands(requestedUserId, accessToken).catch(() => []),
+    fetchPublicServices(
+      { owner_id: requestedUserId, direct_only: true },
+      accessToken,
+    ).catch(() => []),
+  ]);
 
-  return <UserProfilePanel user={targetUser} brands={brands} />;
+  return <UserProfilePanel user={targetUser} brands={brands} services={services} />;
 }

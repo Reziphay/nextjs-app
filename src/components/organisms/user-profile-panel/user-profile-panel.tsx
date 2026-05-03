@@ -33,6 +33,7 @@ import {
   UserAvatar,
 } from "@/components/molecules";
 import { AccountBrandsSection } from "@/components/organisms/account-brands-section/account-brands-section";
+import { AccountServicesSection } from "@/components/organisms/account-services-section";
 import { useLocale } from "@/components/providers/locale-provider";
 import { getCountryLabel, getCountryOptions } from "@/lib/countries";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -54,12 +55,14 @@ import {
 } from "@/components/molecules/social-links-editor/social-links-editor";
 import { socialFieldsToUrls, socialUrlsToFields } from "@/lib/social-url";
 import type { AccountUserProfile, Brand, UserProfile } from "@/types";
+import type { Service } from "@/types/service";
 import styles from "./user-profile-panel.module.css";
 
 type UserProfilePanelProps = {
   user: AccountUserProfile;
   canEdit?: boolean;
   brands?: Brand[];
+  services?: Service[];
 };
 
 type PendingCropImage = {
@@ -88,6 +91,7 @@ export function UserProfilePanel({
   user,
   canEdit = false,
   brands = [],
+  services = [],
 }: UserProfilePanelProps) {
   const dispatch = useAppDispatch();
   const { messages, locale } = useLocale();
@@ -741,16 +745,28 @@ export function UserProfilePanel({
       </div>
 
       {!canEdit && profile.type === "uso" ? (
-        <AccountBrandsSection
-          brands={brands}
-          owner={profile}
-          title={p.brandsSectionTitle}
-          description={p.brandsSectionDescription}
-          emptyTitle={p.brandsEmptyTitle}
-          emptyDescription={p.brandsEmptyDescription}
-          viewMoreHref={`/brands?account=${profile.id}`}
-          maxItems={2}
-        />
+        <>
+          <AccountServicesSection
+            services={services}
+            brands={brands}
+            owner={profile}
+            title={p.servicesSectionTitle}
+            description={p.servicesSectionDescription}
+            emptyTitle={p.servicesEmptyTitle}
+            emptyDescription={p.servicesEmptyDescription}
+            maxItems={6}
+          />
+          <AccountBrandsSection
+            brands={brands}
+            owner={profile}
+            title={p.brandsSectionTitle}
+            description={p.brandsSectionDescription}
+            emptyTitle={p.brandsEmptyTitle}
+            emptyDescription={p.brandsEmptyDescription}
+            viewMoreHref={`/brands?account=${profile.id}`}
+            maxItems={2}
+          />
+        </>
       ) : null}
     </div>
   );

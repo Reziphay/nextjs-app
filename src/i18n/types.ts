@@ -975,6 +975,11 @@ export type Messages = {
     brandsEmptyTitle: string;
     brandsEmptyDescription: string;
     viewMoreBrands: string;
+    servicesSectionTitle: string;
+    servicesSectionDescription: string;
+    servicesEmptyTitle: string;
+    servicesEmptyDescription: string;
+    viewMoreServices: string;
     editProfile: string;
     cancelEditing: string;
     saveChanges: string;

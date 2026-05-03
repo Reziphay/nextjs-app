@@ -61,7 +61,13 @@ export async function fetchServiceById(
 }
 
 export async function fetchPublicServices(
-  filters?: { service_category_id?: string; branch_id?: string; q?: string },
+  filters?: {
+    service_category_id?: string;
+    branch_id?: string;
+    owner_id?: string;
+    direct_only?: boolean;
+    q?: string;
+  },
   accessToken?: string,
 ): Promise<Service[]> {
   const client = createApiClient({ accessToken });
