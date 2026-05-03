@@ -2,6 +2,8 @@
   position: sticky;
   top: 0.875rem;
   z-index: 2;
+  overflow: hidden;
+  isolation: isolate;
   display: flex;
   align-items: center;
   gap: 0.875rem;
@@ -10,11 +12,24 @@
   padding: 0.875rem 1rem;
   margin-bottom: 2rem;
   border-radius: var(--general-border-radius-card);
-  background: var(--app-bg-canvas);
+  background: transparent;
   border: 1px solid var(--app-border-soft);
   box-shadow: 0 1px 4px var(--app-shadow-card-soft);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(22px) saturate(1.08);
+}
+
+.header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: color-mix(in srgb, var(--app-bg-surface) 6%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(1.08);
+}
+
+.header > * {
+  position: relative;
+  z-index: 1;
 }
 
 .backButton {
