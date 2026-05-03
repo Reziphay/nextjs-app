@@ -18,6 +18,7 @@ import {
 import { Icon } from "@/components/icon";
 import { Logo } from "@/components/logo";
 import { LanguageSwitcher } from "@/components/molecules/language-switcher/language-switcher";
+import { MarketplaceSearchBox } from "@/components/molecules/marketplace-search-box/marketplace-search-box";
 import { ThemeSwitcher } from "@/components/molecules/theme-switcher/theme-switcher";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
@@ -193,14 +194,11 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
 
       <div className={styles.right}>
         {showUcrSearch ? (
-          <Link
-            href="/search"
+          <MarketplaceSearchBox
+            accessToken={session.accessToken ?? undefined}
+            placeholder={messages.marketplace.searchPlaceholder}
             className={styles.headerSearch}
-            aria-label={messages.marketplace.searchPlaceholder}
-          >
-            <Icon icon="search" size={15} color="current" />
-            <span>{messages.marketplace.searchPlaceholder}</span>
-          </Link>
+          />
         ) : null}
 
         <Link
