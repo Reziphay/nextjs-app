@@ -353,12 +353,22 @@ export async function fetchBrandById(
   return brand ? normalizeBrand(brand) : null;
 }
 
-export async function fetchActiveBrands(accessToken?: string): Promise<Brand[]> {
+export type PublicBrandFilters = {
+  brand_category_id?: string;
+};
+
+export async function fetchActiveBrands(
+  accessToken?: string,
+  filters?: PublicBrandFilters,
+): Promise<Brand[]> {
   const client = createApiClient({ accessToken });
   const response = await client.request<ApiSuccessResponse<{ brands: Brand[] }>>({
     url: "/brands",
     method: "GET",
-    params: { status: "ACTIVE" },
+    params: {
+      status: "ACTIVE",
+      ...(filters?.brand_category_id && { brand_category_id: filters.brand_category_id }),
+    },
   });
   return normalizeBrands(response.data?.data?.brands);
 }

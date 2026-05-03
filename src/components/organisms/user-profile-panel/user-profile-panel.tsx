@@ -112,19 +112,12 @@ export function UserProfilePanel({
   const socialLinksEditorRef = useRef<SocialLinksEditorRef>(null);
   const [pendingCropImage, setPendingCropImage] =
     useState<PendingCropImage>(null);
-  const [socialLinks, setSocialLinks] = useState<string[]>(() =>
-    draft ? socialFieldsToUrls(draft) : [],
+  const socialLinks = useMemo(
+    () => (draft ? socialFieldsToUrls(draft) : []),
+    [draft],
   );
 
-  // Keep local social links in sync when editing starts or draft is reset
-  useEffect(() => {
-    if (isEditing && draft) {
-      setSocialLinks(socialFieldsToUrls(draft));
-    }
-  }, [isEditing]); // eslint-disable-line react-hooks/exhaustive-deps
-
   function handleSocialLinksChange(urls: string[]) {
-    setSocialLinks(urls);
     const fields = socialUrlsToFields(urls);
     const keys = Object.keys(fields) as Array<keyof typeof fields>;
     for (const field of keys) {

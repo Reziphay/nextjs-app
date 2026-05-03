@@ -602,18 +602,22 @@ function ServiceFormPage({
 
 // ─── Service Card (Wolt-style) ────────────────────────────────────────────────
 
-function ServiceCard({
+export function ServiceCard({
   service,
   copy,
   brands,
   user,
   onClick,
+  showStatus = true,
+  favoriteSlot,
 }: {
   service: Service;
   copy: Messages["services"];
   brands: Brand[];
   user: AuthenticatedUser;
   onClick: () => void;
+  showStatus?: boolean;
+  favoriteSlot?: ReactNode;
 }) {
   const { messages } = useLocale();
   const statusLabel = getStatusLabel(service.status, copy);
@@ -651,15 +655,16 @@ function ServiceCard({
             <Icon icon="design_services" size={32} color="current" className={styles.cardHeroIcon} />
           </div>
         )}
-        {/* Status pill overlaid top-right */}
-        <StatusBadge
-          appearance="overlay"
-          tone={SERVICE_STATUS_TONE[service.status]}
-          icon={SERVICE_STATUS_ICON[service.status]}
-          className={styles.cardStatusPill}
-        >
-          {statusLabel}
-        </StatusBadge>
+        {showStatus ? (
+          <StatusBadge
+            appearance="overlay"
+            tone={SERVICE_STATUS_TONE[service.status]}
+            icon={SERVICE_STATUS_ICON[service.status]}
+            className={styles.cardStatusPill}
+          >
+            {statusLabel}
+          </StatusBadge>
+        ) : null}
         {/* Price pill overlaid bottom-right */}
         {priceLabel !== "—" && (
           <div className={styles.cardPricePill}>
@@ -717,6 +722,15 @@ function ServiceCard({
               {owner.brand.rating.toFixed(1)}
             </span>
           )}
+          {favoriteSlot ? (
+            <span
+              className={styles.cardFavoriteSlot}
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+            >
+              {favoriteSlot}
+            </span>
+          ) : null}
         </div>
       </div>
     </div>

@@ -8,7 +8,7 @@
   padding: 1.25rem 1.75rem;
   border: 1px solid var(--app-border-soft);
   border-radius: var(--general-border-radius-hero);
-  background: transparent;
+  background: color-mix(in srgb, var(--app-bg-surface) 12%, transparent);
   box-shadow: 0 1px 4px var(--app-shadow-card-soft);
 }
 
@@ -17,7 +17,7 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: color-mix(in srgb, var(--app-bg-surface) 6%, transparent);
+  background: color-mix(in srgb, var(--app-bg-surface) 16%, transparent);
   backdrop-filter: blur(22px) saturate(1.08);
   -webkit-backdrop-filter: blur(22px) saturate(1.08);
 }

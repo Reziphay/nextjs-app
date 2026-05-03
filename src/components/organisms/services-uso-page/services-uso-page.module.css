@@ -295,6 +295,13 @@
   white-space: nowrap;
 }
 
+.cardFavoriteSlot {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .cardStarIcon {
   color: var(--app-warning);
   flex-shrink: 0;

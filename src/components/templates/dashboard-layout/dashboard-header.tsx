@@ -129,6 +129,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
   const settingsActive = pathname === "/settings";
   const showNotificationBadge =
     !notificationsActive && Boolean(session.accessToken) && hasNotificationSignal;
+  const showUcrSearch = session.user?.type === "ucr";
   const defaultHref = getDefaultAppRouteForUserType(session.user?.type);
   const crumbs = isProtectedAppPath(pathname)
     ? getDashboardBreadcrumbs({
@@ -191,6 +192,17 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
       </div>
 
       <div className={styles.right}>
+        {showUcrSearch ? (
+          <Link
+            href="/search"
+            className={styles.headerSearch}
+            aria-label={messages.marketplace.searchPlaceholder}
+          >
+            <Icon icon="search" size={15} color="current" />
+            <span>{messages.marketplace.searchPlaceholder}</span>
+          </Link>
+        ) : null}
+
         <Link
           href="/notification"
           aria-label={db.notifications}

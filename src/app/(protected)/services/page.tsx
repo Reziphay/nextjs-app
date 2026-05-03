@@ -5,8 +5,9 @@ import { getMessages } from "@/i18n/config";
 import { getServerLocale } from "@/i18n/server";
 import { buildPageTitle } from "@/lib/page-metadata";
 import { fetchMyServices, fetchServiceById, fetchServiceCategories } from "@/lib/services-api";
-import { fetchMyBrands, fetchBrandById } from "@/lib/brands-api";
+import { fetchMyBrands, fetchBrandById, fetchActiveBrands } from "@/lib/brands-api";
 import { ServicesUsoPage } from "@/components/organisms/services-uso-page";
+import { PublicServiceDetail } from "@/components/organisms/public-service-detail";
 import { requireProtectedRouteAccess } from "@/lib/protected-route";
 
 type ServicesPageProps = {
@@ -52,12 +53,45 @@ export default async function ServicesPage({
   const resolvedParams = await (searchParams ?? Promise.resolve({}));
   const user = await requireProtectedRouteAccess("/services", resolvedParams);
 
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("rzp_at")?.value ?? "";
+
+  if (user.type === "ucr") {
+    const serviceId = getStringParam(resolvedParams, "id");
+
+    if (!serviceId) {
+      redirect("/home");
+    }
+
+    const [service, brands] = await Promise.all([
+      fetchServiceById(serviceId, accessToken).catch(() => null),
+      fetchActiveBrands(accessToken).catch(() => []),
+    ]);
+
+    if (!service || service.status !== "ACTIVE") {
+      redirect("/home");
+    }
+
+    return (
+      <PublicServiceDetail
+        service={service}
+        brands={brands}
+        user={{
+          id: user.id,
+          email: user.email,
+          type: user.type,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          email_verified: user.email_verified,
+          avatar_url: user.avatar_url ?? null,
+        }}
+      />
+    );
+  }
+
   if (user.type !== "uso") {
     redirect("/brands");
   }
-
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("rzp_at")?.value ?? "";
 
   const [services, brands, serviceCategories] = await Promise.all([
     fetchMyServices(accessToken).catch(() => []),

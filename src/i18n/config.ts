@@ -63,6 +63,7 @@ export function getMessages(locale: Locale) {
 }
 
 export function getLocaleDirection(locale: Locale) {
+  void locale;
   return "ltr";
 }
 

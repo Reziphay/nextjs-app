@@ -105,7 +105,7 @@ export function canAccessProtectedRoute({
     case "/notification":
       return true;
     case "/services":
-      return userType === "uso";
+      return userType === "uso" || userType === "ucr";
     case "/brands":
       // UCR can view the gallery, USO manages brands, admin can inspect brand detail from moderation.
       return userType === "uso" || userType === "ucr" || userType === "admin";
