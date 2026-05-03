@@ -351,6 +351,7 @@
 }
 
 .brandCard {
+  position: relative;
   flex: 0 0 15rem;
   overflow: hidden;
   border-radius: var(--general-border-radius-card);
@@ -358,13 +359,27 @@
   border: 1px solid var(--app-border-soft);
   color: inherit;
   text-decoration: none;
+  cursor: pointer;
   transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
-.brandCard:hover {
+.brandCard:hover,
+.brandCard:has(.brandCardLink:focus-visible) {
   transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--app-primary) 45%, var(--app-border-soft));
   box-shadow: 0 0.75rem 1.7rem color-mix(in srgb, var(--app-shadow-color) 60%, transparent);
+}
+
+.brandCard:has(.brandCardLink:focus-visible) {
+  outline: 2px solid color-mix(in srgb, var(--app-primary) 45%, transparent);
+  outline-offset: 3px;
+}
+
+.brandCardLink {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
 }
 
 .brandCover {
@@ -392,15 +407,25 @@
 .brandBody {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  padding: 0.85rem;
+  gap: 0.65rem;
+  min-height: 4.25rem;
+  padding: 0.72rem 0.78rem;
 }
 
 .brandLogo {
+  width: 2.15rem;
+  height: 2.15rem;
+  flex-shrink: 0;
   border-radius: 50%;
   border: 1px solid var(--app-border-soft);
   background: var(--app-bg-surface);
   object-fit: cover;
+}
+
+.brandInfo {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
 }
 
 .brandBody h3,
@@ -418,9 +443,48 @@
 }
 
 .brandBody p {
-  margin-top: 0.18rem;
   color: var(--app-text-muted);
   font-size: var(--font-size-extra-small);
+  white-space: nowrap;
+}
+
+.brandMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.brandOwner {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  color: var(--app-text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 999px;
+}
+
+.brandOwner:hover {
+  color: var(--app-text-strong);
+  text-decoration: underline;
+}
+
+.brandOwner span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brandOwnerAvatar {
+  width: 1rem !important;
+  height: 1rem !important;
+  flex-shrink: 0;
 }
 
 .compactGrid {

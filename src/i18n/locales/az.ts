@@ -1161,6 +1161,7 @@ export const azMessages: Messages = {
     labelDurationUnit: "dəq",
     labelDuration: "Müddət",
     labelPrice: "Qiymət",
+    labelRating: "Reytinq",
     labelAddress: "Ünvan",
     labelRejectionReason: "Rədd səbəbi",
     labelCategory: "Kateqoriya",

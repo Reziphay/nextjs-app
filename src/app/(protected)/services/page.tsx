@@ -6,6 +6,7 @@ import { getServerLocale } from "@/i18n/server";
 import { buildPageTitle } from "@/lib/page-metadata";
 import { fetchMyServices, fetchServiceById, fetchServiceCategories } from "@/lib/services-api";
 import { fetchMyBrands, fetchBrandById, fetchActiveBrands } from "@/lib/brands-api";
+import { fetchUserProfileById } from "@/lib/users-api";
 import { ServicesUsoPage } from "@/components/organisms/services-uso-page";
 import { PublicServiceDetail } from "@/components/organisms/public-service-detail";
 import { requireProtectedRouteAccess } from "@/lib/protected-route";
@@ -20,6 +21,21 @@ function getStringParam(
 ): string | undefined {
   const val = params[key];
   return Array.isArray(val) ? val[0] : val;
+}
+
+async function fetchDetailedBrandsForServices(
+  serviceOwnerId: string,
+  accessToken: string,
+): Promise<Awaited<ReturnType<typeof fetchActiveBrands>>> {
+  const brands = await fetchActiveBrands(accessToken).catch(() => []);
+  const relevantBrands = brands.filter((brand) => brand.owner_id === serviceOwnerId);
+
+  return Promise.all(
+    relevantBrands.map(async (brand) => {
+      const detailed = await fetchBrandById(brand.id, accessToken).catch(() => null);
+      return detailed ?? brand;
+    }),
+  );
 }
 
 export async function generateMetadata({
@@ -63,12 +79,18 @@ export default async function ServicesPage({
       redirect("/home");
     }
 
-    const [service, brands] = await Promise.all([
-      fetchServiceById(serviceId, accessToken).catch(() => null),
-      fetchActiveBrands(accessToken).catch(() => []),
-    ]);
+    const service = await fetchServiceById(serviceId, accessToken).catch(() => null);
 
     if (!service || service.status !== "ACTIVE") {
+      redirect("/home");
+    }
+
+    const [brands, owner] = await Promise.all([
+      fetchDetailedBrandsForServices(service.owner_id, accessToken),
+      fetchUserProfileById(service.owner_id, accessToken),
+    ]);
+
+    if (!owner) {
       redirect("/home");
     }
 
@@ -77,13 +99,13 @@ export default async function ServicesPage({
         service={service}
         brands={brands}
         user={{
-          id: user.id,
-          email: user.email,
-          type: user.type,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          email_verified: user.email_verified,
-          avatar_url: user.avatar_url ?? null,
+          id: owner.id,
+          email: owner.email,
+          type: owner.type,
+          first_name: owner.first_name,
+          last_name: owner.last_name,
+          email_verified: false,
+          avatar_url: owner.avatar_url ?? null,
         }}
       />
     );

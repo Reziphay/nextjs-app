@@ -1031,6 +1031,7 @@ export const trMessages: Messages = {
     labelDurationUnit: "dk",
     labelDuration: "Süre",
     labelPrice: "Fiyat",
+    labelRating: "Puan",
     labelAddress: "Adres",
     labelRejectionReason: "Reddedilme nedeni",
     labelCategory: "Kategori",

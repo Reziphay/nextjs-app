@@ -1147,6 +1147,7 @@ export const ruMessages: Messages = {
     labelDurationUnit: "мин",
     labelDuration: "Длительность",
     labelPrice: "Цена",
+    labelRating: "Рейтинг",
     labelAddress: "Адрес",
     labelRejectionReason: "Причина отклонения",
     labelCategory: "Категория",

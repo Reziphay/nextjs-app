@@ -1106,6 +1106,7 @@ export type Messages = {
     labelDurationUnit: string;
     labelDuration: string;
     labelPrice: string;
+    labelRating: string;
     labelAddress: string;
     labelRejectionReason: string;
     labelCategory: string;

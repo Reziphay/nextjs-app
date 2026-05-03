@@ -24,6 +24,7 @@ export function PublicServiceDetail({ service, brands, user }: PublicServiceDeta
       brands={brands}
       user={user}
       onBack={() => router.push("/home")}
+      showStatus={false}
       actionSlot={
         <Button variant="primary" icon="event_available" disabled>
           {messages.dashboard.reservations}

@@ -28,6 +28,9 @@ function normalizeService(service: Service): Service {
     address: service.address ?? undefined,
     rejection_reason: service.rejection_reason ?? undefined,
     images: service.images ?? [],
+    rating: service.rating ?? null,
+    rating_count: service.rating_count ?? 0,
+    my_rating: service.my_rating ?? null,
   };
 }
 
@@ -179,6 +182,22 @@ export async function unarchiveService(
   });
   const service = response.data?.data?.service;
   if (!service) throw new Error("Invalid response from unarchive service API");
+  return normalizeService(service);
+}
+
+export async function submitServiceRating(
+  serviceId: string,
+  value: number,
+  accessToken: string,
+): Promise<Service> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ service: Service }>>({
+    url: `/services/${serviceId}/rating`,
+    method: "PUT",
+    data: { value },
+  });
+  const service = response.data?.data?.service;
+  if (!service) throw new Error("Invalid response from service rating API");
   return normalizeService(service);
 }
 

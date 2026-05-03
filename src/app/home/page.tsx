@@ -5,7 +5,7 @@ import {
   fetchMyServices,
   fetchPublicServices,
 } from "@/lib/services-api";
-import { fetchActiveBrands, fetchMyBrands } from "@/lib/brands-api";
+import { fetchActiveBrands, fetchBrandById, fetchMyBrands } from "@/lib/brands-api";
 import { fetchMarketplaceFacets } from "@/lib/marketplace-api";
 import { fetchUserProfileById } from "@/lib/users-api";
 import { UsoCalendarPage } from "@/components/organisms/uso-calendar-page";
@@ -57,6 +57,18 @@ async function fetchMarketplaceOwnersById(
   );
 }
 
+async function fetchDetailedBrands(
+  brands: Brand[],
+  accessToken: string,
+): Promise<Brand[]> {
+  return Promise.all(
+    brands.map(async (brand) => {
+      const detailed = await fetchBrandById(brand.id, accessToken).catch(() => null);
+      return detailed ?? brand;
+    }),
+  );
+}
+
 export default async function HomeDashboardPage({ searchParams }: HomePageProps) {
   const resolvedParams = await (searchParams ?? Promise.resolve({}));
   const user = await requireProtectedRouteAccess("/home", resolvedParams);
@@ -82,13 +94,14 @@ export default async function HomeDashboardPage({ searchParams }: HomePageProps)
         brand_categories: [],
       })),
     ]);
-    const ownersById = await fetchMarketplaceOwnersById(brands, services, accessToken);
+    const detailedBrands = await fetchDetailedBrands(brands, accessToken);
+    const ownersById = await fetchMarketplaceOwnersById(detailedBrands, services, accessToken);
 
     return (
       <UcrMarketplacePage
         user={user}
         services={services}
-        brands={brands}
+        brands={detailedBrands}
         serviceCategories={marketplaceFacets.service_categories}
         brandCategories={marketplaceFacets.brand_categories}
         ownersById={ownersById}

@@ -14,6 +14,7 @@ import {
 } from "@/components/atoms";
 import { Combobox, type ComboboxOption } from "@/components/atoms/combobox";
 import { AvatarCropDialog } from "@/components/molecules/avatar-crop-dialog/avatar-crop-dialog";
+import { UserAvatar } from "@/components/molecules/user-avatar/user-avatar";
 import { FormActions } from "@/components/molecules/form-actions";
 import { Switch } from "@/components/atoms/switch";
 import { Icon } from "@/components/icon";
@@ -128,7 +129,7 @@ function getBrandByBranchId(brands: Brand[], branchId: string): Brand | undefine
 
 type OwnerInfo =
   | { isBrand: true; name: string; brand: Brand }
-  | { isBrand: false; name: string; brand: null };
+  | { isBrand: false; name: string; brand: null; user: AuthenticatedUser };
 
 function getOwnerInfo(
   service: Service,
@@ -139,7 +140,7 @@ function getOwnerInfo(
     const brand = getBrandByBranchId(brands, service.branch_id);
     if (brand) return { isBrand: true, name: brand.name, brand };
   }
-  return { isBrand: false, name: `${user.first_name} ${user.last_name}`, brand: null };
+  return { isBrand: false, name: `${user.first_name} ${user.last_name}`.trim(), brand: null, user };
 }
 
 const DEFAULT_FORM: ServiceFormState = {
@@ -633,10 +634,14 @@ export function ServiceCard({
   const category = service.service_category
     ? (messages.categories[service.service_category.key as keyof typeof messages.categories] ?? service.service_category.key)
     : null;
+  const serviceRating = typeof service.rating === "number" && service.rating > 0 ? service.rating : null;
 
   const brandLogoUrl = owner.isBrand ? (proxyMediaUrl(owner.brand.logo_url ?? "") || null) : null;
+  const ownerInitials = owner.isBrand
+    ? ""
+    : `${owner.user.first_name[0] ?? ""}${owner.user.last_name[0] ?? ""}`.toUpperCase();
 
-  const ownerHref = owner.isBrand ? `/brands?id=${owner.brand.id}` : "/account";
+  const ownerHref = owner.isBrand ? `/brands?id=${owner.brand.id}` : `/account?id=${owner.user.id}`;
 
   return (
     <div
@@ -706,7 +711,12 @@ export function ServiceCard({
                 <Icon icon="store" size={12} color="current" className={styles.cardOwnerIcon} />
               )
             ) : (
-              <Icon icon="person" size={12} color="current" className={styles.cardOwnerIcon} />
+              <UserAvatar
+                initials={ownerInitials}
+                src={owner.user.avatar_url}
+                size="sm"
+                className={styles.cardOwnerAvatar}
+              />
             )}
             {owner.name}
           </Link>
@@ -716,10 +726,11 @@ export function ServiceCard({
               {branch.name}
             </span>
           )}
-          {owner.isBrand && owner.brand.rating !== null && owner.brand.rating > 0 && (
+          {serviceRating !== null && (
             <span className={styles.cardRating}>
               <Icon icon="star" size={11} color="current" className={styles.cardStarIcon} />
-              {owner.brand.rating.toFixed(1)}
+              {serviceRating.toFixed(1)}
+              {service.rating_count > 0 ? ` (${service.rating_count})` : ""}
             </span>
           )}
           {favoriteSlot ? (
@@ -755,6 +766,7 @@ export function ServiceDetailView({
   onResume,
   onArchive,
   onUnarchive,
+  showStatus = true,
 }: {
   service: Service;
   copy: Messages["services"];
@@ -771,6 +783,7 @@ export function ServiceDetailView({
   onResume: () => void;
   onArchive: () => void;
   onUnarchive: () => void;
+  showStatus?: boolean;
 }) {
   const { messages } = useLocale();
   const statusLabel = getStatusLabel(service.status, copy);
@@ -782,6 +795,7 @@ export function ServiceDetailView({
   const category = service.service_category
     ? (messages.categories[service.service_category.key as keyof typeof messages.categories] ?? service.service_category.key)
     : null;
+  const serviceRating = typeof service.rating === "number" && service.rating > 0 ? service.rating : null;
 
   const images = service.images.map((img) => proxyMediaUrl(img.url) ?? img.url);
 
@@ -798,15 +812,15 @@ export function ServiceDetailView({
     <div className={styles.detailWrapper}>
       <PageSurfaceHeader
         title={service.title}
-        titleAddon={
+        titleAddon={showStatus ? (
           <StatusBadge tone={SERVICE_STATUS_TONE[service.status]}>
             {statusLabel}
           </StatusBadge>
-        }
+        ) : undefined}
         onBack={onBack}
       />
 
-      {banner !== null && (
+      {showStatus && banner !== null && (
         <StatusBanner variant={banner.variant} icon={banner.icon} className={styles.detailStatusBanner}>
           {banner.msg}
         </StatusBanner>
@@ -880,6 +894,19 @@ export function ServiceDetailView({
               <dt className={styles.detailDt}>{copy.labelPrice}</dt>
               <dd className={styles.detailDd}>{priceLabel}</dd>
 
+              {serviceRating !== null && (
+                <>
+                  <dt className={styles.detailDt}>{copy.labelRating}</dt>
+                  <dd className={styles.detailDd}>
+                    <span className={styles.detailRating}>
+                      <Icon icon="star" size={13} color="current" className={styles.cardStarIcon} />
+                      {serviceRating.toFixed(1)}
+                      {service.rating_count > 0 ? ` (${service.rating_count})` : ""}
+                    </span>
+                  </dd>
+                </>
+              )}
+
               <dt className={styles.detailDt}>{copy.labelDuration}</dt>
               <dd className={styles.detailDd}>{durationLabel}</dd>
 
@@ -912,10 +939,10 @@ export function ServiceDetailView({
                 <OwnerCard
                   roleLabel={copy.labelOwner}
                   name={owner.name}
-                  href="/account"
-                  avatarUrl={user.avatar_url}
-                  initials={`${user.first_name[0] ?? ""}${user.last_name[0] ?? ""}`.toUpperCase()}
-                  subtitle={user.email}
+                  href={`/account?id=${owner.user.id}`}
+                  avatarUrl={owner.user.avatar_url}
+                  initials={`${owner.user.first_name[0] ?? ""}${owner.user.last_name[0] ?? ""}`.toUpperCase()}
+                  subtitle={owner.user.email}
                 />
               )}
             </div>
@@ -1001,12 +1028,14 @@ export function ServiceReadOnlyDetailView({
   user,
   actionSlot,
   onBack,
+  showStatus,
 }: {
   service: Service;
   brands: Brand[];
   user: AuthenticatedUser;
   actionSlot?: ReactNode;
   onBack: () => void;
+  showStatus?: boolean;
 }) {
   const { messages } = useLocale();
   const copy = messages.services;
@@ -1020,6 +1049,7 @@ export function ServiceReadOnlyDetailView({
       user={user}
       actionLoading={false}
       actionSlot={actionSlot}
+      showStatus={showStatus}
       onBack={onBack}
       onEdit={noop}
       onSubmit={noop}

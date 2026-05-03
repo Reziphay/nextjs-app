@@ -28,6 +28,9 @@ export type Service = {
   status: ServiceStatus;
   rejection_reason?: string;
   images: ServiceImage[];
+  rating: number | null;
+  rating_count: number;
+  my_rating: number | null;
   created_at: string;
   updated_at: string;
 };

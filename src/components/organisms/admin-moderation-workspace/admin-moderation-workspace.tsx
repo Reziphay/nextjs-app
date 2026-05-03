@@ -199,6 +199,9 @@ function mapModerationServiceToService(service: ModerationServiceDetail): Servic
       order: index,
       url: item.url,
     })),
+    rating: null,
+    rating_count: 0,
+    my_rating: null,
     created_at: service.created_at,
     updated_at: service.updated_at ?? service.created_at,
   };

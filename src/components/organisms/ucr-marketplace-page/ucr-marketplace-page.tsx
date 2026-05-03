@@ -8,6 +8,7 @@ import { Button } from "@/components/atoms";
 import { Icon } from "@/components/icon";
 import { ServiceCard } from "@/components/organisms/services-uso-page/services-uso-page";
 import { useLocale } from "@/components/providers/locale-provider";
+import { UserAvatar } from "@/components/molecules/user-avatar/user-avatar";
 import { proxyMediaUrl } from "@/lib/media";
 import type { MarketplaceFacet } from "@/lib/marketplace-api";
 import type { Brand, Branch, BrandCategory, PublicUserProfile } from "@/types";
@@ -151,12 +152,28 @@ function SectionHeader({
   );
 }
 
-function BrandCard({ brand }: { brand: Brand }) {
+function getProfileName(owner?: PublicUserProfile) {
+  return `${owner?.first_name ?? ""} ${owner?.last_name ?? ""}`.trim();
+}
+
+function getProfileInitials(owner?: PublicUserProfile) {
+  return `${owner?.first_name?.[0] ?? ""}${owner?.last_name?.[0] ?? ""}`.toUpperCase() || "?";
+}
+
+function BrandCard({
+  brand,
+  owner,
+}: {
+  brand: Brand;
+  owner?: PublicUserProfile;
+}) {
   const { messages } = useLocale();
   const t = messages.marketplace;
+  const ownerName = getProfileName(owner);
 
   return (
-    <Link href={`/brands?id=${brand.id}`} className={styles.brandCard}>
+    <article className={styles.brandCard}>
+      <Link href={`/brands?id=${brand.id}`} className={styles.brandCardLink} aria-label={brand.name} />
       <div className={styles.brandCover}>
         <Image src={imageForBrand(brand)} alt={brand.name} fill className={styles.brandImage} sizes="220px" />
         {brand.categories[0] ? (
@@ -167,12 +184,28 @@ function BrandCard({ brand }: { brand: Brand }) {
       </div>
       <div className={styles.brandBody}>
         <Image src={logoForBrand(brand)} alt="" width={34} height={34} className={styles.brandLogo} />
-        <div>
+        <div className={styles.brandInfo}>
           <h3>{brand.name}</h3>
-          <p>{brand.rating ? `${brand.rating.toFixed(1)} · ${brand.rating_count}` : t.newBrand}</p>
+          <div className={styles.brandMetaRow}>
+            <p>{brand.rating ? `${brand.rating.toFixed(1)} · ${brand.rating_count}` : t.newBrand}</p>
+            {owner ? (
+              <Link
+                href={`/account?id=${owner.id}`}
+                className={styles.brandOwner}
+              >
+                <UserAvatar
+                  initials={getProfileInitials(owner)}
+                  src={owner.avatar_url}
+                  size="sm"
+                  className={styles.brandOwnerAvatar}
+                />
+                <span>{ownerName || owner.email}</span>
+              </Link>
+            ) : null}
+          </div>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }
 
@@ -365,7 +398,7 @@ export function UcrMarketplacePage({
           />
           <div className={styles.brandRail}>
             {topBrands.map((brand) => (
-              <BrandCard key={brand.id} brand={brand} />
+              <BrandCard key={brand.id} brand={brand} owner={ownersById[brand.owner_id]} />
             ))}
           </div>
         </section>

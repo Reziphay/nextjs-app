@@ -1161,6 +1161,7 @@ export const enMessages: Messages = {
     labelDurationUnit: "min",
     labelDuration: "Duration",
     labelPrice: "Price",
+    labelRating: "Rating",
     labelAddress: "Address",
     labelRejectionReason: "Rejection reason",
     labelCategory: "Category",
