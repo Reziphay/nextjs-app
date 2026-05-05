@@ -1,3 +1,5 @@
+import sanitizeHtml from "sanitize-html";
+
 const HTML_ENTITY_MAP: Record<string, string> = {
   amp: "&",
   lt: "<",
@@ -7,14 +9,39 @@ const HTML_ENTITY_MAP: Record<string, string> = {
   nbsp: " ",
 };
 
+// Allowlist tuned for the Tiptap editor output (see rich-text-editor).
+// Keep this in sync with extensions enabled in the editor.
+const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
+  allowedTags: [
+    "p", "br", "strong", "em", "u", "s", "code", "pre",
+    "ol", "ul", "li",
+    "h1", "h2", "h3", "h4", "h5", "h6",
+    "blockquote", "hr",
+    "a", "span",
+  ],
+  allowedAttributes: {
+    a: ["href", "target", "rel"],
+    span: ["style"],
+    "*": ["class"],
+  },
+  allowedSchemes: ["http", "https", "mailto", "tel"],
+  allowedSchemesAppliedToAttributes: ["href"],
+  // Drop any tag we don't allow rather than escaping it.
+  disallowedTagsMode: "discard",
+  // Restrict inline styles to a small, safe set (color from Tiptap color extension).
+  allowedStyles: {
+    span: {
+      color: [/^#(0x)?[0-9a-f]+$/i, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/],
+    },
+  },
+  // Force external links to open safely.
+  transformTags: {
+    a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer", target: "_blank" }),
+  },
+};
+
 export function sanitizeRichHtml(html: string): string {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, "")
-    .replace(/<style[\s\S]*?<\/style>/gi, "")
-    .replace(/<img[^>]*>/gi, "")
-    .replace(/<iframe[\s\S]*?<\/iframe>/gi, "")
-    .replace(/\son\w+=(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
-    .replace(/javascript:/gi, "");
+  return sanitizeHtml(html, SANITIZE_OPTIONS);
 }
 
 export function isRichHtml(value: string): boolean {
