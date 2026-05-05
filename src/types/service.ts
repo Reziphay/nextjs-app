@@ -13,12 +13,27 @@ export type ServiceImage = {
   url: string;
 };
 
+export type ServiceBranchContext = {
+  id: string;
+  brand_id: string;
+  name: string;
+  brand: {
+    id: string;
+    name: string;
+    owner_id: string;
+    logo_url?: string;
+    rating: number | null;
+    rating_count: number;
+  } | null;
+};
+
 export type Service = {
   id: string;
   title: string;
   description?: string;
   owner_id: string;
   branch_id: string | null;
+  branch?: ServiceBranchContext | null;
   service_category_id: string | null;
   service_category: ServiceCategory | null;
   price: number | null;

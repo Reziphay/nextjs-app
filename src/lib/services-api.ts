@@ -28,6 +28,7 @@ export function normalizeService(service: Service): Service {
     ...service,
     description: service.description ?? undefined,
     branch_id: service.branch_id ?? null,
+    branch: service.branch ?? null,
     service_category_id: service.service_category_id ?? null,
     service_category: service.service_category ?? null,
     price: service.price ?? null,
@@ -71,6 +72,7 @@ export async function fetchPublicServices(
   filters?: {
     service_category_id?: string;
     branch_id?: string;
+    brand_id?: string;
     owner_id?: string;
     direct_only?: boolean;
     q?: string;
@@ -92,6 +94,7 @@ export async function fetchPublicServicesPage(
   filters?: {
     service_category_id?: string;
     branch_id?: string;
+    brand_id?: string;
     owner_id?: string;
     direct_only?: boolean;
     q?: string;

@@ -81,8 +81,8 @@ export default async function HomeDashboardPage({ searchParams }: HomePageProps)
     const activeServiceCategoryId = getSingleParam(resolvedParams, "service_category_id");
     const activeBrandCategoryId = getSingleParam(resolvedParams, "brand_category_id");
     const serviceFilters = activeServiceCategoryId
-      ? { service_category_id: activeServiceCategoryId }
-      : {};
+      ? { service_category_id: activeServiceCategoryId, limit: 120 }
+      : { limit: 120 };
     const brandFilters = activeBrandCategoryId
       ? { brand_category_id: activeBrandCategoryId }
       : {};

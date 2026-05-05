@@ -295,6 +295,10 @@ export function UcrMarketplacePage({
 
   const serviceCategoryOptions = serviceCategories;
   const brandCategoryOptions = brandCategories;
+  const totalServiceCount =
+    serviceCategoryOptions.reduce((sum, category) => sum + category.count, 0) || services.length;
+  const totalBrandCount =
+    brandCategoryOptions.reduce((sum, category) => sum + category.count, 0) || brands.length;
 
   const recentServices = serviceItems.slice(0, 10);
   const featuredServiceIds = new Set(recentServices.slice(0, 4).map((item) => item.service.id));
@@ -443,8 +447,8 @@ export function UcrMarketplacePage({
           </h1>
           <p className={styles.heroLead}>{t.lead}</p>
           <div className={styles.marketStats} aria-label={t.marketStats}>
-            <span><strong>{services.length}</strong>{t.servicesStat}</span>
-            <span><strong>{brands.length}</strong>{t.brandsStat}</span>
+            <span><strong>{totalServiceCount}</strong>{t.servicesStat}</span>
+            <span><strong>{totalBrandCount}</strong>{t.brandsStat}</span>
             <span><strong>{serviceCategoryOptions.length + brandCategoryOptions.length}</strong>{t.categoriesStat}</span>
           </div>
         </div>

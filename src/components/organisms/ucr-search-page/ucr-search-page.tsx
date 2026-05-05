@@ -92,15 +92,27 @@ export function UcrSearchPage({ accessToken, initialQuery, facets }: UcrSearchPa
       return;
     }
 
-    setLoading(true);
-    void searchMarketplace(query, accessToken, {
-      type: activeType,
-      category: activeCategory,
-      sort: activeSort,
-      limit: 24,
-    })
-      .then((data) => setResults(data.results))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+    void Promise.resolve()
+      .then(() => {
+        if (!cancelled) setLoading(true);
+        return searchMarketplace(query, accessToken, {
+          type: activeType,
+          category: activeCategory,
+          sort: activeSort,
+          limit: 24,
+        });
+      })
+      .then((data) => {
+        if (!cancelled) setResults(data.results);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [accessToken, activeCategory, activeSort, activeType, query]);
 
   const total = useMemo(

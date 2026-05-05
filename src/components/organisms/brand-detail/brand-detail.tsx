@@ -424,26 +424,19 @@ export function BrandDetail({
     return () => window.clearInterval(intervalId);
   }, [galleryPaused, gallerySlides.length]);
 
-  // Lazy load active services for this brand's branches
+  // Lazy load active services for this brand on the API side.
   useEffect(() => {
-    const branchIds = branches.map((b) => b.id);
-    if (branchIds.length === 0) {
-      setBrandServices([]);
-      setServicesState("ready");
-      return;
-    }
-
     let active = true;
     setServicesState("loading");
 
     async function loadServices() {
       try {
-        const allServices = await fetchPublicServices({}, session.accessToken ?? undefined);
-        if (!active) return;
-        const filtered = allServices.filter(
-          (s) => s.status === "ACTIVE" && s.branch_id && branchIds.includes(s.branch_id),
+        const services = await fetchPublicServices(
+          { brand_id: brand.id, limit: 200 },
+          session.accessToken ?? undefined,
         );
-        setBrandServices(filtered);
+        if (!active) return;
+        setBrandServices(services);
         setServicesState("ready");
       } catch {
         if (!active) return;
@@ -454,8 +447,7 @@ export function BrandDetail({
 
     void loadServices();
     return () => { active = false; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [brandState.id]);
+  }, [brand.id, session.accessToken]);
 
   const stats = [
     {

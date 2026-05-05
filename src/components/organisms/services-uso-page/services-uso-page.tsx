@@ -128,7 +128,7 @@ function getBrandByBranchId(brands: Brand[], branchId: string): Brand | undefine
 }
 
 type OwnerInfo =
-  | { isBrand: true; name: string; brand: Brand }
+  | { isBrand: true; name: string; brand: Pick<Brand, "id" | "name" | "logo_url" | "rating" | "rating_count"> }
   | { isBrand: false; name: string; brand: null; user: AuthenticatedUser };
 
 function getOwnerInfo(
@@ -139,6 +139,13 @@ function getOwnerInfo(
   if (service.branch_id) {
     const brand = getBrandByBranchId(brands, service.branch_id);
     if (brand) return { isBrand: true, name: brand.name, brand };
+    if (service.branch?.brand) {
+      return {
+        isBrand: true,
+        name: service.branch.brand.name,
+        brand: service.branch.brand,
+      };
+    }
   }
   return { isBrand: false, name: `${user.first_name} ${user.last_name}`.trim(), brand: null, user };
 }
@@ -626,7 +633,9 @@ export function ServiceCard({
   const durationLabel = formatDuration(service.duration, copy.fieldDurationUnit);
   const owner = getOwnerInfo(service, brands, user);
 
-  const branch = service.branch_id ? getBranchById(brands, service.branch_id) : null;
+  const branch = service.branch_id
+    ? (getBranchById(brands, service.branch_id) ?? service.branch)
+    : null;
 
   const firstImage = service.images[0];
   const imageUrl = firstImage ? proxyMediaUrl(firstImage.url) : null;
@@ -790,7 +799,9 @@ export function ServiceDetailView({
   const priceLabel = formatPrice(service, copy);
   const durationLabel = formatDuration(service.duration, copy.fieldDurationUnit);
   const owner = getOwnerInfo(service, brands, user);
-  const branch = service.branch_id ? getBranchById(brands, service.branch_id) : null;
+  const branch = service.branch_id
+    ? (getBranchById(brands, service.branch_id) ?? service.branch)
+    : null;
 
   const category = service.service_category
     ? (messages.categories[service.service_category.key as keyof typeof messages.categories] ?? service.service_category.key)
