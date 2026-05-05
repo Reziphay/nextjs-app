@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/atoms";
 import { Icon } from "@/components/icon";
 import { ServiceCard } from "@/components/organisms/services-uso-page/services-uso-page";
@@ -16,7 +16,7 @@ import {
   removeFavoriteService,
 } from "@/lib/favorites-api";
 import { proxyMediaUrl } from "@/lib/media";
-import type { MarketplaceFacet } from "@/lib/marketplace-api";
+import type { MarketplaceFacet, MarketplaceHomeSections, MarketplaceHomeUso } from "@/lib/marketplace-api";
 import type { Brand, Branch, BrandCategory, PublicUserProfile } from "@/types";
 import type { Service, ServiceCategory } from "@/types/service";
 import type { UserProfile } from "@/types/user_types";
@@ -34,6 +34,7 @@ type UcrMarketplacePageProps = {
   favoriteBrandIds: string[];
   serviceCategories: MarketplaceFacet[];
   brandCategories: MarketplaceFacet[];
+  marketplaceHome: MarketplaceHomeSections;
   ownersById: Record<string, PublicUserProfile>;
   activeServiceCategoryId?: string;
   activeBrandCategoryId?: string;
@@ -45,6 +46,55 @@ type ServiceWithContext = {
   branch?: Branch;
   owner?: PublicUserProfile;
 };
+
+function ScrollableRail({
+  children,
+  className,
+  ariaLabel,
+}: {
+  children: ReactNode;
+  className: string;
+  ariaLabel: string;
+}) {
+  const railRef = useRef<HTMLDivElement | null>(null);
+
+  function scroll(direction: "left" | "right") {
+    const rail = railRef.current;
+    if (!rail) return;
+
+    const distance = Math.max(rail.clientWidth * 0.78, 240);
+    rail.scrollBy({
+      left: direction === "left" ? -distance : distance,
+      behavior: "smooth",
+    });
+  }
+
+  return (
+    <div className={styles.railShell}>
+      <Button
+        variant="unstyled"
+        type="button"
+        className={`${styles.railArrow} ${styles.railArrowLeft}`}
+        aria-label={`${ariaLabel} - əvvəlki`}
+        onClick={() => scroll("left")}
+      >
+        <Icon icon="arrow_back" size={16} color="current" />
+      </Button>
+      <div ref={railRef} className={`${className} ${styles.railViewport}`}>
+        {children}
+      </div>
+      <Button
+        variant="unstyled"
+        type="button"
+        className={`${styles.railArrow} ${styles.railArrowRight}`}
+        aria-label={`${ariaLabel} - növbəti`}
+        onClick={() => scroll("right")}
+      >
+        <Icon icon="arrow_forward" size={16} color="current" />
+      </Button>
+    </div>
+  );
+}
 
 const PLACEHOLDER_IMAGE = "/banner1.jpg";
 const PLACEHOLDER_LOGO = "/reziphay-logo.png";
@@ -118,7 +168,7 @@ function CategoryRail({
         <h2>{title}</h2>
         <span>{categories.length}</span>
       </div>
-      <div className={styles.categoryRail}>
+      <ScrollableRail className={styles.categoryRail} ariaLabel={title}>
         <Link
           href={hrefFor("all")}
           className={styles.categoryChip}
@@ -137,7 +187,7 @@ function CategoryRail({
             <small>{category.count}</small>
           </Link>
         ))}
-      </div>
+      </ScrollableRail>
     </section>
   );
 }
@@ -224,6 +274,24 @@ function BrandCard({
   );
 }
 
+function TopUsoCard({ uso }: { uso: MarketplaceHomeUso }) {
+  const name = `${uso.first_name} ${uso.last_name}`.trim() || uso.email;
+  const initials = `${uso.first_name[0] ?? ""}${uso.last_name[0] ?? ""}`.toUpperCase() || "?";
+
+  return (
+    <Link href={`/account?id=${uso.id}`} className={styles.usoCard} aria-label={name}>
+      <UserAvatar initials={initials} src={uso.avatar_url} size="lg" className={styles.usoAvatar} />
+      <span>{name}</span>
+      {uso.rating ? (
+        <small>
+          <Icon icon="star" size={10} color="current" fill />
+          {uso.rating.toFixed(1)}
+        </small>
+      ) : null}
+    </Link>
+  );
+}
+
 export function UcrMarketplacePage({
   user,
   accessToken,
@@ -236,6 +304,7 @@ export function UcrMarketplacePage({
   favoriteBrandIds,
   serviceCategories,
   brandCategories,
+  marketplaceHome,
   ownersById,
   activeServiceCategoryId,
   activeBrandCategoryId,
@@ -258,17 +327,25 @@ export function UcrMarketplacePage({
   const allKnownBrands = useMemo(
     () => {
       const map = new Map<string, Brand>();
-      [...brands, ...favoriteBrandList, ...favoriteServiceBrands].forEach((brand) => {
+      [
+        ...brands,
+        ...marketplaceHome.recent_brands,
+        ...marketplaceHome.recommended_brands,
+        ...marketplaceHome.top_rated_brands,
+        ...favoriteBrandList,
+        ...favoriteServiceBrands,
+      ].forEach((brand) => {
         map.set(brand.id, brand);
       });
       return [...map.values()];
     },
-    [brands, favoriteBrandList, favoriteServiceBrands],
+    [brands, favoriteBrandList, favoriteServiceBrands, marketplaceHome],
   );
   const branchMap = useMemo(() => branchLookup(allKnownBrands), [allKnownBrands]);
-  const serviceItems = useMemo<ServiceWithContext[]>(
-    () =>
-      services.map((service) => {
+
+  const toServiceItems = useMemo(
+    () => (items: Service[]): ServiceWithContext[] =>
+      items.map((service) => {
         const branchContext = service.branch_id ? branchMap.get(service.branch_id) : undefined;
         return {
           service,
@@ -277,20 +354,15 @@ export function UcrMarketplacePage({
           owner: ownersById[service.owner_id],
         };
       }),
-    [branchMap, ownersById, services],
+    [branchMap, ownersById],
+  );
+  const serviceItems = useMemo<ServiceWithContext[]>(
+    () => toServiceItems(services),
+    [services, toServiceItems],
   );
   const favoriteServiceItems = useMemo<ServiceWithContext[]>(
-    () =>
-      favoriteServiceList.map((service) => {
-        const branchContext = service.branch_id ? branchMap.get(service.branch_id) : undefined;
-        return {
-          service,
-          brand: branchContext?.brand,
-          branch: branchContext?.branch,
-          owner: ownersById[service.owner_id],
-        };
-      }),
-    [branchMap, favoriteServiceList, ownersById],
+    () => toServiceItems(favoriteServiceList),
+    [favoriteServiceList, toServiceItems],
   );
 
   const serviceCategoryOptions = serviceCategories;
@@ -300,26 +372,12 @@ export function UcrMarketplacePage({
   const totalBrandCount =
     brandCategoryOptions.reduce((sum, category) => sum + category.count, 0) || brands.length;
 
-  const recentServices = serviceItems.slice(0, 10);
-  const featuredServiceIds = new Set(recentServices.slice(0, 4).map((item) => item.service.id));
-  const fastServices = serviceItems
-    .filter(
-      (item) =>
-        item.service.duration !== null &&
-        item.service.duration <= 60 &&
-        !featuredServiceIds.has(item.service.id),
-    )
-    .slice(0, 10);
-  const freeOrStarter = serviceItems
-    .filter(
-      (item) =>
-        (item.service.price_type === "FREE" || item.service.price_type === "STARTING_FROM") &&
-        !featuredServiceIds.has(item.service.id),
-    )
-    .slice(0, 10);
-  const topBrands = [...brands]
-    .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0) || b.rating_count - a.rating_count)
-    .slice(0, 8);
+  const randomServices = activeServiceCategoryId ? serviceItems : toServiceItems(marketplaceHome.random_services);
+  const smartServices = toServiceItems(marketplaceHome.smart_services);
+  const recentServices = toServiceItems(marketplaceHome.recent_services);
+  const recommendedServices = toServiceItems(marketplaceHome.recommended_services);
+  const topRatedServices = toServiceItems(marketplaceHome.top_rated_services);
+  const topBrands = marketplaceHome.recent_brands.slice(0, 10);
   const heroService = serviceItems[0];
   const heroBrand = topBrands[0] ?? brands[0];
   const heroImageSrc = heroBrand
@@ -438,6 +496,60 @@ export function UcrMarketplacePage({
     );
   }
 
+  function renderServiceRail(title: string, items: ServiceWithContext[], actionHref?: string) {
+    if (items.length === 0) return null;
+    return (
+      <section className={styles.section}>
+        <SectionHeader title={title} actionHref={actionHref} actionLabel={actionHref ? t.seeAll : undefined} />
+        <ScrollableRail className={styles.serviceRail} ariaLabel={title}>
+          {items.slice(0, 10).map((item) => (
+            <ServiceCard
+              key={item.service.id}
+              service={item.service}
+              copy={serviceCopy}
+              brands={allKnownBrands}
+              user={ownerAsCardUser(item)}
+              showStatus={false}
+              favoriteSlot={(
+                <FavoriteButton
+                  type="service"
+                  id={item.service.id}
+                  active={activeFavoriteServices.has(item.service.id)}
+                />
+              )}
+              onClick={() => router.push(`/services?id=${item.service.id}`)}
+            />
+          ))}
+        </ScrollableRail>
+      </section>
+    );
+  }
+
+  function renderBrandRail(title: string, items: Brand[], actionHref?: string) {
+    if (items.length === 0) return null;
+    return (
+      <section className={styles.section}>
+        <SectionHeader title={title} actionHref={actionHref} actionLabel={actionHref ? t.seeAll : undefined} />
+        <ScrollableRail className={styles.brandRail} ariaLabel={title}>
+          {items.slice(0, 10).map((brand) => (
+            <BrandCard
+              key={brand.id}
+              brand={brand}
+              owner={ownersById[brand.owner_id]}
+              favoriteSlot={(
+                <FavoriteButton
+                  type="brand"
+                  id={brand.id}
+                  active={activeFavoriteBrands.has(brand.id)}
+                />
+              )}
+            />
+          ))}
+        </ScrollableRail>
+      </section>
+    );
+  }
+
   return (
     <div className={styles.wrapper}>
       <section className={styles.hero}>
@@ -468,6 +580,16 @@ export function UcrMarketplacePage({
         </div>
       </section>
 
+      {marketplaceHome.top_usos.length > 0 ? (
+        <section className={styles.section}>
+          <div className={styles.usoRail}>
+            {marketplaceHome.top_usos.map((uso) => (
+              <TopUsoCard key={uso.id} uso={uso} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <CategoryRail
         title={t.serviceCategoriesTitle}
         allLabel={t.allServices}
@@ -478,39 +600,11 @@ export function UcrMarketplacePage({
         secondaryFilterValue={activeBrandCategoryId}
       />
 
-      {recentServices.length > 0 ? (
-        <section className={styles.section}>
-          <SectionHeader
-            title={
-              currentServiceCategory
-                ? categoryLabel(currentServiceCategory, messages)
-                : t.featuredServices
-            }
-            actionHref={servicesSeeAllHref}
-            actionLabel={t.seeAll}
-          />
-          <div className={styles.serviceRail}>
-            {recentServices.map((item) => (
-              <ServiceCard
-                key={item.service.id}
-                service={item.service}
-                copy={serviceCopy}
-                brands={allKnownBrands}
-                user={ownerAsCardUser(item)}
-                showStatus={false}
-                favoriteSlot={(
-                  <FavoriteButton
-                    type="service"
-                    id={item.service.id}
-                    active={activeFavoriteServices.has(item.service.id)}
-                  />
-                )}
-                onClick={() => router.push(`/services?id=${item.service.id}`)}
-              />
-            ))}
-          </div>
-        </section>
-      ) : null}
+      {renderServiceRail(
+        currentServiceCategory ? categoryLabel(currentServiceCategory, messages) : t.featuredServices,
+        randomServices,
+        servicesSeeAllHref,
+      )}
 
       <CategoryRail
         title={t.brandCategoriesTitle}
@@ -522,37 +616,13 @@ export function UcrMarketplacePage({
         secondaryFilterValue={activeServiceCategoryId}
       />
 
-      {topBrands.length > 0 ? (
-        <section className={styles.section}>
-          <SectionHeader
-            title={
-              currentBrandCategory
-                ? categoryLabel(currentBrandCategory, messages)
-                : t.brandSpotlight
-            }
-            actionHref={brandsSeeAllHref}
-            actionLabel={t.seeAll}
-          />
-          <div className={styles.brandRail}>
-            {topBrands.map((brand) => (
-              <BrandCard
-                key={brand.id}
-                brand={brand}
-                owner={ownersById[brand.owner_id]}
-                favoriteSlot={(
-                  <FavoriteButton
-                    type="brand"
-                    id={brand.id}
-                    active={activeFavoriteBrands.has(brand.id)}
-                  />
-                )}
-              />
-            ))}
-          </div>
-        </section>
-      ) : null}
+      {renderBrandRail(
+        currentBrandCategory ? categoryLabel(currentBrandCategory, messages) : t.recentBrands,
+        activeBrandCategoryId ? brands : marketplaceHome.recent_brands,
+        brandsSeeAllHref,
+      )}
 
-      {recentServices.length === 0 && topBrands.length === 0 ? (
+      {randomServices.length === 0 && topBrands.length === 0 ? (
         <section className={styles.emptyState}>
           <div>
             <span className={styles.emptyEyebrow}>{t.emptyEyebrow}</span>
@@ -566,7 +636,7 @@ export function UcrMarketplacePage({
         </section>
       ) : null}
 
-      {recentServices.length === 0 && topBrands.length > 0 ? (
+      {randomServices.length === 0 && topBrands.length > 0 ? (
         <section className={`${styles.emptyState} ${styles.emptyStateCompact}`}>
           <div>
             <span className={styles.emptyEyebrow}>{t.emptyEyebrow}</span>
@@ -591,57 +661,13 @@ export function UcrMarketplacePage({
         </Link>
       </section>
 
-      {fastServices.length >= 3 ? (
-        <section className={styles.section}>
-          <SectionHeader title={t.fastServices} />
-          <div className={styles.compactGrid}>
-            {fastServices.map((item) => (
-              <ServiceCard
-                key={item.service.id}
-                service={item.service}
-                copy={serviceCopy}
-                brands={allKnownBrands}
-                user={ownerAsCardUser(item)}
-                showStatus={false}
-                favoriteSlot={(
-                  <FavoriteButton
-                    type="service"
-                    id={item.service.id}
-                    active={activeFavoriteServices.has(item.service.id)}
-                  />
-                )}
-                onClick={() => router.push(`/services?id=${item.service.id}`)}
-              />
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {freeOrStarter.length >= 3 ? (
-        <section className={styles.section}>
-          <SectionHeader title={t.smartDeals} />
-          <div className={styles.compactGrid}>
-            {freeOrStarter.map((item) => (
-              <ServiceCard
-                key={item.service.id}
-                service={item.service}
-                copy={serviceCopy}
-                brands={allKnownBrands}
-                user={ownerAsCardUser(item)}
-                showStatus={false}
-                favoriteSlot={(
-                  <FavoriteButton
-                    type="service"
-                    id={item.service.id}
-                    active={activeFavoriteServices.has(item.service.id)}
-                  />
-                )}
-                onClick={() => router.push(`/services?id=${item.service.id}`)}
-              />
-            ))}
-          </div>
-        </section>
-      ) : null}
+      {renderServiceRail(t.smartDeals, smartServices)}
+      {renderServiceRail(t.recentServices, recentServices, "/services")}
+      {renderBrandRail(t.recentBrands, marketplaceHome.recent_brands, "/brands")}
+      {renderServiceRail(t.youMayLike, recommendedServices)}
+      {renderBrandRail(t.youMayLikeBrands, marketplaceHome.recommended_brands)}
+      {renderServiceRail(t.mostLikedServices, topRatedServices)}
+      {renderBrandRail(t.mostLikedBrands, marketplaceHome.top_rated_brands)}
 
       {favoriteServiceList.length > 0 || favoriteBrandList.length > 0 ? (
         <section className={styles.section}>
@@ -651,7 +677,7 @@ export function UcrMarketplacePage({
             actionLabel={t.seeAll}
           />
           {favoriteServiceItems.length > 0 ? (
-            <div className={styles.serviceRail}>
+            <ScrollableRail className={styles.serviceRail} ariaLabel={t.myFavorites}>
               {favoriteServiceItems.slice(0, 8).map((item) => (
                 <ServiceCard
                   key={item.service.id}
@@ -670,10 +696,10 @@ export function UcrMarketplacePage({
                   onClick={() => router.push(`/services?id=${item.service.id}`)}
                 />
               ))}
-            </div>
+            </ScrollableRail>
           ) : null}
           {favoriteBrandList.length > 0 ? (
-            <div className={styles.brandRail}>
+            <ScrollableRail className={styles.brandRail} ariaLabel={t.myFavorites}>
               {favoriteBrandList.slice(0, 8).map((brand) => (
                 <BrandCard
                   key={brand.id}
@@ -688,7 +714,7 @@ export function UcrMarketplacePage({
                   )}
                 />
               ))}
-            </div>
+            </ScrollableRail>
           ) : null}
         </section>
       ) : null}

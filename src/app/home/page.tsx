@@ -5,9 +5,9 @@ import {
   fetchMyServices,
   fetchPublicServices,
 } from "@/lib/services-api";
-import { fetchActiveBrands, fetchBrandById, fetchMyBrands } from "@/lib/brands-api";
+import { fetchActiveBrands, fetchMyBrands } from "@/lib/brands-api";
 import { emptyFavorites, fetchFavorites } from "@/lib/favorites-api";
-import { fetchMarketplaceFacets } from "@/lib/marketplace-api";
+import { EMPTY_MARKETPLACE_HOME, fetchMarketplaceFacets, fetchMarketplaceHome } from "@/lib/marketplace-api";
 import { fetchUserProfileById } from "@/lib/users-api";
 import { UsoCalendarPage } from "@/components/organisms/uso-calendar-page";
 import { UcrMarketplacePage } from "@/components/organisms/ucr-marketplace-page";
@@ -58,18 +58,6 @@ async function fetchMarketplaceOwnersById(
   );
 }
 
-async function fetchDetailedBrands(
-  brands: Brand[],
-  accessToken: string,
-): Promise<Brand[]> {
-  return Promise.all(
-    brands.map(async (brand) => {
-      const detailed = await fetchBrandById(brand.id, accessToken).catch(() => null);
-      return detailed ?? brand;
-    }),
-  );
-}
-
 export default async function HomeDashboardPage({ searchParams }: HomePageProps) {
   const resolvedParams = await (searchParams ?? Promise.resolve({}));
   const user = await requireProtectedRouteAccess("/home", resolvedParams);
@@ -87,19 +75,38 @@ export default async function HomeDashboardPage({ searchParams }: HomePageProps)
       ? { brand_category_id: activeBrandCategoryId }
       : {};
 
-    const [services, brands, marketplaceFacets, favorites] = await Promise.all([
-      fetchPublicServices(serviceFilters, accessToken).catch(() => []),
-      fetchActiveBrands(accessToken, brandFilters).catch(() => []),
+    const [marketplaceHome, marketplaceFacets, favorites] = await Promise.all([
+      fetchMarketplaceHome(accessToken).catch(() => EMPTY_MARKETPLACE_HOME),
       fetchMarketplaceFacets(accessToken).catch(() => ({
         service_categories: [],
         brand_categories: [],
       })),
       fetchFavorites(accessToken).catch(() => emptyFavorites()),
     ]);
-    const detailedBrands = await fetchDetailedBrands(brands, accessToken);
+    const services = activeServiceCategoryId
+      ? await fetchPublicServices(serviceFilters, accessToken).catch(() => [])
+      : marketplaceHome.random_services;
+    const brands = activeBrandCategoryId
+      ? await fetchActiveBrands(accessToken, brandFilters).catch(() => [])
+      : marketplaceHome.recent_brands;
     const ownersById = await fetchMarketplaceOwnersById(
-      [...detailedBrands, ...favorites.brands, ...favorites.service_brands],
-      [...services, ...favorites.services],
+      [
+        ...brands,
+        ...marketplaceHome.recent_brands,
+        ...marketplaceHome.recommended_brands,
+        ...marketplaceHome.top_rated_brands,
+        ...favorites.brands,
+        ...favorites.service_brands,
+      ],
+      [
+        ...services,
+        ...marketplaceHome.random_services,
+        ...marketplaceHome.smart_services,
+        ...marketplaceHome.recent_services,
+        ...marketplaceHome.recommended_services,
+        ...marketplaceHome.top_rated_services,
+        ...favorites.services,
+      ],
       accessToken,
     );
 
@@ -108,7 +115,8 @@ export default async function HomeDashboardPage({ searchParams }: HomePageProps)
         user={user}
         accessToken={accessToken}
         services={services}
-        brands={detailedBrands}
+        brands={brands}
+        marketplaceHome={marketplaceHome}
         favoriteServices={favorites.services}
         favoriteBrands={favorites.brands}
         favoriteServiceBrands={favorites.service_brands}

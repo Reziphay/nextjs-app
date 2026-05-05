@@ -1,4 +1,5 @@
 import { createApiClient } from "@/lib/api";
+import { toPlainTextPreview } from "@/lib/rich-text";
 import type { ApiSuccessResponse } from "@/types";
 
 export type MarketplaceSearchItemType = "brand" | "branch" | "service" | "uso" | "address";
@@ -27,6 +28,28 @@ export type MarketplaceSearchResults = {
     addresses: MarketplaceSearchItem[];
   };
 };
+
+function normalizeSearchItem(item: MarketplaceSearchItem): MarketplaceSearchItem {
+  return {
+    ...item,
+    title: toPlainTextPreview(item.title),
+    subtitle: toPlainTextPreview(item.subtitle),
+  };
+}
+
+function normalizeSearchResults(data: MarketplaceSearchResults): MarketplaceSearchResults {
+  return {
+    ...data,
+    suggestions: data.suggestions.map(normalizeSearchItem),
+    results: {
+      brands: data.results.brands.map(normalizeSearchItem),
+      branches: data.results.branches.map(normalizeSearchItem),
+      services: data.results.services.map(normalizeSearchItem),
+      users: data.results.users.map(normalizeSearchItem),
+      addresses: data.results.addresses.map(normalizeSearchItem),
+    },
+  };
+}
 
 export async function searchMarketplace(
   query: string,
@@ -59,9 +82,11 @@ export async function searchMarketplace(
     },
   });
 
-  return response.data?.data ?? {
+  const fallback = {
     query,
     suggestions: [],
     results: { brands: [], branches: [], services: [], users: [], addresses: [] },
   };
+
+  return normalizeSearchResults(response.data?.data ?? fallback);
 }

@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 1.35rem;
   width: 100%;
-  max-width: 78rem;
+  max-width: 86rem;
   height: 100%;
   margin-inline: auto;
   padding: 1.45rem 2rem 2rem;
@@ -25,7 +25,11 @@
   border: 1px solid var(--app-border-soft);
   border-radius: var(--general-border-radius-card);
   background:
-    linear-gradient(110deg, var(--app-bg-surface-strong), var(--app-bg-surface) 72%),
+    linear-gradient(
+      110deg,
+      var(--app-bg-surface-strong),
+      var(--app-bg-surface) 72%
+    ),
     var(--app-bg-surface-strong);
 }
 
@@ -132,7 +136,8 @@
   gap: 0.65rem;
   min-width: 0;
   padding: 0.85rem 0;
-  border-top: 1px solid color-mix(in srgb, var(--app-border-soft) 70%, transparent);
+  border-top: 1px solid
+    color-mix(in srgb, var(--app-border-soft) 70%, transparent);
 }
 
 .categoryHeader {
@@ -163,6 +168,58 @@
   font-weight: 800;
 }
 
+.railShell {
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.railViewport {
+  scroll-behavior: smooth;
+}
+
+.railArrow {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--app-bg-surface) 92%, transparent);
+  color: var(--app-text-strong);
+  cursor: pointer;
+  box-shadow: 0 0.55rem 1.2rem
+    color-mix(in srgb, var(--app-shadow-color) 45%, transparent);
+  transform: translateY(-50%);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    opacity 160ms ease;
+}
+
+.railArrow:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--app-primary) 42%,
+    var(--app-border-soft)
+  );
+  background: var(--app-bg-surface);
+  transform: translateY(-50%) scale(1.04);
+}
+
+.railArrowLeft {
+  left: -1.05rem;
+}
+
+.railArrowRight {
+  right: -1.05rem;
+}
+
 .categoryRail {
   display: flex;
   align-items: center;
@@ -179,7 +236,8 @@
 }
 
 .serviceRail,
-.brandRail {
+.brandRail,
+.usoRail {
   display: flex;
   gap: 0.75rem;
   min-width: 0;
@@ -194,7 +252,8 @@
 }
 
 .serviceRail::-webkit-scrollbar,
-.brandRail::-webkit-scrollbar {
+.brandRail::-webkit-scrollbar,
+.usoRail::-webkit-scrollbar {
   display: none;
 }
 
@@ -214,7 +273,10 @@
   font-size: var(--font-size-extra-small);
   font-weight: 800;
   white-space: nowrap;
-  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
 }
 
 .categoryChip:hover {
@@ -224,7 +286,11 @@
 }
 
 .categoryChip[data-active="true"] {
-  border-color: color-mix(in srgb, var(--app-primary) 55%, var(--app-border-soft));
+  border-color: color-mix(
+    in srgb,
+    var(--app-primary) 55%,
+    var(--app-border-soft)
+  );
   background: var(--app-primary-faint);
   color: var(--app-primary);
 }
@@ -291,17 +357,28 @@
   background: var(--app-bg-surface);
   color: var(--app-text-muted);
   cursor: pointer;
-  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+  transition:
+    background 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease;
 }
 
 .favoriteButton:hover {
-  border-color: color-mix(in srgb, var(--app-error) 40%, var(--app-border-soft));
+  border-color: color-mix(
+    in srgb,
+    var(--app-error) 40%,
+    var(--app-border-soft)
+  );
   background: color-mix(in srgb, var(--app-error) 9%, var(--app-bg-surface));
   color: var(--app-error);
 }
 
 .favoriteButton[data-active="true"] {
-  border-color: color-mix(in srgb, var(--app-error) 35%, var(--app-border-soft));
+  border-color: color-mix(
+    in srgb,
+    var(--app-error) 35%,
+    var(--app-border-soft)
+  );
   background: color-mix(in srgb, var(--app-error) 12%, var(--app-bg-surface));
   color: var(--app-error);
 }
@@ -350,6 +427,59 @@
   align-items: stretch;
 }
 
+.usoRail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.15rem 0.35rem;
+}
+
+.usoCard {
+  flex: 0 0 5.6rem;
+  display: grid;
+  justify-items: center;
+  gap: 0.42rem;
+  color: var(--app-text-strong);
+  text-align: center;
+  text-decoration: none;
+}
+
+.usoAvatar {
+  width: 4.2rem !important;
+  height: 4.2rem !important;
+  border: 2px solid var(--app-bg-surface);
+  color: white;
+  --app-primary: #141414;
+  --app-text-inverse: #fff;
+  box-shadow: 0 0.55rem 1.2rem
+    color-mix(in srgb, var(--app-shadow-color) 45%, transparent);
+}
+
+.usoAvatar span {
+  color: #fff !important;
+}
+
+.usoCard span {
+  max-width: 5.6rem;
+  overflow: hidden;
+  color: var(--app-text-strong);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.usoCard small {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18rem;
+  color: var(--app-warning);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
 .brandGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
@@ -366,14 +496,22 @@
   color: inherit;
   text-decoration: none;
   cursor: pointer;
-  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .brandCard:hover,
 .brandCard:has(.brandCardLink:focus-visible) {
   transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--app-primary) 45%, var(--app-border-soft));
-  box-shadow: 0 0.75rem 1.7rem color-mix(in srgb, var(--app-shadow-color) 60%, transparent);
+  border-color: color-mix(
+    in srgb,
+    var(--app-primary) 45%,
+    var(--app-border-soft)
+  );
+  box-shadow: 0 0.75rem 1.7rem
+    color-mix(in srgb, var(--app-shadow-color) 60%, transparent);
 }
 
 .brandCard:has(.brandCardLink:focus-visible) {
@@ -585,5 +723,18 @@
   .emptyState {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .railArrow {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .railArrowLeft {
+    left: -3.55rem;
+  }
+
+  .railArrowRight {
+    right: -3.55rem;
   }
 }

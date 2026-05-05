@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { BrandCard } from "@/components/molecules/brand-card";
+import { RichTextDisplay } from "@/components/molecules/rich-text-editor/rich-text-display";
 import {
   AlertDialog,
   Button,
@@ -381,7 +382,10 @@ export function BrandsUcrPage({
                 {selectedService.description?.trim() ? (
                   <div className={styles.serviceModalField}>
                     <span className={styles.serviceModalLabel}>{t.serviceModalDescription}</span>
-                    <p className={styles.serviceModalText}>{selectedService.description.trim()}</p>
+                    <RichTextDisplay
+                      html={selectedService.description}
+                      className={styles.serviceModalText}
+                    />
                   </div>
                 ) : null}
 

@@ -1,3 +1,4 @@
+import { isRichHtml, sanitizeRichHtml } from "@/lib/rich-text";
 import styles from "./rich-text-display.module.css";
 
 type RichTextDisplayProps = {
@@ -5,20 +6,6 @@ type RichTextDisplayProps = {
   className?: string;
   emptyFallback?: string;
 };
-
-// Allowed tags and attributes for sanitization (no images, no scripts)
-function sanitize(html: string): string {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, "")
-    .replace(/<img[^>]*>/gi, "")
-    .replace(/<iframe[\s\S]*?<\/iframe>/gi, "")
-    .replace(/on\w+="[^"]*"/gi, "")
-    .replace(/javascript:/gi, "");
-}
-
-function isRichHtml(html: string): boolean {
-  return /<[a-z][\s\S]*>/i.test(html);
-}
 
 export function RichTextDisplay({ html, className, emptyFallback }: RichTextDisplayProps) {
   if (!html || html === "<p></p>") {
@@ -36,7 +23,7 @@ export function RichTextDisplay({ html, className, emptyFallback }: RichTextDisp
   return (
     <div
       className={`${styles.richText}${className ? ` ${className}` : ""}`}
-      dangerouslySetInnerHTML={{ __html: sanitize(html) }}
+      dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(html) }}
     />
   );
 }

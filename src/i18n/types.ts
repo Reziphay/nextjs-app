@@ -209,6 +209,12 @@ export type Messages = {
     bannerTwoEyebrow: string;
     bannerTwoTitle: string;
     popularBrands: string;
+    recentServices: string;
+    recentBrands: string;
+    youMayLike: string;
+    youMayLikeBrands: string;
+    mostLikedServices: string;
+    mostLikedBrands: string;
     newBrand: string;
     fastServices: string;
     smartDeals: string;

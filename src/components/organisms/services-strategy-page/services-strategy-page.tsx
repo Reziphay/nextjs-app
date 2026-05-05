@@ -5,6 +5,7 @@ import { Badge } from "@/components/atoms/badge";
 import { Button } from "@/components/atoms/button";
 import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
+import { toPlainTextPreview } from "@/lib/rich-text";
 import type { Brand } from "@/types/brand";
 import styles from "./services-strategy-page.module.css";
 
@@ -164,7 +165,7 @@ export function ServicesStrategyPage({
                     <div>
                       <h3 className={styles.brandName}>{brand.name}</h3>
                       <p className={styles.brandDescription}>
-                        {brand.description?.trim() || t.strategyFutureNoteBody}
+                        {toPlainTextPreview(brand.description) || t.strategyFutureNoteBody}
                       </p>
                     </div>
 
