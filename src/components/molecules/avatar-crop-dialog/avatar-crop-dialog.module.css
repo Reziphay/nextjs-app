@@ -118,6 +118,11 @@
   cursor: grabbing;
 }
 
+.cropAreaWide {
+  width: min(100%, 28rem);
+  aspect-ratio: 16 / 9;
+}
+
 .cropGrid {
   position: absolute;
   inset: 0;

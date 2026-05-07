@@ -10,7 +10,7 @@ import {
   Combobox,
   type ComboboxOption,
 } from "@/components/atoms/combobox";
-import { ImageCropModal } from "@/components/atoms/image-crop-modal/image-crop-modal";
+import { AvatarCropDialog } from "@/components/molecules/avatar-crop-dialog/avatar-crop-dialog";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -21,6 +21,11 @@ import {
   AlertDialogCancel,
 } from "@/components/atoms/alert-dialog";
 import { Icon } from "@/components/icon";
+import { FormActions, FormActionsDanger, FormActionsSpacer } from "@/components/molecules/form-actions";
+import { PageSurfaceHeader } from "@/components/molecules/page-surface-header";
+import { StatusBanner } from "@/components/molecules/status-banner";
+import { SocialLinksEditor } from "@/components/molecules/social-links-editor/social-links-editor";
+import { socialFieldsToUrls, socialUrlsToFields } from "@/lib/social-url";
 import { Switch } from "@/components/atoms/switch";
 import { useLocale } from "@/components/providers/locale-provider";
 import { proxyMediaUrl } from "@/lib/media";
@@ -42,6 +47,7 @@ import {
 import { translateBackendErrorMessage } from "@/lib/backend-errors";
 import type { Brand, BrandCategory, BrandGalleryItem, Branch } from "@/types/brand";
 import { BranchPage } from "./branch-page";
+import { RichTextEditor } from "@/components/molecules/rich-text-editor/rich-text-editor";
 import styles from "./brand-form.module.css";
 
 // Branch draft preserves the server id for persisted branches
@@ -76,6 +82,7 @@ type BrandFormDraft = {
   newGalleryFiles: File[];
   newGalleryPreviewUrls: string[];
   branches: BranchDraft[];
+  socialLinks: string[];
 };
 
 type BrandFormProps = {
@@ -98,6 +105,7 @@ function createEmptyDraft(): BrandFormDraft {
     newGalleryFiles: [],
     newGalleryPreviewUrls: [],
     branches: [],
+    socialLinks: [],
   };
 }
 
@@ -111,6 +119,7 @@ function brandToDraft(brand: Brand): BrandFormDraft {
     logoRemoved: false,
     existingGalleryItems: (brand.gallery ?? []).slice().sort((a, b) => a.order - b.order),
     newGalleryFiles: [],
+    socialLinks: socialFieldsToUrls(brand),
     newGalleryPreviewUrls: [],
     branches: (brand.branches ?? []).map((b) => ({
       id: b.id,
@@ -274,6 +283,8 @@ export function BrandForm({
   const t = messages.brands;
   const session = useAppSelector(selectAuthSession);
   const branchQueryId = searchParams.get("branch");
+  const addBranchQuery = searchParams.get("addBranch");
+  const [addBranchQueryHandled, setAddBranchQueryHandled] = useState(false);
   const [persistedBrand, setPersistedBrand] = useState<Brand | null>(
     mode === "edit" ? brand ?? null : null,
   );
@@ -319,7 +330,7 @@ export function BrandForm({
 
   const categoryOptions: ComboboxOption[] = categories.map((c) => ({
     value: c.id,
-    label: c.name,
+    label: messages.categories[c.key as keyof typeof messages.categories] ?? c.key,
   }));
 
   const verificationMissing =
@@ -480,6 +491,13 @@ export function BrandForm({
   }, [branchQueryHandled, branchQueryId, draft.branches, mode]);
 
   useEffect(() => {
+    if (mode !== "edit" || addBranchQuery !== "1" || addBranchQueryHandled) return;
+    setAddBranchQueryHandled(true);
+    setEditingBranchIndex(null);
+    setBranchModalOpen(true);
+  }, [addBranchQuery, addBranchQueryHandled, mode]);
+
+  useEffect(() => {
     if (!branchModalOpen) {
       return;
     }
@@ -577,6 +595,9 @@ export function BrandForm({
           categoryIds: draft.category_ids,
           logo_media_id: logoMediaId,
           gallery_media_ids: allGalleryIds.length > 0 ? allGalleryIds : undefined,
+          ...Object.fromEntries(
+            Object.entries(socialUrlsToFields(draft.socialLinks)).map(([k, v]) => [k, v || null]),
+          ),
           branches: draft.branches.map((branch, index) => ({
             name: branch.name,
             description: branch.description || undefined,
@@ -622,6 +643,9 @@ export function BrandForm({
               ? { logo_media_id: null as null }
               : {}),
           ...(galleryChanged ? { gallery_media_ids: allGalleryIds } : {}),
+          ...Object.fromEntries(
+            Object.entries(socialUrlsToFields(draft.socialLinks)).map(([k, v]) => [k, v || null]),
+          ),
         };
         const updatedBrand = await updateBrand(currentBrand.id, payload, accessToken);
         didMutateServerState = true;
@@ -825,15 +849,14 @@ export function BrandForm({
     ...draft.newGalleryPreviewUrls.map((url, i) => ({ url, isExisting: false, index: i })),
   ];
 
-  function renderFormActions(className?: string) {
+  function renderFormActions(layout: "default" | "aside" = "default") {
     return (
-      <div className={`${styles.formFooter}${className ? ` ${className}` : ""}`}>
+      <FormActions layout={layout}>
         <Button
           variant="primary"
           type="submit"
           isLoading={isLoading}
           icon={isLoading ? undefined : "check"}
-          className={styles.formFooterPrimary}
           disabled={
             isLoading ||
             verificationMissing ||
@@ -850,10 +873,10 @@ export function BrandForm({
           {t.cancelForm}
         </Button>
 
-        <div className={styles.formFooterSpacer} />
+        <FormActionsSpacer />
 
         {mode === "edit" && (persistedBrand ?? brand) && (
-          <div className={styles.formFooterDanger}>
+          <FormActionsDanger>
             <Button
               variant="outline"
               type="button"
@@ -870,9 +893,9 @@ export function BrandForm({
             >
               {t.deleteBrand}
             </Button>
-          </div>
+          </FormActionsDanger>
         )}
-      </div>
+      </FormActions>
     );
   }
 
@@ -896,40 +919,29 @@ export function BrandForm({
 
   return (
     <div className={styles.wrapper}>
-      {/* ── Sticky header ── */}
-      <div className={styles.pageHeader}>
-        <Button variant="ghost" icon="arrow_back" onClick={handleCancel} />
-        <div className={styles.headerMeta}>
-          <h1 className={styles.title}>
-            {mode === "create" ? t.formCreateTitle : t.formEditTitle}
-          </h1>
-          <span className={styles.modeBadge}>
-            {mode === "create" ? t.formCreateTitle : t.formEditTitle}
-          </span>
-        </div>
-      </div>
+      <PageSurfaceHeader
+        title={mode === "create" ? t.formCreateTitle : t.formEditTitle}
+        subtitle={mode === "create" ? t.formCreateTitle : t.formEditTitle}
+        onBack={handleCancel}
+      />
 
       {/* ── Verification warning ── */}
       {verificationMissing && (
-        <div className={`${styles.feedback} ${styles.feedbackError}`}>
+        <StatusBanner variant="error" className={styles.formBanner}>
           <strong>{t.verificationRequiredTitle}</strong>
           {" — "}
           {t.verificationRequiredDescription}
-        </div>
+        </StatusBanner>
       )}
 
       <form className={styles.form} onSubmit={handleSubmit}>
         {/* ── Feedback ── */}
         {feedback && (
-          <div
-            className={`${styles.feedback} ${
-              feedback.type === "success"
-                ? styles.feedbackSuccess
-                : styles.feedbackError
-            }`}
+          <StatusBanner
+            variant={feedback.type === "success" ? "success" : "error"}
           >
             {feedback.message}
-          </div>
+          </StatusBanner>
         )}
 
         <div className={styles.desktopShell}>
@@ -949,19 +961,20 @@ export function BrandForm({
                 <div className={styles.logoPreview}>
                   <Image
                     src={proxyMediaUrl(draft.logoPreviewUrl) ?? draft.logoPreviewUrl}
-                    alt="Logo preview"
+                    alt={t.fieldLogo}
                     fill
                     className={styles.previewImage}
                     sizes="(min-width: 980px) 18rem, 120px"
                   />
-                  <button
+                  <Button
+                    variant="unstyled"
                     type="button"
                     className={styles.removePreviewBtn}
-                    aria-label="Remove logo"
+                    aria-label={`${t.deleteConfirm} ${t.fieldLogo}`}
                     onClick={handleRemoveLogo}
                   >
                     <Icon icon="close" size={12} color="current" />
-                  </button>
+                  </Button>
                 </div>
               </div>
             ) : (
@@ -987,8 +1000,26 @@ export function BrandForm({
             )}
           </div>
 
+            {/* Social links — sidebar, below logo */}
+            <div className={`${styles.formSection} ${styles.socialSidebarSection}`}>
+              <p className={styles.socialSidebarTitle}>{t.socialSection}</p>
+              <SocialLinksEditor
+                value={draft.socialLinks}
+                onChange={(links) => setDraft((prev) => ({ ...prev, socialLinks: links }))}
+                messages={{
+                  addPlaceholder: t.socialUrlPlaceholder,
+                  addButton: t.socialAddLink,
+                  removeLabel: t.socialRemoveLink,
+                  errorInvalidFormat: t.socialUrlErrorInvalidFormat,
+                  errorInvalidProtocol: t.socialUrlErrorInvalidProtocol,
+                  errorTooLong: t.socialUrlErrorTooLong,
+                  errorInvalidChars: t.socialUrlErrorInvalidChars,
+                }}
+              />
+            </div>
+
             <div className={styles.desktopAside}>
-              {renderFormActions(styles.formFooterAside)}
+              {renderFormActions("aside")}
             </div>
           </div>
 
@@ -1020,12 +1051,10 @@ export function BrandForm({
               <div className={styles.fieldRow}>
                 <Field>
                   <FieldLabel>{t.fieldDescription}</FieldLabel>
-                  <textarea
-                    className={styles.textarea}
-                    value={draft.description}
+                  <RichTextEditor
+                    value={draft.description ?? ""}
+                    onChange={(html) => updateField("description", html)}
                     placeholder={t.fieldDescriptionPlaceholder}
-                    rows={4}
-                    onChange={(e) => updateField("description", e.target.value)}
                   />
                 </Field>
               </div>
@@ -1091,10 +1120,11 @@ export function BrandForm({
                         className={styles.previewImage}
                         sizes="200px"
                       />
-                      <button
+                      <Button
+                        variant="unstyled"
                         type="button"
                         className={styles.removePreviewBtn}
-                        aria-label={`Remove gallery image ${index + 1}`}
+                        aria-label={`${t.deleteConfirm} ${t.gallery} ${index + 1}`}
                         onClick={() =>
                           isExisting
                             ? handleRemoveExistingGalleryItem(index)
@@ -1102,7 +1132,7 @@ export function BrandForm({
                         }
                       >
                         <Icon icon="close" size={12} color="current" />
-                      </button>
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -1138,22 +1168,24 @@ export function BrandForm({
                         </div>
                       </div>
                       <div className={styles.branchItemActions}>
-                        <button
+                        <Button
+                          variant="unstyled"
                           type="button"
                           className={styles.iconBtn}
-                          aria-label={`Edit ${branch.name}`}
+                          aria-label={`${t.branchEditModalTitle}: ${branch.name}`}
                           onClick={() => handleEditBranch(index)}
                         >
                           <Icon icon="edit" size={14} color="current" />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="unstyled"
                           type="button"
                           className={`${styles.iconBtn} ${styles.iconBtnDelete}`}
-                          aria-label={`Delete ${branch.name}`}
+                          aria-label={`${t.deleteBranch}: ${branch.name}`}
                           onClick={() => handleDeleteBranch(index)}
                         >
                           <Icon icon="delete" size={14} color="current" />
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ))
@@ -1178,11 +1210,12 @@ export function BrandForm({
 
       {/* Image crop modal */}
       {cropTarget && (
-        <ImageCropModal
+        <AvatarCropDialog
           file={cropTarget.file}
           aspectRatio={cropTarget.aspectRatio}
-          onCrop={cropTarget.onDone}
-          onCancel={() => setCropTarget(null)}
+          open={true}
+          onConfirm={cropTarget.onDone}
+          onClose={() => setCropTarget(null)}
         />
       )}
 
@@ -1307,7 +1340,8 @@ export function BrandForm({
                       {selectedTransferTarget.email}
                     </span>
                   </div>
-                  <button
+                  <Button
+                    variant="unstyled"
                     type="button"
                     onClick={() => {
                       setSelectedTransferTarget(null);
@@ -1325,7 +1359,7 @@ export function BrandForm({
                     }}
                   >
                     {t.transferChangeTarget}
-                  </button>
+                  </Button>
                 </div>
 
                 {/* Brand being transferred */}

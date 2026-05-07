@@ -1,0 +1,126 @@
+.wrapper {
+  width: 100%;
+  max-width: 78rem;
+  height: 100%;
+  margin-inline: auto;
+  padding: 1.45rem 2rem 2rem;
+  overflow-y: auto;
+  scrollbar-width: none;
+  box-sizing: border-box;
+}
+
+.wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.header {
+  margin-bottom: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-card);
+  background: var(--app-bg-surface-strong);
+}
+
+.header h1,
+.header p {
+  margin: 0;
+}
+
+.header h1 {
+  margin-top: 0.3rem;
+  color: var(--app-text-strong);
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1;
+  font-weight: 800;
+}
+
+.header p {
+  max-width: 42rem;
+  margin-top: 0.7rem;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  line-height: 1.7;
+}
+
+.eyebrow {
+  color: var(--app-primary);
+  font-size: var(--font-size-extra-small);
+  font-weight: 800;
+}
+
+.categorySection {
+  display: flex;
+  gap: 0.55rem;
+  overflow-x: auto;
+  padding: 0.25rem 0 1rem;
+  scrollbar-width: none;
+}
+
+.categorySection::-webkit-scrollbar {
+  display: none;
+}
+
+.categoryChip {
+  flex: 0 0 auto;
+  min-height: 2.35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface-strong);
+  color: var(--app-text-strong);
+  text-decoration: none;
+  font-size: var(--font-size-extra-small);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.categoryChip[data-active="true"] {
+  border-color: color-mix(in srgb, var(--app-primary) 55%, var(--app-border-soft));
+  background: var(--app-primary-faint);
+  color: var(--app-primary);
+}
+
+.categoryChip small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--app-bg-surface);
+  color: var(--app-text-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: 1rem;
+}
+
+.sentinel {
+  min-height: 4rem;
+  display: flex;
+  justify-content: center;
+  padding: 1.25rem 0;
+}
+
+.loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-extra-small);
+  font-weight: 800;
+}
+
+@media (max-width: 56rem) {
+  .wrapper {
+    padding: 1rem 1rem 6rem;
+  }
+}

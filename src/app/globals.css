@@ -6,7 +6,7 @@
 
 :root {
   color-scheme: light;
-  --general-border-radius: 0.35rem;
+  --general-border-radius: 0.65rem;
   --general-border-radius-2xs: calc(var(--general-border-radius) * 0.286);
   --general-border-radius-xs: calc(var(--general-border-radius) * 0.357);
   --general-border-radius-sm: calc(var(--general-border-radius) * 0.571);
@@ -311,7 +311,7 @@ pre {
   color: var(--app-text-strong);
   font-size: clamp(2.6rem, 6vw, 4.5rem);
   font-weight: 800;
-  line-height: 1.0;
+  line-height: 1;
   letter-spacing: -0.05em;
 }
 
@@ -891,7 +891,9 @@ pre {
   font-size: 1.3rem;
   font-weight: 400;
   color: var(--app-text-muted);
-  transition: transform 200ms ease, color 160ms ease;
+  transition:
+    transform 200ms ease,
+    color 160ms ease;
   display: inline-block;
 }
 

@@ -115,7 +115,7 @@ export const fontLinks = dedupeLinks([
 ]);
 
 export const typographyTheme = {
-  rootFontSizePx: 14,
+  rootFontSizePx: 16,
   fontFamilyBase: createFontFamily(fontEmbedMarkup),
   fontSizes: fontSizeScale,
 } as const;

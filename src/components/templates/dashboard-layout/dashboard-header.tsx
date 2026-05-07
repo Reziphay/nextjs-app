@@ -18,6 +18,7 @@ import {
 import { Icon } from "@/components/icon";
 import { Logo } from "@/components/logo";
 import { LanguageSwitcher } from "@/components/molecules/language-switcher/language-switcher";
+import { MarketplaceSearchBox } from "@/components/molecules/marketplace-search-box/marketplace-search-box";
 import { ThemeSwitcher } from "@/components/molecules/theme-switcher/theme-switcher";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
@@ -129,6 +130,10 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
   const settingsActive = pathname === "/settings";
   const showNotificationBadge =
     !notificationsActive && Boolean(session.accessToken) && hasNotificationSignal;
+  const showMarketplaceSearch =
+    session.user?.type === "ucr" ||
+    session.user?.type === "uso" ||
+    session.user?.type === "admin";
   const defaultHref = getDefaultAppRouteForUserType(session.user?.type);
   const crumbs = isProtectedAppPath(pathname)
     ? getDashboardBreadcrumbs({
@@ -150,18 +155,19 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
           <Logo size={20} />
         </Link>
 
-        <button
+        <Button
+          variant="unstyled"
           type="button"
           onClick={onToggle}
-          aria-label={collapsed ? "Sidebar aç" : "Sidebar bağla"}
+          aria-label={collapsed ? db.openSidebar : db.closeSidebar}
           className={styles.toggleBtn}
         >
           <Icon icon="left_panel_open" size={16} color="current" className={`${styles.toggleIcon} ${collapsed ? styles.toggleIconCollapsed : ""}`} />
-        </button>
+        </Button>
 
         <div className={styles.separator} />
 
-        <nav aria-label="breadcrumb" className={styles.breadcrumb}>
+        <nav aria-label={db.breadcrumb} className={styles.breadcrumb}>
           {crumbs.map((crumb, i) => (
             <span key={`${crumb.href ?? "current"}-${crumb.label}-${i}`} className={styles.crumbItem}>
               {i > 0 ? (
@@ -190,6 +196,14 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
       </div>
 
       <div className={styles.right}>
+        {showMarketplaceSearch ? (
+          <MarketplaceSearchBox
+            accessToken={session.accessToken ?? undefined}
+            placeholder={messages.marketplace.searchPlaceholder}
+            className={styles.headerSearch}
+          />
+        ) : null}
+
         <Link
           href="/notification"
           aria-label={db.notifications}
@@ -205,7 +219,8 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
         </Link>
 
         <div ref={settingsWrapRef} className={styles.settingsWrap}>
-          <button
+          <Button
+            variant="unstyled"
             type="button"
             aria-label={db.settings}
             aria-expanded={settingsOpen}
@@ -215,7 +230,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
             onClick={() => setSettingsOpen((open) => !open)}
           >
             <Icon icon="settings" size={16} color="current" className={styles.supportIcon} />
-          </button>
+          </Button>
 
           {settingsOpen ? (
             <div

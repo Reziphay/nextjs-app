@@ -109,7 +109,7 @@ export function AccountBrandsSection({
                   backgroundImage={{ src: backgroundImage, alt: brand.name }}
                   title={brand.name}
                   description={brand.description ?? ""}
-                  category={brand.categories[0]?.name}
+                  category={brand.categories[0] ? (messages.categories[brand.categories[0].key as keyof typeof messages.categories] ?? brand.categories[0].key) : undefined}
                   badgeText={
                     brand.rating_count > 0
                       ? `${brand.rating_count} ${t.brandCardReviewsSuffix}`

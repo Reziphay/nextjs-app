@@ -11,6 +11,7 @@ type ProfileBoxProps = {
   label?: string;
   subtitle?: string;
   className?: string;
+  priority?: boolean;
 };
 
 export function ProfileBox({
@@ -20,6 +21,7 @@ export function ProfileBox({
   label,
   subtitle,
   className,
+  priority = false,
 }: ProfileBoxProps) {
   const href = userId ? `/account?id=${userId}` : null;
   const content = (
@@ -30,6 +32,7 @@ export function ProfileBox({
         width={48}
         height={48}
         className={styles.avatar}
+        priority={priority}
       />
       <div className={styles.meta}>
         {label ? <span className={styles.label}>{label}</span> : null}

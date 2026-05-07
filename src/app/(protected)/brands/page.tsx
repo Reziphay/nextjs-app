@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { AccountBrandsSection } from "@/components/organisms/account-brands-section/account-brands-section";
@@ -5,11 +6,14 @@ import { requireProtectedRouteAccess } from "@/lib/protected-route";
 import {
   fetchMyBrands,
   fetchBrandById,
-  fetchActiveBrands,
+  fetchActiveBrandsPage,
   fetchAccountBrands,
   fetchBrandCategories,
   fetchBrandTeamWorkspace,
 } from "@/lib/brands-api";
+import { fetchPublicServices } from "@/lib/services-api";
+import { fetchMarketplaceFacets } from "@/lib/marketplace-api";
+import { fetchBrandForReview } from "@/lib/moderation-api";
 import { BrandsUsoPage } from "@/components/organisms/brands-uso-page";
 import { BrandsUcrPage } from "@/components/organisms/brands-ucr-page";
 import { BrandDetail } from "@/components/organisms/brand-detail";
@@ -18,7 +22,9 @@ import { BrandTeamWorkspace } from "@/components/organisms/brand-team-workspace"
 import { fetchUserProfileById } from "@/lib/users-api";
 import { getMessages } from "@/i18n/config";
 import { getServerLocale } from "@/i18n/server";
-import type { Brand, PublicUserProfile } from "@/types";
+import { buildPageTitle } from "@/lib/page-metadata";
+import type { Brand, BrandStatus, PublicUserProfile } from "@/types";
+import type { ModerationBrandDetail } from "@/types/moderation";
 
 type BrandsPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -56,6 +62,113 @@ async function fetchBrandOwnersById(
       ): entry is readonly [string, PublicUserProfile] => entry !== null,
     ),
   );
+}
+
+function mapModerationBrandToBrand(brand: ModerationBrandDetail): Brand {
+  return {
+    id: brand.id,
+    name: brand.name,
+    description: brand.description ?? undefined,
+    status: brand.status as BrandStatus,
+    owner_id: brand.owner.id,
+    logo_url: brand.logo_url ?? undefined,
+    gallery: (brand.gallery ?? []).map((item, index) => ({
+      id: `${brand.id}-gallery-${index}`,
+      media_id: `${brand.id}-gallery-media-${index}`,
+      url: item.url,
+      order: item.order ?? index,
+    })),
+    branches: (brand.branches ?? []).map((branch) => ({
+      id: branch.id,
+      brand_id: brand.id,
+      name: branch.name,
+      description: branch.description ?? undefined,
+      address1: branch.address1,
+      address2: branch.address2 ?? undefined,
+      phone: branch.phone ?? undefined,
+      email: branch.email ?? undefined,
+      is_24_7: branch.is_24_7 ?? false,
+      opening: branch.opening ?? undefined,
+      closing: branch.closing ?? undefined,
+      breaks: [],
+      cover_url: branch.cover_url ?? undefined,
+    })),
+    categories: brand.categories ?? [],
+    rating: null,
+    rating_count: 0,
+    my_rating: null,
+    created_at: brand.created_at,
+    updated_at: brand.updated_at ?? brand.created_at,
+  };
+}
+
+function mapModerationBrandOwnerToProfile(brand: ModerationBrandDetail): PublicUserProfile {
+  return {
+    id: brand.owner.id,
+    first_name: brand.owner.first_name,
+    last_name: brand.owner.last_name,
+    email: brand.owner.email,
+    type: "uso",
+    avatar_url: brand.owner.avatar_url ?? null,
+    created_at: brand.owner.created_at ?? brand.created_at,
+    updated_at: brand.owner.created_at ?? brand.created_at,
+  };
+}
+
+export async function generateMetadata({
+  searchParams,
+}: BrandsPageProps): Promise<Metadata> {
+  const [locale, resolvedParams, cookieStore] = await Promise.all([
+    getServerLocale(),
+    searchParams ?? Promise.resolve({}),
+    cookies(),
+  ]);
+  const messages = getMessages(locale);
+  const progress = getStringParam(resolvedParams, "progress");
+  const brandId = getStringParam(resolvedParams, "id");
+  const accountUserId = getStringParam(resolvedParams, "account");
+  const accessToken = cookieStore.get("rzp_at")?.value ?? "";
+
+  if (accountUserId && !progress && !brandId) {
+    const targetUser = await fetchUserProfileById(accountUserId, accessToken).catch(() => null);
+    const fullName = targetUser
+      ? `${targetUser.first_name} ${targetUser.last_name}`.trim()
+      : null;
+
+    return {
+      title: buildPageTitle(messages.profile.brandsSectionTitle, fullName),
+    };
+  }
+
+  if (progress === "create") {
+    return {
+      title: buildPageTitle(messages.dashboard.brands, messages.brands.createBrand),
+    };
+  }
+
+  if (brandId) {
+    const brand = await fetchBrandById(brandId, accessToken).catch(() => null);
+
+    if (progress === "edit") {
+      return {
+        title: buildPageTitle(messages.brands.editBrand, brand?.name),
+      };
+    }
+
+    if (progress === "team") {
+      return {
+        title: buildPageTitle(messages.brands.teamWorkspace, brand?.name),
+      };
+    }
+
+    return {
+      title: buildPageTitle(messages.brands.detailTitle, brand?.name),
+    };
+  }
+
+  return {
+    title: messages.dashboard.brands,
+  };
 }
 
 export default async function BrandsPage({ searchParams }: BrandsPageProps) {
@@ -137,6 +250,26 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
 
   // ── Brand detail view (?id=<brand_id>) ────────────────────────────────────
   if (brandId && !progress) {
+    if (user.type === "admin") {
+      const moderationBrand = await fetchBrandForReview(brandId, accessToken).catch(() => null);
+
+      if (!moderationBrand) {
+        return (
+          <div style={{ padding: "2rem", color: "var(--app-text-muted)", fontSize: "var(--font-size-small)" }}>
+            Brand not found.
+          </div>
+        );
+      }
+
+      return (
+        <BrandDetail
+          brand={mapModerationBrandToBrand(moderationBrand)}
+          currentUserId={user.id}
+          owner={mapModerationBrandOwnerToProfile(moderationBrand)}
+        />
+      );
+    }
+
     const brand = await fetchBrandById(brandId, accessToken).catch(() => null);
 
     if (!brand) {
@@ -225,8 +358,37 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
 
   // ── UCR default view (should only land here with ?id, handled above) ───────
   // Fallback: show the active brands gallery
-  const brands = await fetchActiveBrands(accessToken).catch(() => []);
-  const ownersById = await fetchBrandOwnersById(brands, accessToken);
+  const activeBrandCategoryId =
+    getStringParam(resolvedParams, "category") ??
+    getStringParam(resolvedParams, "brand_category_id");
+  const [brandsPage, featuredServices, marketplaceFacets] = await Promise.all([
+    fetchActiveBrandsPage(accessToken, {
+      page: 1,
+      limit: 24,
+      ...(activeBrandCategoryId && { brand_category_id: activeBrandCategoryId }),
+    }).catch(() => ({
+      brands: [],
+      meta: { page: 1, limit: 24, total_count: 0, has_more: false },
+    })),
+    fetchPublicServices({}, accessToken).catch(() => []),
+    fetchMarketplaceFacets(accessToken).catch(() => ({
+      service_categories: [],
+      brand_categories: [],
+    })),
+  ]);
+  const ownersById = await fetchBrandOwnersById(brandsPage.brands, accessToken);
+  const activeServices = featuredServices.filter((s) => s.status === "ACTIVE");
 
-  return <BrandsUcrPage brands={brands} ownersById={ownersById} />;
+  return (
+    <BrandsUcrPage
+      key={activeBrandCategoryId ?? "all"}
+      brands={brandsPage.brands}
+      ownersById={ownersById}
+      featuredServices={activeServices}
+      accessToken={accessToken}
+      initialMeta={brandsPage.meta}
+      brandCategories={marketplaceFacets.brand_categories}
+      activeBrandCategoryId={activeBrandCategoryId}
+    />
+  );
 }

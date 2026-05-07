@@ -168,7 +168,8 @@ export function AlertDialogTrigger({
   }
 
   return (
-    <button
+    <Button
+      variant="unstyled"
       type="button"
       aria-expanded={open}
       aria-haspopup="dialog"
@@ -177,7 +178,7 @@ export function AlertDialogTrigger({
       {...props}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 

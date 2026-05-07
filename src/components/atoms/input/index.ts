@@ -6,3 +6,6 @@ export {
   Input,
   PasswordInput,
 } from "./input";
+export type {
+  InputProps,
+} from "./input";

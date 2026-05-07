@@ -10,7 +10,8 @@ type ButtonVariant =
   | "ghost"
   | "destructive"
   | "link"
-  | "icon";
+  | "icon"
+  | "unstyled";
 
 type ButtonSize = "small" | "medium" | "large";
 
@@ -61,6 +62,30 @@ export function Button({
   const iconName = isLoading ? "progress_activity" : icon;
   const iconSize = buttonIconSizes[size];
   const isDisabled = disabled || isLoading;
+
+  if (variant === "unstyled") {
+    return (
+      <button
+        type="button"
+        className={className}
+        disabled={isDisabled}
+        aria-busy={isLoading}
+        {...props}
+      >
+        {iconName ? (
+          <Icon
+            icon={iconName}
+            size={iconSize}
+            color="current"
+            className={isLoading ? styles.spinning : undefined}
+          />
+        ) : iconNode ? (
+          iconNode
+        ) : null}
+        {children}
+      </button>
+    );
+  }
 
   return (
     <button

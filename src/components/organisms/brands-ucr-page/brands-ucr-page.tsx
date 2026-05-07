@@ -1,17 +1,34 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { BrandCard } from "@/components/molecules/brand-card";
+import { RichTextDisplay } from "@/components/molecules/rich-text-editor/rich-text-display";
+import {
+  AlertDialog,
+  Button,
+  AlertDialogContent,
+} from "@/components/atoms";
 import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
+import { fetchActiveBrandsPage, type PaginatedBrandMeta } from "@/lib/brands-api";
 import { proxyMediaUrl } from "@/lib/media";
+import { fetchUserProfileById } from "@/lib/users-api";
 import type { Brand } from "@/types/brand";
 import type { PublicUserProfile } from "@/types";
+import type { Service } from "@/types/service";
 import styles from "./brands-ucr-page.module.css";
 
 type BrandsUcrPageProps = {
   brands: Brand[];
   ownersById: Record<string, PublicUserProfile>;
+  featuredServices?: Service[];
+  accessToken?: string;
+  initialMeta?: PaginatedBrandMeta;
+  brandCategories?: { id: string; key: string; count: number }[];
+  activeBrandCategoryId?: string;
 };
 
 type BrandSection = {
@@ -44,6 +61,8 @@ function BrandGrid({
   reviewsSuffix: string;
   onSelect: (id: string) => void;
 }) {
+  const { messages } = useLocale();
+
   if (brands.length === 0) {
     return <div className={styles.empty}>{emptyLabel}</div>;
   }
@@ -72,7 +91,7 @@ function BrandGrid({
             }}
             title={brand.name}
             description={brand.description ?? ""}
-            category={brand.categories[0]?.name}
+            category={brand.categories[0] ? (messages.categories[brand.categories[0].key as keyof typeof messages.categories] ?? brand.categories[0].key) : undefined}
             badgeText={
               brand.rating_count > 0
                 ? `${brand.rating_count} ${reviewsSuffix}`
@@ -139,22 +158,173 @@ function buildSections(
   return sections;
 }
 
-export function BrandsUcrPage({ brands, ownersById }: BrandsUcrPageProps) {
+function formatSvcPrice(service: Service, labelFree: string, labelFrom: string): string {
+  if (service.price_type === "FREE") return labelFree;
+  if (service.price === null) return "—";
+  if (service.price_type === "STARTING_FROM") return `${labelFrom} ${service.price}`;
+  return String(service.price);
+}
+
+function formatSvcDuration(minutes: number | null, unit: string): string {
+  if (!minutes) return "";
+  if (minutes < 60) return `${minutes} ${unit}`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  const hourUnit =
+    unit === "мин" ? "ч" : unit === "dəq" ? "saat" : unit === "dk" ? "sa" : "h";
+  return m > 0 ? `${h}${hourUnit} ${m}${unit}` : `${h}${hourUnit}`;
+}
+
+export function BrandsUcrPage({
+  brands,
+  ownersById,
+  featuredServices = [],
+  accessToken,
+  initialMeta,
+  brandCategories = [],
+  activeBrandCategoryId,
+}: BrandsUcrPageProps) {
   const router = useRouter();
   const { messages } = useLocale();
   const t = messages.brands;
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [brandItems, setBrandItems] = useState(brands);
+  const [ownerItemsById, setOwnerItemsById] = useState(ownersById);
+  const [page, setPage] = useState(initialMeta?.page ?? 1);
+  const [hasMore, setHasMore] = useState(initialMeta?.has_more ?? false);
+  const [loading, setLoading] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   function handleSelect(id: string) {
     router.push(`/brands?id=${id}`);
   }
 
-  const sections = buildSections(brands, t);
+  useEffect(() => {
+    if (!accessToken) return;
+    const missing = [...new Set(brandItems.map((brand) => brand.owner_id).filter((ownerId) => !ownerItemsById[ownerId]))];
+    if (missing.length === 0) return;
+
+    void Promise.all(
+      missing.map(async (ownerId) => {
+        const owner = await fetchUserProfileById(ownerId, accessToken);
+        return owner ? ([ownerId, owner] as const) : null;
+      }),
+    ).then((entries) => {
+      setOwnerItemsById((current) => ({
+        ...current,
+        ...Object.fromEntries(entries.filter((entry): entry is readonly [string, PublicUserProfile] => entry !== null)),
+      }));
+    });
+  }, [accessToken, brandItems, ownerItemsById]);
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !hasMore || !accessToken) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      const first = entries[0];
+      if (!first?.isIntersecting || loading) return;
+
+      const nextPage = page + 1;
+      setLoading(true);
+      void fetchActiveBrandsPage(accessToken, {
+        page: nextPage,
+        limit: 24,
+        ...(activeBrandCategoryId && { brand_category_id: activeBrandCategoryId }),
+      })
+        .then((result) => {
+          setBrandItems((current) => {
+            const seen = new Set(current.map((brand) => brand.id));
+            return [...current, ...result.brands.filter((brand) => !seen.has(brand.id))];
+          });
+          setPage(result.meta.page);
+          setHasMore(result.meta.has_more);
+        })
+        .finally(() => setLoading(false));
+    }, { rootMargin: "480px" });
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [accessToken, activeBrandCategoryId, hasMore, loading, page]);
+
+  const sections = buildSections(brandItems, t);
+  const topServices = featuredServices.slice(0, 8);
 
   return (
     <div className={styles.wrapper}>
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>{t.discoverBrands}</h1>
       </div>
+
+      {brandCategories.length > 0 ? (
+        <section className={styles.categorySection}>
+          <Link
+            href="/brands"
+            className={styles.categoryChip}
+            data-active={!activeBrandCategoryId}
+          >
+            {messages.marketplace.allBrands}
+          </Link>
+          {brandCategories.map((category) => (
+            <Link
+              key={category.id}
+              href={`/brands?category=${category.id}`}
+              className={styles.categoryChip}
+              data-active={activeBrandCategoryId === category.id}
+            >
+              <span>{messages.categories[category.key as keyof typeof messages.categories] ?? category.key}</span>
+              <small>{category.count}</small>
+            </Link>
+          ))}
+        </section>
+      ) : null}
+
+      {topServices.length > 0 ? (
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <Icon icon="design_services" size={18} color="current" className={styles.sectionIcon} />
+            <h2 className={styles.sectionTitle}>{t.ucrFeaturedServicesTitle}</h2>
+          </div>
+          <div className={styles.servicesGrid}>
+            {topServices.map((svc) => {
+              const priceLabel = formatSvcPrice(svc, t.serviceLabelFree, t.serviceLabelFrom);
+              const durationLabel = formatSvcDuration(svc.duration, t.serviceLabelDurationUnit);
+              const firstImg = svc.images[0];
+              const imgUrl = firstImg ? proxyMediaUrl(firstImg.url) : null;
+
+              return (
+                <Button
+                  variant="unstyled"
+                  key={svc.id}
+                  type="button"
+                  className={styles.serviceCard}
+                  onClick={() => setSelectedService(svc)}
+                >
+                  {imgUrl ? (
+                    <div className={styles.serviceCardThumb}>
+                      <Image src={imgUrl} alt={svc.title} fill className={styles.serviceCardThumbImg} sizes="56px" />
+                    </div>
+                  ) : (
+                    <div className={styles.serviceCardThumbPlaceholder}>
+                      <Icon icon="design_services" size={18} color="current" />
+                    </div>
+                  )}
+                  <div className={styles.serviceCardBody}>
+                    <p className={styles.serviceCardTitle}>{svc.title}</p>
+                    {svc.service_category ? (
+                      <span className={styles.serviceCardCategory}>{messages.categories[svc.service_category.key as keyof typeof messages.categories] ?? svc.service_category.key}</span>
+                    ) : null}
+                    <div className={styles.serviceCardMeta}>
+                      <span>{priceLabel}</span>
+                      {durationLabel ? <span>{durationLabel}</span> : null}
+                    </div>
+                  </div>
+                </Button>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
       {sections.map((section) => (
         <section key={section.key} className={styles.section}>
@@ -169,13 +339,99 @@ export function BrandsUcrPage({ brands, ownersById }: BrandsUcrPageProps) {
           </div>
           <BrandGrid
             brands={section.brands}
-            ownersById={ownersById}
+            ownersById={ownerItemsById}
             emptyLabel={t.noSectionBrands}
             reviewsSuffix={t.brandCardReviewsSuffix}
             onSelect={handleSelect}
           />
         </section>
       ))}
+
+      <div ref={sentinelRef} className={styles.sentinel}>
+        {loading ? (
+          <span className={styles.loading}>
+            <Icon icon="progress_activity" size={16} color="current" />
+            {messages.auth.login.submitting}
+          </span>
+        ) : null}
+      </div>
+
+      <AlertDialog open={Boolean(selectedService)} onOpenChange={(open) => { if (!open) setSelectedService(null); }}>
+        <AlertDialogContent className={styles.serviceModal}>
+          {selectedService ? (
+            <>
+              <div className={styles.serviceModalHeader}>
+                <div>
+                  <h2 className={styles.serviceModalTitle}>{selectedService.title}</h2>
+                  {selectedService.service_category ? (
+                    <p className={styles.serviceModalCategory}>{messages.categories[selectedService.service_category.key as keyof typeof messages.categories] ?? selectedService.service_category.key}</p>
+                  ) : null}
+                </div>
+                <Button
+                  variant="unstyled"
+                  type="button"
+                  className={styles.serviceModalClose}
+                  onClick={() => setSelectedService(null)}
+                  aria-label={t.serviceModalClose}
+                >
+                  <Icon icon="close" size={18} color="current" />
+                </Button>
+              </div>
+
+              <div className={styles.serviceModalBody}>
+                {selectedService.description?.trim() ? (
+                  <div className={styles.serviceModalField}>
+                    <span className={styles.serviceModalLabel}>{t.serviceModalDescription}</span>
+                    <RichTextDisplay
+                      html={selectedService.description}
+                      className={styles.serviceModalText}
+                    />
+                  </div>
+                ) : null}
+
+                <div className={styles.serviceModalGrid}>
+                  <div className={styles.serviceModalField}>
+                    <span className={styles.serviceModalLabel}>{t.serviceModalPrice}</span>
+                    <p className={styles.serviceModalText}>{formatSvcPrice(selectedService, t.serviceLabelFree, t.serviceLabelFrom)}</p>
+                  </div>
+                  {selectedService.duration ? (
+                    <div className={styles.serviceModalField}>
+                      <span className={styles.serviceModalLabel}>{t.serviceModalDuration}</span>
+                      <p className={styles.serviceModalText}>{formatSvcDuration(selectedService.duration, t.serviceLabelDurationUnit)}</p>
+                    </div>
+                  ) : null}
+                  {selectedService.address ? (
+                    <div className={styles.serviceModalField}>
+                      <span className={styles.serviceModalLabel}>{t.serviceModalAddress}</span>
+                      <p className={styles.serviceModalText}>{selectedService.address}</p>
+                    </div>
+                  ) : null}
+                </div>
+
+                {selectedService.images.length > 0 ? (
+                  <div className={styles.serviceModalImages}>
+                    {selectedService.images.map((img) => {
+                      const imgUrl = proxyMediaUrl(img.url);
+                      if (!imgUrl) return null;
+                      return (
+                        <div key={img.id} className={styles.serviceModalImageFrame}>
+                          <Image
+                            src={imgUrl}
+                            alt={selectedService.title}
+                            fill
+                            className={styles.serviceModalImage}
+                            sizes="(max-width: 640px) 50vw, 160px"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
+            </>
+          ) : null}
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -3,21 +3,7 @@
   position: relative;
   isolation: isolate;
   padding: 0 1.429rem 2rem;
-  background:
-    radial-gradient(
-      circle at top left,
-      var(--app-glow-primary-soft),
-      transparent 32%
-    ),
-    radial-gradient(
-      circle at top right,
-      var(--app-glow-primary-strong),
-      transparent 30%
-    );
-  background-repeat: no-repeat;
-  background-size:
-    100% 100%,
-    100% 100%;
+  background: var(--app-bg-canvas);
 }
 
 .topbar {
@@ -28,8 +14,8 @@
   z-index: 40;
   padding: 0 1.714rem;
   border-radius: 0;
-  background: var(--app-bg-surface-strong);
-  box-shadow: 0 1rem 2.5rem var(--app-shadow-card-soft);
+  background: var(--app-bg-surface);
+  box-shadow: 0 1px 0 var(--app-border-soft);
 }
 
 .content {
@@ -50,13 +36,7 @@
   padding: 0.857rem;
   border: 1px solid var(--app-border-soft);
   border-radius: var(--general-border-radius-6xl);
-  background:
-    linear-gradient(
-      135deg,
-      var(--app-bg-overlay-strong) 0%,
-      var(--app-bg-overlay-soft) 100%
-    ),
-    var(--app-bg-surface);
+  background: var(--app-bg-surface);
   box-shadow: 0 1.714rem 5rem var(--app-shadow-color);
 }
 
@@ -76,7 +56,7 @@
   align-content: center;
   padding: clamp(1.714rem, 2.4vw, 3rem);
   border-radius: var(--general-border-radius-5xl);
-  background: var(--app-bg-surface-strong);
+  background: var(--app-bg-surface);
   box-shadow: 0 0.857rem 2.286rem var(--app-shadow-card-soft);
 }
 

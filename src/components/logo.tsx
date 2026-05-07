@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/atoms/button";
+import { useLocale } from "@/components/providers/locale-provider";
 
 const DEFAULT_LOGO_SRC = "/reziphay-logo-default.svg";
 const HOVER_LOGO_SRC = "/reziphay-logo-hover.svg";
@@ -13,13 +15,15 @@ type LogoProps = {
 
 export function Logo({ size = 56, priority = false }: LogoProps) {
   const router = useRouter();
+  const { messages } = useLocale();
   const defaultLoading = priority ? "eager" : "lazy";
 
   return (
-    <button
+    <Button
+      variant="unstyled"
       type="button"
       className="logoButton"
-      aria-label="Go to home page"
+      aria-label={messages.navigation.home}
       onClick={() => router.push("/")}
     >
       <span className="logoSwap" style={{ width: size, height: size }}>
@@ -45,6 +49,6 @@ export function Logo({ size = 56, priority = false }: LogoProps) {
           className="logoSwapImage logoSwapImageHover"
         />
       </span>
-    </button>
+    </Button>
   );
 }

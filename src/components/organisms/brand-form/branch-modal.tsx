@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/atoms/alert-dialog";
 import { Button } from "@/components/atoms/button";
-import { ImageCropModal } from "@/components/atoms/image-crop-modal/image-crop-modal";
+import { AvatarCropDialog } from "@/components/molecules/avatar-crop-dialog/avatar-crop-dialog";
 import {
   Combobox,
   type ComboboxOption,
@@ -30,6 +30,8 @@ import {
 } from "@/components/atoms/input";
 import { Switch } from "@/components/atoms/switch";
 import { Icon } from "@/components/icon";
+import { RichTextEditor } from "@/components/molecules/rich-text-editor/rich-text-editor";
+import { StatusBanner } from "@/components/molecules/status-banner";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   fetchBranchTeamDetail,
@@ -46,6 +48,10 @@ import { selectAuthSession } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
 import type { Branch } from "@/types/brand";
 import styles from "./branch-modal.module.css";
+import {
+  isValidTime24,
+  TimeInput,
+} from "./time-input";
 
 type BranchDraft = Omit<Branch, "id" | "brand_id"> & {
   id?: string;
@@ -66,233 +72,6 @@ type CropTarget = {
   file: File;
   aspectRatio: "1:1";
 };
-
-type StudioCopy = {
-  subtitleNew: string;
-  subtitleEdit: string;
-  visualTitle: string;
-  visualDescription: string;
-  visualPendingTitle: string;
-  visualPendingBody: string;
-  visualAddAction: string;
-  visualReplaceAction: string;
-  visualRemoveAction: string;
-  visualReadyBadge: string;
-  visualEmptyBadge: string;
-  teamTitle: string;
-  teamDescription: string;
-  teamUnlockedTitle: string;
-  teamUnlockedBody: string;
-  teamLoading: string;
-  teamError: string;
-  retryTeam: string;
-  searchLabel: string;
-  searchHint: string;
-  searchPlaceholder: string;
-  searchIdle: string;
-  searchLoading: string;
-  searchReady: string;
-  searchEmpty: string;
-  inviteAction: string;
-  inviteSuccess: string;
-  removeAction: string;
-  removeSuccess: string;
-  reinviteAction: string;
-  reinviteSuccess: string;
-  cancelInviteAction: string;
-  acceptedTitle: string;
-  pendingTitle: string;
-  archiveTitle: string;
-  noAccepted: string;
-  noPending: string;
-  noArchive: string;
-  ownerRole: string;
-  memberRole: string;
-  pendingStatus: string;
-  rejectedStatus: string;
-  removedStatus: string;
-  branchIdentityTitle: string;
-  teamCreatedAfterSave: string;
-  coverPlannedBadge: string;
-  teamLiveBadge: string;
-};
-
-const EN_COPY: StudioCopy = {
-  subtitleNew:
-    "Fill in the branch details and save when ready.",
-  subtitleEdit:
-    "Update this branch's details, photo, and team from here.",
-  visualTitle: "Branch visual identity",
-  visualDescription:
-    "This photo is optional. If you add one, it replaces the default icon in the branch list.",
-  visualPendingTitle: "Add a branch photo",
-  visualPendingBody:
-    "Choose one photo, crop it in a square frame, and we will use it as the branch image.",
-  visualAddAction: "Add branch photo",
-  visualReplaceAction: "Replace photo",
-  visualRemoveAction: "Remove photo",
-  visualReadyBadge: "Photo ready",
-  visualEmptyBadge: "No photo",
-  teamTitle: "Branch team",
-  teamDescription:
-    "Manage the people working in this branch.",
-  teamUnlockedTitle: "Team becomes available after the branch is saved",
-  teamUnlockedBody:
-    "Save the branch first, then you can invite people here.",
-  teamLoading: "Loading branch team...",
-  teamError: "Branch team could not be loaded.",
-  retryTeam: "Retry team",
-  searchLabel: "Find a service owner",
-  searchHint:
-    "Search by name, email, or phone. Accepted and pending members are hidden from the results.",
-  searchPlaceholder: "Search by name, email, or phone",
-  searchIdle: "Start typing to search USO users.",
-  searchLoading: "Searching users...",
-  searchReady: "Choose a user to send a branch invitation.",
-  searchEmpty: "No matching users found for this branch.",
-  inviteAction: "Invite to branch",
-  inviteSuccess: "Invitation sent to the branch team.",
-  removeAction: "Remove from branch",
-  removeSuccess: "Branch team membership updated.",
-  reinviteAction: "Re-invite",
-  reinviteSuccess: "Invitation sent again.",
-  cancelInviteAction: "Cancel invite",
-  acceptedTitle: "Accepted team",
-  pendingTitle: "Pending invitations",
-  archiveTitle: "Archived states",
-  noAccepted: "Only the owner is attached right now.",
-  noPending: "No pending invitations yet.",
-  noArchive: "Rejected and removed members will appear here.",
-  ownerRole: "Owner",
-  memberRole: "Member",
-  pendingStatus: "Pending",
-  rejectedStatus: "Rejected",
-  removedStatus: "Removed",
-  branchIdentityTitle: "Branch identity",
-  teamCreatedAfterSave: "The team section opens after the branch is saved.",
-  coverPlannedBadge: "Photo",
-  teamLiveBadge: "Active",
-};
-
-const TR_COPY: StudioCopy = {
-  subtitleNew:
-    "Şube bilgilerini doldur ve hazır olduğunda kaydet.",
-  subtitleEdit:
-    "Bu şubenin bilgilerini, fotoğrafını ve takımını buradan güncelle.",
-  visualTitle: "Şube görsel kimliği",
-  visualDescription:
-    "Bu foto zorunlu değil. Eklersen şube listesinde varsayılan ikon yerine görünür.",
-  visualPendingTitle: "Şube fotoğrafı ekle",
-  visualPendingBody:
-    "Tek bir foto seç, kare çerçevede crop et ve şube görseli olarak kullan.",
-  visualAddAction: "Şube fotoğrafı ekle",
-  visualReplaceAction: "Fotoğrafı değiştir",
-  visualRemoveAction: "Fotoğrafı kaldır",
-  visualReadyBadge: "Foto hazır",
-  visualEmptyBadge: "Foto yok",
-  teamTitle: "Şube takımı",
-  teamDescription:
-    "Bu şubede çalışan kişileri buradan yönetebilirsin.",
-  teamUnlockedTitle: "Takım bölümü şube kaydedildikten sonra açılır",
-  teamUnlockedBody:
-    "Önce şubeyi kaydet, sonra buraya kişileri davet edebilirsin.",
-  teamLoading: "Şube takımı yükleniyor...",
-  teamError: "Şube takımı yüklenemedi.",
-  retryTeam: "Takımı yenile",
-  searchLabel: "Bir service owner bul",
-  searchHint:
-    "İsim, email veya telefonla ara. Kabul edilmiş ve bekleyen üyeler sonuçlarda gizlenir.",
-  searchPlaceholder: "İsim, email veya telefon ara",
-  searchIdle: "USO aramak için yazmaya başla.",
-  searchLoading: "Kullanıcılar aranıyor...",
-  searchReady: "Şubeye davet göndermek için bir kullanıcı seç.",
-  searchEmpty: "Bu şube için eşleşen kullanıcı bulunamadı.",
-  inviteAction: "Şubeye davet et",
-  inviteSuccess: "Şube takımına davet gönderildi.",
-  removeAction: "Şubeden çıkar",
-  removeSuccess: "Şube takım üyeliği güncellendi.",
-  reinviteAction: "Yeniden davet et",
-  reinviteSuccess: "Davet yeniden gönderildi.",
-  cancelInviteAction: "Daveti iptal et",
-  acceptedTitle: "Kabul edilen takım",
-  pendingTitle: "Bekleyen davetler",
-  archiveTitle: "Arşiv durumları",
-  noAccepted: "Şu anda yalnızca owner bağlı.",
-  noPending: "Henüz bekleyen davet yok.",
-  noArchive: "Reddedilen ve kaldırılan üyeler burada görünür.",
-  ownerRole: "Sahip",
-  memberRole: "Üye",
-  pendingStatus: "Beklemede",
-  rejectedStatus: "Reddedildi",
-  removedStatus: "Kaldırıldı",
-  branchIdentityTitle: "Şube kimliği",
-  teamCreatedAfterSave: "Şube kaydedildikten sonra takım bölümü açılır.",
-  coverPlannedBadge: "Fotoğraf",
-  teamLiveBadge: "Aktif",
-};
-
-const AZ_COPY: StudioCopy = {
-  subtitleNew:
-    "Filial məlumatlarını doldur və hazır olduqda yadda saxla.",
-  subtitleEdit:
-    "Bu filialın məlumatlarını, fotosunu və komandasını buradan yenilə.",
-  visualTitle: "Filial vizual kimliyi",
-  visualDescription:
-    "Bu foto məcburi deyil. Əlavə etsən filial siyahısında default ikon yerinə görünəcək.",
-  visualPendingTitle: "Filial fotosu əlavə et",
-  visualPendingBody:
-    "Bir foto seç, kvadrat çərçivədə crop et və filial şəkli kimi istifadə et.",
-  visualAddAction: "Filial fotosu əlavə et",
-  visualReplaceAction: "Fotonu dəyiş",
-  visualRemoveAction: "Fotonu sil",
-  visualReadyBadge: "Foto hazırdır",
-  visualEmptyBadge: "Foto yoxdur",
-  teamTitle: "Filial komandası",
-  teamDescription:
-    "Bu filialda çalışan şəxsləri buradan idarə edə bilərsən.",
-  teamUnlockedTitle: "Komanda bölməsi filial yadda saxlandıqdan sonra açılır",
-  teamUnlockedBody:
-    "Əvvəl filialı yadda saxla, sonra buraya şəxsləri dəvət edə bilərsən.",
-  teamLoading: "Filial komandası yüklənir...",
-  teamError: "Filial komandası yüklənmədi.",
-  retryTeam: "Komandanı yenilə",
-  searchLabel: "Bir service owner tap",
-  searchHint:
-    "Ad, email və ya telefon ilə axtar. Qəbul olunmuş və gözləyən üzvlər nəticələrdə gizlənir.",
-  searchPlaceholder: "Ad, email və ya telefon axtar",
-  searchIdle: "USO axtarmaq üçün yazmağa başla.",
-  searchLoading: "İstifadəçilər axtarılır...",
-  searchReady: "Filiala dəvət göndərmək üçün bir istifadəçi seç.",
-  searchEmpty: "Bu filial üçün uyğun istifadəçi tapılmadı.",
-  inviteAction: "Filiala dəvət et",
-  inviteSuccess: "Filial komandasına dəvət göndərildi.",
-  removeAction: "Filialdan çıxar",
-  removeSuccess: "Filial komanda üzvlüyü yeniləndi.",
-  reinviteAction: "Yenidən dəvət et",
-  reinviteSuccess: "Dəvət yenidən göndərildi.",
-  cancelInviteAction: "Dəvəti ləğv et",
-  acceptedTitle: "Qəbul olunmuş komanda",
-  pendingTitle: "Gözləyən dəvətlər",
-  archiveTitle: "Arxiv vəziyyətləri",
-  noAccepted: "Hazırda yalnız owner qoşulub.",
-  noPending: "Hələ gözləyən dəvət yoxdur.",
-  noArchive: "Rədd olunan və silinən üzvlər burada görünür.",
-  ownerRole: "Sahib",
-  memberRole: "Üzv",
-  pendingStatus: "Gözləyir",
-  rejectedStatus: "Rədd edildi",
-  removedStatus: "Silindi",
-  branchIdentityTitle: "Filial kimliyi",
-  teamCreatedAfterSave: "Filial yadda saxlandıqdan sonra komanda bölməsi açılır.",
-  coverPlannedBadge: "Foto",
-  teamLiveBadge: "Aktivdir",
-};
-
-function getCopy(locale: string) {
-  if (locale.startsWith("az")) return AZ_COPY;
-  if (locale.startsWith("tr")) return TR_COPY;
-  return EN_COPY;
-}
 
 function createEmptyBranch(): BranchDraft {
   return {
@@ -326,11 +105,11 @@ function getInitials(
 
 function getMemberStatusLabel(
   status: TeamWorkspaceMember["status"],
-  copy: StudioCopy,
+  t: { branchPendingStatus: string; branchRejectedStatus: string; branchRemovedStatus: string },
 ) {
-  if (status === "PENDING") return copy.pendingStatus;
-  if (status === "REJECTED") return copy.rejectedStatus;
-  if (status === "REMOVED") return copy.removedStatus;
+  if (status === "PENDING") return t.branchPendingStatus;
+  if (status === "REJECTED") return t.branchRejectedStatus;
+  if (status === "REMOVED") return t.branchRemovedStatus;
   return status;
 }
 
@@ -351,9 +130,8 @@ export function BranchModal({
   brandId,
   onSave,
 }: BranchModalProps) {
-  const { locale, messages } = useLocale();
+  const { messages } = useLocale();
   const t = messages.brands;
-  const copy = useMemo(() => getCopy(locale), [locale]);
   const session = useAppSelector(selectAuthSession);
   const accessToken = session.accessToken;
   const visualInputRef = useRef<HTMLInputElement>(null);
@@ -580,10 +358,14 @@ export function BranchModal({
     if (!draft.is_24_7) {
       if (!draft.opening?.trim()) {
         nextErrors.opening = t.openingRequiredMessage;
+      } else if (!isValidTime24(draft.opening)) {
+        nextErrors.opening = "HH:mm";
       }
 
       if (!draft.closing?.trim()) {
         nextErrors.closing = t.closingRequiredMessage;
+      } else if (!isValidTime24(draft.closing)) {
+        nextErrors.closing = "HH:mm";
       }
     }
 
@@ -632,7 +414,7 @@ export function BranchModal({
       setTeamState("error");
       setTeamFeedback({
         tone: "error",
-        message: resolveTeamError(error, copy.teamError),
+        message: resolveTeamError(error, t.branchTeamError),
       });
     }
   }
@@ -663,11 +445,11 @@ export function BranchModal({
       setSearchItemsMap(new Map());
       setSelectedSearchTarget(null);
       setSearchState("idle");
-      setTeamFeedback({ tone: "success", message: copy.inviteSuccess });
+      setTeamFeedback({ tone: "success", message: t.branchInviteSuccess });
     } catch (error) {
       setTeamFeedback({
         tone: "error",
-        message: resolveTeamError(error, copy.teamError),
+        message: resolveTeamError(error, t.branchTeamError),
       });
     } finally {
       setInviteUserId(null);
@@ -750,11 +532,11 @@ export function BranchModal({
         resolvedAccessToken,
       );
       await refreshTeam();
-      setTeamFeedback({ tone: "success", message: copy.removeSuccess });
+      setTeamFeedback({ tone: "success", message: t.branchMemberRemoveSuccess });
     } catch (error) {
       setTeamFeedback({
         tone: "error",
-        message: resolveTeamError(error, copy.teamError),
+        message: resolveTeamError(error, t.branchTeamError),
       });
     } finally {
       setMemberActionId(null);
@@ -781,11 +563,11 @@ export function BranchModal({
         resolvedAccessToken,
       );
       await refreshTeam();
-      setTeamFeedback({ tone: "success", message: copy.reinviteSuccess });
+      setTeamFeedback({ tone: "success", message: t.branchReinviteSuccess });
     } catch (error) {
       setTeamFeedback({
         tone: "error",
-        message: resolveTeamError(error, copy.teamError),
+        message: resolveTeamError(error, t.branchTeamError),
       });
     } finally {
       setMemberActionId(null);
@@ -809,7 +591,7 @@ export function BranchModal({
             <div className={styles.headerText}>
               <AlertDialogTitle>{modalTitle}</AlertDialogTitle>
               <AlertDialogDescription>
-                {isEditing ? copy.subtitleEdit : copy.subtitleNew}
+                {isEditing ? t.branchSubtitleEdit : t.branchSubtitleNew}
               </AlertDialogDescription>
             </div>
           </div>
@@ -820,17 +602,17 @@ export function BranchModal({
             <article className={styles.stageCard}>
               <div className={styles.stageCardHeader}>
                 <div>
-                  <h3 className={styles.stageTitle}>{copy.branchIdentityTitle}</h3>
+                  <h3 className={styles.stageTitle}>{t.branchIdentityTitle}</h3>
                   <p className={styles.stageLead}>
                     {draft.name.trim() || t.branchFieldNamePlaceholder}
                   </p>
                 </div>
                 <span className={styles.stageBadge}>
                   {draft.photoPreviewUrl
-                    ? copy.visualReadyBadge
+                    ? t.branchVisualReady
                     : teamEnabled
-                      ? copy.teamLiveBadge
-                      : copy.coverPlannedBadge}
+                      ? t.branchTeamLiveBadge
+                      : t.branchCoverPlannedBadge}
                 </span>
               </div>
 
@@ -867,13 +649,13 @@ export function BranchModal({
             <article className={styles.stageCard}>
               <div className={styles.stageCardHeader}>
                 <div>
-                  <h3 className={styles.stageTitle}>{copy.visualTitle}</h3>
-                  <p className={styles.stageLead}>{copy.visualDescription}</p>
+                  <h3 className={styles.stageTitle}>{t.branchVisualTitle}</h3>
+                  <p className={styles.stageLead}>{t.branchVisualDescription}</p>
                 </div>
                 <span className={styles.stageBadge}>
                   {draft.photoPreviewUrl
-                    ? copy.visualReadyBadge
-                    : copy.visualEmptyBadge}
+                    ? t.branchVisualReady
+                    : t.branchVisualEmpty}
                 </span>
               </div>
 
@@ -881,7 +663,7 @@ export function BranchModal({
                 {draft.photoPreviewUrl ? (
                   <div className={styles.visualOverlay}>
                     <strong>{draft.name.trim() || t.branchFieldNamePlaceholder}</strong>
-                    <span>{copy.visualReadyBadge}</span>
+                    <span>{t.branchVisualReady}</span>
                   </div>
                 ) : (
                   <div className={styles.visualEmpty}>
@@ -889,8 +671,8 @@ export function BranchModal({
                       <Icon icon="sell" size={22} color="current" />
                     </div>
                     <div className={styles.visualEmptyText}>
-                      <strong>{copy.visualPendingTitle}</strong>
-                      <p>{copy.visualPendingBody}</p>
+                      <strong>{t.branchVisualPendingTitle}</strong>
+                      <p>{t.branchVisualPendingBody}</p>
                     </div>
                   </div>
                 )}
@@ -911,8 +693,8 @@ export function BranchModal({
                   onClick={() => visualInputRef.current?.click()}
                 >
                   {draft.photoPreviewUrl
-                    ? copy.visualReplaceAction
-                    : copy.visualAddAction}
+                    ? t.branchVisualReplace
+                    : t.branchVisualAdd}
                 </Button>
                 {draft.photoPreviewUrl ? (
                   <Button
@@ -921,7 +703,7 @@ export function BranchModal({
                     icon="delete"
                     onClick={handleRemoveVisual}
                   >
-                    {copy.visualRemoveAction}
+                    {t.branchVisualRemove}
                   </Button>
                 ) : null}
               </div>
@@ -950,12 +732,10 @@ export function BranchModal({
 
               <Field>
                 <FieldLabel>{t.branchFieldDescription}</FieldLabel>
-                <Input
+                <RichTextEditor
                   value={draft.description ?? ""}
                   placeholder={t.branchFieldDescriptionPlaceholder}
-                  onChange={(event) =>
-                    updateField("description", event.target.value)
-                  }
+                  onChange={(html) => updateField("description", html)}
                 />
               </Field>
 
@@ -1034,15 +814,11 @@ export function BranchModal({
                   <div className={styles.row}>
                     <Field>
                       <FieldLabel required>{t.branchFieldOpening}</FieldLabel>
-                      <Input
-                        type="time"
+                      <TimeInput
                         value={draft.opening ?? ""}
                         placeholder="09:00"
-                        step={60}
                         aria-invalid={Boolean(errors.opening)}
-                        onChange={(event) =>
-                          updateField("opening", event.target.value)
-                        }
+                        onChange={(value) => updateField("opening", value)}
                       />
                       {errors.opening ? (
                         <p className={styles.errorText}>{errors.opening}</p>
@@ -1051,15 +827,11 @@ export function BranchModal({
 
                     <Field>
                       <FieldLabel required>{t.branchFieldClosing}</FieldLabel>
-                      <Input
-                        type="time"
+                      <TimeInput
                         value={draft.closing ?? ""}
                         placeholder="18:00"
-                        step={60}
                         aria-invalid={Boolean(errors.closing)}
-                        onChange={(event) =>
-                          updateField("closing", event.target.value)
-                        }
+                        onChange={(value) => updateField("closing", value)}
                       />
                       {errors.closing ? (
                         <p className={styles.errorText}>{errors.closing}</p>
@@ -1085,37 +857,30 @@ export function BranchModal({
                     {draft.breaks.map((branchBreak, index) => (
                       <div key={branchBreak.id ?? index} className={styles.breakRow}>
                         <Field>
-                          <FieldLabel>Start</FieldLabel>
-                          <Input
-                            type="time"
+                          <FieldLabel>{t.branchFieldOpening}</FieldLabel>
+                          <TimeInput
                             value={branchBreak.start}
                             placeholder="12:00"
-                            step={60}
-                            onChange={(event) =>
-                              updateBreak(index, "start", event.target.value)
-                            }
+                            onChange={(value) => updateBreak(index, "start", value)}
                           />
                         </Field>
                         <Field>
-                          <FieldLabel>End</FieldLabel>
-                          <Input
-                            type="time"
+                          <FieldLabel>{t.branchFieldClosing}</FieldLabel>
+                          <TimeInput
                             value={branchBreak.end}
                             placeholder="13:00"
-                            step={60}
-                            onChange={(event) =>
-                              updateBreak(index, "end", event.target.value)
-                            }
+                            onChange={(value) => updateBreak(index, "end", value)}
                           />
                         </Field>
-                        <button
+                        <Button
+                          variant="unstyled"
                           type="button"
                           className={styles.removeBreakBtn}
                           aria-label={t.branchRemoveBreak}
                           onClick={() => removeBreak(index)}
                         >
                           <Icon icon="delete" size={16} color="current" />
-                        </button>
+                        </Button>
                       </div>
                     ))}
                   </div>
@@ -1127,10 +892,10 @@ export function BranchModal({
           <section className={styles.teamSection}>
             <div className={styles.formSectionHeader}>
               <div>
-                <h3 className={styles.sectionTitle}>{copy.teamTitle}</h3>
-                <p className={styles.sectionLead}>{copy.teamDescription}</p>
+                <h3 className={styles.sectionTitle}>{t.branchTeamTitle}</h3>
+                <p className={styles.sectionLead}>{t.branchTeamDescription}</p>
               </div>
-              <span className={styles.stageBadge}>{copy.teamLiveBadge}</span>
+              <span className={styles.stageBadge}>{t.branchTeamLiveBadge}</span>
             </div>
 
             {!teamEnabled ? (
@@ -1139,16 +904,16 @@ export function BranchModal({
                   <Icon icon="groups" size={18} color="current" />
                 </div>
                 <div className={styles.teamLockedText}>
-                  <strong>{copy.teamUnlockedTitle}</strong>
-                  <p>{copy.teamUnlockedBody}</p>
-                  <span>{copy.teamCreatedAfterSave}</span>
+                  <strong>{t.branchTeamLockedTitle}</strong>
+                  <p>{t.branchTeamLockedBody}</p>
+                  <span>{t.branchTeamAfterSave}</span>
                 </div>
               </div>
             ) : teamState === "loading" ? (
-              <div className={styles.teamStateCard}>{copy.teamLoading}</div>
+              <div className={styles.teamStateCard}>{t.branchTeamLoading}</div>
             ) : teamState === "error" ? (
               <div className={styles.teamStateCard}>
-                <strong>{copy.teamError}</strong>
+                <strong>{t.branchTeamError}</strong>
                 <Button
                   variant="outline"
                   size="small"
@@ -1157,25 +922,25 @@ export function BranchModal({
                     void handleRetryTeam();
                   }}
                 >
-                  {copy.retryTeam}
+                  {t.branchTeamRetry}
                 </Button>
               </div>
             ) : (
               <div className={styles.teamPanel}>
                 <Field>
-                  <FieldLabel>{copy.searchLabel}</FieldLabel>
+                  <FieldLabel>{t.branchSearchLabel}</FieldLabel>
                   <Combobox
                     items={searchItems}
                     value={searchComboValue}
-                    placeholder={copy.searchPlaceholder}
+                    placeholder={t.branchSearchPlaceholder}
                     emptyMessage={
                       searchState === "loading"
-                        ? copy.searchLoading
+                        ? t.branchSearchLoading
                         : searchState === "error"
-                          ? copy.teamError
+                          ? t.branchTeamError
                           : searchInputValue.length >= 2
-                            ? copy.searchEmpty
-                            : copy.searchHint
+                            ? t.branchSearchEmpty
+                            : t.branchSearchHint
                     }
                     onValueChange={handleSearchValueChange}
                     onInput={handleSearchInput}
@@ -1209,32 +974,26 @@ export function BranchModal({
                       );
                     }}
                   />
-                  <FieldDescription>{copy.searchHint}</FieldDescription>
+                  <FieldDescription>{t.branchSearchHint}</FieldDescription>
                 </Field>
 
                 {teamFeedback ? (
-                  <div
-                    className={`${styles.feedback} ${
-                      teamFeedback.tone === "success"
-                        ? styles.feedbackSuccess
-                        : styles.feedbackError
-                    }`}
-                  >
+                  <StatusBanner variant={teamFeedback.tone === "success" ? "success" : "error"}>
                     {teamFeedback.message}
-                  </div>
+                  </StatusBanner>
                 ) : null}
 
                 {!selectedSearchTarget ? (
                   <div className={styles.searchState}>
                     {searchState === "loading"
-                      ? copy.searchLoading
+                      ? t.branchSearchLoading
                       : searchState === "error"
-                        ? copy.teamError
+                        ? t.branchTeamError
                         : searchInputValue.length < 2
-                          ? copy.searchIdle
+                          ? t.branchSearchIdle
                           : searchItems.length === 0
-                            ? copy.searchEmpty
-                            : copy.searchReady}
+                            ? t.branchSearchEmpty
+                            : t.branchSearchReady}
                   </div>
                 ) : null}
 
@@ -1286,7 +1045,7 @@ export function BranchModal({
                           void handleInvite(selectedSearchTarget);
                         }}
                       >
-                        {copy.inviteAction}
+                        {t.branchInvite}
                       </Button>
                     </article>
                   </div>
@@ -1294,9 +1053,9 @@ export function BranchModal({
 
                 <div className={styles.teamGroups}>
                   <div className={styles.teamGroup}>
-                    <h4>{copy.acceptedTitle}</h4>
+                    <h4>{t.branchAcceptedTitle}</h4>
                     {acceptedMembers.length === 0 ? (
-                      <div className={styles.emptyCard}>{copy.noAccepted}</div>
+                      <div className={styles.emptyCard}>{t.branchNoAccepted}</div>
                     ) : (
                       <div className={styles.memberGrid}>
                         {acceptedMembers.map((member) => {
@@ -1324,8 +1083,8 @@ export function BranchModal({
                               <div className={styles.memberPills}>
                                 <span className={styles.roleBadge}>
                                   {member.role === "OWNER"
-                                    ? copy.ownerRole
-                                    : copy.memberRole}
+                                    ? t.branchOwnerRole
+                                    : t.branchMemberRole}
                                 </span>
                               </div>
                               {member.role !== "OWNER" ? (
@@ -1338,7 +1097,7 @@ export function BranchModal({
                                     void handleRemove(member);
                                   }}
                                 >
-                                  {copy.removeAction}
+                                  {t.branchMemberRemove}
                                 </Button>
                               ) : null}
                             </article>
@@ -1349,9 +1108,9 @@ export function BranchModal({
                   </div>
 
                   <div className={styles.teamGroup}>
-                    <h4>{copy.pendingTitle}</h4>
+                    <h4>{t.branchPendingTitle}</h4>
                     {pendingMembers.length === 0 ? (
-                      <div className={styles.emptyCard}>{copy.noPending}</div>
+                      <div className={styles.emptyCard}>{t.branchNoPending}</div>
                     ) : (
                       <div className={styles.memberGrid}>
                         {pendingMembers.map((member) => {
@@ -1378,7 +1137,7 @@ export function BranchModal({
                               </div>
                               <div className={styles.memberPills}>
                                 <span className={styles.roleBadge}>
-                                  {copy.pendingStatus}
+                                  {t.branchPendingStatus}
                                 </span>
                               </div>
                               <Button
@@ -1390,7 +1149,7 @@ export function BranchModal({
                                   void handleRemove(member);
                                 }}
                               >
-                                {copy.cancelInviteAction}
+                                {t.branchCancelInvite}
                               </Button>
                             </article>
                           );
@@ -1400,9 +1159,9 @@ export function BranchModal({
                   </div>
 
                   <div className={styles.teamGroup}>
-                    <h4>{copy.archiveTitle}</h4>
+                    <h4>{t.branchArchiveTitle}</h4>
                     {archivedMembers.length === 0 ? (
-                      <div className={styles.emptyCard}>{copy.noArchive}</div>
+                      <div className={styles.emptyCard}>{t.branchNoArchive}</div>
                     ) : (
                       <div className={styles.memberGrid}>
                         {archivedMembers.map((member) => {
@@ -1429,7 +1188,7 @@ export function BranchModal({
                               </div>
                               <div className={styles.memberPills}>
                                 <span className={styles.roleBadge}>
-                                  {getMemberStatusLabel(member.status, copy)}
+                                  {getMemberStatusLabel(member.status, t)}
                                 </span>
                               </div>
                               <Button
@@ -1441,7 +1200,7 @@ export function BranchModal({
                                   void handleReinvite(member);
                                 }}
                               >
-                                {copy.reinviteAction}
+                                {t.branchReinvite}
                               </Button>
                             </article>
                           );
@@ -1463,11 +1222,12 @@ export function BranchModal({
         </AlertDialogFooter>
       </AlertDialogContent>
       {cropTarget ? (
-        <ImageCropModal
+        <AvatarCropDialog
           file={cropTarget.file}
           aspectRatio={cropTarget.aspectRatio}
-          onCrop={handleVisualCrop}
-          onCancel={() => setCropTarget(null)}
+          open={true}
+          onConfirm={handleVisualCrop}
+          onClose={() => setCropTarget(null)}
         />
       ) : null}
     </AlertDialog>

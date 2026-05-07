@@ -1,0 +1,100 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.32rem;
+  min-height: 1.85rem;
+  padding: 0.34rem 0.72rem;
+  border-radius: var(--general-border-radius-pill);
+  border: 1px solid var(--badge-border);
+  background: var(--badge-bg);
+  color: var(--badge-text);
+  font-size: var(--font-size-small);
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.success {
+  --badge-soft-bg: var(--app-success-bg);
+  --badge-soft-border: var(--app-success-border);
+  --badge-soft-text: var(--app-success);
+  --badge-solid-bg: var(--app-success);
+  --badge-solid-border: color-mix(in srgb, var(--app-success) 72%, white 28%);
+  --badge-solid-text: var(--app-text-inverse);
+  --badge-overlay-bg: var(--app-success);
+  --badge-overlay-border: color-mix(in srgb, var(--app-success) 74%, white 26%);
+  --badge-overlay-text: var(--app-text-inverse);
+}
+
+.warning {
+  --badge-soft-bg: var(--app-warning-bg);
+  --badge-soft-border: var(--app-warning-border);
+  --badge-soft-text: var(--app-warning-strong);
+  --badge-solid-bg: var(--app-warning);
+  --badge-solid-border: color-mix(in srgb, var(--app-warning) 76%, white 24%);
+  --badge-solid-text: rgb(0 0 0 / 0.78);
+  --badge-overlay-bg: color-mix(in srgb, var(--app-warning) 88%, white 12%);
+  --badge-overlay-border: color-mix(in srgb, var(--app-warning) 72%, white 28%);
+  --badge-overlay-text: rgb(0 0 0 / 0.82);
+}
+
+.error {
+  --badge-soft-bg: var(--app-error-bg);
+  --badge-soft-border: var(--app-error-border);
+  --badge-soft-text: var(--app-error);
+  --badge-solid-bg: var(--app-error);
+  --badge-solid-border: color-mix(in srgb, var(--app-error) 72%, white 28%);
+  --badge-solid-text: var(--app-text-inverse);
+  --badge-overlay-bg: var(--app-error);
+  --badge-overlay-border: color-mix(in srgb, var(--app-error) 72%, white 28%);
+  --badge-overlay-text: var(--app-text-inverse);
+}
+
+.info {
+  --badge-soft-bg: color-mix(in srgb, var(--app-primary) 8%, transparent);
+  --badge-soft-border: color-mix(in srgb, var(--app-primary) 22%, transparent);
+  --badge-soft-text: color-mix(in srgb, var(--app-primary) 82%, var(--app-text-strong));
+  --badge-solid-bg: var(--app-primary);
+  --badge-solid-border: color-mix(in srgb, var(--app-primary) 72%, white 28%);
+  --badge-solid-text: var(--app-text-inverse);
+  --badge-overlay-bg: var(--app-primary);
+  --badge-overlay-border: color-mix(in srgb, var(--app-primary) 72%, white 28%);
+  --badge-overlay-text: var(--app-text-inverse);
+}
+
+.muted {
+  --badge-soft-bg: var(--app-bg-surface-strong);
+  --badge-soft-border: var(--app-border-soft);
+  --badge-soft-text: var(--app-text-muted);
+  --badge-solid-bg: rgb(0 0 0 / 0.62);
+  --badge-solid-border: rgb(255 255 255 / 0.16);
+  --badge-solid-text: var(--app-text-inverse);
+  --badge-overlay-bg: color-mix(in srgb, var(--app-bg-surface) 92%, transparent);
+  --badge-overlay-border: color-mix(in srgb, var(--app-border-soft) 84%, transparent);
+  --badge-overlay-text: var(--app-text-muted);
+}
+
+.soft {
+  --badge-bg: var(--badge-soft-bg);
+  --badge-border: var(--badge-soft-border);
+  --badge-text: var(--badge-soft-text);
+}
+
+.solid {
+  --badge-bg: var(--badge-solid-bg);
+  --badge-border: var(--badge-solid-border);
+  --badge-text: var(--badge-solid-text);
+  box-shadow: 0 0.75rem 1.5rem rgb(0 0 0 / 0.18);
+}
+
+.overlay {
+  --badge-bg: var(--badge-overlay-bg);
+  --badge-border: var(--badge-overlay-border);
+  --badge-text: var(--badge-overlay-text);
+  box-shadow: 0 0.75rem 1.5rem rgb(0 0 0 / 0.18);
+}
+
+.icon {
+  flex-shrink: 0;
+}

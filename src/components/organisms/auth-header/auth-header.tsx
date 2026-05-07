@@ -77,7 +77,7 @@ export function AuthHeader() {
   return (
     <header className={styles.header}>
       <Link className={styles.brand} href="/">
-        <Logo size={28} />
+        <Logo size={28} priority />
         <span className={styles.brandName}>Reziphay</span>
       </Link>
 
@@ -170,7 +170,7 @@ export function AuthHeader() {
             href="/"
             onClick={() => setIsMenuOpen(false)}
           >
-            <Logo size={28} />
+            <Logo size={28} priority />
             <span className={styles.mobileBrandName}>Reziphay</span>
           </Link>
 
