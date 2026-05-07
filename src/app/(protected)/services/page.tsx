@@ -166,11 +166,19 @@ export default async function ServicesPage({
     redirect("/brands");
   }
 
-  const [services, brands, serviceCategories] = await Promise.all([
+  const serviceId = getStringParam(resolvedParams, "id");
+
+  const [myServices, serviceFromUrl, brands, serviceCategories] = await Promise.all([
     fetchMyServices(accessToken).catch(() => []),
+    serviceId ? fetchServiceById(serviceId, accessToken).catch(() => null) : null,
     fetchMyBrands(accessToken).catch(() => []),
     fetchServiceCategories(accessToken).catch(() => []),
   ]);
+
+  const services =
+    serviceFromUrl && !myServices.some((service) => service.id === serviceFromUrl.id)
+      ? [serviceFromUrl, ...myServices]
+      : myServices;
 
   // Fetch detailed brand info (with branches) for the service form branch selector
   const detailedBrands = await Promise.all(

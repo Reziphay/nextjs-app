@@ -130,7 +130,10 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
   const settingsActive = pathname === "/settings";
   const showNotificationBadge =
     !notificationsActive && Boolean(session.accessToken) && hasNotificationSignal;
-  const showUcrSearch = session.user?.type === "ucr";
+  const showMarketplaceSearch =
+    session.user?.type === "ucr" ||
+    session.user?.type === "uso" ||
+    session.user?.type === "admin";
   const defaultHref = getDefaultAppRouteForUserType(session.user?.type);
   const crumbs = isProtectedAppPath(pathname)
     ? getDashboardBreadcrumbs({
@@ -193,7 +196,7 @@ export function DashboardHeader({ collapsed, onToggle }: DashboardHeaderProps) {
       </div>
 
       <div className={styles.right}>
-        {showUcrSearch ? (
+        {showMarketplaceSearch ? (
           <MarketplaceSearchBox
             accessToken={session.accessToken ?? undefined}
             placeholder={messages.marketplace.searchPlaceholder}

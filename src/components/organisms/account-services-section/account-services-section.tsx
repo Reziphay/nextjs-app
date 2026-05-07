@@ -63,7 +63,7 @@ export function AccountServicesSection({
   const router = useRouter();
   const { messages } = useLocale();
   const visibleServices = useMemo(
-    () => sortVisibleServices(services.filter((service) => service.status === "ACTIVE" && service.branch_id === null)),
+    () => sortVisibleServices(services.filter((service) => service.status === "ACTIVE" && service.brand_id === null)),
     [services],
   );
   const displayedServices =

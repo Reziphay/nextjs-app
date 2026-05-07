@@ -88,6 +88,15 @@
     var(--app-bg-surface);
 }
 
+.streamCard[role="button"] {
+  cursor: pointer;
+}
+
+.streamCard[role="button"]:focus-visible {
+  outline: 3px solid var(--app-focus-ring);
+  outline-offset: 3px;
+}
+
 .streamCardTop {
   display: flex;
   align-items: flex-start;

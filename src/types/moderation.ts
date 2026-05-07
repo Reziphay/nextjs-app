@@ -81,19 +81,14 @@ export type ModerationServiceDetail = {
   price_type?: string;
   duration?: number | null;
   address?: string | null;
-  branch?: {
+  brand?: {
     id: string;
     name: string;
-    address1: string;
-    address2?: string | null;
-    brand?: {
-      id: string;
-      name: string;
-      logo_url?: string | null;
-      rating?: number | null;
-      rating_count?: number;
-    } | null;
+    logo_url?: string | null;
+    rating?: number | null;
+    rating_count?: number;
   } | null;
+  branch?: null;
   checklist?: ChecklistItem[];
 };
 

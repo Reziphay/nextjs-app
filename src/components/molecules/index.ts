@@ -1,6 +1,7 @@
 export { AvatarCropDialog } from "./avatar-crop-dialog/avatar-crop-dialog";
 export { OwnerCard } from "./owner-card";
 export { BrandCard } from "./brand-card";
+export { DataTable, type DataTableColumn } from "./data-table";
 export { FeedbackPopup } from "./feedback-popup/feedback-popup";
 export { FormActions, FormActionsDanger, FormActionsSpacer } from "./form-actions";
 export { LanguageSwitcher } from "./language-switcher";

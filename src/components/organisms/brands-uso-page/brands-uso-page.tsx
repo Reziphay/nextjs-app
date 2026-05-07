@@ -31,9 +31,6 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
   const { messages } = useLocale();
   const t = messages.brands;
   const { user } = useAppSelector(selectAuthSession);
-  const authorName = user ? `${user.first_name} ${user.last_name}`.trim() : "";
-  const authorAvatar = proxyMediaUrl(user?.avatar_url) ?? "/reziphay-logo.png";
-  const authorSubtitle = user?.email ?? "";
 
   const STATUS_LABEL: Record<BrandStatus, string> = {
     PENDING: t.statusPending,
@@ -41,6 +38,8 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
     REJECTED: t.statusRejected,
     CLOSED: t.statusClosed,
   };
+
+  const memberBadgeLabel = t.memberBadge ?? null;
 
   function handleCreateBrand() {
     router.push("/brands?progress=create");
@@ -80,9 +79,35 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
           </div>
         ) : (
           brands.map((brand) => {
-            const isOwner = brand.owner_id === currentUserId;
+            const isOwner =
+              brand.viewer_role === "OWNER" || brand.owner_id === currentUserId;
+            const isMember = brand.viewer_role === "MEMBER";
             const firstGalleryImage = proxyMediaUrl(brand.gallery?.[0]?.url ?? brand.logo_url);
             const placeholderImage = "/banner1.jpg";
+            const owner = brand.owner;
+            const ownerName = owner
+              ? `${owner.first_name} ${owner.last_name}`.trim() || owner.email
+              : user && brand.owner_id === user.id
+                ? `${user.first_name} ${user.last_name}`.trim() || user.email
+                : "";
+            const ownerAvatar = owner
+              ? proxyMediaUrl(owner.avatar_url) ?? "/reziphay-logo.png"
+              : user && brand.owner_id === user.id
+                ? proxyMediaUrl(user.avatar_url) ?? "/reziphay-logo.png"
+                : "/reziphay-logo.png";
+            const ownerSubtitle = owner?.email ?? (user && brand.owner_id === user.id ? user.email : "");
+
+            const badgeText = isOwner
+              ? STATUS_LABEL[brand.status]
+              : isMember
+                ? memberBadgeLabel
+                : undefined;
+            const badgeVariant = isOwner
+              ? STATUS_BADGE_VARIANT[brand.status]
+              : isMember
+                ? "secondary"
+                : undefined;
+            const badgePlacement = badgeText ? "below-title" : undefined;
 
             return (
               <div key={brand.id} className={styles.cardWrapper}>
@@ -110,14 +135,14 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
                   title={brand.name}
                   description={brand.description ?? ""}
                   category={brand.categories[0] ? (messages.categories[brand.categories[0].key as keyof typeof messages.categories] ?? brand.categories[0].key) : undefined}
-                  badgeText={isOwner ? STATUS_LABEL[brand.status] : undefined}
-                  badgeVariant={isOwner ? STATUS_BADGE_VARIANT[brand.status] : undefined}
-                  badgePlacement={isOwner ? "below-title" : undefined}
+                  badgeText={badgeText}
+                  badgeVariant={badgeVariant}
+                  badgePlacement={badgePlacement}
                   author={{
-                    userId: user?.id,
-                    name: authorName,
-                    avatar: authorAvatar,
-                    subtitle: authorSubtitle,
+                    userId: owner?.id ?? brand.owner_id,
+                    name: ownerName,
+                    avatar: ownerAvatar,
+                    subtitle: ownerSubtitle,
                   }}
                   rating={brand.rating}
                   ratingCount={brand.rating_count}

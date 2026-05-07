@@ -1,0 +1,198 @@
+.wrapper {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.scrollArea {
+  width: 100%;
+  overflow-x: clip;
+}
+
+.table {
+  width: 100%;
+  min-width: 0;
+  border-collapse: separate;
+  border-spacing: 0 0.38rem;
+  table-layout: fixed;
+}
+
+.headerCell {
+  padding: 0.42rem 0.55rem;
+  color: var(--app-text-subtle);
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-left: 1px solid color-mix(in srgb, var(--brand-border) 58%, transparent);
+}
+
+.headerCell:first-child {
+  border-left: 0;
+}
+
+.row {
+  position: relative;
+}
+
+.cell {
+  height: 3.35rem;
+  padding: 0.42rem 0.55rem;
+  vertical-align: middle;
+  background: var(--brand-surface-base);
+  border-top: 1px solid color-mix(in srgb, var(--brand-border) 90%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--brand-border) 90%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--brand-border) 58%, transparent);
+}
+
+.cell:first-child {
+  border-left: 1px solid color-mix(in srgb, var(--brand-border) 90%, transparent);
+  border-top-left-radius: var(--general-border-radius);
+  border-bottom-left-radius: var(--general-border-radius);
+}
+
+.cell:last-child {
+  border-right: 1px solid color-mix(in srgb, var(--brand-border) 90%, transparent);
+  border-top-right-radius: var(--general-border-radius);
+  border-bottom-right-radius: var(--general-border-radius);
+}
+
+.rowSelected .cell {
+  background: color-mix(in srgb, var(--app-primary-faint) 42%, var(--brand-surface-base) 58%);
+  border-color: color-mix(in srgb, var(--app-primary) 22%, var(--brand-border) 78%);
+}
+
+.alignLeft {
+  text-align: left;
+}
+
+.alignCenter {
+  text-align: center;
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.selectionCell {
+  width: 2.5rem;
+  text-align: center;
+}
+
+.bulkBar {
+  min-height: 2.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius);
+  background: var(--app-bg-surface);
+}
+
+.bulkCount {
+  min-width: 1.75rem;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--app-primary-faint);
+  color: var(--app-primary);
+  font-weight: 900;
+}
+
+.bulkActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 64rem) {
+  .headerCell {
+    padding-inline: 0.42rem;
+    font-size: 0.56rem;
+    letter-spacing: 0.11em;
+  }
+
+  .cell {
+    height: 3rem;
+    padding: 0.36rem 0.42rem;
+  }
+}
+
+@media (max-width: 48rem) {
+  .scrollArea {
+    overflow-x: visible;
+  }
+
+  .table,
+  .table colgroup,
+  .table thead,
+  .table tbody,
+  .table tr,
+  .table th,
+  .table td {
+    display: block;
+  }
+
+  .table colgroup,
+  .table thead {
+    display: none;
+  }
+
+  .table {
+    border-spacing: 0;
+  }
+
+  .row {
+    margin-bottom: 0.65rem;
+    border-radius: var(--general-border-radius);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--brand-border) 90%, transparent);
+    background: var(--brand-surface-base);
+  }
+
+  .cell {
+    min-height: 2.6rem;
+    height: auto;
+    display: grid;
+    grid-template-columns: minmax(5.75rem, 0.42fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 0.7rem;
+    text-align: left;
+    border: 0;
+    border-top: 1px solid color-mix(in srgb, var(--brand-border) 58%, transparent);
+    border-radius: 0;
+  }
+
+  .cell:first-child {
+    border: 0;
+    border-radius: 0;
+  }
+
+  .cell:last-child {
+    border-right: 0;
+    border-radius: 0;
+  }
+
+  .cell::before {
+    content: attr(data-label);
+    min-width: 0;
+    color: var(--app-text-subtle);
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .selectionCell {
+    width: auto;
+  }
+}

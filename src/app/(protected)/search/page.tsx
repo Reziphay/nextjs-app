@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { UcrSearchPage } from "@/components/organisms/ucr-search-page";
 import { getMessages } from "@/i18n/config";
 import { getServerLocale } from "@/i18n/server";
@@ -32,11 +31,7 @@ export const dynamic = "force-dynamic";
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const resolvedParams = await (searchParams ?? Promise.resolve({}));
-  const user = await requireProtectedRouteAccess("/search", resolvedParams);
-
-  if (user.type !== "ucr") {
-    redirect("/home");
-  }
+  await requireProtectedRouteAccess("/search", resolvedParams);
 
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("rzp_at")?.value ?? "";

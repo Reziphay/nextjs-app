@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { isAxiosError } from "axios";
 import { Button } from "@/components/atoms/button";
 import { Icon } from "@/components/icon";
@@ -110,12 +111,30 @@ function getFeedImageUrl(item: NotificationFeedItem) {
   }
 }
 
+function getFeedTargetHref(item: NotificationFeedItem): string | null {
+  if (item.type === "notification") {
+    const brandId =
+      typeof item.data.brand_id === "string" ? item.data.brand_id : null;
+    const notificationType =
+      typeof item.data.notification_type === "string"
+        ? item.data.notification_type
+        : null;
+
+    if (brandId && notificationType === "service_assignment_requested") {
+      return `/brands?id=${brandId}#assignment-requests`;
+    }
+  }
+
+  return null;
+}
+
 export function NotificationTransferPage({
   initialFeed,
   teamInvitationDetails = {},
 }: NotificationTransferPageProps) {
   const { locale, messages } = useLocale();
   const t = messages.brands;
+  const router = useRouter();
   const session = useAppSelector(selectAuthSession);
   const [feedItems, setFeedItems] = useState(initialFeed.items);
   const [loadingTransferId, setLoadingTransferId] = useState<string | null>(null);
@@ -362,11 +381,24 @@ export function NotificationTransferPage({
               invitationDetail?.branch_address ||
               invitationDetail?.branch_description ||
               null;
+            const targetHref = getFeedTargetHref(item);
 
             return (
               <article
                 key={item.feed_id}
                 className={`${styles.streamCard} ${item.type === "notification" && item.data.read === false ? styles.streamCardUnread : ""}`}
+                role={targetHref ? "button" : undefined}
+                tabIndex={targetHref ? 0 : undefined}
+                onClick={() => {
+                  if (targetHref) router.push(targetHref);
+                }}
+                onKeyDown={(event) => {
+                  if (!targetHref) return;
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    router.push(targetHref);
+                  }
+                }}
               >
                 <div className={styles.streamCardTop}>
                   {item.type !== "team_invitation" ? (
@@ -418,7 +450,10 @@ export function NotificationTransferPage({
                         aria-label={t.notifCenterClearOneAction}
                         className={styles.dismissButton}
                         isLoading={clearingItemId === item.feed_id}
-                        onClick={() => void handleDismiss(item)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          void handleDismiss(item);
+                        }}
                       />
                     </div>
 

@@ -15,9 +15,9 @@ import {
   getSidebarRoutesForUserType,
 } from "@/lib/app-routes";
 import { fetchMyBrands } from "@/lib/brands-api";
-import { fetchMyServices } from "@/lib/services-api";
+import { fetchMyAssignedServices, fetchMyServices } from "@/lib/services-api";
 import type { Brand } from "@/types/brand";
-import type { Service } from "@/types/service";
+import type { AssignedService, Service } from "@/types/service";
 import styles from "./app-sidebar.module.css";
 
 type AppSidebarProps = {
@@ -60,11 +60,15 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
   // Sub-data
   const [brands, setBrands] = useState<Brand[]>([]);
   const [services, setServices] = useState<Service[]>([]);
+  const [assignedServices, setAssignedServices] = useState<AssignedService[]>([]);
 
   function loadSidebarData() {
     if (!user || !accessToken || user.type !== "uso") return;
     fetchMyBrands(accessToken).then(setBrands).catch(() => setBrands([]));
     fetchMyServices(accessToken).then(setServices).catch(() => setServices([]));
+    fetchMyAssignedServices(accessToken)
+      .then(setAssignedServices)
+      .catch(() => setAssignedServices([]));
   }
 
   useEffect(() => {
@@ -127,19 +131,33 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
       status: b.status,
       branches: (b.branches ?? []).map((br) => ({ id: br.id, label: br.name, href: `/brands?id=${b.id}` })),
     }));
-    if (href === "/services") return services.map((s) => ({
-      id: s.id,
-      label: s.title,
-      href: `/services?id=${s.id}`,
-      status: s.status,
-      branches: [] as { id: string; label: string; href: string }[],
-    }));
+    if (href === "/services") {
+      const ownedItems = services.map((s) => ({
+        id: s.id,
+        label: s.title,
+        href: `/services?id=${s.id}`,
+        status: s.status,
+        branches: [] as { id: string; label: string; href: string }[],
+      }));
+      const assignedItems = assignedServices.map((assignment) => ({
+        id: `assigned-${assignment.id}`,
+        label: assignment.service.title,
+        href: `/services?id=${assignment.service.id}`,
+        status: assignment.service.brand?.name,
+        icon: "store",
+        branches: [] as { id: string; label: string; href: string }[],
+      }));
+
+      return [...ownedItems, ...assignedItems];
+    }
     return [];
   }
 
   function getBadgeCount(href: string): number | null {
     if (href === "/brands" && brands.length > 0) return brands.length;
-    if (href === "/services" && services.length > 0) return services.length;
+    if (href === "/services" && services.length + assignedServices.length > 0) {
+      return services.length + assignedServices.length;
+    }
     return null;
   }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useRef, useState, useEffect } from "react";
+import { type ReactNode, useMemo, useRef, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,12 +30,20 @@ import {
   archiveService,
   unarchiveService,
   uploadServiceMedia,
+  fetchMyAssignedServices,
+  withdrawServiceAssignment,
   type CreateServicePayload,
   type UpdateServicePayload,
 } from "@/lib/services-api";
 import { proxyMediaUrl } from "@/lib/media";
-import type { Brand, Branch } from "@/types/brand";
-import type { Service, ServiceCategory, ServiceStatus, PriceType } from "@/types/service";
+import type { Brand } from "@/types/brand";
+import type {
+  Service,
+  ServiceCategory,
+  ServiceStatus,
+  PriceType,
+  AssignedService,
+} from "@/types/service";
 import type { AuthenticatedUser } from "@/types/user_types";
 import { OwnerCard } from "@/components/molecules/owner-card";
 import { PageSurfaceHeader } from "@/components/molecules/page-surface-header";
@@ -115,18 +123,6 @@ function getStatusLabel(status: ServiceStatus, copy: Messages["services"]): stri
   return map[status];
 }
 
-function getBranchById(brands: Brand[], branchId: string): Branch | undefined {
-  for (const brand of brands) {
-    const branch = brand.branches?.find((b) => b.id === branchId);
-    if (branch) return branch;
-  }
-  return undefined;
-}
-
-function getBrandByBranchId(brands: Brand[], branchId: string): Brand | undefined {
-  return brands.find((brand) => brand.branches?.some((b) => b.id === branchId));
-}
-
 type OwnerInfo =
   | { isBrand: true; name: string; brand: Pick<Brand, "id" | "name" | "logo_url" | "rating" | "rating_count"> }
   | { isBrand: false; name: string; brand: null; user: AuthenticatedUser };
@@ -136,18 +132,59 @@ function getOwnerInfo(
   brands: Brand[],
   user: AuthenticatedUser,
 ): OwnerInfo {
-  if (service.branch_id) {
-    const brand = getBrandByBranchId(brands, service.branch_id);
+  if (service.brand_id) {
+    const brand = brands.find((item) => item.id === service.brand_id);
     if (brand) return { isBrand: true, name: brand.name, brand };
-    if (service.branch?.brand) {
+    if (service.brand) {
       return {
         isBrand: true,
-        name: service.branch.brand.name,
-        brand: service.branch.brand,
+        name: service.brand.name,
+        brand: service.brand,
       };
     }
   }
   return { isBrand: false, name: `${user.first_name} ${user.last_name}`.trim(), brand: null, user };
+}
+
+function assignedServiceToService(assignment: AssignedService): Service {
+  const svc = assignment.service;
+  const brand = svc.brand
+    ? {
+        id: svc.brand.id,
+        name: svc.brand.name,
+        owner_id: svc.brand.owner_id ?? "",
+        logo_url: svc.brand.logo_url ?? undefined,
+        rating: svc.brand.rating ?? null,
+        rating_count: svc.brand.rating_count ?? 0,
+      }
+    : null;
+
+  return {
+    id: svc.id,
+    title: svc.title,
+    description: svc.description ?? undefined,
+    owner_id: brand?.owner_id ?? "",
+    brand_id: brand?.id ?? null,
+    brand,
+    service_category_id: null,
+    service_category: null,
+    price: assignment.proposed_price ?? svc.price,
+    price_type: svc.price_type,
+    duration: assignment.proposed_duration ?? svc.duration,
+    address: undefined,
+    status: svc.status,
+    images: svc.images.map((image) => ({
+      id: image.id,
+      media_id: image.id,
+      order: image.order,
+      url: image.url,
+    })),
+    rating: null,
+    rating_count: 0,
+    my_rating: null,
+    created_at: assignment.created_at,
+    updated_at: assignment.updated_at,
+  };
 }
 
 const DEFAULT_FORM: ServiceFormState = {
@@ -166,8 +203,8 @@ const DEFAULT_FORM: ServiceFormState = {
 };
 
 function serviceToFormState(service: Service, brands: Brand[]): ServiceFormState {
-  const contextType = service.branch_id ? "branch" : "individual";
-  const brand = service.branch_id ? getBrandByBranchId(brands, service.branch_id) : undefined;
+  const contextType = service.brand_id ? "branch" : "individual";
+  const brand = service.brand_id ? brands.find((item) => item.id === service.brand_id) : undefined;
   return {
     title: service.title,
     description: service.description ?? "",
@@ -175,7 +212,7 @@ function serviceToFormState(service: Service, brands: Brand[]): ServiceFormState
     contextType,
     address: service.address ?? "",
     brandId: brand?.id ?? "",
-    branchId: service.branch_id ?? "",
+    branchId: "",
     duration: service.duration !== null ? String(service.duration) : "",
     price_type: service.price_type,
     price: service.price !== null ? String(service.price) : "",
@@ -194,9 +231,9 @@ function buildPayload(form: ServiceFormState): CreateServicePayload {
   };
 
   if (form.contextType === "branch") {
-    payload.branch_id = form.branchId || null;
+    payload.brand_id = form.brandId || null;
   } else {
-    payload.branch_id = null;
+    payload.brand_id = null;
     payload.address = form.address.trim() || undefined;
   }
 
@@ -250,17 +287,11 @@ function ServiceFormPage({
   const [cropTarget, setCropTarget] = useState<CropTarget | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const selectedBrand = brands.find((b) => b.id === form.brandId);
   const brandOptions: ComboboxOption[] = brands.map((b) => ({ value: b.id, label: b.name }));
   const categoryOptions: ComboboxOption[] = serviceCategories.map((c) => ({
     value: c.id,
     label: messages.categories[c.key as keyof typeof messages.categories] ?? c.key,
   }));
-  const branchOptions: ComboboxOption[] = (selectedBrand?.branches ?? []).map((b) => ({
-    value: b.id,
-    label: b.name,
-  }));
-
   function setField<K extends keyof ServiceFormState>(key: K, value: ServiceFormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
@@ -520,23 +551,6 @@ function ServiceFormPage({
                       />
                     </Field>
                   </div>
-
-                  <div className={styles.fieldRow}>
-                    <Field>
-                      <FieldLabel>{copy.fieldBranch}</FieldLabel>
-                      <Combobox
-                        items={branchOptions}
-                        value={form.branchId}
-                        placeholder={form.brandId ? copy.fieldBranchPlaceholder : copy.selectBrandFirst}
-                        emptyMessage="No branches found"
-                        disabled={!form.brandId}
-                        onValueChange={(val) => {
-                          const id = Array.isArray(val) ? (val[0] ?? "") : (val ?? "");
-                          setField("branchId", id);
-                        }}
-                      />
-                    </Field>
-                  </div>
                 </>
               )}
             </div>
@@ -633,10 +647,6 @@ export function ServiceCard({
   const durationLabel = formatDuration(service.duration, copy.fieldDurationUnit);
   const owner = getOwnerInfo(service, brands, user);
 
-  const branch = service.branch_id
-    ? (getBranchById(brands, service.branch_id) ?? service.branch)
-    : null;
-
   const firstImage = service.images[0];
   const imageUrl = firstImage ? proxyMediaUrl(firstImage.url) : null;
 
@@ -729,12 +739,6 @@ export function ServiceCard({
             )}
             {owner.name}
           </Link>
-          {branch && !owner.isBrand && (
-            <span className={styles.cardBranch}>
-              <Icon icon="location_on" size={12} color="current" />
-              {branch.name}
-            </span>
-          )}
           {serviceRating !== null && (
             <span className={styles.cardRating}>
               <Icon icon="star" size={11} color="current" className={styles.cardStarIcon} />
@@ -799,10 +803,7 @@ export function ServiceDetailView({
   const priceLabel = formatPrice(service, copy);
   const durationLabel = formatDuration(service.duration, copy.fieldDurationUnit);
   const owner = getOwnerInfo(service, brands, user);
-  const branch = service.branch_id
-    ? (getBranchById(brands, service.branch_id) ?? service.branch)
-    : null;
-
+  const canManageService = service.owner_id === user.id;
   const category = service.service_category
     ? (messages.categories[service.service_category.key as keyof typeof messages.categories] ?? service.service_category.key)
     : null;
@@ -921,14 +922,7 @@ export function ServiceDetailView({
               <dt className={styles.detailDt}>{copy.labelDuration}</dt>
               <dd className={styles.detailDd}>{durationLabel}</dd>
 
-              {branch && (
-                <>
-                  <dt className={styles.detailDt}>{copy.labelBranch}</dt>
-                  <dd className={styles.detailDd}>{branch.name}</dd>
-                </>
-              )}
-
-              {service.address && !branch && (
+              {service.address && !owner.isBrand && (
                 <>
                   <dt className={styles.detailDt}>{copy.labelAddress}</dt>
                   <dd className={styles.detailDd}>{service.address}</dd>
@@ -959,7 +953,7 @@ export function ServiceDetailView({
             </div>
           </div>
 
-          {/* Actions card */}
+          {canManageService ? (
           <div className={styles.detailActionsCard}>
             <h2 className={styles.detailSidebarTitle}>{copy.detailActions}</h2>
 
@@ -1027,6 +1021,7 @@ export function ServiceDetailView({
               </div>
             )}
           </div>
+          ) : null}
         </div>
       </div>
     </div>
@@ -1090,15 +1085,56 @@ export function ServicesUsoPage({
   const searchKey = searchParams.toString();
 
   const [services, setServices] = useState<Service[]>(initialServices);
+  const [assignedServices, setAssignedServices] = useState<AssignedService[]>([]);
+  const [assignedBusyId, setAssignedBusyId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!accessToken) return;
+    let active = true;
+    (async () => {
+      try {
+        const items = await fetchMyAssignedServices(accessToken);
+        if (active) setAssignedServices(items);
+      } catch {
+        if (active) setAssignedServices([]);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [accessToken]);
+
+  async function handleStepDown(assignmentId: string) {
+    if (!accessToken || assignedBusyId) return;
+    setAssignedBusyId(assignmentId);
+    try {
+      await withdrawServiceAssignment(assignmentId, accessToken);
+      setAssignedServices((prev) => prev.filter((a) => a.id !== assignmentId));
+      window.dispatchEvent(new Event("reziphay:services-changed"));
+    } catch {
+      // Surface via existing feedback channel later if needed; silent for now.
+    } finally {
+      setAssignedBusyId(null);
+    }
+  }
 
   const initialServiceId = searchParams.get("id");
+  const assignedServiceCards = useMemo(
+    () => assignedServices.map(assignedServiceToService),
+    [assignedServices],
+  );
   const initialService = initialServiceId
-    ? initialServices.find((s) => s.id === initialServiceId) ?? null
+    ? initialServices.find((s) => s.id === initialServiceId) ??
+      assignedServiceCards.find((s) => s.id === initialServiceId) ??
+      null
     : null;
   const initialAction = searchParams.get("action");
   const initialBrandId = searchParams.get("brand") ?? undefined;
 
-  const isEditAction = initialAction === "edit" && Boolean(initialService);
+  const isEditAction =
+    initialAction === "edit" &&
+    Boolean(initialService) &&
+    initialService?.owner_id === user.id;
 
   const [view, setView] = useState<"list" | "detail" | "form">(
     isEditAction ? "form" : initialService ? "detail" : initialAction === "create" ? "form" : "list",
@@ -1139,7 +1175,9 @@ export function ServicesUsoPage({
     }
 
     if (id) {
-      const match = services.find((s) => s.id === id);
+      const match =
+        services.find((s) => s.id === id) ??
+        assignedServiceCards.find((s) => s.id === id);
       if (match) {
         setEditingService(null);
         setViewService(match);
@@ -1153,7 +1191,7 @@ export function ServicesUsoPage({
     setViewService(null);
     setCreateBrandId(undefined);
     setView("list");
-  }, [searchKey, services]);
+  }, [assignedServiceCards, searchKey, services]);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
@@ -1293,7 +1331,10 @@ export function ServicesUsoPage({
   }
 
   if (view === "detail" && viewService) {
-    const liveService = services.find((s) => s.id === viewService.id) ?? viewService;
+    const liveService =
+      services.find((s) => s.id === viewService.id) ??
+      assignedServiceCards.find((s) => s.id === viewService.id) ??
+      viewService;
     return (
       <ServiceDetailView
         service={liveService}
@@ -1332,7 +1373,7 @@ export function ServicesUsoPage({
         </StatusBanner>
       ) : null}
 
-      {services.length === 0 ? (
+      {services.length === 0 && assignedServices.length === 0 ? (
         <div className={styles.empty}>
           <div className={styles.emptyIcon}>
             <Icon icon="design_services" size={40} color="current" />
@@ -1355,6 +1396,32 @@ export function ServicesUsoPage({
               onClick={() => openDetail(service)}
             />
           ))}
+          {assignedServices.map((assignment) => {
+              const service = assignedServiceToService(assignment);
+              const busy = assignedBusyId === assignment.id;
+
+              return (
+                <ServiceCard
+                  key={assignment.id}
+                  service={service}
+                  copy={copy}
+                  brands={brands}
+                  user={user}
+                  showStatus={false}
+                  onClick={() => openDetail(service)}
+                  favoriteSlot={
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      disabled={busy}
+                      onClick={() => handleStepDown(assignment.id)}
+                    >
+                      {messages.brands.assignmentActionStepDown}
+                    </Button>
+                  }
+                />
+              );
+            })}
         </div>
       )}
     </div>

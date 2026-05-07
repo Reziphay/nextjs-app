@@ -1,11 +1,18 @@
 import { createApiClient } from "@/lib/api";
 import type { ApiSuccessResponse } from "@/types";
-import type { Service, ServiceCategory } from "@/types/service";
+import type {
+  Service,
+  ServiceCategory,
+  AssignableService,
+  AssignedService,
+  ServiceAssignment,
+  ServiceAssignmentRequest,
+} from "@/types/service";
 
 export type CreateServicePayload = {
   title: string;
   description?: string;
-  branch_id?: string | null;
+  brand_id?: string | null;
   service_category_id?: string | null;
   price?: number;
   price_type?: 'FIXED' | 'STARTING_FROM' | 'FREE';
@@ -15,6 +22,12 @@ export type CreateServicePayload = {
 };
 
 export type UpdateServicePayload = Partial<CreateServicePayload>;
+
+export type ServiceAssignmentRequestPayload = {
+  proposed_description?: string | null;
+  proposed_price?: number | null;
+  proposed_duration?: number | null;
+};
 
 export type PaginatedMeta = {
   page: number;
@@ -27,8 +40,8 @@ export function normalizeService(service: Service): Service {
   return {
     ...service,
     description: service.description ?? undefined,
-    branch_id: service.branch_id ?? null,
-    branch: service.branch ?? null,
+    brand_id: service.brand_id ?? null,
+    brand: service.brand ?? null,
     service_category_id: service.service_category_id ?? null,
     service_category: service.service_category ?? null,
     price: service.price ?? null,
@@ -274,4 +287,114 @@ export async function uploadServiceMedia(
   const data = response.data?.data;
   if (!data?.media_id) throw new Error("Invalid response from service media upload API");
   return data;
+}
+
+// ─── Team-member service assignment ──────────────────────────────────────────
+
+export async function fetchAssignableBrandServices(
+  brandId: string,
+  accessToken: string,
+): Promise<AssignableService[]> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<
+    ApiSuccessResponse<{ services: AssignableService[] }>
+  >({
+    url: `/brands/${brandId}/assignable-services`,
+    method: "GET",
+  });
+  return response.data?.data?.services ?? [];
+}
+
+export async function requestServiceAssignment(
+  brandId: string,
+  serviceId: string,
+  accessToken: string,
+  payload?: ServiceAssignmentRequestPayload,
+): Promise<ServiceAssignment> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<
+    ApiSuccessResponse<{ assignment: ServiceAssignment }>
+  >({
+    url: `/brands/${brandId}/services/${serviceId}/assignment-request`,
+    method: "POST",
+    data: payload,
+  });
+  const assignment = response.data?.data?.assignment;
+  if (!assignment) throw new Error("Invalid response from assignment request API");
+  return assignment;
+}
+
+export async function fetchBrandServiceAssignmentRequests(
+  brandId: string,
+  accessToken: string,
+): Promise<ServiceAssignmentRequest[]> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<
+    ApiSuccessResponse<{ requests: ServiceAssignmentRequest[] }>
+  >({
+    url: `/brands/${brandId}/service-assignment-requests`,
+    method: "GET",
+  });
+  return response.data?.data?.requests ?? [];
+}
+
+export async function withdrawServiceAssignment(
+  assignmentId: string,
+  accessToken: string,
+): Promise<ServiceAssignment> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<
+    ApiSuccessResponse<{ assignment: ServiceAssignment }>
+  >({
+    url: `/team-member-services/${assignmentId}`,
+    method: "DELETE",
+  });
+  const assignment = response.data?.data?.assignment;
+  if (!assignment) throw new Error("Invalid response from assignment withdraw API");
+  return assignment;
+}
+
+export async function approveServiceAssignment(
+  assignmentId: string,
+  accessToken: string,
+): Promise<ServiceAssignment> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<
+    ApiSuccessResponse<{ assignment: ServiceAssignment }>
+  >({
+    url: `/team-member-services/${assignmentId}/approve`,
+    method: "PATCH",
+  });
+  const assignment = response.data?.data?.assignment;
+  if (!assignment) throw new Error("Invalid response from assignment approve API");
+  return assignment;
+}
+
+export async function rejectServiceAssignment(
+  assignmentId: string,
+  accessToken: string,
+): Promise<ServiceAssignment> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<
+    ApiSuccessResponse<{ assignment: ServiceAssignment }>
+  >({
+    url: `/team-member-services/${assignmentId}/reject`,
+    method: "PATCH",
+  });
+  const assignment = response.data?.data?.assignment;
+  if (!assignment) throw new Error("Invalid response from assignment reject API");
+  return assignment;
+}
+
+export async function fetchMyAssignedServices(
+  accessToken: string,
+): Promise<AssignedService[]> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<
+    ApiSuccessResponse<{ assignments: AssignedService[] }>
+  >({
+    url: "/services/assigned/mine",
+    method: "GET",
+  });
+  return response.data?.data?.assignments ?? [];
 }

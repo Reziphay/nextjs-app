@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { isAxiosError } from "axios";
@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/atoms/button";
 import { Input } from "@/components/atoms/input";
 import { Icon } from "@/components/icon";
-import { ProfileBox } from "@/components/molecules";
+import { DataTable, type DataTableColumn, ProfileBox } from "@/components/molecules";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   fetchBrandTeamWorkspace,
@@ -25,14 +25,22 @@ import {
   type BrandTeamWorkspace,
   type TeamWorkspaceMember,
 } from "@/lib/brands-api";
-import { fetchPublicServices, deleteService } from "@/lib/services-api";
+import {
+  fetchPublicServices,
+  fetchAssignableBrandServices,
+  fetchBrandServiceAssignmentRequests,
+  requestServiceAssignment,
+  approveServiceAssignment,
+  rejectServiceAssignment,
+  withdrawServiceAssignment,
+} from "@/lib/services-api";
 import { translateBackendErrorMessage } from "@/lib/backend-errors";
 import { proxyMediaUrl } from "@/lib/media";
 import { selectAuthSession } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
 import type { Brand, Branch, BrandStatus } from "@/types/brand";
 import type { PublicUserProfile } from "@/types";
-import type { Service } from "@/types/service";
+import type { Service, AssignableService, ServiceAssignmentRequest } from "@/types/service";
 import { RichTextDisplay } from "@/components/molecules/rich-text-editor/rich-text-display";
 import { StatusBanner } from "@/components/molecules/status-banner";
 import { SocialIcon, SOCIAL_COLORS } from "@/components/atoms/social-icon/social-icon";
@@ -223,15 +231,39 @@ export function BrandDetail({
   const [brandServices, setBrandServices] = useState<Service[]>([]);
   const [servicesState, setServicesState] = useState<"idle" | "loading" | "ready">("idle");
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [deletingServiceId, setDeletingServiceId] = useState<string | null>(null);
   const [deletingBranchId, setDeletingBranchId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<
-    | { type: "service"; item: Service }
-    | { type: "branch"; item: Branch }
-    | null
+    { type: "branch"; item: Branch } | null
   >(null);
 
-  const isOwner = Boolean(currentUserId && brandState.owner_id === currentUserId);
+  const isOwner =
+    brandState.viewer_role === "OWNER" ||
+    Boolean(currentUserId && brandState.owner_id === currentUserId);
+  const isMember = brandState.viewer_role === "MEMBER";
+  const canSelfAssignServices = isOwner || isMember;
+  const viewerBranchId = brandState.viewer_branch_id ?? null;
+  const [assignableServices, setAssignableServices] = useState<
+    AssignableService[]
+  >([]);
+  const [assignableState, setAssignableState] = useState<
+    "idle" | "loading" | "ready" | "error"
+  >("idle");
+  const [assignmentBusyId, setAssignmentBusyId] = useState<string | null>(null);
+  const [assignmentError, setAssignmentError] = useState<string | null>(null);
+  const [assignmentDraftService, setAssignmentDraftService] =
+    useState<AssignableService | null>(null);
+  const [assignmentDraft, setAssignmentDraft] = useState({
+    proposed_description: "",
+    proposed_price: "",
+    proposed_duration: "",
+  });
+  const [ownerAssignmentRequests, setOwnerAssignmentRequests] = useState<
+    ServiceAssignmentRequest[]
+  >([]);
+  const [ownerAssignmentRequestsState, setOwnerAssignmentRequestsState] = useState<
+    "idle" | "loading" | "ready" | "error"
+  >("idle");
+  const ownerRequestsSectionRef = useRef<HTMLElement | null>(null);
   const categories = useMemo(
     () => brandState.categories ?? [],
     [brandState.categories],
@@ -310,7 +342,7 @@ export function BrandDetail({
   useEffect(() => {
     const token = accessToken;
 
-    if (!isOwner || !token) {
+    if (!canSelfAssignServices || !token) {
       setTeamWorkspace(null);
       setTeamWorkspaceState("idle");
       return;
@@ -349,7 +381,195 @@ export function BrandDetail({
     return () => {
       active = false;
     };
+  }, [accessToken, brandState.id, canSelfAssignServices]);
+
+  useEffect(() => {
+    if (!canSelfAssignServices || !accessToken) {
+      setAssignableServices([]);
+      setAssignableState("idle");
+      return;
+    }
+
+    const token = accessToken;
+    let active = true;
+    setAssignableState("loading");
+
+    (async () => {
+      try {
+        const services = await fetchAssignableBrandServices(brandState.id, token);
+        if (!active) return;
+        setAssignableServices(services);
+        setAssignableState("ready");
+      } catch {
+        if (!active) return;
+        setAssignableServices([]);
+        setAssignableState("error");
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [accessToken, brandState.id, canSelfAssignServices]);
+
+  useEffect(() => {
+    if (!isOwner || !accessToken) {
+      setOwnerAssignmentRequests([]);
+      setOwnerAssignmentRequestsState("idle");
+      return;
+    }
+
+    const token = accessToken;
+    let active = true;
+    setOwnerAssignmentRequestsState("loading");
+
+    (async () => {
+      try {
+        const requests = await fetchBrandServiceAssignmentRequests(
+          brandState.id,
+          token,
+        );
+        if (!active) return;
+        setOwnerAssignmentRequests(requests);
+        setOwnerAssignmentRequestsState("ready");
+      } catch {
+        if (!active) return;
+        setOwnerAssignmentRequests([]);
+        setOwnerAssignmentRequestsState("error");
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
   }, [accessToken, brandState.id, isOwner]);
+
+  useEffect(() => {
+    if (!isOwner || ownerAssignmentRequestsState === "loading") {
+      return;
+    }
+
+    if (window.location.hash !== "#assignment-requests") {
+      return;
+    }
+
+    window.setTimeout(() => {
+      ownerRequestsSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 80);
+  }, [isOwner, ownerAssignmentRequestsState, ownerAssignmentRequests.length]);
+
+  function openAssignmentDraft(service: AssignableService) {
+    setAssignmentError(null);
+    setAssignmentDraftService(service);
+    setAssignmentDraft({
+      proposed_description: service.description ?? "",
+      proposed_price: service.price == null ? "" : String(service.price),
+      proposed_duration: service.duration == null ? "" : String(service.duration),
+    });
+  }
+
+  async function handleRequestAssignment(serviceId: string) {
+    if (!accessToken || assignmentBusyId) return;
+    setAssignmentBusyId(serviceId);
+    setAssignmentError(null);
+    try {
+      const assignment = await requestServiceAssignment(
+        brandState.id,
+        serviceId,
+        accessToken,
+        {
+          proposed_description:
+            assignmentDraft.proposed_description.trim() || null,
+          proposed_price:
+            assignmentDraft.proposed_price.trim() === ""
+              ? null
+              : Number(assignmentDraft.proposed_price),
+          proposed_duration:
+            assignmentDraft.proposed_duration.trim() === ""
+              ? null
+              : Number(assignmentDraft.proposed_duration),
+        },
+      );
+      setAssignableServices((prev) =>
+        prev.map((s) =>
+          s.id === serviceId ? { ...s, my_assignment: assignment } : s,
+        ),
+      );
+      setAssignmentDraftService(null);
+    } catch (err) {
+      const fallback = t.assignmentErrorGeneric ?? "Could not submit request.";
+      const apiMessage = isAxiosError(err)
+        ? (err.response?.data as { message?: string } | undefined)?.message
+        : undefined;
+      const translated = translateBackendErrorMessage(
+        apiMessage,
+        messages.backendErrors,
+      );
+      setAssignmentError(translated ?? fallback);
+    } finally {
+      setAssignmentBusyId(null);
+    }
+  }
+
+  async function handleWithdrawAssignment(assignmentId: string, serviceId: string) {
+    if (!accessToken || assignmentBusyId) return;
+    setAssignmentBusyId(serviceId);
+    setAssignmentError(null);
+    try {
+      await withdrawServiceAssignment(assignmentId, accessToken);
+      setAssignableServices((prev) =>
+        prev.map((s) =>
+          s.id === serviceId ? { ...s, my_assignment: null } : s,
+        ),
+      );
+    } catch (err) {
+      const fallback = t.assignmentErrorGeneric ?? "Could not withdraw.";
+      const apiMessage = isAxiosError(err)
+        ? (err.response?.data as { message?: string } | undefined)?.message
+        : undefined;
+      const translated = translateBackendErrorMessage(
+        apiMessage,
+        messages.backendErrors,
+      );
+      setAssignmentError(translated ?? fallback);
+    } finally {
+      setAssignmentBusyId(null);
+    }
+  }
+
+  async function handleOwnerAssignmentAction(
+    assignmentId: string,
+    action: "approve" | "reject",
+  ) {
+    if (!accessToken || assignmentBusyId) return;
+    setAssignmentBusyId(assignmentId);
+    setAssignmentError(null);
+    try {
+      if (action === "approve") {
+        await approveServiceAssignment(assignmentId, accessToken);
+      } else {
+        await rejectServiceAssignment(assignmentId, accessToken);
+      }
+      setOwnerAssignmentRequests((prev) =>
+        prev.filter((item) => item.assignment.id !== assignmentId),
+      );
+    } catch (err) {
+      const fallback = t.assignmentErrorGeneric ?? "Could not update request.";
+      const apiMessage = isAxiosError(err)
+        ? (err.response?.data as { message?: string } | undefined)?.message
+        : undefined;
+      const translated = translateBackendErrorMessage(
+        apiMessage,
+        messages.backendErrors,
+      );
+      setAssignmentError(translated ?? fallback);
+    } finally {
+      setAssignmentBusyId(null);
+    }
+  }
 
   const filteredBranches = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -482,16 +702,6 @@ export function BrandDetail({
     router.push(`/brands?progress=edit&id=${brandState.id}`);
   }
 
-  function handleEditService(svc: Service, e: React.MouseEvent) {
-    e.stopPropagation();
-    router.push(`/services?action=edit&id=${svc.id}`);
-  }
-
-  function handleDeleteService(svc: Service, e: React.MouseEvent) {
-    e.stopPropagation();
-    setDeleteTarget({ type: "service", item: svc });
-  }
-
   function handleEditBranch(branch: Branch, e: React.MouseEvent) {
     e.stopPropagation();
     router.push(`/brands?progress=edit&id=${brandState.id}&branch=${branch.id}`);
@@ -506,33 +716,19 @@ export function BrandDetail({
     const token = session.accessToken;
     if (!token || !deleteTarget) return;
 
-    if (deleteTarget.type === "service") {
-      const svc = deleteTarget.item;
-      setDeletingServiceId(svc.id);
-      setDeleteTarget(null);
-      try {
-        await deleteService(svc.id, token);
-        setBrandServices((prev) => prev.filter((s) => s.id !== svc.id));
-      } catch {
-        // silent
-      } finally {
-        setDeletingServiceId(null);
-      }
-    } else {
-      const branch = deleteTarget.item;
-      setDeletingBranchId(branch.id);
-      setDeleteTarget(null);
-      try {
-        await deleteBranchApi(brandState.id, branch.id, token);
-        setBrandState((prev) => ({
-          ...prev,
-          branches: (prev.branches ?? []).filter((b) => b.id !== branch.id),
-        }));
-      } catch {
-        // silent
-      } finally {
-        setDeletingBranchId(null);
-      }
+    const branch = deleteTarget.item;
+    setDeletingBranchId(branch.id);
+    setDeleteTarget(null);
+    try {
+      await deleteBranchApi(brandState.id, branch.id, token);
+      setBrandState((prev) => ({
+        ...prev,
+        branches: (prev.branches ?? []).filter((b) => b.id !== branch.id),
+      }));
+    } catch {
+      // silent
+    } finally {
+      setDeletingBranchId(null);
     }
   }
 
@@ -879,35 +1075,124 @@ export function BrandDetail({
         )}
       </section>
 
-      <section className={styles.servicesPanel}>
-        <div className={styles.servicesPanelHeader}>
-          <div className={styles.servicesPanelTitleGroup}>
-            <h2 className={styles.servicesPanelTitle}>{t.serviceSectionTitle}</h2>
-            {brandServices.length > 0 ? (
-              <span className={styles.servicesCount}>{brandServices.length}</span>
-            ) : null}
+      {!canSelfAssignServices ? (
+        <section className={styles.servicesPanel}>
+          <div className={styles.servicesPanelHeader}>
+            <div className={styles.servicesPanelTitleGroup}>
+              <h2 className={styles.servicesPanelTitle}>{t.serviceSectionTitle}</h2>
+              {brandServices.length > 0 ? (
+                <span className={styles.servicesCount}>{brandServices.length}</span>
+              ) : null}
+            </div>
           </div>
-          {isOwner ? (
-            <Button
-              variant="primary"
-              size="small"
-              icon="add"
-              onClick={() => router.push(`/services?action=create&brand=${brandState.id}`)}
-            >
-              {t.serviceAdd}
-            </Button>
-          ) : null}
-        </div>
 
-        {servicesState === "loading" ? (
-          <div className={styles.emptyState}>{t.serviceLoading}</div>
-        ) : brandServices.length === 0 ? (
-          <div className={styles.emptyStateServices}>
-            <Icon icon="design_services" size={32} color="current" className={styles.emptyStateServicesIcon} />
-            <p className={styles.emptyStateServicesText}>{t.serviceEmpty}</p>
+          {servicesState === "loading" ? (
+            <div className={styles.emptyState}>{t.serviceLoading}</div>
+          ) : brandServices.length === 0 ? (
+            <div className={styles.emptyStateServices}>
+              <Icon icon="design_services" size={32} color="current" className={styles.emptyStateServicesIcon} />
+              <p className={styles.emptyStateServicesText}>{t.serviceEmpty}</p>
+            </div>
+          ) : (
+            <>
+              <div className={styles.servicesTableHead}>
+                <span>{t.serviceTableService}</span>
+                <span>{t.serviceTableBranch}</span>
+                <span>{t.serviceTablePrice}</span>
+                <span>{t.serviceTableDuration}</span>
+              </div>
+              <div className={styles.servicesTableBody}>
+                {brandServices.map((svc) => {
+                  const priceLabel = formatServicePrice(svc, t);
+                  const durationLabel = formatServiceDuration(svc.duration, t.serviceLabelDurationUnit);
+                  const firstImg = svc.images[0];
+                  const imgUrl = firstImg ? proxyMediaUrl(firstImg.url) : null;
+                  const ownerName = svc.brand?.name ?? t.serviceModalIndividual;
+
+                  return (
+                    <div
+                      key={svc.id}
+                      role="button"
+                      tabIndex={0}
+                      className={styles.serviceRow}
+                      onClick={() => setSelectedService(svc)}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSelectedService(svc); }}
+                      aria-label={svc.title}
+                    >
+                      <div className={styles.serviceIdentity}>
+                        {imgUrl ? (
+                          <div className={styles.serviceThumb}>
+                            <Image
+                              src={imgUrl}
+                              alt={svc.title}
+                              fill
+                              className={styles.serviceThumbImage}
+                              sizes="56px"
+                            />
+                          </div>
+                        ) : (
+                          <div className={styles.serviceThumbPlaceholder}>
+                            <Icon icon="design_services" size={14} color="current" />
+                          </div>
+                        )}
+                        <div className={styles.serviceIdentityText}>
+                          <p className={styles.serviceName}>{svc.title}</p>
+                          {svc.service_category ? (
+                            <span className={styles.serviceCategory}>
+                              {messages.categories[svc.service_category.key as keyof typeof messages.categories] ?? svc.service_category.key}
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      <div className={`${styles.serviceCell} ${styles.serviceBranchCell}`}>
+                        <span className={styles.serviceBranchName}>{ownerName}</span>
+                      </div>
+
+                      <div className={`${styles.serviceCell} ${styles.servicePriceCell}`}>
+                        <span className={styles.servicePricePill}>{priceLabel}</span>
+                      </div>
+
+                      <div className={`${styles.serviceCell} ${styles.serviceDurationCell}`}>
+                        {durationLabel !== "—" ? (
+                          <span className={styles.serviceDurationPill}>
+                            <Icon icon="schedule" size={13} color="current" />
+                            {durationLabel}
+                          </span>
+                        ) : (
+                          <span className={styles.serviceMuted}>—</span>
+                        )}
+                      </div>
+
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </section>
+      ) : null}
+
+      {canSelfAssignServices ? (
+        <section
+          id="assignment-requests"
+          ref={ownerRequestsSectionRef}
+          className={styles.assignmentPanel}
+        >
+          <div className={styles.servicesPanelHeader}>
+            <div className={styles.servicesPanelTitleGroup}>
+              <h2 className={styles.servicesPanelTitle}>
+                {t.assignmentSectionTitle}
+              </h2>
+              {assignableServices.length > 0 ? (
+                <span className={styles.servicesCount}>
+                  {assignableServices.length}
+                </span>
+              ) : null}
+            </div>
             {isOwner ? (
               <Button
-                variant="secondary"
+                variant="primary"
                 size="small"
                 icon="add"
                 onClick={() => router.push(`/services?action=create&brand=${brandState.id}`)}
@@ -916,111 +1201,421 @@ export function BrandDetail({
               </Button>
             ) : null}
           </div>
-        ) : (
-          <>
-            <div className={styles.servicesTableHead}>
-              <span>{t.serviceTableService}</span>
-              <span>{t.serviceTableBranch}</span>
-              <span>{t.serviceTablePrice}</span>
-              <span>{t.serviceTableDuration}</span>
-            </div>
-            <div className={styles.servicesTableBody}>
-              {brandServices.map((svc) => {
-                const priceLabel = formatServicePrice(svc, t);
-                const durationLabel = formatServiceDuration(svc.duration, t.serviceLabelDurationUnit);
-                const firstImg = svc.images[0];
-                const imgUrl = firstImg ? proxyMediaUrl(firstImg.url) : null;
-                const branchName = svc.branch_id
-                  ? (branches.find((b) => b.id === svc.branch_id)?.name ?? "—")
-                  : t.serviceModalIndividual;
 
-                return (
-                  <div
-                    key={svc.id}
-                    role="button"
-                    tabIndex={0}
-                    className={styles.serviceRow}
-                    onClick={() => setSelectedService(svc)}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSelectedService(svc); }}
-                    aria-label={svc.title}
-                  >
-                    <div className={styles.serviceIdentity}>
-                      {imgUrl ? (
-                        <div className={styles.serviceThumb}>
-                          <Image
-                            src={imgUrl}
-                            alt={svc.title}
-                            fill
-                            className={styles.serviceThumbImage}
-                            sizes="56px"
-                          />
+          {assignmentError ? (
+            <StatusBanner variant="error">{assignmentError}</StatusBanner>
+          ) : null}
+
+          {assignableState === "loading" ? (
+            <div className={styles.emptyState}>{t.serviceLoading}</div>
+          ) : assignableServices.length === 0 ? (
+            <div className={styles.emptyStateServices}>
+              <Icon
+                icon="design_services"
+                size={32}
+                color="current"
+                className={styles.emptyStateServicesIcon}
+              />
+              <p className={styles.emptyStateServicesText}>
+                {t.assignmentEmpty}
+              </p>
+            </div>
+          ) : (
+            <DataTable<AssignableService>
+              rows={assignableServices}
+              getRowId={(svc) => svc.id}
+              tableClassName={`${styles.assignmentDataTable} ${styles.assignableServicesTable}`}
+              columns={[
+                {
+                  id: "service",
+                  header: t.serviceTableService,
+                  width: "24%",
+                  render: (svc) => {
+                    const firstImg = svc.images[0];
+                    const imgUrl = firstImg ? proxyMediaUrl(firstImg.url) : null;
+
+                    return (
+                      <Button
+                        variant="unstyled"
+                        type="button"
+                        className={`${styles.serviceIdentity} ${styles.serviceIdentityLink}`}
+                        onClick={() => router.push(`/services?id=${svc.id}`)}
+                        aria-label={svc.title}
+                      >
+                        {imgUrl ? (
+                          <div className={styles.serviceThumb}>
+                            <Image
+                              src={imgUrl}
+                              alt={svc.title}
+                              fill
+                              className={styles.serviceThumbImage}
+                              sizes="28px"
+                            />
+                          </div>
+                        ) : (
+                          <div className={styles.serviceThumbPlaceholder}>
+                            <Icon icon="design_services" size={22} color="current" />
+                          </div>
+                        )}
+                        <div className={styles.serviceIdentityText}>
+                          <p className={styles.serviceName}>{svc.title}</p>
                         </div>
-                      ) : (
-                        <div className={styles.serviceThumbPlaceholder}>
-                          <Icon icon="design_services" size={22} color="current" />
-                        </div>
-                      )}
-                      <div className={styles.serviceIdentityText}>
-                        <p className={styles.serviceName}>{svc.title}</p>
-                        {svc.service_category ? (
-                          <span className={styles.serviceCategory}>
-                            {messages.categories[svc.service_category.key as keyof typeof messages.categories] ?? svc.service_category.key}
-                          </span>
+                      </Button>
+                    );
+                  },
+                },
+                {
+                  id: "members",
+                  header: t.assignmentStatsMembers,
+                  width: "5.8rem",
+                  align: "center",
+                  render: (svc) => (
+                    <span className={styles.assignmentStatValue}>
+                      {svc.assigned_team_members_count}
+                    </span>
+                  ),
+                },
+                {
+                  id: "branches",
+                  header: t.assignmentStatsBranches,
+                  width: "4.8rem",
+                  align: "center",
+                  render: (svc) => (
+                    <span className={styles.assignmentStatValue}>
+                      {svc.assigned_branches_count}
+                    </span>
+                  ),
+                },
+                {
+                  id: "price",
+                  header: t.serviceTablePrice,
+                  width: "4.8rem",
+                  align: "center",
+                  render: (svc) => {
+                    const priceLabel =
+                      svc.price_type === "FREE"
+                        ? t.serviceLabelFree
+                        : svc.price === null
+                          ? "—"
+                          : svc.price_type === "STARTING_FROM"
+                            ? `${t.serviceLabelFrom} ${svc.price}`
+                            : String(svc.price);
+
+                    return (
+                      <span className={styles.servicePricePill}>{priceLabel}</span>
+                    );
+                  },
+                },
+                {
+                  id: "duration",
+                  header: t.serviceTableDuration,
+                  width: "6rem",
+                  align: "center",
+                  render: (svc) => {
+                    const durationLabel = formatServiceDuration(
+                      svc.duration,
+                      t.serviceLabelDurationUnit,
+                    );
+
+                    return durationLabel !== "—" ? (
+                      <span className={styles.serviceDurationPill}>
+                        <Icon icon="schedule" size={11} color="current" />
+                        {durationLabel}
+                      </span>
+                    ) : (
+                      <span className={styles.assignmentEmptyCell}>—</span>
+                    );
+                  },
+                },
+                {
+                  id: "status",
+                  header: t.assignmentTableStatus,
+                  width: "6.8rem",
+                  align: "center",
+                  render: (svc) => {
+                    const a =
+                      svc.my_assignment?.status === "WITHDRAWN"
+                        ? null
+                        : svc.my_assignment;
+                    const status = a?.status ?? null;
+                    const initiator = a?.initiated_by ?? null;
+                    let statusBadge: { text: string; className: string } | null =
+                      null;
+
+                    if (status === "PENDING") {
+                      statusBadge = {
+                        text:
+                          initiator === "MEMBER"
+                            ? t.assignmentStatusPending
+                            : t.assignmentStatusOwnerOffer,
+                        className: styles.statusWarm,
+                      };
+                    } else if (status === "ACCEPTED") {
+                      statusBadge = {
+                        text: t.assignmentStatusAccepted,
+                        className: styles.statusSuccess,
+                      };
+                    } else if (status === "REJECTED") {
+                      statusBadge = {
+                        text: t.assignmentStatusRejected,
+                        className: styles.statusError,
+                      };
+                    }
+
+                    return statusBadge ? (
+                      <span
+                        className={`${styles.assignmentStatusBadge} ${statusBadge.className}`}
+                      >
+                        {statusBadge.text}
+                      </span>
+                    ) : (
+                      <span className={styles.assignmentEmptyCell}>—</span>
+                    );
+                  },
+                },
+                {
+                  id: "actions",
+                  header: t.assignmentTableActions,
+                  width: "9rem",
+                  align: "right",
+                  render: (svc) => {
+                    const a =
+                      svc.my_assignment?.status === "WITHDRAWN"
+                        ? null
+                        : svc.my_assignment;
+                    const status = a?.status ?? null;
+                    const initiator = a?.initiated_by ?? null;
+                    const busy = assignmentBusyId === svc.id;
+
+                    return (
+                      <div className={styles.assignmentActions}>
+                        {!status || status === "REJECTED" ? (
+                          <Button
+                            variant="secondary"
+                            size="small"
+                            icon="check"
+                            onClick={() => openAssignmentDraft(svc)}
+                            disabled={busy}
+                          >
+                            {status === "REJECTED"
+                              ? t.assignmentActionRequestAgain
+                              : t.assignmentActionRequest}
+                          </Button>
+                        ) : status === "PENDING" && initiator === "MEMBER" ? (
+                          <Button
+                            variant="secondary"
+                            size="small"
+                            onClick={() =>
+                              a && handleWithdrawAssignment(a.id, svc.id)
+                            }
+                            disabled={busy}
+                          >
+                            {t.assignmentActionWithdraw}
+                          </Button>
+                        ) : status === "ACCEPTED" ? (
+                          <Button
+                            variant="secondary"
+                            size="small"
+                            onClick={() =>
+                              a && handleWithdrawAssignment(a.id, svc.id)
+                            }
+                            disabled={busy}
+                          >
+                            {t.assignmentActionStepDown}
+                          </Button>
                         ) : null}
                       </div>
-                    </div>
+                    );
+                  },
+                },
+              ] satisfies DataTableColumn<AssignableService>[]}
+            />
+          )}
+        </section>
+      ) : null}
 
-                    <div className={`${styles.serviceCell} ${styles.serviceBranchCell}`}>
-                      <span className={styles.serviceBranchName}>{branchName}</span>
-                    </div>
+      {isOwner ? (
+        <section className={styles.assignmentPanel}>
+          <div className={styles.servicesPanelHeader}>
+            <div className={styles.servicesPanelTitleGroup}>
+              <h2 className={styles.servicesPanelTitle}>
+                {t.assignmentOwnerRequestsTitle}
+              </h2>
+              {ownerAssignmentRequests.length > 0 ? (
+                <span className={styles.servicesCount}>
+                  {ownerAssignmentRequests.length}
+                </span>
+              ) : null}
+            </div>
+          </div>
 
-                    <div className={`${styles.serviceCell} ${styles.servicePriceCell}`}>
-                      <span className={styles.servicePricePill}>{priceLabel}</span>
-                    </div>
+          {ownerAssignmentRequestsState === "loading" ? (
+            <div className={styles.emptyState}>{t.serviceLoading}</div>
+          ) : ownerAssignmentRequests.length === 0 ? (
+            <div className={styles.emptyStateServices}>
+              <Icon
+                icon="assignment_ind"
+                size={32}
+                color="current"
+                className={styles.emptyStateServicesIcon}
+              />
+              <p className={styles.emptyStateServicesText}>
+                {t.assignmentOwnerRequestsEmpty}
+              </p>
+            </div>
+          ) : (
+            <DataTable<ServiceAssignmentRequest>
+              rows={ownerAssignmentRequests}
+              getRowId={(item) => item.assignment.id}
+              tableClassName={`${styles.assignmentDataTable} ${styles.ownerRequestsTable}`}
+              columns={[
+                {
+                  id: "service",
+                  header: t.serviceTableService,
+                  width: "22%",
+                  render: (item) => {
+                    const firstImg = item.service.images[0];
+                    const imgUrl = firstImg ? proxyMediaUrl(firstImg.url) : null;
 
-                    <div className={`${styles.serviceCell} ${styles.serviceDurationCell}`}>
-                      {durationLabel !== "—" ? (
-                        <span className={styles.serviceDurationPill}>
-                          <Icon icon="schedule" size={13} color="current" />
-                          {durationLabel}
-                        </span>
-                      ) : (
-                        <span className={styles.serviceMuted}>—</span>
-                      )}
-                    </div>
+                    return (
+                      <Button
+                        variant="unstyled"
+                        type="button"
+                        className={`${styles.serviceIdentity} ${styles.serviceIdentityLink}`}
+                        onClick={() => router.push(`/services?id=${item.service.id}`)}
+                        aria-label={item.service.title}
+                      >
+                        {imgUrl ? (
+                          <div className={styles.serviceThumb}>
+                            <Image
+                              src={imgUrl}
+                              alt={item.service.title}
+                              fill
+                              className={styles.serviceThumbImage}
+                              sizes="28px"
+                            />
+                          </div>
+                        ) : (
+                          <div className={styles.serviceThumbPlaceholder}>
+                            <Icon icon="design_services" size={14} color="current" />
+                          </div>
+                        )}
+                        <div className={styles.serviceIdentityText}>
+                          <p className={styles.serviceName}>{item.service.title}</p>
+                        </div>
+                      </Button>
+                    );
+                  },
+                },
+                {
+                  id: "member",
+                  header: t.assignmentStatsMembers,
+                  width: "8rem",
+                  render: (item) => {
+                    const memberName =
+                      `${item.team_member.first_name} ${item.team_member.last_name}`.trim() ||
+                      item.team_member.email;
+                    const memberAvatar =
+                      proxyMediaUrl(item.team_member.avatar_url) ?? "/reziphay-logo.png";
 
-                    {isOwner ? (
-                      <div className={styles.rowActions} onClick={(e) => e.stopPropagation()}>
+                    return (
+                      <ProfileBox
+                        userId={item.team_member.user_id}
+                        name={memberName}
+                        avatar={memberAvatar}
+                        className={styles.assignmentProfileCell}
+                      />
+                    );
+                  },
+                },
+                {
+                  id: "branch",
+                  header: t.serviceTableBranch,
+                  width: "8.5rem",
+                  render: (item) => (
+                    <span className={styles.assignmentTextCell}>
+                      {item.branch.name}
+                    </span>
+                  ),
+                },
+                {
+                  id: "price",
+                  header: t.serviceTablePrice,
+                  width: "4.8rem",
+                  align: "center",
+                  render: (item) => {
+                    const proposedPrice =
+                      item.assignment.proposed_price ?? item.service.price;
+
+                    return (
+                      <span className={styles.servicePricePill}>
+                        {proposedPrice == null ? "—" : proposedPrice}
+                      </span>
+                    );
+                  },
+                },
+                {
+                  id: "duration",
+                  header: t.serviceTableDuration,
+                  width: "6rem",
+                  align: "center",
+                  render: (item) => {
+                    const proposedDuration =
+                      item.assignment.proposed_duration ?? item.service.duration;
+
+                    return proposedDuration ? (
+                      <span className={styles.serviceDurationPill}>
+                        <Icon icon="schedule" size={11} color="current" />
+                        {formatServiceDuration(
+                          proposedDuration,
+                          t.serviceLabelDurationUnit,
+                        )}
+                      </span>
+                    ) : (
+                      <span className={styles.assignmentEmptyCell}>—</span>
+                    );
+                  },
+                },
+                {
+                  id: "actions",
+                  header: t.assignmentTableActions,
+                  width: "8.8rem",
+                  align: "right",
+                  render: (item) => {
+                    const busy = assignmentBusyId === item.assignment.id;
+
+                    return (
+                      <div className={styles.assignmentActions}>
                         <Button
-                          variant="unstyled"
-                          type="button"
-                          className={styles.rowActionBtn}
-                          onClick={(e) => handleEditService(svc, e)}
-                          aria-label={`${t.serviceActionEdit}: ${svc.title}`}
-                          title={t.serviceActionEdit}
+                          variant="secondary"
+                          size="small"
+                          onClick={() =>
+                            handleOwnerAssignmentAction(item.assignment.id, "reject")
+                          }
+                          disabled={busy}
                         >
-                          <Icon icon="edit" size={15} color="current" />
+                          {t.assignmentOwnerReject}
                         </Button>
                         <Button
-                          variant="unstyled"
-                          type="button"
-                          className={`${styles.rowActionBtn} ${styles.rowActionBtnDanger}`}
-                          onClick={(e) => handleDeleteService(svc, e)}
-                          disabled={deletingServiceId === svc.id}
-                          aria-label={`${t.serviceActionDelete}: ${svc.title}`}
-                          title={t.serviceActionDelete}
+                          variant="primary"
+                          size="small"
+                          icon="check"
+                          onClick={() =>
+                            handleOwnerAssignmentAction(item.assignment.id, "approve")
+                          }
+                          disabled={busy}
                         >
-                          <Icon icon="delete" size={15} color="current" />
+                          {t.assignmentOwnerApprove}
                         </Button>
                       </div>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
-      </section>
+                    );
+                  },
+                },
+              ] satisfies DataTableColumn<ServiceAssignmentRequest>[]}
+            />
+          )}
+        </section>
+      ) : null}
 
       <div className={styles.branchesSectionHeader}>
         <div className={styles.branchesSectionTitleGroup}>
@@ -1118,7 +1713,14 @@ export function BrandDetail({
                       </div>
                     )}
                     <div className={styles.branchIdentityText}>
-                      <p className={styles.branchName}>{branch.name}</p>
+                      <div className={styles.branchNameRow}>
+                        <p className={styles.branchName}>{branch.name}</p>
+                        {viewerBranchId === branch.id ? (
+                          <span className={styles.yourBranchBadge}>
+                            {t.yourBranchBadge}
+                          </span>
+                        ) : null}
+                      </div>
                       <p className={styles.branchNote}>{t.branchDetailRowHint}</p>
                     </div>
                   </div>
@@ -1191,6 +1793,115 @@ export function BrandDetail({
       </section>
 
       <AlertDialog
+        open={Boolean(assignmentDraftService)}
+        onOpenChange={(open) => {
+          if (!open) setAssignmentDraftService(null);
+        }}
+      >
+        <AlertDialogContent className={styles.assignmentDialogContent}>
+          {assignmentDraftService ? (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t.assignmentModalTitle}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t.assignmentModalDescription}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+
+              <div className={styles.assignmentDialogBody}>
+                <div className={styles.assignmentInfoBox}>
+                  <span className={styles.branchDialogLabel}>
+                    {assignmentDraftService.title}
+                  </span>
+                  {assignmentDraftService.description?.trim() ? (
+                    <RichTextDisplay
+                      html={assignmentDraftService.description}
+                      className={styles.branchDialogText}
+                    />
+                  ) : (
+                    <p className={styles.branchDialogText}>—</p>
+                  )}
+                </div>
+
+                <div className={styles.assignmentFormGrid}>
+                  <label className={styles.assignmentField}>
+                    <span className={styles.branchDialogLabel}>
+                      {t.assignmentModalPrice}
+                    </span>
+                    <Input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      value={assignmentDraft.proposed_price}
+                      onChange={(event) =>
+                        setAssignmentDraft((prev) => ({
+                          ...prev,
+                          proposed_price: event.target.value,
+                        }))
+                      }
+                    />
+                    <span className={styles.assignmentFieldHint}>
+                      {t.assignmentOwnerDefaultValue}:{" "}
+                      {assignmentDraftService.price ?? "—"}
+                    </span>
+                  </label>
+
+                  <label className={styles.assignmentField}>
+                    <span className={styles.branchDialogLabel}>
+                      {t.assignmentModalDuration}
+                    </span>
+                    <Input
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={assignmentDraft.proposed_duration}
+                      onChange={(event) =>
+                        setAssignmentDraft((prev) => ({
+                          ...prev,
+                          proposed_duration: event.target.value,
+                        }))
+                      }
+                    />
+                    <span className={styles.assignmentFieldHint}>
+                      {t.assignmentOwnerDefaultValue}:{" "}
+                      {assignmentDraftService.duration ?? "—"}
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setAssignmentDraftService(null)}>
+                  {t.deleteCancel}
+                </AlertDialogCancel>
+                <Button
+                  variant="secondary"
+                  icon="open_in_new"
+                  onClick={() =>
+                    window.open(
+                      `/services?id=${assignmentDraftService.id}`,
+                      "_blank",
+                      "noopener,noreferrer",
+                    )
+                  }
+                >
+                  {t.assignmentModalOpenService}
+                </Button>
+                <Button
+                  variant="primary"
+                  icon="check"
+                  isLoading={assignmentBusyId === assignmentDraftService.id}
+                  onClick={() => handleRequestAssignment(assignmentDraftService.id)}
+                >
+                  {t.assignmentModalSubmit}
+                </Button>
+              </AlertDialogFooter>
+            </>
+          ) : null}
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
         open={Boolean(selectedService)}
         onOpenChange={(open) => {
           if (!open) setSelectedService(null);
@@ -1245,14 +1956,7 @@ export function BrandDetail({
                     </div>
                   ) : null}
 
-                  {selectedService.branch_id ? (
-                    <div className={styles.branchDialogItem}>
-                      <span className={styles.branchDialogLabel}>{t.serviceModalBranch}</span>
-                      <p className={styles.branchDialogText}>
-                        {branches.find((b) => b.id === selectedService.branch_id)?.name ?? selectedService.branch_id}
-                      </p>
-                    </div>
-                  ) : selectedService.address ? (
+                  {selectedService.address && !selectedService.brand_id ? (
                     <div className={styles.branchDialogItem}>
                       <span className={styles.branchDialogLabel}>{t.serviceModalAddress}</span>
                       <p className={styles.branchDialogText}>{selectedService.address}</p>
@@ -1386,7 +2090,7 @@ export function BrandDetail({
                       </span>
                     </div>
 
-                    {isOwner ? (
+                    {canSelfAssignServices ? (
                       teamWorkspaceState === "loading" ? (
                         <p className={styles.branchStudioMuted}>
                           {t.branchDetailTeamLoading}
@@ -1397,27 +2101,29 @@ export function BrandDetail({
                         </p>
                       ) : (
                         <>
-                          <div className={styles.branchTeamMetrics}>
-                            <div className={styles.branchTeamMetric}>
-                              <span>{t.branchDetailAccepted}</span>
-                              <strong>
-                                {selectedBranchTeam?.members.accepted.length ?? 0}
-                              </strong>
+                          {isOwner ? (
+                            <div className={styles.branchTeamMetrics}>
+                              <div className={styles.branchTeamMetric}>
+                                <span>{t.branchDetailAccepted}</span>
+                                <strong>
+                                  {selectedBranchTeam?.members.accepted.length ?? 0}
+                                </strong>
+                              </div>
+                              <div className={styles.branchTeamMetric}>
+                                <span>{t.branchDetailPending}</span>
+                                <strong>
+                                  {selectedBranchTeam?.members.pending.length ?? 0}
+                                </strong>
+                              </div>
+                              <div className={styles.branchTeamMetric}>
+                                <span>{t.branchDetailArchived}</span>
+                                <strong>
+                                  {(selectedBranchTeam?.members.rejected.length ?? 0) +
+                                    (selectedBranchTeam?.members.removed.length ?? 0)}
+                                </strong>
+                              </div>
                             </div>
-                            <div className={styles.branchTeamMetric}>
-                              <span>{t.branchDetailPending}</span>
-                              <strong>
-                                {selectedBranchTeam?.members.pending.length ?? 0}
-                              </strong>
-                            </div>
-                            <div className={styles.branchTeamMetric}>
-                              <span>{t.branchDetailArchived}</span>
-                              <strong>
-                                {(selectedBranchTeam?.members.rejected.length ?? 0) +
-                                  (selectedBranchTeam?.members.removed.length ?? 0)}
-                              </strong>
-                            </div>
-                          </div>
+                          ) : null}
 
                           {selectedBranchTeam &&
                           selectedBranchTeam.members.accepted.length > 0 ? (
@@ -1563,9 +2269,7 @@ export function BrandDetail({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {deleteTarget?.type === "service"
-                ? `${t.serviceActionDelete}: ${deleteTarget.item.title}`
-                : `${t.deleteBranch}: ${deleteTarget?.item.name}`}
+              {`${t.deleteBranch}: ${deleteTarget?.item.name}`}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {t.deleteModalDescription}

@@ -146,8 +146,8 @@ function mapModerationBrandToBrand(brand: ModerationBrandDetail): Brand {
 }
 
 function mapServiceBrandToBrand(service: ModerationServiceDetail): Brand | null {
-  const brand = service.branch?.brand;
-  if (!brand || !service.branch) return null;
+  const brand = service.brand;
+  if (!brand) return null;
 
   return {
     id: brand.id,
@@ -157,17 +157,7 @@ function mapServiceBrandToBrand(service: ModerationServiceDetail): Brand | null 
     owner_id: service.owner.id,
     logo_url: brand.logo_url ?? undefined,
     gallery: [],
-    branches: [
-      {
-        id: service.branch.id,
-        brand_id: brand.id,
-        name: service.branch.name,
-        address1: service.branch.address1,
-        address2: service.branch.address2 ?? undefined,
-        is_24_7: false,
-        breaks: [],
-      },
-    ],
+    branches: [],
     categories: [],
     rating: brand.rating ?? null,
     rating_count: brand.rating_count ?? 0,
@@ -183,15 +173,23 @@ function mapModerationServiceToService(service: ModerationServiceDetail): Servic
     title: service.title,
     description: service.description ?? undefined,
     owner_id: service.owner.id,
-    branch_id: service.branch?.id ?? null,
+    brand_id: service.brand?.id ?? null,
+    brand: service.brand
+      ? {
+          id: service.brand.id,
+          name: service.brand.name,
+          owner_id: service.owner.id,
+          logo_url: service.brand.logo_url ?? undefined,
+          rating: service.brand.rating ?? null,
+          rating_count: service.brand.rating_count ?? 0,
+        }
+      : null,
     service_category_id: service.service_category_id ?? service.service_category?.id ?? null,
     service_category: service.service_category ?? null,
     price: service.price ?? null,
     price_type: service.price_type === "STARTING_FROM" || service.price_type === "FREE" ? service.price_type : "FIXED",
     duration: service.duration ?? null,
-    address: service.branch
-      ? [service.branch.address1, service.branch.address2].filter(Boolean).join(", ")
-      : (service.address ?? undefined),
+    address: service.address ?? undefined,
     status: service.status as Service["status"],
     images: (service.images ?? []).map((item, index) => ({
       id: `${service.id}-image-${index}`,

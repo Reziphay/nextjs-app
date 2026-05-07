@@ -14,7 +14,7 @@ import {
   removeFavoriteService,
 } from "@/lib/favorites-api";
 import { proxyMediaUrl } from "@/lib/media";
-import type { Brand, Branch, PublicUserProfile } from "@/types";
+import type { Brand, PublicUserProfile } from "@/types";
 import type { Service } from "@/types/service";
 import type { UserProfile } from "@/types/user_types";
 import styles from "./ucr-favorites-page.module.css";
@@ -35,18 +35,6 @@ type ServiceWithContext = {
 
 const PLACEHOLDER_IMAGE = "/banner1.jpg";
 const PLACEHOLDER_LOGO = "/reziphay-logo.png";
-
-function branchLookup(brands: Brand[]) {
-  const map = new Map<string, { brand: Brand; branch: Branch }>();
-
-  for (const brand of brands) {
-    for (const branch of brand.branches ?? []) {
-      map.set(branch.id, { brand, branch });
-    }
-  }
-
-  return map;
-}
 
 function imageForBrand(brand: Brand) {
   return (
@@ -156,17 +144,18 @@ export function UcrFavoritesPage({
     [...brands, ...serviceBrands].forEach((brand) => map.set(brand.id, brand));
     return [...map.values()];
   }, [brands, serviceBrands]);
-  const branchMap = useMemo(() => branchLookup(allKnownBrands), [allKnownBrands]);
   const servicesWithContext = useMemo<ServiceWithContext[]>(
     () =>
       serviceItems.map((service) => {
-        const branchContext = service.branch_id ? branchMap.get(service.branch_id) : undefined;
+        const brand = service.brand_id
+          ? allKnownBrands.find((item) => item.id === service.brand_id)
+          : undefined;
         return {
           service,
-          owner: ownersById[service.owner_id] ?? ownersById[branchContext?.brand.owner_id ?? ""],
+          owner: ownersById[service.owner_id] ?? ownersById[brand?.owner_id ?? ""],
         };
       }),
-    [branchMap, ownersById, serviceItems],
+    [allKnownBrands, ownersById, serviceItems],
   );
 
   function ownerAsCardUser(item: ServiceWithContext) {

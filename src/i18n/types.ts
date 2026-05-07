@@ -523,6 +523,39 @@ export type Messages = {
     branchDetailPhotoEmpty: string;
     branchDetailPhotoReady: string;
     branchDetailTeamBadge: string;
+    // Member-mode brand detail
+    memberBadge: string;
+    yourBranchBadge: string;
+    assignmentSectionTitle: string;
+    assignmentEmpty: string;
+    assignmentStatusPending: string;
+    assignmentStatusOwnerOffer: string;
+    assignmentStatusAccepted: string;
+    assignmentStatusRejected: string;
+    assignmentStatusWithdrawn: string;
+    assignmentActionRequest: string;
+    assignmentActionRequestAgain: string;
+    assignmentActionWithdraw: string;
+    assignmentActionStepDown: string;
+    assignmentStatsMembers: string;
+    assignmentStatsBranches: string;
+    assignmentTableStatus: string;
+    assignmentTableActions: string;
+    assignmentErrorGeneric: string;
+    assignmentModalTitle: string;
+    assignmentModalDescription: string;
+    assignmentModalServiceDescription: string;
+    assignmentModalPrice: string;
+    assignmentModalDuration: string;
+    assignmentModalOpenService: string;
+    assignmentModalSubmit: string;
+    assignmentOwnerRequestsTitle: string;
+    assignmentOwnerRequestsEmpty: string;
+    assignmentOwnerApprove: string;
+    assignmentOwnerReject: string;
+    assignmentOwnerDefaultValue: string;
+    assignedFromBrandsTitle: string;
+    assignedFromBrandsEmpty: string;
     // UCR featured services
     ucrFeaturedServicesTitle: string;
     // Strategy page

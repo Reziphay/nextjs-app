@@ -45,12 +45,21 @@ export type BrandSocialLinks = {
   website_url?: string;
 };
 
+export type BrandViewerRole = 'OWNER' | 'MEMBER' | 'NONE';
+
 export type Brand = {
   id: string;
   name: string;
   description?: string;
   status: BrandStatus;
   owner_id: string;
+  owner?: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    avatar_url?: string | null;
+  };
   logo_url?: string;
   gallery?: BrandGalleryItem[];
   branches?: Branch[];
@@ -58,6 +67,9 @@ export type Brand = {
   rating: number | null;
   rating_count: number;
   my_rating: number | null;
+  // Set on getMyBrands and getBrandById; undefined on public listings.
+  viewer_role?: BrandViewerRole;
+  viewer_branch_id?: string | null;
   created_at: string;
   updated_at: string;
 } & BrandSocialLinks;

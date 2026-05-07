@@ -17,7 +17,7 @@ import {
 } from "@/lib/favorites-api";
 import { proxyMediaUrl } from "@/lib/media";
 import type { MarketplaceFacet, MarketplaceHomeSections, MarketplaceHomeUso } from "@/lib/marketplace-api";
-import type { Brand, Branch, BrandCategory, PublicUserProfile } from "@/types";
+import type { Brand, BrandCategory, PublicUserProfile } from "@/types";
 import type { Service, ServiceCategory } from "@/types/service";
 import type { UserProfile } from "@/types/user_types";
 import styles from "./ucr-marketplace-page.module.css";
@@ -43,7 +43,6 @@ type UcrMarketplacePageProps = {
 type ServiceWithContext = {
   service: Service;
   brand?: Brand;
-  branch?: Branch;
   owner?: PublicUserProfile;
 };
 
@@ -98,18 +97,6 @@ function ScrollableRail({
 
 const PLACEHOLDER_IMAGE = "/banner1.jpg";
 const PLACEHOLDER_LOGO = "/reziphay-logo.png";
-
-function branchLookup(brands: Brand[]) {
-  const map = new Map<string, { brand: Brand; branch: Branch }>();
-
-  for (const brand of brands) {
-    for (const branch of brand.branches ?? []) {
-      map.set(branch.id, { brand, branch });
-    }
-  }
-
-  return map;
-}
 
 function imageForBrand(brand: Brand) {
   return (
@@ -341,20 +328,20 @@ export function UcrMarketplacePage({
     },
     [brands, favoriteBrandList, favoriteServiceBrands, marketplaceHome],
   );
-  const branchMap = useMemo(() => branchLookup(allKnownBrands), [allKnownBrands]);
 
   const toServiceItems = useMemo(
     () => (items: Service[]): ServiceWithContext[] =>
       items.map((service) => {
-        const branchContext = service.branch_id ? branchMap.get(service.branch_id) : undefined;
+        const brand = service.brand_id
+          ? allKnownBrands.find((item) => item.id === service.brand_id)
+          : undefined;
         return {
           service,
-          brand: branchContext?.brand,
-          branch: branchContext?.branch,
+          brand,
           owner: ownersById[service.owner_id],
         };
       }),
-    [branchMap, ownersById],
+    [allKnownBrands, ownersById],
   );
   const serviceItems = useMemo<ServiceWithContext[]>(
     () => toServiceItems(services),
