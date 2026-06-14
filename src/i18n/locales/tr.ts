@@ -454,6 +454,8 @@ export const trMessages: Messages = {
     requiredMessage: "Bu alan zorunludur.",
     nameRequiredMessage: "Marka adı zorunludur.",
     openingRequiredMessage: "Açılış saati zorunludur.",
+    branchPhoneInvalid: "Geçerli bir telefon numarası girin.",
+    branchEmailInvalid: "Geçerli bir e-posta adresi girin.",
     closingRequiredMessage: "Kapanış saati zorunludur.",
     gallery: "Galeri",
     discoverBrands: "Markaları keşfet",

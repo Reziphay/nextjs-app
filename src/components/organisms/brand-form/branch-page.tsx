@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { Button } from "@/components/atoms/button";
+import { PhoneInput } from "@/components/molecules/phone-input";
 import { AvatarCropDialog } from "@/components/molecules/avatar-crop-dialog/avatar-crop-dialog";
 import {
   Combobox,
@@ -66,6 +67,10 @@ type CropTarget = {
   aspectRatio: "1:1";
 };
 
+
+function stripUnsafe(value: string): string {
+  return value.replace(/[<>]/g, "");
+}
 
 function createEmptyBranch(): BranchDraft {
   return {
@@ -244,6 +249,8 @@ export function BranchPage({
       if (!draft.closing?.trim()) errs.closing = t.closingRequiredMessage;
       else if (!isValidTime24(draft.closing)) errs.closing = "HH:mm";
     }
+    if (draft.phone && !/^\+?\d{7,20}$/.test(draft.phone)) errs.phone = t.branchPhoneInvalid;
+    if (draft.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(draft.email)) errs.email = t.branchEmailInvalid;
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -477,9 +484,10 @@ export function BranchPage({
                         <Input
                           autoFocus
                           value={draft.name}
+                          maxLength={100}
                           placeholder={t.branchFieldNamePlaceholder}
                           aria-invalid={Boolean(errors.name)}
-                          onChange={(e) => updateField("name", e.target.value)}
+                          onChange={(e) => updateField("name", stripUnsafe(e.target.value))}
                         />
                         {errors.name ? <p className={styles.fieldError}>{errors.name}</p> : null}
                       </Field>
@@ -501,9 +509,10 @@ export function BranchPage({
                         <FieldLabel required>{t.branchFieldAddress1}</FieldLabel>
                         <Input
                           value={draft.address1}
+                          maxLength={200}
                           placeholder={t.branchFieldAddress1Placeholder}
                           aria-invalid={Boolean(errors.address1)}
-                          onChange={(e) => updateField("address1", e.target.value)}
+                          onChange={(e) => updateField("address1", stripUnsafe(e.target.value))}
                         />
                         {errors.address1 ? <p className={styles.fieldError}>{errors.address1}</p> : null}
                       </Field>
@@ -511,8 +520,9 @@ export function BranchPage({
                         <FieldLabel>{t.branchFieldAddress2}</FieldLabel>
                         <Input
                           value={draft.address2 ?? ""}
+                          maxLength={200}
                           placeholder={t.branchFieldAddress2Placeholder}
-                          onChange={(e) => updateField("address2", e.target.value)}
+                          onChange={(e) => updateField("address2", stripUnsafe(e.target.value))}
                         />
                       </Field>
                     </div>
@@ -520,12 +530,13 @@ export function BranchPage({
                     <div className={styles.fieldGrid2}>
                       <Field>
                         <FieldLabel>{t.branchFieldPhone}</FieldLabel>
-                        <Input
-                          type="tel"
+                        <PhoneInput
                           value={draft.phone ?? ""}
                           placeholder={t.branchFieldPhonePlaceholder}
-                          onChange={(e) => updateField("phone", e.target.value)}
+                          invalid={Boolean(errors.phone)}
+                          onChange={(val) => updateField("phone", val)}
                         />
+                        {errors.phone ? <p className={styles.fieldError}>{errors.phone}</p> : null}
                       </Field>
                       <Field>
                         <FieldLabel>{t.branchFieldEmail}</FieldLabel>
@@ -533,8 +544,10 @@ export function BranchPage({
                           type="email"
                           value={draft.email ?? ""}
                           placeholder={t.branchFieldEmailPlaceholder}
+                          aria-invalid={Boolean(errors.email)}
                           onChange={(e) => updateField("email", e.target.value)}
                         />
+                        {errors.email ? <p className={styles.fieldError}>{errors.email}</p> : null}
                       </Field>
                     </div>
                   </div>

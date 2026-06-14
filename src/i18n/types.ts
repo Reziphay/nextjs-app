@@ -383,6 +383,8 @@ export type Messages = {
     requiredMessage: string;
     nameRequiredMessage: string;
     openingRequiredMessage: string;
+    branchPhoneInvalid: string;
+    branchEmailInvalid: string;
     closingRequiredMessage: string;
     // Detail page labels
     back: string;

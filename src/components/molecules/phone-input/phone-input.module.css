@@ -1,0 +1,45 @@
+.wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-card);
+  background: var(--app-bg-surface);
+  overflow: hidden;
+}
+
+.wrap:focus-within {
+  border-color: var(--app-border-primary-strong);
+}
+
+.invalid {
+  border-color: var(--app-error);
+}
+
+.prefix {
+  flex-shrink: 0;
+  border: none;
+  border-right: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface-strong);
+  color: var(--app-text-strong);
+  font-size: var(--font-size-small);
+  padding: 0 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+.number {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--app-text-strong);
+  font-size: var(--font-size-small);
+  padding: 10px 12px;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.number::placeholder {
+  color: var(--app-text-subtle);
+}

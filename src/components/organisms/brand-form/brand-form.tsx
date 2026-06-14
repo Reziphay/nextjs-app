@@ -93,6 +93,18 @@ type BrandFormProps = {
   phoneVerified?: boolean;
 };
 
+// Limits mirror backend brand.schema.ts.
+const BRAND_NAME_MAX = 100;
+const BRAND_DESCRIPTION_MAX = 1000;
+
+function stripUnsafe(value: string): string {
+  return value.replace(/[<>]/g, "");
+}
+
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+}
+
 function createEmptyDraft(): BrandFormDraft {
   return {
     name: "",
@@ -512,11 +524,14 @@ export function BrandForm({
     };
   }, [branchModalOpen]);
 
+  const descriptionTextLength = stripHtml(draft.description ?? "").length;
+
   function validate(): boolean {
     const nextErrors: Partial<Record<string, string>> = {};
-    if (!draft.name.trim()) {
-      nextErrors.name = t.nameRequiredMessage;
-    }
+    const name = draft.name.trim();
+    if (!name) nextErrors.name = t.nameRequiredMessage;
+    else if (name.length > BRAND_NAME_MAX) nextErrors.name = messages.services.maxCharsReached;
+    if (descriptionTextLength > BRAND_DESCRIPTION_MAX) nextErrors.description = messages.services.maxCharsReached;
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   }
@@ -1038,13 +1053,15 @@ export function BrandForm({
                   <FieldLabel required>{t.fieldName}</FieldLabel>
                   <Input
                     value={draft.name}
+                    maxLength={BRAND_NAME_MAX}
                     placeholder={t.fieldNamePlaceholder}
                     aria-invalid={!!errors.name}
-                    onChange={(e) => updateField("name", e.target.value)}
+                    onChange={(e) => updateField("name", stripUnsafe(e.target.value))}
                   />
-                  {errors.name && (
-                    <p className={styles.fieldError}>{errors.name}</p>
-                  )}
+                  <div className={styles.charMetaRow}>
+                    {errors.name ? <span className={styles.fieldError}>{errors.name}</span> : <span />}
+                    <span className={styles.charCount}>{draft.name.length}/{BRAND_NAME_MAX}</span>
+                  </div>
                 </Field>
               </div>
 
@@ -1056,6 +1073,12 @@ export function BrandForm({
                     onChange={(html) => updateField("description", html)}
                     placeholder={t.fieldDescriptionPlaceholder}
                   />
+                  <div className={styles.charMetaRow}>
+                    {errors.description ? <span className={styles.fieldError}>{errors.description}</span> : <span />}
+                    <span className={[styles.charCount, descriptionTextLength > BRAND_DESCRIPTION_MAX ? styles.charCountOver : ""].filter(Boolean).join(" ")}>
+                      {descriptionTextLength}/{BRAND_DESCRIPTION_MAX}
+                    </span>
+                  </div>
                 </Field>
               </div>
 

@@ -417,6 +417,8 @@ export const azMessages: Messages = {
     requiredMessage: "Bu sahə mütləqdir.",
     nameRequiredMessage: "Brend adı mütləqdir.",
     openingRequiredMessage: "Açılış saatı mütləqdir.",
+    branchPhoneInvalid: "Düzgün telefon nömrəsi daxil edin.",
+    branchEmailInvalid: "Düzgün email ünvanı daxil edin.",
     closingRequiredMessage: "Bağlanış saatı mütləqdir.",
     back: "Geri",
     gallery: "Qalereya",

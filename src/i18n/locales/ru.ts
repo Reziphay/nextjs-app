@@ -717,6 +717,8 @@ export const ruMessages: Messages = {
     requiredMessage: "Это поле обязательно.",
     nameRequiredMessage: "Название бренда обязательно.",
     openingRequiredMessage: "Время открытия обязательно.",
+    branchPhoneInvalid: "Введите корректный номер телефона.",
+    branchEmailInvalid: "Введите корректный email.",
     closingRequiredMessage: "Время закрытия обязательно.",
     back: "Назад",
     gallery: "Галерея",

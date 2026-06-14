@@ -417,6 +417,8 @@ export const enMessages: Messages = {
     requiredMessage: "This field is required.",
     nameRequiredMessage: "Brand name is required.",
     openingRequiredMessage: "Opening time is required.",
+    branchPhoneInvalid: "Enter a valid phone number.",
+    branchEmailInvalid: "Enter a valid email address.",
     closingRequiredMessage: "Closing time is required.",
     back: "Back",
     gallery: "Gallery",

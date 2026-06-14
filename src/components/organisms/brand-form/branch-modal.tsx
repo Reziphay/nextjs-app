@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/atoms/alert-dialog";
 import { Button } from "@/components/atoms/button";
+import { PhoneInput } from "@/components/molecules/phone-input";
 import { AvatarCropDialog } from "@/components/molecules/avatar-crop-dialog/avatar-crop-dialog";
 import {
   Combobox,
@@ -72,6 +73,11 @@ type CropTarget = {
   file: File;
   aspectRatio: "1:1";
 };
+
+// Forbid XSS/HTML-injection characters in plain-text inputs.
+function stripUnsafe(value: string): string {
+  return value.replace(/[<>]/g, "");
+}
 
 function createEmptyBranch(): BranchDraft {
   return {
@@ -367,6 +373,15 @@ export function BranchModal({
       } else if (!isValidTime24(draft.closing)) {
         nextErrors.closing = "HH:mm";
       }
+    }
+
+    // Phone (optional) must match the backend format when provided.
+    if (draft.phone && !/^\+?\d{7,20}$/.test(draft.phone)) {
+      nextErrors.phone = t.branchPhoneInvalid;
+    }
+    // Email (optional) must be a valid address when provided.
+    if (draft.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(draft.email)) {
+      nextErrors.email = t.branchEmailInvalid;
     }
 
     setErrors(nextErrors);
@@ -721,9 +736,10 @@ export function BranchModal({
                 <Input
                   data-alert-dialog-autofocus
                   value={draft.name}
+                  maxLength={100}
                   placeholder={t.branchFieldNamePlaceholder}
                   aria-invalid={Boolean(errors.name)}
-                  onChange={(event) => updateField("name", event.target.value)}
+                  onChange={(event) => updateField("name", stripUnsafe(event.target.value))}
                 />
                 {errors.name ? (
                   <p className={styles.errorText}>{errors.name}</p>
@@ -744,10 +760,11 @@ export function BranchModal({
                   <FieldLabel required>{t.branchFieldAddress1}</FieldLabel>
                   <Input
                     value={draft.address1}
+                    maxLength={200}
                     placeholder={t.branchFieldAddress1Placeholder}
                     aria-invalid={Boolean(errors.address1)}
                     onChange={(event) =>
-                      updateField("address1", event.target.value)
+                      updateField("address1", stripUnsafe(event.target.value))
                     }
                   />
                   {errors.address1 ? (
@@ -759,9 +776,10 @@ export function BranchModal({
                   <FieldLabel>{t.branchFieldAddress2}</FieldLabel>
                   <Input
                     value={draft.address2 ?? ""}
+                    maxLength={200}
                     placeholder={t.branchFieldAddress2Placeholder}
                     onChange={(event) =>
-                      updateField("address2", event.target.value)
+                      updateField("address2", stripUnsafe(event.target.value))
                     }
                   />
                 </Field>
@@ -770,12 +788,13 @@ export function BranchModal({
               <div className={styles.row}>
                 <Field>
                   <FieldLabel>{t.branchFieldPhone}</FieldLabel>
-                  <Input
-                    type="tel"
+                  <PhoneInput
                     value={draft.phone ?? ""}
                     placeholder={t.branchFieldPhonePlaceholder}
-                    onChange={(event) => updateField("phone", event.target.value)}
+                    invalid={Boolean(errors.phone)}
+                    onChange={(val) => updateField("phone", val)}
                   />
+                  {errors.phone ? <p className={styles.errorText}>{errors.phone}</p> : null}
                 </Field>
 
                 <Field>
@@ -784,8 +803,10 @@ export function BranchModal({
                     type="email"
                     value={draft.email ?? ""}
                     placeholder={t.branchFieldEmailPlaceholder}
+                    aria-invalid={Boolean(errors.email)}
                     onChange={(event) => updateField("email", event.target.value)}
                   />
+                  {errors.email ? <p className={styles.errorText}>{errors.email}</p> : null}
                 </Field>
               </div>
 
