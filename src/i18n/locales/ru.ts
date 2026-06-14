@@ -1351,5 +1351,13 @@ export const ruMessages: Messages = {
     evening: "Вечер",
     slotsCount: "свободно",
     durationLabel: "Длительность",
+    close: "Закрыть",
+    viewService: "Страница услуги",
+    pageReservationsTitle: "Брони на эту услугу",
+    pageNoReservations: "Броней пока нет.",
+    colDate: "Дата",
+    colTime: "Время",
+    colCustomer: "Клиент",
+    colStatus: "Статус",
   },
 };

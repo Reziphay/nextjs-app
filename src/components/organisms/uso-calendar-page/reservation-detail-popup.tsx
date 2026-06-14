@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -11,6 +12,7 @@ import {
   Badge,
   Button,
 } from "@/components/atoms";
+import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   confirmReservation,
@@ -43,6 +45,7 @@ type Props = {
 
 export function ReservationDetailPopup({ reservation, accessToken, mode = "provider", onUpdated, onClose }: Props) {
   const { messages } = useLocale();
+  const router = useRouter();
   const t = messages.reservations;
   const c = messages.calendar;
   const [busy, setBusy] = useState(false);
@@ -101,6 +104,15 @@ export function ReservationDetailPopup({ reservation, accessToken, mode = "provi
             <span className={styles.label}>{messages.services.tableStatus}</span>
             <Badge variant={STATUS_VARIANT[reservation.status]}>{statusLabel(reservation.status)}</Badge>
           </div>
+
+          <button
+            type="button"
+            className={styles.serviceLink}
+            onClick={() => router.push(`/services?id=${reservation.service_id}`)}
+          >
+            {t.viewService}
+            <Icon icon="arrow_forward" size={14} color="current" />
+          </button>
         </div>
 
         {error && <p className={styles.error}>{error}</p>}
@@ -132,20 +144,20 @@ export function ReservationDetailPopup({ reservation, accessToken, mode = "provi
                 </>
               )}
               {reservation.status !== "PENDING" && reservation.status !== "CONFIRMED" && (
-                <Button variant="ghost" onClick={onClose}>{t.cancel}</Button>
+                <Button variant="ghost" onClick={onClose}>{t.close}</Button>
               )}
             </>
           ) : (
             <>
               {reservation.status === "PENDING" || reservation.status === "CONFIRMED" ? (
                 <>
-                  <Button variant="ghost" onClick={onClose} disabled={busy}>{t.cancel}</Button>
+                  <Button variant="ghost" onClick={onClose} disabled={busy}>{t.close}</Button>
                   <Button variant="destructive" onClick={() => run(() => cancelReservation(reservation.id, accessToken))} isLoading={busy}>
                     {t.actionCancel}
                   </Button>
                 </>
               ) : (
-                <Button variant="ghost" onClick={onClose}>{t.cancel}</Button>
+                <Button variant="ghost" onClick={onClose}>{t.close}</Button>
               )}
             </>
           )}

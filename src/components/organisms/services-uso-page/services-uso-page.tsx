@@ -14,6 +14,8 @@ import {
   Checkbox,
 } from "@/components/atoms";
 import { Combobox, type ComboboxOption } from "@/components/atoms/combobox";
+import { ServiceReservationsTable } from "@/components/molecules/service-reservations-table/service-reservations-table";
+import type { Reservation } from "@/types/reservation";
 import { AvatarCropDialog } from "@/components/molecules/avatar-crop-dialog/avatar-crop-dialog";
 import { UserAvatar } from "@/components/molecules/user-avatar/user-avatar";
 import { FormActions } from "@/components/molecules/form-actions";
@@ -60,6 +62,7 @@ type ServicesUsoPageProps = {
   accessToken: string;
   serviceCategories: ServiceCategory[];
   user: AuthenticatedUser;
+  reservations?: Reservation[];
 };
 
 type HoursDay = { enabled: boolean; start: string; end: string };
@@ -932,6 +935,7 @@ export function ServiceDetailView({
   user,
   actionLoading,
   actionSlot,
+  extraContent,
   onBack,
   onEdit,
   onSubmit,
@@ -949,6 +953,7 @@ export function ServiceDetailView({
   user: AuthenticatedUser;
   actionLoading: boolean;
   actionSlot?: ReactNode;
+  extraContent?: ReactNode;
   onBack: () => void;
   onEdit: () => void;
   onSubmit: () => void;
@@ -1186,6 +1191,7 @@ export function ServiceDetailView({
           ) : null}
         </div>
       </div>
+      {extraContent}
     </div>
   );
 }
@@ -1195,6 +1201,7 @@ export function ServiceReadOnlyDetailView({
   brands,
   user,
   actionSlot,
+  extraContent,
   onBack,
   showStatus,
 }: {
@@ -1202,6 +1209,7 @@ export function ServiceReadOnlyDetailView({
   brands: Brand[];
   user: AuthenticatedUser;
   actionSlot?: ReactNode;
+  extraContent?: ReactNode;
   onBack: () => void;
   showStatus?: boolean;
 }) {
@@ -1217,6 +1225,7 @@ export function ServiceReadOnlyDetailView({
       user={user}
       actionLoading={false}
       actionSlot={actionSlot}
+      extraContent={extraContent}
       showStatus={showStatus}
       onBack={onBack}
       onEdit={noop}
@@ -1239,6 +1248,7 @@ export function ServicesUsoPage({
   accessToken,
   serviceCategories,
   user,
+  reservations = [],
 }: ServicesUsoPageProps) {
   const { messages } = useLocale();
   const copy = messages.services;
@@ -1513,6 +1523,10 @@ export function ServicesUsoPage({
         onResume={() => handleLifecycle(liveService, "resume")}
         onArchive={() => handleLifecycle(liveService, "archive")}
         onUnarchive={() => handleLifecycle(liveService, "unarchive")}
+        extraContent={(() => {
+          const rows = reservations.filter((r) => r.service_id === liveService.id);
+          return rows.length > 0 ? <ServiceReservationsTable reservations={rows} mode="provider" /> : null;
+        })()}
       />
     );
   }

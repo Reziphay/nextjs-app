@@ -1310,5 +1310,13 @@ export type Messages = {
     evening: string;
     slotsCount: string;
     durationLabel: string;
+    close: string;
+    viewService: string;
+    pageReservationsTitle: string;
+    pageNoReservations: string;
+    colDate: string;
+    colTime: string;
+    colCustomer: string;
+    colStatus: string;
   };
 };

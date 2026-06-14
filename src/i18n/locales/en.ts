@@ -1365,5 +1365,13 @@ export const enMessages: Messages = {
     evening: "Evening",
     slotsCount: "available",
     durationLabel: "Duration",
+    close: "Close",
+    viewService: "View service",
+    pageReservationsTitle: "Reservations for this service",
+    pageNoReservations: "No reservations yet.",
+    colDate: "Date",
+    colTime: "Time",
+    colCustomer: "Customer",
+    colStatus: "Status",
   },
 };

@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/atoms";
 import { ServiceReadOnlyDetailView } from "@/components/organisms/services-uso-page/services-uso-page";
 import { BookingModal } from "@/components/organisms/booking-modal";
+import { ServiceReservationsTable } from "@/components/molecules/service-reservations-table/service-reservations-table";
 import { useLocale } from "@/components/providers/locale-provider";
 import type { Brand } from "@/types";
 import type { Service } from "@/types/service";
+import type { Reservation } from "@/types/reservation";
 import type { AuthenticatedUser } from "@/types/user_types";
 
 type PublicServiceDetailProps = {
@@ -15,9 +17,10 @@ type PublicServiceDetailProps = {
   brands: Brand[];
   user: AuthenticatedUser;
   accessToken: string;
+  reservations?: Reservation[];
 };
 
-export function PublicServiceDetail({ service, brands, user, accessToken }: PublicServiceDetailProps) {
+export function PublicServiceDetail({ service, brands, user, accessToken, reservations = [] }: PublicServiceDetailProps) {
   const router = useRouter();
   const { messages } = useLocale();
   const [bookingOpen, setBookingOpen] = useState(false);
@@ -41,6 +44,11 @@ export function PublicServiceDetail({ service, brands, user, accessToken }: Publ
           >
             {messages.reservations.book}
           </Button>
+        }
+        extraContent={
+          reservations.length > 0 ? (
+            <ServiceReservationsTable reservations={reservations} mode="customer" />
+          ) : null
         }
       />
       <BookingModal

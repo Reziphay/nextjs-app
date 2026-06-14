@@ -5,6 +5,7 @@ import { getMessages } from "@/i18n/config";
 import { getServerLocale } from "@/i18n/server";
 import { buildPageTitle } from "@/lib/page-metadata";
 import { fetchMyServices, fetchPublicServicesPage, fetchServiceById, fetchServiceCategories } from "@/lib/services-api";
+import { fetchMyReservations } from "@/lib/reservations-api";
 import { fetchMyBrands, fetchBrandById, fetchActiveBrands } from "@/lib/brands-api";
 import { fetchMarketplaceFacets } from "@/lib/marketplace-api";
 import { fetchUserProfileById } from "@/lib/users-api";
@@ -136,20 +137,24 @@ export default async function ServicesPage({
       redirect("/home");
     }
 
-    const [brands, owner] = await Promise.all([
+    const [brands, owner, myReservations] = await Promise.all([
       fetchDetailedBrandsForServices(service.owner_id, accessToken),
       fetchUserProfileById(service.owner_id, accessToken),
+      fetchMyReservations("customer", accessToken).catch(() => []),
     ]);
 
     if (!owner) {
       redirect("/home");
     }
 
+    const serviceReservations = myReservations.filter((r) => r.service_id === service.id);
+
     return (
       <PublicServiceDetail
         service={service}
         brands={brands}
         accessToken={accessToken}
+        reservations={serviceReservations}
         user={{
           id: owner.id,
           email: owner.email,
@@ -169,11 +174,12 @@ export default async function ServicesPage({
 
   const serviceId = getStringParam(resolvedParams, "id");
 
-  const [myServices, serviceFromUrl, brands, serviceCategories] = await Promise.all([
+  const [myServices, serviceFromUrl, brands, serviceCategories, providerReservations] = await Promise.all([
     fetchMyServices(accessToken).catch(() => []),
     serviceId ? fetchServiceById(serviceId, accessToken).catch(() => null) : null,
     fetchMyBrands(accessToken).catch(() => []),
     fetchServiceCategories(accessToken).catch(() => []),
+    fetchMyReservations("provider", accessToken).catch(() => []),
   ]);
 
   const services =
@@ -196,6 +202,7 @@ export default async function ServicesPage({
       accessToken={accessToken}
       serviceCategories={serviceCategories}
       user={user}
+      reservations={providerReservations}
     />
   );
 }

@@ -1365,5 +1365,13 @@ export const azMessages: Messages = {
     evening: "Axşam",
     slotsCount: "boş vaxt",
     durationLabel: "Müddət",
+    close: "Bağla",
+    viewService: "Servis səhifəsi",
+    pageReservationsTitle: "Bu servisə rezervasiyalar",
+    pageNoReservations: "Hələ rezervasiya yoxdur.",
+    colDate: "Tarix",
+    colTime: "Vaxt",
+    colCustomer: "Müştəri",
+    colStatus: "Status",
   },
 };

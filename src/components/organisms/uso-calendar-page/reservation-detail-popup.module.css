@@ -3,6 +3,7 @@
   flex-direction: column;
   gap: 12px;
   margin: 8px 0;
+  padding: 0 1.714rem;
 }
 
 .row {
@@ -23,7 +24,27 @@
   font-weight: 500;
 }
 
+.serviceLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 6px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--app-primary-soft);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+}
+
+.serviceLink:hover {
+  text-decoration: underline;
+}
+
 .error {
   color: var(--app-error);
   font-size: var(--font-size-small);
+  padding: 0 1.714rem;
 }

@@ -1237,5 +1237,13 @@ export const trMessages: Messages = {
     evening: "Akşam",
     slotsCount: "uygun saat",
     durationLabel: "Süre",
+    close: "Kapat",
+    viewService: "Hizmet sayfası",
+    pageReservationsTitle: "Bu hizmet için rezervasyonlar",
+    pageNoReservations: "Henüz rezervasyon yok.",
+    colDate: "Tarih",
+    colTime: "Saat",
+    colCustomer: "Müşteri",
+    colStatus: "Durum",
   },
 };
