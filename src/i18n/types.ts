@@ -247,6 +247,7 @@ export type Messages = {
     statusActive: string;
     statusRejected: string;
     statusClosed: string;
+    rejectionReasonLabel: string;
     // Brand form
     formCreateTitle: string;
     formEditTitle: string;

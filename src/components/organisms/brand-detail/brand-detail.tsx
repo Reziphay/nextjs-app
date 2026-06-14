@@ -800,6 +800,12 @@ export function BrandDetail({
         </StatusBanner>
       ) : null}
 
+      {isOwner && brandState.status === "REJECTED" && brandState.rejection_reason ? (
+        <StatusBanner variant="error" icon="error">
+          <strong>{t.rejectionReasonLabel}:</strong> {brandState.rejection_reason}
+        </StatusBanner>
+      ) : null}
+
       <section className={styles.hero}>
         <div className={styles.heroMain}>
           <div className={styles.heroTitleRow}>

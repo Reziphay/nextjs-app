@@ -594,6 +594,7 @@ export const ruMessages: Messages = {
     statusActive: "Активен",
     statusRejected: "Отклонён",
     statusClosed: "Закрыт",
+    rejectionReasonLabel: "Причина отклонения",
     formCreateTitle: "Создать бренд",
     formEditTitle: "Редактировать бренд",
     formSaveChanges: "Сохранить изменения",

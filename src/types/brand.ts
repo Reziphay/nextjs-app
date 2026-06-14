@@ -52,6 +52,7 @@ export type Brand = {
   name: string;
   description?: string;
   status: BrandStatus;
+  rejection_reason?: string;
   owner_id: string;
   owner?: {
     id: string;

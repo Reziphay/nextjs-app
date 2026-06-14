@@ -330,6 +330,7 @@ export const trMessages: Messages = {
     statusActive: "Aktif",
     statusRejected: "Reddedildi",
     statusClosed: "Kapalı",
+    rejectionReasonLabel: "Red nedeni",
     formCreateTitle: "Marka oluştur",
     formEditTitle: "Markayı düzenle",
     formSaveChanges: "Değişiklikleri kaydet",

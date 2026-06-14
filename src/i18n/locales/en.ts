@@ -294,6 +294,7 @@ export const enMessages: Messages = {
     statusActive: "Active",
     statusRejected: "Rejected",
     statusClosed: "Closed",
+    rejectionReasonLabel: "Rejection reason",
     formCreateTitle: "Create a Brand",
     formEditTitle: "Edit Brand",
     formSaveChanges: "Save changes",

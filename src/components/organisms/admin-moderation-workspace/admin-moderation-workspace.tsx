@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/atoms/button";
 import { OwnerCard } from "@/components/molecules/owner-card";
@@ -248,6 +249,10 @@ export function AdminModerationWorkspace() {
 
   // Decision modal
   const [showDecisionModal, setShowDecisionModal] = useState(false);
+  // Portal target guard (modal must escape the transformed .wrapper to stay
+  // viewport-centered; portaling to document.body avoids the fixed-in-transform trap).
+  const [portalReady, setPortalReady] = useState(false);
+  useEffect(() => setPortalReady(true), []);
 
   // Action feedback
   const [actionStatus, setActionStatus] = useState<ActionStatus>("idle");
@@ -604,7 +609,7 @@ export function AdminModerationWorkspace() {
 
   return (
     <div className={styles.wrapper}>
-      {showDecisionModal && (
+      {showDecisionModal && portalReady && createPortal(
         <div className={styles.overlay}>
           <div className={styles.modal}>
             <h2 className={styles.modalTitle}>{decisionLabel}</h2>
@@ -657,7 +662,8 @@ export function AdminModerationWorkspace() {
               </Button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
 
       {/* Detail header */}

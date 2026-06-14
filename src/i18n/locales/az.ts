@@ -294,6 +294,7 @@ export const azMessages: Messages = {
     statusActive: "Aktiv",
     statusRejected: "Rədd edildi",
     statusClosed: "Bağlıdır",
+    rejectionReasonLabel: "Rədd səbəbi",
     formCreateTitle: "Brend yarat",
     formEditTitle: "Brendi redaktə et",
     formSaveChanges: "Dəyişiklikləri yadda saxla",
