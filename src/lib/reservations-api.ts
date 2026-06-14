@@ -3,7 +3,6 @@ import type { ApiSuccessResponse } from "@/types/user_types";
 import type {
   Reservation,
   AvailabilityResult,
-  ProviderDayOff,
 } from "@/types/reservation";
 
 export type ReservationRole = "customer" | "provider";
@@ -81,28 +80,3 @@ export const completeReservation = (id: string, accessToken: string) =>
 export const markNoShow = (id: string, accessToken: string) =>
   transition(id, "no-show", accessToken);
 
-// ─── Provider day-offs (vacation) ────────────────────────────────────────────
-
-export async function fetchMyDayOffs(
-  accessToken: string,
-): Promise<ProviderDayOff[]> {
-  const client = createApiClient({ accessToken });
-  const response = await client.request<ApiSuccessResponse<{ dayoffs: ProviderDayOff[] }>>({
-    url: "/availability/me",
-    method: "GET",
-  });
-  return response.data?.data?.dayoffs ?? [];
-}
-
-export async function setMyDayOffs(
-  dates: string[],
-  accessToken: string,
-): Promise<ProviderDayOff[]> {
-  const client = createApiClient({ accessToken });
-  const response = await client.request<ApiSuccessResponse<ProviderDayOff[]>>({
-    url: "/availability/me/dayoffs",
-    method: "PUT",
-    data: { dates },
-  });
-  return response.data?.data ?? [];
-}

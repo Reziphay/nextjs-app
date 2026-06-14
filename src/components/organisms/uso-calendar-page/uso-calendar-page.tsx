@@ -5,10 +5,9 @@ import { Button } from "@/components/atoms/button";
 import { Checkbox } from "@/components/atoms/checkbox";
 import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
-import type { Service } from "@/types/service";
+import type { Service, ServiceStatus } from "@/types/service";
 import type { Brand } from "@/types/brand";
 import type { Reservation, ReservationStatus } from "@/types/reservation";
-import { AvailabilityModal } from "./availability-modal";
 import { ReservationDetailPopup } from "./reservation-detail-popup";
 import { PendingRequestsPanel } from "./pending-requests-panel";
 import styles from "./uso-calendar-page.module.css";
@@ -22,7 +21,10 @@ type CalendarService = {
   name: string;
   color: string;
   enabled: boolean;
+  status: ServiceStatus | null;
 };
+
+type ServiceStatusFilter = "ALL" | "ACTIVE" | "PENDING" | "REJECTED";
 
 type CalendarBrand = {
   id: string;
@@ -404,6 +406,52 @@ function ViewSwitcherDropdown({ view, labels, onChange }: ViewSwitcherProps) {
               ]
                 .filter(Boolean)
                 .join(" ")}
+              onClick={() => {
+                onChange(v);
+                setOpen(false);
+              }}
+            >
+              {labels[v]}
+            </Button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── StatusFilterDropdown ─────────────────────────────────────────────────────
+
+type StatusFilterProps = {
+  value: ServiceStatusFilter;
+  labels: Record<ServiceStatusFilter, string>;
+  onChange: (v: ServiceStatusFilter) => void;
+};
+
+function StatusFilterDropdown({ value, labels, onChange }: StatusFilterProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div className={styles.dropdownWrap} ref={ref}>
+      <Button variant="primary" size="small" icon="filter_list" onClick={() => setOpen((o) => !o)}>
+        {labels[value]}
+      </Button>
+      {open && (
+        <div className={styles.dropdownMenu}>
+          {(["ALL", "ACTIVE", "PENDING", "REJECTED"] as ServiceStatusFilter[]).map((v) => (
+            <Button
+              variant="unstyled"
+              key={v}
+              className={[styles.dropdownItem, value === v ? styles.dropdownItemActive : ""].filter(Boolean).join(" ")}
               onClick={() => {
                 onChange(v);
                 setOpen(false);
@@ -837,13 +885,14 @@ type CalendarToolbarProps = {
   sidebarOpen: boolean;
   brands: CalendarBrand[];
   selectedBrandId: string;
-  isNewDisabled: boolean;
-  showNewButton: boolean;
   timeFormat: TimeFormat;
   viewLabels: Record<CalendarView, string>;
   todayLabel: string;
   filterLabel: string;
-  newLabel: string;
+  statusFilter: ServiceStatusFilter;
+  statusFilterLabels: Record<ServiceStatusFilter, string>;
+  showStatusFilter: boolean;
+  onStatusFilterChange: (v: ServiceStatusFilter) => void;
   previousMonthLabel: string;
   nextMonthLabel: string;
   previousPeriodLabel: string;
@@ -861,7 +910,6 @@ type CalendarToolbarProps = {
   onViewChange: (v: CalendarView) => void;
   onDateSelect: (d: Date) => void;
   onBrandChange: (id: string) => void;
-  onNew: () => void;
   onTimeFormatChange: (f: TimeFormat) => void;
 };
 
@@ -873,13 +921,14 @@ function CalendarToolbar({
   sidebarOpen,
   brands,
   selectedBrandId,
-  isNewDisabled,
-  showNewButton,
   timeFormat,
   viewLabels,
   todayLabel,
   filterLabel,
-  newLabel,
+  statusFilter,
+  statusFilterLabels,
+  showStatusFilter,
+  onStatusFilterChange,
   previousMonthLabel,
   nextMonthLabel,
   previousPeriodLabel,
@@ -897,7 +946,6 @@ function CalendarToolbar({
   onViewChange,
   onDateSelect,
   onBrandChange,
-  onNew,
   onTimeFormatChange,
 }: CalendarToolbarProps) {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
@@ -946,21 +994,18 @@ function CalendarToolbar({
       <div className={styles.toolbarRight}>
         <ViewSwitcherDropdown view={view} labels={viewLabels} onChange={onViewChange} />
 
-        <Button variant="unstyled" className={styles.toolbarFilterBtn} aria-label={filterLabel}>
-          <Icon icon="filter_list" size={16} color="current" />
-          <span>{filterLabel}</span>
-        </Button>
-
         <BrandPickerDropdown
           brands={brands}
           selectedId={selectedBrandId}
           onChange={onBrandChange}
         />
 
-        {showNewButton && (
-          <Button variant="primary" size="small" icon="event_busy" onClick={onNew} disabled={isNewDisabled}>
-            {newLabel}
-          </Button>
+        {showStatusFilter && (
+          <StatusFilterDropdown
+            value={statusFilter}
+            labels={statusFilterLabels}
+            onChange={onStatusFilterChange}
+          />
         )}
 
         <Button
@@ -1002,7 +1047,6 @@ export function UsoCalendarPage({ services, brands, reservations, accessToken, m
   today.setHours(0, 0, 0, 0);
 
   const [reservationItems, setReservationItems] = useState<Reservation[]>(reservations);
-  const [availabilityOpen, setAvailabilityOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
   const handleReservationUpdated = useCallback((updated: Reservation) => {
@@ -1038,16 +1082,19 @@ export function UsoCalendarPage({ services, brands, reservations, accessToken, m
   const [calendarServices, setCalendarServices] = useState<CalendarService[]>(() => {
     // Build the service chip list from owned services plus any service referenced
     // by a reservation (covers the customer view where `services` is empty).
-    const seen = new Map<string, string>();
-    for (const s of services) seen.set(s.id, s.title);
-    for (const r of reservations) if (!seen.has(r.service_id)) seen.set(r.service_id, r.service?.title ?? "—");
-    return [...seen.entries()].map(([id, name], i) => ({
+    const seen = new Map<string, { name: string; status: ServiceStatus | null }>();
+    for (const s of services) seen.set(s.id, { name: s.title, status: s.status });
+    for (const r of reservations)
+      if (!seen.has(r.service_id)) seen.set(r.service_id, { name: r.service?.title ?? "—", status: null });
+    return [...seen.entries()].map(([id, info], i) => ({
       id,
-      name,
+      name: info.name,
       color: assignServiceColor(i),
       enabled: true,
+      status: info.status,
     }));
   });
+  const [statusFilter, setStatusFilter] = useState<ServiceStatusFilter>("ALL");
 
   const handleServiceToggle = useCallback((id: string) => {
     setCalendarServices((prev) =>
@@ -1087,6 +1134,10 @@ export function UsoCalendarPage({ services, brands, reservations, accessToken, m
         return !cs || cs.enabled;
       })
       .filter((r) => {
+        if (statusFilter === "ALL") return true;
+        return colorById.get(r.service_id)?.status === statusFilter;
+      })
+      .filter((r) => {
         if (selectedBrandId === "all") return true;
         return serviceBrandMap.get(r.service_id) === selectedBrandId;
       })
@@ -1101,7 +1152,16 @@ export function UsoCalendarPage({ services, brands, reservations, accessToken, m
           title: r.service?.title ?? cs?.name ?? "—",
         };
       });
-  }, [reservationItems, calendarServices, selectedBrandId, serviceBrandMap]);
+  }, [reservationItems, calendarServices, selectedBrandId, serviceBrandMap, statusFilter]);
+
+  // Service chips shown in the sidebar, narrowed by the status filter.
+  const visibleServices = useMemo(
+    () =>
+      statusFilter === "ALL"
+        ? calendarServices
+        : calendarServices.filter((s) => s.status === statusFilter),
+    [calendarServices, statusFilter],
+  );
 
   const handleDateSelect = (d: Date) => {
     setCurrentDate(d);
@@ -1135,13 +1195,19 @@ export function UsoCalendarPage({ services, brands, reservations, accessToken, m
           sidebarOpen={sidebarOpen}
           brands={calendarBrands}
           selectedBrandId={selectedBrandId}
-          isNewDisabled={false}
-          showNewButton={isProvider}
           timeFormat={timeFormat}
           viewLabels={viewLabels}
           todayLabel={t.today}
           filterLabel={t.filter}
-          newLabel={t.dayOffsTitle}
+          statusFilter={statusFilter}
+          showStatusFilter={isProvider}
+          statusFilterLabels={{
+            ALL: m.services.filterAll,
+            ACTIVE: m.services.filterActive,
+            PENDING: m.services.statusPending,
+            REJECTED: m.services.filterRejected,
+          }}
+          onStatusFilterChange={setStatusFilter}
           previousMonthLabel={t.previousMonth}
           nextMonthLabel={t.nextMonth}
           previousPeriodLabel={t.previousPeriod}
@@ -1159,7 +1225,6 @@ export function UsoCalendarPage({ services, brands, reservations, accessToken, m
           onViewChange={setView}
           onDateSelect={handleDateSelect}
           onBrandChange={setSelectedBrandId}
-          onNew={() => setAvailabilityOpen(true)}
           onTimeFormatChange={setTimeFormat}
         />
 
@@ -1207,7 +1272,7 @@ export function UsoCalendarPage({ services, brands, reservations, accessToken, m
         selected={currentDate}
         today={today}
         locale={locale}
-        services={calendarServices}
+        services={visibleServices}
         showServices={isProvider}
         myServicesLabel={t.myServices}
         noServicesLabel={t.noServicesYet}
@@ -1229,13 +1294,6 @@ export function UsoCalendarPage({ services, brands, reservations, accessToken, m
         />
       )}
 
-      {isProvider && (
-        <AvailabilityModal
-          open={availabilityOpen}
-          accessToken={accessToken}
-          onClose={() => setAvailabilityOpen(false)}
-        />
-      )}
     </div>
   );
 }
