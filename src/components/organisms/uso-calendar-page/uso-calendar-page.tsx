@@ -31,6 +31,22 @@ type CalendarBrand = {
   name: string;
 };
 
+// Service status → dot/event color, matching the app's status-color scheme
+// (see SERVICE_STATUS_TONE). Random palette colors are NOT used — color encodes
+// the service status. Fallback (no status, e.g. customer view) is primary.
+const STATUS_COLOR: Record<ServiceStatus, string> = {
+  ACTIVE: "var(--app-success)",
+  PENDING: "var(--app-warning)",
+  REJECTED: "var(--app-error)",
+  DRAFT: "var(--app-text-muted)",
+  PAUSED: "var(--app-text-muted)",
+  ARCHIVED: "var(--app-text-muted)",
+};
+
+function statusColor(status: ServiceStatus | null): string {
+  return status ? STATUS_COLOR[status] : "var(--app-primary-soft)";
+}
+
 type CalendarEvent = {
   reservation: Reservation;
   dayKey: string; // YYYY-MM-DD (wall-clock)
@@ -55,25 +71,6 @@ function localDateKey(d: Date): string {
 }
 
 const ACTIVE_EVENT_STATUSES: ReservationStatus[] = ["PENDING", "CONFIRMED", "COMPLETED", "NO_SHOW"];
-
-// ─── Color Palette ────────────────────────────────────────────────────────────
-
-const SERVICE_COLORS = [
-  "#4f8ef7",
-  "#34c98a",
-  "#f7874f",
-  "#a855f7",
-  "#f7c34f",
-  "#ef4444",
-  "#06b6d4",
-  "#84cc16",
-  "#f43f5e",
-  "#8b5cf6",
-];
-
-function assignServiceColor(index: number): string {
-  return SERVICE_COLORS[index % SERVICE_COLORS.length];
-}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -1086,10 +1083,10 @@ export function UsoCalendarPage({ services, brands, reservations, accessToken, m
     for (const s of services) seen.set(s.id, { name: s.title, status: s.status });
     for (const r of reservations)
       if (!seen.has(r.service_id)) seen.set(r.service_id, { name: r.service?.title ?? "—", status: null });
-    return [...seen.entries()].map(([id, info], i) => ({
+    return [...seen.entries()].map(([id, info]) => ({
       id,
       name: info.name,
-      color: assignServiceColor(i),
+      color: statusColor(info.status),
       enabled: true,
       status: info.status,
     }));
@@ -1148,7 +1145,7 @@ export function UsoCalendarPage({ services, brands, reservations, accessToken, m
           dayKey: r.starts_at.slice(0, 10),
           startMin: minutesFromIso(r.starts_at),
           endMin: minutesFromIso(r.ends_at),
-          color: cs?.color ?? SERVICE_COLORS[0],
+          color: cs?.color ?? statusColor(null),
           title: r.service?.title ?? cs?.name ?? "—",
         };
       });
