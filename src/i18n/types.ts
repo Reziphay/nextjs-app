@@ -1269,6 +1269,13 @@ export type Messages = {
     noCategoriesFound: string;
     noBranchesFound: string;
     requiredMessage: string;
+    maxCharsReached: string;
+    formIncomplete: string;
+    titleRequired: string;
+    addressRequired: string;
+    hoursRequired: string;
+    priceRequired: string;
+    durationRequired: string;
     fieldHours: string;
     hoursBranch: string;
     hoursCustom: string;

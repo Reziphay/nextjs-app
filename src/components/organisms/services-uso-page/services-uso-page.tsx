@@ -84,6 +84,9 @@ type ServiceFormState = {
   imagePreviews: string[];
 };
 
+// Display order for the weekly hours editor: Monday-first (index 0 = Sunday).
+const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
 function defaultHours(): HoursDay[] {
   return Array.from({ length: 7 }, (_, weekday) => ({
     enabled: weekday >= 1 && weekday <= 5,
@@ -190,13 +193,13 @@ function assignedServiceToService(assignment: AssignedService): Service {
   const svc = assignment.service;
   const brand = svc.brand
     ? {
-        id: svc.brand.id,
-        name: svc.brand.name,
-        owner_id: svc.brand.owner_id ?? "",
-        logo_url: svc.brand.logo_url ?? undefined,
-        rating: svc.brand.rating ?? null,
-        rating_count: svc.brand.rating_count ?? 0,
-      }
+      id: svc.brand.id,
+      name: svc.brand.name,
+      owner_id: svc.brand.owner_id ?? "",
+      logo_url: svc.brand.logo_url ?? undefined,
+      rating: svc.brand.rating ?? null,
+      rating_count: svc.brand.rating_count ?? 0,
+    }
     : null;
 
   return {
@@ -266,6 +269,22 @@ function serviceToFormState(service: Service, brands: Brand[]): ServiceFormState
     image_media_ids: service.images.map((img) => img.media_id),
     imagePreviews: service.images.map((img) => proxyMediaUrl(img.url) ?? img.url),
   };
+}
+
+// Validation limits — mirror backend service.schema.ts.
+const TITLE_MAX = 150;
+const TITLE_MIN = 2;
+const DESCRIPTION_MAX = 2000;
+const ADDRESS_MAX = 500;
+
+/** Forbid characters used for XSS/HTML injection in plain-text inputs. */
+function stripUnsafeChars(value: string): string {
+  return value.replace(/[<>]/g, "");
+}
+
+/** Rough plain-text length of rich-text HTML (for the character counter). */
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
 }
 
 function buildPayload(form: ServiceFormState): CreateServicePayload {
@@ -349,8 +368,12 @@ function ServiceFormPage({
   const [form, setForm] = useState<ServiceFormState>(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [errors, setErrors] = useState<{ title?: string; address?: string; description?: string; hours?: string; price?: string; duration?: string }>({});
   const [cropTarget, setCropTarget] = useState<CropTarget | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Limits mirror the backend Zod schema (service.schema.ts).
+  const descriptionTextLength = stripHtml(form.description).length;
 
   const brandOptions: ComboboxOption[] = brands.map((b) => ({ value: b.id, label: b.name }));
   const selectedBrand = brands.find((b) => b.id === form.brandId);
@@ -358,11 +381,13 @@ function ServiceFormPage({
     value: br.id,
     label: br.name,
   }));
-  const updateHoursDay = (weekday: number, patch: Partial<HoursDay>) =>
+  const updateHoursDay = (weekday: number, patch: Partial<HoursDay>) => {
     setForm((prev) => ({
       ...prev,
       hours: prev.hours.map((d, i) => (i === weekday ? { ...d, ...patch } : d)),
     }));
+    if (errors.hours) setErrors((p) => ({ ...p, hours: undefined }));
+  };
   const weekdayNames = Array.from({ length: 7 }, (_, i) => {
     const anchor = new Date(2024, 0, 7); // Sunday
     anchor.setDate(anchor.getDate() + i);
@@ -410,8 +435,37 @@ function ServiceFormPage({
 
   const isEditingPaused = editingService?.status === "PAUSED";
 
+  function validate(): boolean {
+    const next: { title?: string; address?: string; description?: string; hours?: string; price?: string; duration?: string } = {};
+    const title = form.title.trim();
+    if (title.length < TITLE_MIN) next.title = copy.titleRequired;
+    else if (title.length > TITLE_MAX) next.title = copy.maxCharsReached;
+    if (descriptionTextLength > DESCRIPTION_MAX) next.description = copy.maxCharsReached;
+    if (form.contextType === "individual") {
+      if (!form.address.trim()) next.address = copy.addressRequired;
+      else if (form.address.length > ADDRESS_MAX) next.address = copy.maxCharsReached;
+    }
+    // Custom working hours require at least one valid enabled day (matches the
+    // backend refine: individual/custom services need ≥1 window).
+    const usesCustomHours = form.contextType === "individual" || form.hoursSource === "CUSTOM";
+    if (usesCustomHours) {
+      const enabledDays = form.hours.filter((d) => d.enabled && hhmmToMin(d.end) > hhmmToMin(d.start));
+      if (enabledDays.length === 0) next.hours = copy.hoursRequired;
+    }
+    // Price required unless the service is Free.
+    if (form.price_type !== "FREE" && !form.price.trim()) next.price = copy.priceRequired;
+    // Duration always required.
+    if (!form.duration.trim()) next.duration = copy.durationRequired;
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!validate()) {
+      setFeedback({ type: "error", message: copy.formIncomplete });
+      return;
+    }
     const payload = buildPayload(form);
     setIsLoading(true);
     try {
@@ -433,9 +487,10 @@ function ServiceFormPage({
         onSaved(created, true);
       }
     } catch (error) {
-      const message = isAxiosError(error)
-        ? ((error.response?.data?.message as string | undefined) ?? copy.errorGeneric)
-        : copy.errorGeneric;
+      const rawKey = isAxiosError(error)
+        ? (error.response?.data?.message as string | undefined)
+        : undefined;
+      const message = (rawKey && messages.backendErrors[rawKey]) ?? rawKey ?? copy.errorGeneric;
       setFeedback({ type: "error", message });
     } finally {
       setIsLoading(false);
@@ -451,7 +506,7 @@ function ServiceFormPage({
           variant="primary"
           type="submit"
           isLoading={isLoading}
-          disabled={!form.title.trim() || isLoading}
+          disabled={isLoading}
           icon={isLoading ? undefined : isEditingPaused ? "send" : "check"}
         >
           {isEditingPaused ? copy.btnResubmit : copy.btnSave}
@@ -472,10 +527,14 @@ function ServiceFormPage({
       />
 
       {feedback ? (
-        <StatusBanner variant={feedback.type === "success" ? "success" : "error"}>
+        <StatusBanner
+          variant={feedback.type === "success" ? "success" : "error"}
+          className={styles.formFeedback}
+        >
           {feedback.message}
         </StatusBanner>
-      ) : null}
+      ) : null
+      }
 
       <form className={styles.formBody} onSubmit={handleSubmit}>
         <div className={styles.desktopShell}>
@@ -550,7 +609,20 @@ function ServiceFormPage({
               <div className={styles.fieldRow}>
                 <Field>
                   <FieldLabel required>{copy.fieldTitle}</FieldLabel>
-                  <Input value={form.title} onChange={(e) => setField("title", e.target.value)} placeholder={copy.fieldTitlePlaceholder} required />
+                  <Input
+                    value={form.title}
+                    maxLength={TITLE_MAX}
+                    aria-invalid={Boolean(errors.title)}
+                    onChange={(e) => {
+                      setField("title", stripUnsafeChars(e.target.value));
+                      if (errors.title) setErrors((p) => ({ ...p, title: undefined }));
+                    }}
+                    placeholder={copy.fieldTitlePlaceholder}
+                  />
+                  <div className={styles.fieldMeta}>
+                    <span className={styles.fieldError}>{errors.title}</span>
+                    <span className={styles.charCount}>{form.title.length}/{TITLE_MAX}</span>
+                  </div>
                 </Field>
               </div>
 
@@ -559,10 +631,21 @@ function ServiceFormPage({
                   <FieldLabel>{copy.fieldDescription}</FieldLabel>
                   <RichTextEditor
                     value={form.description}
-                    onChange={(html) => setField("description", html)}
+                    onChange={(html) => {
+                      setField("description", html);
+                      if (errors.description) setErrors((p) => ({ ...p, description: undefined }));
+                    }}
                     placeholder={copy.fieldDescriptionPlaceholder}
                     disabled={isLoading}
                   />
+                  <div className={styles.fieldMeta}>
+                    <span className={styles.fieldError}>{errors.description}</span>
+                    <span
+                      className={[styles.charCount, descriptionTextLength > DESCRIPTION_MAX ? styles.charCountOver : ""].filter(Boolean).join(" ")}
+                    >
+                      {descriptionTextLength}/{DESCRIPTION_MAX}
+                    </span>
+                  </div>
                 </Field>
               </div>
 
@@ -609,8 +692,21 @@ function ServiceFormPage({
               {form.contextType === "individual" ? (
                 <div className={styles.fieldRow}>
                   <Field>
-                    <FieldLabel>{copy.fieldAddress}</FieldLabel>
-                    <Input value={form.address} onChange={(e) => setField("address", e.target.value)} placeholder={copy.fieldAddressPlaceholder} />
+                    <FieldLabel required>{copy.fieldAddress}</FieldLabel>
+                    <Input
+                      value={form.address}
+                      maxLength={ADDRESS_MAX}
+                      aria-invalid={Boolean(errors.address)}
+                      onChange={(e) => {
+                        setField("address", stripUnsafeChars(e.target.value));
+                        if (errors.address) setErrors((p) => ({ ...p, address: undefined }));
+                      }}
+                      placeholder={copy.fieldAddressPlaceholder}
+                    />
+                    <div className={styles.fieldMeta}>
+                      <span className={styles.fieldError}>{errors.address}</span>
+                      <span className={styles.charCount}>{form.address.length}/{ADDRESS_MAX}</span>
+                    </div>
                   </Field>
                 </div>
               ) : (
@@ -637,7 +733,7 @@ function ServiceFormPage({
               {/* Working hours */}
               <div className={styles.fieldRow}>
                 <Field>
-                  <FieldLabel>{copy.fieldHours}</FieldLabel>
+                  <FieldLabel required>{copy.fieldHours}</FieldLabel>
                   <FieldContent>
                     {form.contextType === "branch" && (
                       <div className={styles.radioGroup}>
@@ -677,44 +773,52 @@ function ServiceFormPage({
                       />
                     ) : (
                       <div className={styles.hoursEditor}>
-                        {form.hours.map((d, weekday) => (
-                          <div key={weekday} className={styles.hoursRow}>
-                            <label className={styles.hoursToggle}>
-                              <Checkbox
-                                checked={d.enabled}
-                                onChange={() => updateHoursDay(weekday, { enabled: !d.enabled })}
-                              />
-                              <span className={styles.hoursDayName}>{weekdayNames[weekday]}</span>
-                            </label>
-                            {d.enabled ? (
-                              <div className={styles.hoursTimes}>
-                                <select
-                                  value={d.start}
-                                  onChange={(e) => updateHoursDay(weekday, { start: e.target.value })}
-                                  className={styles.timeInput}
-                                >
-                                  {TIME_OPTIONS.map((t) => (
-                                    <option key={t} value={t}>{t}</option>
-                                  ))}
-                                </select>
-                                <span>–</span>
-                                <select
-                                  value={d.end}
-                                  onChange={(e) => updateHoursDay(weekday, { end: e.target.value })}
-                                  className={styles.timeInput}
-                                >
-                                  {TIME_OPTIONS.map((t) => (
-                                    <option key={t} value={t}>{t}</option>
-                                  ))}
-                                </select>
-                              </div>
-                            ) : (
-                              <span className={styles.hoursClosed}>{messages.calendar.availabilityClosed}</span>
-                            )}
-                          </div>
-                        ))}
+                        {WEEKDAY_ORDER.map((weekday) => {
+                          const d = form.hours[weekday];
+                          return (
+                            <div key={weekday} className={styles.hoursRow}>
+                              <label className={styles.hoursToggle}>
+                                <Checkbox
+                                  checked={d.enabled}
+                                  onChange={() => updateHoursDay(weekday, { enabled: !d.enabled })}
+                                />
+                                <span className={styles.hoursDayName}>{weekdayNames[weekday]}</span>
+                              </label>
+                              {d.enabled ? (
+                                <div className={styles.hoursTimes}>
+                                  <select
+                                    value={d.start}
+                                    onChange={(e) => updateHoursDay(weekday, { start: e.target.value })}
+                                    className={styles.timeInput}
+                                  >
+                                    {TIME_OPTIONS.map((t) => (
+                                      <option key={t} value={t}>{t}</option>
+                                    ))}
+                                  </select>
+                                  <span>–</span>
+                                  <select
+                                    value={d.end}
+                                    onChange={(e) => updateHoursDay(weekday, { end: e.target.value })}
+                                    className={styles.timeInput}
+                                  >
+                                    {TIME_OPTIONS.map((t) => (
+                                      <option key={t} value={t}>{t}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              ) : (
+                                <span className={styles.hoursClosed}>{messages.calendar.availabilityClosed}</span>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
+                    {errors.hours ? (
+                      <div className={styles.fieldMeta}>
+                        <span className={styles.fieldError}>{errors.hours}</span>
+                      </div>
+                    ) : null}
                   </FieldContent>
                 </Field>
               </div>
@@ -730,14 +834,14 @@ function ServiceFormPage({
 
               <div className={styles.fieldRow}>
                 <Field>
-                  <FieldLabel>{copy.fieldPriceType}</FieldLabel>
+                  <FieldLabel required>{copy.fieldPriceType}</FieldLabel>
                   <FieldContent>
                     <div className={styles.radioGroup}>
                       {(["FIXED", "STARTING_FROM", "FREE"] as PriceType[]).map((pt) => {
                         const label = pt === "FIXED" ? copy.priceTypeFixed : pt === "STARTING_FROM" ? copy.priceTypeStartingFrom : copy.priceTypeFree;
                         return (
                           <label key={pt} className={styles.radioLabel}>
-                            <input type="radio" name="price_type" value={pt} checked={form.price_type === pt} onChange={() => setField("price_type", pt)} className={styles.radioInput} />
+                            <input type="radio" name="price_type" value={pt} checked={form.price_type === pt} onChange={() => { setField("price_type", pt); setErrors((p) => ({ ...p, price: undefined })); }} className={styles.radioInput} />
                             <span>{label}</span>
                           </label>
                         );
@@ -750,20 +854,42 @@ function ServiceFormPage({
               {showPrice ? (
                 <div className={styles.fieldRow}>
                   <Field>
-                    <FieldLabel>{copy.fieldPrice}</FieldLabel>
-                    <Input type="number" min="0" step="0.01" value={form.price} onChange={(e) => setField("price", e.target.value)} placeholder={copy.fieldPricePlaceholder} />
+                    <FieldLabel required>{copy.fieldPrice}</FieldLabel>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.price}
+                      aria-invalid={Boolean(errors.price)}
+                      onChange={(e) => { setField("price", e.target.value); if (errors.price) setErrors((p) => ({ ...p, price: undefined })); }}
+                      placeholder={copy.fieldPricePlaceholder}
+                    />
+                    {errors.price ? (
+                      <div className={styles.fieldMeta}><span className={styles.fieldError}>{errors.price}</span></div>
+                    ) : null}
                   </Field>
                 </div>
               ) : null}
 
               <div className={styles.fieldRow}>
                 <Field>
-                  <FieldLabel>{copy.fieldDuration}</FieldLabel>
+                  <FieldLabel required>{copy.fieldDuration}</FieldLabel>
                   <FieldContent>
                     <div className={styles.inlineRow}>
-                      <Input type="number" min="1" value={form.duration} onChange={(e) => setField("duration", e.target.value)} placeholder={copy.fieldDurationPlaceholder} className={styles.durationInput} />
+                      <Input
+                        type="number"
+                        min="1"
+                        value={form.duration}
+                        aria-invalid={Boolean(errors.duration)}
+                        onChange={(e) => { setField("duration", e.target.value); if (errors.duration) setErrors((p) => ({ ...p, duration: undefined })); }}
+                        placeholder={copy.fieldDurationPlaceholder}
+                        className={styles.durationInput}
+                      />
                       <span className={styles.inlineUnit}>{copy.fieldDurationUnit}</span>
                     </div>
+                    {errors.duration ? (
+                      <div className={styles.fieldMeta}><span className={styles.fieldError}>{errors.duration}</span></div>
+                    ) : null}
                   </FieldContent>
                 </Field>
               </div>
@@ -774,16 +900,18 @@ function ServiceFormPage({
         <div className={styles.mobileFooter}>{renderFormActions()}</div>
       </form>
 
-      {cropTarget ? (
-        <AvatarCropDialog
-          file={cropTarget.file}
-          aspectRatio="16:9"
-          open={true}
-          onConfirm={handleCropDone}
-          onClose={() => setCropTarget(null)}
-        />
-      ) : null}
-    </div>
+      {
+        cropTarget ? (
+          <AvatarCropDialog
+            file={cropTarget.file}
+            aspectRatio="16:9"
+            open={true}
+            onConfirm={handleCropDone}
+            onClose={() => setCropTarget(null)}
+          />
+        ) : null
+      }
+    </div >
   );
 }
 
@@ -979,11 +1107,11 @@ export function ServiceDetailView({
   const images = service.images.map((img) => proxyMediaUrl(img.url) ?? img.url);
 
   const bannerConfig: Partial<Record<typeof service.status, { msg: string; variant: StatusBannerVariant; icon: string }>> = {
-    DRAFT:    { msg: copy.draftNote,    variant: "warning", icon: "info"     },
-    PENDING:  { msg: copy.pendingNote,  variant: "warning", icon: "schedule" },
-    PAUSED:   { msg: copy.pausedNote,   variant: "info",    icon: "pause"    },
-    REJECTED: { msg: copy.rejectedNote, variant: "error",   icon: "error"    },
-    ARCHIVED: { msg: copy.archivedNote, variant: "muted",   icon: "archive"  },
+    DRAFT: { msg: copy.draftNote, variant: "warning", icon: "info" },
+    PENDING: { msg: copy.pendingNote, variant: "warning", icon: "schedule" },
+    PAUSED: { msg: copy.pausedNote, variant: "info", icon: "pause" },
+    REJECTED: { msg: copy.rejectedNote, variant: "error", icon: "error" },
+    ARCHIVED: { msg: copy.archivedNote, variant: "muted", icon: "archive" },
   };
   const banner = bannerConfig[service.status] ?? null;
 
@@ -1121,73 +1249,73 @@ export function ServiceDetailView({
           </div>
 
           {canManageService ? (
-          <div className={styles.detailActionsCard}>
-            <h2 className={styles.detailSidebarTitle}>{copy.detailActions}</h2>
+            <div className={styles.detailActionsCard}>
+              <h2 className={styles.detailSidebarTitle}>{copy.detailActions}</h2>
 
-            {actionSlot ? (
-              <div className={styles.detailActionGroup}>{actionSlot}</div>
-            ) : service.status === "PENDING" ? (
-              <p className={styles.pendingNote}>{copy.pendingNote}</p>
-            ) : null}
+              {actionSlot ? (
+                <div className={styles.detailActionGroup}>{actionSlot}</div>
+              ) : service.status === "PENDING" ? (
+                <p className={styles.pendingNote}>{copy.pendingNote}</p>
+              ) : null}
 
-            {!actionSlot && service.status === "DRAFT" && (
-              <div className={styles.detailActionGroup}>
-                <Button variant="primary" icon="send" onClick={onSubmit} isLoading={actionLoading} className={styles.detailActionBtn}>
-                  {copy.actionSubmit}
-                </Button>
-                <Button variant="outline" icon="edit" onClick={onEdit} disabled={actionLoading} className={styles.detailActionBtn}>
-                  {copy.actionEdit}
-                </Button>
-                <Button variant="destructive" icon="delete" onClick={onDelete} disabled={actionLoading} className={styles.detailActionBtn}>
-                  {copy.actionDelete}
-                </Button>
-              </div>
-            )}
+              {!actionSlot && service.status === "DRAFT" && (
+                <div className={styles.detailActionGroup}>
+                  <Button variant="primary" icon="send" onClick={onSubmit} isLoading={actionLoading} className={styles.detailActionBtn}>
+                    {copy.actionSubmit}
+                  </Button>
+                  <Button variant="outline" icon="edit" onClick={onEdit} disabled={actionLoading} className={styles.detailActionBtn}>
+                    {copy.actionEdit}
+                  </Button>
+                  <Button variant="destructive" icon="delete" onClick={onDelete} disabled={actionLoading} className={styles.detailActionBtn}>
+                    {copy.actionDelete}
+                  </Button>
+                </div>
+              )}
 
-            {!actionSlot && service.status === "REJECTED" && (
-              <div className={styles.detailActionGroup}>
-                <Button variant="outline" icon="edit" onClick={onEdit} disabled={actionLoading} className={styles.detailActionBtn}>
-                  {copy.actionEdit}
-                </Button>
-                <Button variant="primary" icon="send" onClick={onResubmit} isLoading={actionLoading} className={styles.detailActionBtn}>
-                  {copy.actionResubmit}
-                </Button>
-              </div>
-            )}
+              {!actionSlot && service.status === "REJECTED" && (
+                <div className={styles.detailActionGroup}>
+                  <Button variant="outline" icon="edit" onClick={onEdit} disabled={actionLoading} className={styles.detailActionBtn}>
+                    {copy.actionEdit}
+                  </Button>
+                  <Button variant="primary" icon="send" onClick={onResubmit} isLoading={actionLoading} className={styles.detailActionBtn}>
+                    {copy.actionResubmit}
+                  </Button>
+                </div>
+              )}
 
-            {!actionSlot && service.status === "ACTIVE" && (
-              <div className={styles.detailActionGroup}>
-                <Button variant="outline" icon="pause" onClick={onPause} isLoading={actionLoading} className={styles.detailActionBtn}>
-                  {copy.actionPause}
-                </Button>
-                <Button variant="ghost" icon="archive" onClick={onArchive} disabled={actionLoading} className={styles.detailActionBtn}>
-                  {copy.actionArchive}
-                </Button>
-              </div>
-            )}
+              {!actionSlot && service.status === "ACTIVE" && (
+                <div className={styles.detailActionGroup}>
+                  <Button variant="outline" icon="pause" onClick={onPause} isLoading={actionLoading} className={styles.detailActionBtn}>
+                    {copy.actionPause}
+                  </Button>
+                  <Button variant="ghost" icon="archive" onClick={onArchive} disabled={actionLoading} className={styles.detailActionBtn}>
+                    {copy.actionArchive}
+                  </Button>
+                </div>
+              )}
 
-            {!actionSlot && service.status === "PAUSED" && (
-              <div className={styles.detailActionGroup}>
-                <Button variant="primary" icon="edit" onClick={onEdit} disabled={actionLoading} className={styles.detailActionBtn}>
-                  {copy.actionEdit}
-                </Button>
-                <Button variant="outline" icon="play_arrow" onClick={onResume} disabled={actionLoading} className={styles.detailActionBtn}>
-                  {copy.actionResume}
-                </Button>
-                <Button variant="ghost" icon="archive" onClick={onArchive} disabled={actionLoading} className={styles.detailActionBtn}>
-                  {copy.actionArchive}
-                </Button>
-              </div>
-            )}
+              {!actionSlot && service.status === "PAUSED" && (
+                <div className={styles.detailActionGroup}>
+                  <Button variant="primary" icon="edit" onClick={onEdit} disabled={actionLoading} className={styles.detailActionBtn}>
+                    {copy.actionEdit}
+                  </Button>
+                  <Button variant="outline" icon="play_arrow" onClick={onResume} disabled={actionLoading} className={styles.detailActionBtn}>
+                    {copy.actionResume}
+                  </Button>
+                  <Button variant="ghost" icon="archive" onClick={onArchive} disabled={actionLoading} className={styles.detailActionBtn}>
+                    {copy.actionArchive}
+                  </Button>
+                </div>
+              )}
 
-            {!actionSlot && service.status === "ARCHIVED" && (
-              <div className={styles.detailActionGroup}>
-                <Button variant="outline" icon="autorenew" onClick={onUnarchive} isLoading={actionLoading} className={styles.detailActionBtn}>
-                  {copy.actionUnarchive}
-                </Button>
-              </div>
-            )}
-          </div>
+              {!actionSlot && service.status === "ARCHIVED" && (
+                <div className={styles.detailActionGroup}>
+                  <Button variant="outline" icon="autorenew" onClick={onUnarchive} isLoading={actionLoading} className={styles.detailActionBtn}>
+                    {copy.actionUnarchive}
+                  </Button>
+                </div>
+              )}
+            </div>
           ) : null}
         </div>
       </div>
@@ -1215,7 +1343,7 @@ export function ServiceReadOnlyDetailView({
 }) {
   const { messages } = useLocale();
   const copy = messages.services;
-  const noop = () => {};
+  const noop = () => { };
 
   return (
     <ServiceDetailView
@@ -1297,8 +1425,8 @@ export function ServicesUsoPage({
   );
   const initialService = initialServiceId
     ? initialServices.find((s) => s.id === initialServiceId) ??
-      assignedServiceCards.find((s) => s.id === initialServiceId) ??
-      null
+    assignedServiceCards.find((s) => s.id === initialServiceId) ??
+    null
     : null;
   const initialAction = searchParams.get("action");
   const initialBrandId = searchParams.get("brand") ?? undefined;
@@ -1573,31 +1701,31 @@ export function ServicesUsoPage({
             />
           ))}
           {assignedServices.map((assignment) => {
-              const service = assignedServiceToService(assignment);
-              const busy = assignedBusyId === assignment.id;
+            const service = assignedServiceToService(assignment);
+            const busy = assignedBusyId === assignment.id;
 
-              return (
-                <ServiceCard
-                  key={assignment.id}
-                  service={service}
-                  copy={copy}
-                  brands={brands}
-                  user={user}
-                  showStatus={false}
-                  onClick={() => openDetail(service)}
-                  favoriteSlot={
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      disabled={busy}
-                      onClick={() => handleStepDown(assignment.id)}
-                    >
-                      {messages.brands.assignmentActionStepDown}
-                    </Button>
-                  }
-                />
-              );
-            })}
+            return (
+              <ServiceCard
+                key={assignment.id}
+                service={service}
+                copy={copy}
+                brands={brands}
+                user={user}
+                showStatus={false}
+                onClick={() => openDetail(service)}
+                favoriteSlot={
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    disabled={busy}
+                    onClick={() => handleStepDown(assignment.id)}
+                  >
+                    {messages.brands.assignmentActionStepDown}
+                  </Button>
+                }
+              />
+            );
+          })}
         </div>
       )}
     </div>
