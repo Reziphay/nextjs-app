@@ -281,7 +281,7 @@ export function AvatarCropDialog({
             aria-label={p.cropPhotoCancel}
             onClick={onClose}
           >
-            <Icon icon="close" size={18} color="white" />
+            <Icon icon="close" size={18} color="current" />
           </Button>
           <AlertDialogTitle className={styles.title}>
             {p.cropPhotoTitle}
@@ -336,7 +336,7 @@ export function AvatarCropDialog({
                 aria-label={`${p.cropPhotoZoom} -`}
                 onClick={() => handleZoomStep(-1)}
               >
-                <Icon icon="remove" size={16} color="white" />
+                <Icon icon="remove" size={16} color="current" />
               </Button>
               <input
                 className={styles.rangeInput}
@@ -354,7 +354,7 @@ export function AvatarCropDialog({
                 aria-label={`${p.cropPhotoZoom} +`}
                 onClick={() => handleZoomStep(1)}
               >
-                <Icon icon="add" size={16} color="white" />
+                <Icon icon="add" size={16} color="current" />
               </Button>
             </div>
           </div>

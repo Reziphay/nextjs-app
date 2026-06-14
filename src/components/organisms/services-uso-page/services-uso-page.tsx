@@ -1616,7 +1616,7 @@ export function ServicesUsoPage({
             setServices((prev) => [service, ...prev]);
             window.dispatchEvent(new Event("reziphay:services-changed"));
             showFeedback("success", copy.successCreate);
-            backToList();
+            openDetail(service);
           } else {
             setServices((prev) => prev.map((s) => (s.id === service.id ? service : s)));
             setViewService(service);

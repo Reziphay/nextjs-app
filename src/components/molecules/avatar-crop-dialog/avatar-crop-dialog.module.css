@@ -1,12 +1,10 @@
 .content {
   position: relative;
   width: min(100%, 34rem);
-  border-color: rgb(255 255 255 / 0.08);
+  border: 1px solid var(--app-border-soft);
   border-radius: var(--general-border-radius-4xl);
-  background: rgb(28 28 33 / 0.96);
-  box-shadow:
-    0 1.5rem 4rem rgb(0 0 0 / 0.45),
-    inset 0 1px 0 rgb(255 255 255 / 0.04);
+  background: var(--app-bg-surface-strong);
+  box-shadow: 0 1.5rem 4rem var(--app-shadow-color-strong);
 }
 
 .header {
@@ -25,17 +23,17 @@
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  border: 1px solid rgb(255 255 255 / 0.08);
+  border: 1px solid var(--app-border-soft);
   border-radius: 999px;
-  background: rgb(255 255 255 / 0.08);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  background: var(--app-bg-surface-muted);
+  color: var(--app-text-strong);
   transition:
     background 160ms ease,
     transform 160ms ease;
 }
 
 .closeButton:hover {
-  background: rgb(255 255 255 / 0.14);
+  background: var(--app-bg-primary-soft);
 }
 
 .closeButton:active {
@@ -43,14 +41,14 @@
 }
 
 .title {
-  color: var(--app-text-inverse);
+  color: var(--app-text-strong);
   font-size: clamp(1.25rem, 0.8vw + 1rem, 1.45rem);
   font-weight: 800;
   letter-spacing: -0.04em;
 }
 
 .description {
-  color: rgb(249 247 241 / 0.72);
+  color: var(--app-text-muted);
   font-size: var(--font-size-small);
   line-height: 1.55;
   max-width: 25rem;
@@ -68,12 +66,9 @@
   place-items: center;
   min-height: 18.5rem;
   padding: 1rem;
-  border: 1px solid rgb(255 255 255 / 0.06);
+  border: 1px solid var(--app-border-soft);
   border-radius: var(--general-border-radius-3xl);
-  background:
-    linear-gradient(to right, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0.02) 18%, rgb(255 255 255 / 0.02) 82%, rgb(255 255 255 / 0.06)),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.02), rgb(255 255 255 / 0.01));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+  background: var(--app-bg-subtle);
 }
 
 .cropAreaShell {
@@ -87,17 +82,16 @@
   width: min(100%, 17rem);
   aspect-ratio: 1;
   overflow: hidden;
-  border: 2px solid rgb(91 170 255 / 0.9);
+  border: 2px solid var(--app-primary-soft);
   border-radius: var(--general-border-radius-xl);
+  /* Neutral checkerboard for image transparency, works on light + dark. */
   background:
-    linear-gradient(45deg, rgb(255 255 255 / 0.08) 25%, transparent 25%, transparent 75%, rgb(255 255 255 / 0.08) 75%),
-    linear-gradient(45deg, rgb(255 255 255 / 0.08) 25%, transparent 25%, transparent 75%, rgb(255 255 255 / 0.08) 75%);
-  background-color: rgb(255 255 255 / 0.03);
+    linear-gradient(45deg, rgb(128 128 128 / 0.12) 25%, transparent 25%, transparent 75%, rgb(128 128 128 / 0.12) 75%),
+    linear-gradient(45deg, rgb(128 128 128 / 0.12) 25%, transparent 25%, transparent 75%, rgb(128 128 128 / 0.12) 75%);
+  background-color: var(--app-bg-surface-muted);
   background-position: 0 0, 0.625rem 0.625rem;
   background-size: 1.25rem 1.25rem;
-  box-shadow:
-    0 1rem 2rem rgb(0 0 0 / 0.3),
-    inset 0 0 0 1px rgb(255 255 255 / 0.3);
+  box-shadow: 0 1rem 2rem var(--app-shadow-color);
   touch-action: none;
   user-select: none;
 }
@@ -126,6 +120,7 @@
 .cropGrid {
   position: absolute;
   inset: 0;
+  /* Rule-of-thirds guide sits over the image — white reads on any photo. */
   background-image:
     linear-gradient(rgb(255 255 255 / 0.5) 1px, transparent 1px),
     linear-gradient(90deg, rgb(255 255 255 / 0.5) 1px, transparent 1px);
@@ -140,7 +135,7 @@
 
 .hint {
   margin: 0;
-  color: rgb(249 247 241 / 0.7);
+  color: var(--app-text-muted);
   font-size: var(--font-size-small);
   text-align: center;
   line-height: 1.45;
@@ -154,7 +149,7 @@
 }
 
 .rangeLabel {
-  color: var(--app-text-inverse);
+  color: var(--app-text-strong);
   font-size: var(--font-size-small);
   font-weight: 700;
 }
@@ -178,14 +173,14 @@
   justify-content: center;
   width: 2rem;
   height: 2rem;
-  border: 1px solid rgb(255 255 255 / 0.08);
+  border: 1px solid var(--app-border-soft);
   border-radius: 999px;
-  background: rgb(255 255 255 / 0.08);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  background: var(--app-bg-surface-muted);
+  color: var(--app-text-strong);
 }
 
 .zoomButton:hover {
-  background: rgb(255 255 255 / 0.12);
+  background: var(--app-bg-primary-soft);
 }
 
 .rangeInput {
@@ -204,7 +199,7 @@
 }
 
 .changePicture:hover {
-  color: var(--app-text-inverse);
+  color: var(--app-text-strong);
 }
 
 .footer {
@@ -221,17 +216,17 @@
 }
 
 .cancelButton {
-  border-color: rgb(255 255 255 / 0.14);
-  background: rgb(255 255 255 / 0.04);
-  color: var(--app-text-inverse);
+  border-color: var(--app-border-strong);
+  background: var(--app-bg-surface);
+  color: var(--app-text-strong);
 }
 
 .cancelButton:hover {
-  background: rgb(255 255 255 / 0.08);
+  background: var(--app-bg-surface-muted);
 }
 
 .confirmButton {
-  box-shadow: 0 0.875rem 1.75rem rgb(89 13 34 / 0.35);
+  box-shadow: 0 0.875rem 1.75rem var(--app-shadow-primary-soft);
 }
 
 @media (max-width: 48rem) {

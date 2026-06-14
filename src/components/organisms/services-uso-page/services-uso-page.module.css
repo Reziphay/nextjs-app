@@ -605,7 +605,9 @@
   border-radius: var(--general-border-radius-hero);
   background: var(--app-bg-surface);
   border: 1px solid var(--app-border-soft);
-  box-shadow: 0 1px 4px var(--app-shadow-card-soft), 0 4px 16px var(--app-shadow-card-soft);
+  box-shadow:
+    0 1px 4px var(--app-shadow-card-soft),
+    0 4px 16px var(--app-shadow-card-soft);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -613,7 +615,9 @@
 }
 
 .formSection:focus-within {
-  box-shadow: 0 1px 4px var(--app-shadow-card-soft), 0 4px 24px var(--app-shadow-color),
+  box-shadow:
+    0 1px 4px var(--app-shadow-card-soft),
+    0 4px 24px var(--app-shadow-color),
     0 0 0 1px var(--app-border-primary-soft);
 }
 
@@ -692,18 +696,24 @@
   line-height: 1.6;
   resize: vertical;
   box-sizing: border-box;
-  transition: border-color 140ms ease, box-shadow 140ms ease;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
   outline: none;
 }
 
-.textarea:hover { border-color: var(--app-border-strong); }
+.textarea:hover {
+  border-color: var(--app-border-strong);
+}
 
 .textarea:focus {
   border-color: var(--app-primary);
   box-shadow: 0 0 0 3px var(--app-primary-faint);
 }
 
-.textarea::placeholder { color: var(--app-text-subtle); }
+.textarea::placeholder {
+  color: var(--app-text-subtle);
+}
 
 .uploadArea {
   position: relative;
@@ -714,7 +724,9 @@
   border-radius: var(--general-border-radius-card);
   background: var(--app-bg-surface-muted);
   cursor: pointer;
-  transition: border-color 180ms ease, background 180ms ease;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease;
   overflow: hidden;
 }
 
@@ -742,7 +754,9 @@
   transition: color 180ms ease;
 }
 
-.uploadArea:hover .uploadIcon { color: var(--app-primary); }
+.uploadArea:hover .uploadIcon {
+  color: var(--app-primary);
+}
 
 .uploadLabel {
   margin: 0;
@@ -783,9 +797,13 @@
   transition: box-shadow 180ms ease;
 }
 
-.galleryPreviewItem:hover { box-shadow: 0 4px 16px var(--app-shadow-color); }
+.galleryPreviewItem:hover {
+  box-shadow: 0 4px 16px var(--app-shadow-color);
+}
 
-.previewImage { object-fit: cover; }
+.previewImage {
+  object-fit: cover;
+}
 
 .removePreviewBtn {
   position: absolute;
@@ -802,7 +820,10 @@
   cursor: pointer;
   color: var(--app-text-muted);
   padding: 0;
-  transition: color 140ms ease, background 140ms ease, border-color 140ms ease;
+  transition:
+    color 140ms ease,
+    background 140ms ease,
+    border-color 140ms ease;
   box-shadow: 0 1px 4px var(--app-shadow-card-soft);
 }
 
@@ -888,14 +909,21 @@
     align-items: start;
   }
 
-  .desktopAside { display: block; }
-  .mobileFooter { display: none; }
-
+  .desktopAside {
+    display: block;
+  }
+  .mobileFooter {
+    display: none;
+  }
 }
 
 @media (max-width: 640px) {
-  .formSection { padding: 1.25rem; }
-  .sectionHeader { align-items: flex-start; }
+  .formSection {
+    padding: 1.25rem;
+  }
+  .sectionHeader {
+    align-items: flex-start;
+  }
 
   .galleryPreviewGrid {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -930,7 +958,11 @@
   min-height: 1.6rem;
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--app-primary-faint) 78%, var(--brand-surface-base) 22%);
+  background: color-mix(
+    in srgb,
+    var(--app-primary-faint) 78%,
+    var(--brand-surface-base) 22%
+  );
   color: var(--app-primary);
   font-size: 0.78rem;
   font-weight: 800;
@@ -995,7 +1027,11 @@
   align-items: center;
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--app-primary-faint) 60%, var(--brand-surface-base) 40%);
+  background: color-mix(
+    in srgb,
+    var(--app-primary-faint) 60%,
+    var(--brand-surface-base) 40%
+  );
   color: var(--app-primary);
   font-size: 0.78rem;
   font-weight: 700;
@@ -1082,5 +1118,5 @@
 }
 
 .formFeedback {
-  margin-bottom: 16px;
+  margin-bottom: 30px;
 }
