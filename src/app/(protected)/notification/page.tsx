@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import {
   NotificationTransferPage,
@@ -5,6 +6,17 @@ import {
 } from "@/components/organisms/notification-transfer-page/notification-transfer-page";
 import { fetchBrandById, fetchNotificationFeed } from "@/lib/brands-api";
 import { requireProtectedRouteAccess } from "@/lib/protected-route";
+import { getMessages } from "@/i18n/config";
+import { getServerLocale } from "@/i18n/server";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const messages = getMessages(locale);
+
+  return {
+    title: messages.dashboard.notifications,
+  };
+}
 
 async function buildTeamInvitationDetails(
   initialFeed: Awaited<ReturnType<typeof fetchNotificationFeed>>,
@@ -39,7 +51,7 @@ async function buildTeamInvitationDetails(
           brand_name: brand?.name ?? item.data.brand_name,
           brand_logo_url: brand?.logo_url ?? null,
           brand_gallery_url: brand?.gallery?.[0]?.url ?? null,
-          brand_categories: brand?.categories?.map((category) => category.name) ?? [],
+          brand_categories: brand?.categories?.map((category) => category.key) ?? [],
           brand_description: brand?.description ?? null,
           branch_name: branch?.name ?? item.data.branch_name,
           branch_cover_url: branch?.cover_url ?? null,

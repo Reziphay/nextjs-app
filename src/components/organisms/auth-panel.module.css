@@ -60,6 +60,31 @@
   margin-top: 0.143rem;
 }
 
+.datePickerControl {
+  position: relative;
+  width: 100%;
+}
+
+.datePickerInput {
+  padding-right: calc(var(--general-control-height) + 0.35rem);
+}
+
+.datePickerIcon {
+  position: absolute;
+  top: 50%;
+  right: 0.857rem;
+  width: 1.143rem;
+  height: 1.143rem;
+  color: var(--app-text-subtle);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.datePickerPopover {
+  width: auto;
+  padding: 0;
+}
+
 .footer {
   text-align: center;
 }

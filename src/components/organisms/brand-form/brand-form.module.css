@@ -11,60 +11,6 @@
   padding-bottom: 2.5rem;
 }
 
-/* ── Sticky page header ── */
-.pageHeader {
-  position: sticky;
-  top: 0.875rem;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
-  width: 100%;
-  min-width: 0;
-  padding: 0.875rem 0;
-  margin-bottom: 2rem;
-  background: var(--app-bg-canvas);
-  border-bottom: 1px solid var(--app-border-soft);
-  /* subtle backdrop blur for scroll bleed */
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-
-.headerMeta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  flex: 1;
-  min-width: 0;
-}
-
-.title {
-  margin: 0;
-  color: var(--app-text-strong);
-  font-size: var(--font-size-large);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.modeBadge {
-  display: inline-flex;
-  width: fit-content;
-  max-width: 100%;
-  padding: 2px 8px;
-  border-radius: var(--general-border-radius-pill);
-  background: var(--app-bg-primary-soft);
-  border: 1px solid var(--app-border-primary-soft);
-  color: var(--app-primary);
-  font-size: var(--font-size-extra-small);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
 /* ── Form wrapper ── */
 .form {
   display: flex;
@@ -359,6 +305,20 @@
   box-shadow: 0 4px 16px var(--app-shadow-color);
 }
 
+/* Social sidebar section */
+.socialSidebarSection {
+  padding: 1rem 1.125rem;
+}
+
+.socialSidebarTitle {
+  margin: 0 0 0.75rem;
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  color: var(--app-text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 /* ── Branches list ── */
 .branchesList {
   display: flex;
@@ -479,60 +439,8 @@
   border-color: var(--app-error-border);
 }
 
-/* ── Form footer ── */
-.formFooter {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1.25rem 1.75rem;
-  border-radius: var(--general-border-radius-hero);
-  background: var(--app-bg-surface);
-  border: 1px solid var(--app-border-soft);
-  box-shadow: 0 1px 4px var(--app-shadow-card-soft);
-}
-
-.formFooterSpacer {
-  flex: 1;
-}
-
-.formFooterDanger {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  padding-left: 0.75rem;
-  border-left: 1px solid var(--app-border-soft);
-}
-
-.formFooterPrimary {
-  /* already first via JSX order — no order override needed */
-}
-
-/* ── Feedback banner ── */
-.feedback {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.625rem;
-  padding: 0.875rem 1.125rem;
-  border-radius: var(--general-border-radius-card);
-  font-size: var(--font-size-small);
-  font-weight: 500;
-  line-height: 1.5;
-}
-
-.wrapper > .feedback {
+.formBanner {
   margin-bottom: 1.25rem;
-}
-
-.feedbackSuccess {
-  background: var(--app-success-bg);
-  color: var(--app-success-strong);
-  border: 1px solid var(--app-success-border);
-}
-
-.feedbackError {
-  background: var(--app-error-bg);
-  color: var(--app-error);
-  border: 1px solid var(--app-error-border);
 }
 
 /* ── Inline field error ── */
@@ -581,92 +489,15 @@
     max-width: none;
   }
 
-  .formFooterAside {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 0.625rem;
-    padding: 1.125rem 1.25rem;
-  }
-
-  .formFooterAside > *:not(.formFooterSpacer):not(.formFooterDanger) {
-    width: 100%;
-  }
-
-  .formFooterAside .formFooterSpacer {
-    display: none;
-  }
-
-  .formFooterAside .formFooterDanger {
-    width: 100%;
-    padding-top: 0.75rem;
-    padding-left: 0;
-    border-top: 1px solid var(--app-border-soft);
-    border-left: none;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-  }
-
-  .formFooterAside .formFooterDanger > * {
-    width: 100%;
-  }
 }
 
 @media (max-width: 640px) {
-  .pageHeader {
-    align-items: flex-start;
-  }
-
-  .title {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
-  }
-
-  .modeBadge {
-    white-space: normal;
-    line-height: 1.35;
-  }
-
   .formSection {
     padding: 1.25rem;
   }
 
   .sectionHeader {
     align-items: flex-start;
-  }
-
-  .formFooter {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 1rem 1.25rem;
-    gap: 0.625rem;
-  }
-
-  .formFooterSpacer {
-    display: none;
-  }
-
-  .formFooterDanger {
-    padding-left: 0;
-    border-left: none;
-    padding-top: 0.625rem;
-    border-top: 1px solid var(--app-border-soft);
-    justify-content: stretch;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .formFooterDanger > * {
-    width: 100%;
-  }
-
-  .formFooter > *:not(.formFooterSpacer):not(.formFooterDanger) {
-    width: 100%;
-  }
-
-  .formFooterPrimary {
-    order: -1;
   }
 
   .galleryPreviewGrid {

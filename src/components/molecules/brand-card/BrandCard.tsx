@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { ProfileBox } from "@/components/molecules/profile-box";
+import { RichTextDisplay } from "@/components/molecules/rich-text-editor/rich-text-display";
 import { useLocale } from "@/components/providers/locale-provider";
 import styles from "./BrandCard.module.css";
 
@@ -201,7 +202,7 @@ export function BrandCard({
         {hasDescription && (
           <div className={styles.descriptionBlock}>
             <span className={styles.sectionLabel}>{t.brandCardDescriptionLabel}</span>
-            <p className={styles.description}>{description}</p>
+            <RichTextDisplay html={description} className={styles.description} />
           </div>
         )}
 

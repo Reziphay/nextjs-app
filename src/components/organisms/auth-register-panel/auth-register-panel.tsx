@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { CalendarIcon } from "lucide-react";
 import {
   Alert,
   AlertDescription,
@@ -30,10 +31,63 @@ import {
   setRegisterField,
   submitRegister,
 } from "@/store/auth";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import sharedStyles from "../auth-panel.module.css";
 
-function getTodayDateValue() {
-  return new Date().toISOString().slice(0, 10);
+const minimumRegisterAge = 18;
+const earliestBirthday = new Date(1900, 0, 1);
+
+function formatBirthdayInput(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 8);
+  const parts = [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4, 8)]
+    .filter(Boolean);
+
+  return parts.join("-");
+}
+
+function getMaximumBirthday() {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() - minimumRegisterAge);
+  date.setHours(0, 0, 0, 0);
+
+  return date;
+}
+
+function formatBirthdayDate(date: Date) {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = String(date.getFullYear());
+
+  return `${day}-${month}-${year}`;
+}
+
+function parseBirthdayDate(value: string) {
+  const match = /^(\d{2})-(\d{2})-(\d{4})$/.exec(value);
+
+  if (!match) {
+    return undefined;
+  }
+
+  const [, day, month, year] = match;
+  const dayNumber = Number(day);
+  const monthNumber = Number(month);
+  const yearNumber = Number(year);
+  const date = new Date(yearNumber, monthNumber - 1, dayNumber);
+
+  if (
+    date.getFullYear() !== yearNumber ||
+    date.getMonth() !== monthNumber - 1 ||
+    date.getDate() !== dayNumber
+  ) {
+    return undefined;
+  }
+
+  return date;
 }
 
 export function AuthRegisterPanel() {
@@ -46,6 +100,13 @@ export function AuthRegisterPanel() {
   const { errors, feedback, status, values } = useAppSelector(selectRegisterState);
   const register = messages.auth.register;
   const isSubmitting = status === "loading";
+  const [isBirthdayPickerOpen, setBirthdayPickerOpen] = useState(false);
+  const birthdayPickerControlRef = useRef<HTMLDivElement>(null);
+  const maximumBirthday = useMemo(() => getMaximumBirthday(), []);
+  const selectedBirthday = useMemo(
+    () => parseBirthdayDate(values.birthday),
+    [values.birthday],
+  );
 
   const userTypeOptions: readonly ComboboxOption[] = useMemo(
     () => [
@@ -98,6 +159,43 @@ export function AuthRegisterPanel() {
     session.accessToken,
     session.refreshToken,
   ]);
+
+  useEffect(() => {
+    if (!isBirthdayPickerOpen) {
+      return;
+    }
+
+    function closeOnOutsidePointerDown(event: PointerEvent) {
+      const target = event.target;
+
+      if (!(target instanceof Node)) {
+        return;
+      }
+
+      if (birthdayPickerControlRef.current?.contains(target)) {
+        return;
+      }
+
+      if (
+        target instanceof Element &&
+        target.closest('[data-birthday-picker-content="true"]')
+      ) {
+        return;
+      }
+
+      setBirthdayPickerOpen(false);
+    }
+
+    document.addEventListener("pointerdown", closeOnOutsidePointerDown, true);
+
+    return () => {
+      document.removeEventListener(
+        "pointerdown",
+        closeOnOutsidePointerDown,
+        true,
+      );
+    };
+  }, [isBirthdayPickerOpen]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -196,21 +294,78 @@ export function AuthRegisterPanel() {
               <FieldLabel htmlFor="birthday" required>
                 {register.birthdayLabel}
               </FieldLabel>
-              <Input
-                id="birthday"
-                type="date"
-                value={values.birthday}
-                max={getTodayDateValue()}
-                aria-invalid={errors.birthday ? "true" : undefined}
-                onChange={(event) => {
-                  dispatch(
-                    setRegisterField({
-                      field: "birthday",
-                      value: event.target.value,
-                    }),
-                  );
-                }}
-              />
+              <div
+                className={sharedStyles.datePickerControl}
+                ref={birthdayPickerControlRef}
+              >
+                <Popover
+                  open={isBirthdayPickerOpen}
+                  onOpenChange={setBirthdayPickerOpen}
+                >
+                  <PopoverTrigger
+                    nativeButton={false}
+                    render={
+                      <Input
+                        id="birthday"
+                        className={sharedStyles.datePickerInput}
+                        inputMode="numeric"
+                        pattern="[0-9]{2}-[0-9]{2}-[0-9]{4}"
+                        placeholder="dd-mm-yyyy"
+                        value={values.birthday}
+                        aria-invalid={errors.birthday ? "true" : undefined}
+                        autoComplete="bday"
+                        onClick={() => {
+                          setBirthdayPickerOpen(true);
+                        }}
+                        onChange={(event) => {
+                          dispatch(
+                            setRegisterField({
+                              field: "birthday",
+                              value: formatBirthdayInput(event.target.value),
+                            }),
+                          );
+                        }}
+                      />
+                    }
+                  />
+                  <CalendarIcon
+                    className={sharedStyles.datePickerIcon}
+                    aria-hidden="true"
+                  />
+                  <PopoverContent
+                    className={sharedStyles.datePickerPopover}
+                    align="start"
+                    data-birthday-picker-content="true"
+                    finalFocus={false}
+                    initialFocus={false}
+                  >
+                    <Calendar
+                      mode="single"
+                      captionLayout="dropdown"
+                      selected={selectedBirthday}
+                      defaultMonth={selectedBirthday ?? maximumBirthday}
+                      startMonth={earliestBirthday}
+                      endMonth={maximumBirthday}
+                      disabled={(date) =>
+                        date > maximumBirthday || date < earliestBirthday
+                      }
+                      onSelect={(date) => {
+                        if (!date) {
+                          return;
+                        }
+
+                        dispatch(
+                          setRegisterField({
+                            field: "birthday",
+                            value: formatBirthdayDate(date),
+                          }),
+                        );
+                        setBirthdayPickerOpen(false);
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
               {errors.birthday ? (
                 <FieldDescription>{errors.birthday}</FieldDescription>
               ) : null}

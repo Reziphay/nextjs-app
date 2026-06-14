@@ -25,7 +25,7 @@ const authMeEndpoint = "/auth/me";
 const authRefreshEndpoint = "/auth/refresh";
 const authRegisterEndpoint = "/auth/register";
 const invalidApiResponseError = "INVALID_AUTH_API_RESPONSE";
-const minimumRegisterAge = 13;
+const minimumRegisterAge = 18;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const registerPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,72}$/;
 const loginFieldNames = ["email", "password"] as const;
@@ -165,12 +165,37 @@ function normalizeLoginValues(values: LoginFormValues): LoginFormValues {
   };
 }
 
+function parseBirthdayInput(value: string) {
+  const trimmed = value.trim();
+  const match = /^(\d{2})-(\d{2})-(\d{4})$/.exec(trimmed);
+
+  if (!match) {
+    return null;
+  }
+
+  const [, day, month, year] = match;
+  const dayNumber = Number(day);
+  const monthNumber = Number(month);
+  const yearNumber = Number(year);
+  const date = new Date(Date.UTC(yearNumber, monthNumber - 1, dayNumber));
+
+  if (
+    date.getUTCFullYear() !== yearNumber ||
+    date.getUTCMonth() !== monthNumber - 1 ||
+    date.getUTCDate() !== dayNumber
+  ) {
+    return null;
+  }
+
+  return `${year}-${month}-${day}`;
+}
+
 function normalizeRegisterValues(values: RegisterFormDraft): RegisterFormDraft {
   return {
     ...values,
     first_name: values.first_name.trim(),
     last_name: values.last_name.trim(),
-    birthday: values.birthday.trim(),
+    birthday: parseBirthdayInput(values.birthday) ?? values.birthday.trim(),
     country: values.country.trim(),
     email: values.email.trim().toLowerCase(),
     password: values.password,

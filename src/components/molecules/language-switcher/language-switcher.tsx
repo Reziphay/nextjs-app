@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Languages } from "lucide-react";
+import { Button } from "@/components/atoms/button";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   getLocaleNames,
@@ -61,7 +62,8 @@ export function LanguageSwitcher({
         className={joinClassNames(styles.panel, className)}
         data-open={isOpen ? "" : undefined}
       >
-        <button
+        <Button
+          variant="unstyled"
           type="button"
           className={styles.panelTrigger}
           aria-label={`${messages.languageSwitcherDisplayLabel}: ${localeNames[locale]}`}
@@ -89,7 +91,7 @@ export function LanguageSwitcher({
               isOpen ? styles.panelChevronOpen : ""
             }`}
           />
-        </button>
+        </Button>
 
         {isOpen ? (
           <div
@@ -101,7 +103,8 @@ export function LanguageSwitcher({
               const isActive = entry === locale;
 
               return (
-                <button
+                <Button
+                  variant="unstyled"
                   key={entry}
                   type="button"
                   role="option"
@@ -123,7 +126,7 @@ export function LanguageSwitcher({
                   <span className={styles.panelOptionCheck} aria-hidden="true">
                     {isActive ? <Check size={16} /> : null}
                   </span>
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -138,7 +141,8 @@ export function LanguageSwitcher({
       className={joinClassNames(styles.compact, className)}
       data-open={isOpen ? "" : undefined}
     >
-      <button
+      <Button
+        variant="unstyled"
         type="button"
         className={styles.compactTrigger}
         aria-label={`${messages.languageSwitcherAriaLabel}: ${localeNames[locale]}`}
@@ -157,7 +161,7 @@ export function LanguageSwitcher({
             isOpen ? styles.compactChevronOpen : ""
           }`}
         />
-      </button>
+      </Button>
 
       {isOpen ? (
         <div
@@ -169,7 +173,8 @@ export function LanguageSwitcher({
             const isActive = entry === locale;
 
             return (
-              <button
+              <Button
+                variant="unstyled"
                 key={entry}
                 type="button"
                 role="option"
@@ -191,7 +196,7 @@ export function LanguageSwitcher({
                 <span className={styles.compactOptionCheck} aria-hidden="true">
                   {isActive ? <Check size={15} /> : null}
                 </span>
-              </button>
+              </Button>
             );
           })}
         </div>

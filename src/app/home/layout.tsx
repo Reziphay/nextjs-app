@@ -10,7 +10,7 @@ export default async function HomeLayout({
   const locale = await getServerLocale();
 
   return (
-    <ProtectedAppLayoutTemplate locale={locale}>
+    <ProtectedAppLayoutTemplate locale={locale} contentVariant="full">
       {children}
     </ProtectedAppLayoutTemplate>
   );

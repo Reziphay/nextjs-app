@@ -456,24 +456,6 @@
   margin-top: 1rem;
 }
 
-.feedback {
-  padding: 0.8rem 0.9rem;
-  border-radius: calc(var(--general-border-radius) - 0.1rem);
-  font-size: 0.84rem;
-  font-weight: 700;
-  line-height: 1.5;
-}
-
-.feedbackSuccess {
-  background: color-mix(in srgb, var(--app-success-bg, #dff7e9) 78%, white 22%);
-  color: var(--app-success, #0f8b4c);
-}
-
-.feedbackError {
-  background: color-mix(in srgb, var(--app-error-bg) 78%, white 22%);
-  color: var(--app-error);
-}
-
 .searchState {
   color: var(--app-text-muted);
   font-size: 0.84rem;

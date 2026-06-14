@@ -7,6 +7,7 @@ import {
   type InputHTMLAttributes,
   type LabelHTMLAttributes,
 } from "react";
+import { Button } from "@/components/atoms/button";
 import { Eye, EyeOff } from "lucide-react";
 import styles from "./input.module.css";
 
@@ -20,7 +21,7 @@ type FieldDescriptionProps = HTMLAttributes<HTMLParagraphElement>;
 
 type FieldContentProps = HTMLAttributes<HTMLDivElement>;
 
-type InputProps = InputHTMLAttributes<HTMLInputElement>;
+export type InputProps = InputHTMLAttributes<HTMLInputElement>;
 type PasswordInputProps = Omit<InputProps, "type"> & {
   showPasswordLabel: string;
   hidePasswordLabel: string;
@@ -107,7 +108,8 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           disabled={disabled}
           {...props}
         />
-        <button
+        <Button
+          variant="unstyled"
           type="button"
           className={styles.passwordToggle}
           aria-label={isVisible ? hidePasswordLabel : showPasswordLabel}
@@ -125,7 +127,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           ) : (
             <Eye aria-hidden="true" size={18} />
           )}
-        </button>
+        </Button>
       </div>
     );
   },

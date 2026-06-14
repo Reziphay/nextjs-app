@@ -19,20 +19,25 @@ import { useLocale } from "@/components/providers/locale-provider";
 import styles from "./avatar-crop-dialog.module.css";
 
 type AvatarCropDialogProps = {
-  imageName: string;
-  imageSrc: string | null;
   open: boolean;
   onClose: () => void;
   onConfirm: (file: File) => Promise<void> | void;
+  aspectRatio?: "1:1" | "16:9";
+  // Profile avatar variant — pass imageSrc + imageName
+  imageName?: string;
+  imageSrc?: string | null;
   onChooseDifferentPicture?: () => void;
+  // General variant — pass file directly (URL lifecycle managed internally)
+  file?: File;
 };
 
-type Offset = {
-  x: number;
-  y: number;
-};
+type Offset = { x: number; y: number };
 
-const outputSize = 512;
+const OUTPUT = {
+  "1:1": { width: 512, height: 512 },
+  "16:9": { width: 1280, height: 720 },
+} as const;
+
 const minimumZoom = 1;
 const maximumZoom = 3;
 const zoomStep = 0.01;
@@ -49,13 +54,13 @@ function getImageNaturalSize(image: HTMLImageElement) {
 }
 
 function getDisplaySize(
-  frameSize: number,
+  frameWidth: number,
+  frameHeight: number,
   imageWidth: number,
   imageHeight: number,
   zoom: number,
 ) {
-  const baseScale = Math.max(frameSize / imageWidth, frameSize / imageHeight);
-
+  const baseScale = Math.max(frameWidth / imageWidth, frameHeight / imageHeight);
   return {
     width: imageWidth * baseScale * zoom,
     height: imageHeight * baseScale * zoom,
@@ -64,58 +69,40 @@ function getDisplaySize(
 
 function constrainOffset(
   nextOffset: Offset,
-  frameSize: number,
+  frameWidth: number,
+  frameHeight: number,
   imageWidth: number,
   imageHeight: number,
   zoom: number,
-) {
-  const displaySize = getDisplaySize(frameSize, imageWidth, imageHeight, zoom);
-  const maxX = Math.max(0, (displaySize.width - frameSize) / 2);
-  const maxY = Math.max(0, (displaySize.height - frameSize) / 2);
-
+): Offset {
+  const displaySize = getDisplaySize(frameWidth, frameHeight, imageWidth, imageHeight, zoom);
+  const maxX = Math.max(0, (displaySize.width - frameWidth) / 2);
+  const maxY = Math.max(0, (displaySize.height - frameHeight) / 2);
   return {
     x: clamp(nextOffset.x, -maxX, maxX),
     y: clamp(nextOffset.y, -maxY, maxY),
   };
 }
 
-function makeAvatarFileName(imageName: string) {
-  const baseName = imageName.replace(/\.[^/.]+$/, "").trim() || "avatar";
-  return `${baseName}-avatar.png`;
-}
-
-function canvasToFile(canvas: HTMLCanvasElement, fileName: string) {
-  return new Promise<File>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) {
-          reject(new Error("AVATAR_CROP_EXPORT_FAILED"));
-          return;
-        }
-
-        resolve(
-          new File([blob], fileName, {
-            type: "image/png",
-            lastModified: Date.now(),
-          }),
-        );
-      },
-      "image/png",
-      0.95,
-    );
-  });
+function makeOutputFileName(name: string, aspectRatio: "1:1" | "16:9") {
+  const base = name.replace(/\.[^/.]+$/, "").trim() || "image";
+  const ext = aspectRatio === "1:1" ? "png" : "jpg";
+  return `${base}-crop.${ext}`;
 }
 
 export function AvatarCropDialog({
-  imageName,
-  imageSrc,
   open,
   onClose,
   onConfirm,
+  aspectRatio = "1:1",
+  imageName,
+  imageSrc,
   onChooseDifferentPicture,
+  file,
 }: AvatarCropDialogProps) {
   const { messages } = useLocale();
   const p = messages.profile;
+
   const cropFrameRef = useRef<HTMLDivElement | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const pointerStartRef = useRef<{
@@ -124,11 +111,24 @@ export function AvatarCropDialog({
     startY: number;
     offset: Offset;
   } | null>(null);
+
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState<Offset>({ x: 0, y: 0 });
   const [imageSize, setImageSize] = useState({ width: 1, height: 1 });
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Manage object URL when a File is passed directly
+  const [fileSrc, setFileSrc] = useState<string | null>(null);
+  useEffect(() => {
+    if (!file) { setFileSrc(null); return; }
+    const url = URL.createObjectURL(file);
+    setFileSrc(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  const effectiveSrc = file ? fileSrc : (imageSrc ?? null);
+  const effectiveName = file ? (file.name) : (imageName ?? "image");
 
   useEffect(() => {
     if (!open) {
@@ -138,29 +138,27 @@ export function AvatarCropDialog({
       setIsProcessing(false);
       pointerStartRef.current = null;
     }
-  }, [open, imageSrc]);
+  }, [open, effectiveSrc]);
 
   const zoomLabel = useMemo(() => `${Math.round(zoom * 100)}%`, [zoom]);
 
-  function getFrameSize() {
-    return cropFrameRef.current?.clientWidth ?? outputSize;
+  function getFrameDimensions() {
+    const el = cropFrameRef.current;
+    return {
+      width: el?.clientWidth ?? OUTPUT[aspectRatio].width,
+      height: el?.clientHeight ?? OUTPUT[aspectRatio].height,
+    };
   }
 
   function handleImageLoad() {
-    if (!imageRef.current) {
-      return;
-    }
-
+    if (!imageRef.current) return;
     setImageSize(getImageNaturalSize(imageRef.current));
     setOffset({ x: 0, y: 0 });
     setZoom(1);
   }
 
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
-    if (!imageSrc || isProcessing) {
-      return;
-    }
-
+    if (!effectiveSrc || isProcessing) return;
     pointerStartRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
@@ -173,46 +171,39 @@ export function AvatarCropDialog({
 
   function handlePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
     const state = pointerStartRef.current;
-
-    if (!state || state.pointerId !== event.pointerId) {
-      return;
-    }
-
-    const frameSize = getFrameSize();
+    if (!state || state.pointerId !== event.pointerId) return;
+    const { width, height } = getFrameDimensions();
     const nextOffset = constrainOffset(
       {
         x: state.offset.x + (event.clientX - state.startX),
         y: state.offset.y + (event.clientY - state.startY),
       },
-      frameSize,
+      width,
+      height,
       imageSize.width,
       imageSize.height,
       zoom,
     );
-
     setOffset(nextOffset);
   }
 
   function handlePointerUp(event: ReactPointerEvent<HTMLDivElement>) {
-    if (pointerStartRef.current?.pointerId !== event.pointerId) {
-      return;
-    }
-
+    if (pointerStartRef.current?.pointerId !== event.pointerId) return;
     pointerStartRef.current = null;
     setIsDragging(false);
     event.currentTarget.releasePointerCapture(event.pointerId);
   }
 
   function handleZoomChange(nextZoom: number) {
-    const frameSize = getFrameSize();
+    const { width, height } = getFrameDimensions();
     const constrainedOffset = constrainOffset(
       offset,
-      frameSize,
+      width,
+      height,
       imageSize.width,
       imageSize.height,
       nextZoom,
     );
-
     setZoom(nextZoom);
     setOffset(constrainedOffset);
   }
@@ -223,67 +214,75 @@ export function AvatarCropDialog({
       minimumZoom,
       maximumZoom,
     );
-
     handleZoomChange(nextZoom);
   }
 
   async function handleConfirm() {
-    if (!imageSrc || !imageRef.current || !cropFrameRef.current) {
-      return;
-    }
-
+    if (!effectiveSrc || !imageRef.current || !cropFrameRef.current) return;
     setIsProcessing(true);
-
     try {
-      const frameSize = cropFrameRef.current.clientWidth;
-      const displaySize = getDisplaySize(
-        frameSize,
-        imageSize.width,
-        imageSize.height,
-        zoom,
-      );
-      const ratio = outputSize / frameSize;
+      const { width: frameWidth, height: frameHeight } = getFrameDimensions();
+      const output = OUTPUT[aspectRatio];
+      const displaySize = getDisplaySize(frameWidth, frameHeight, imageSize.width, imageSize.height, zoom);
+      const ratioX = output.width / frameWidth;
+      const ratioY = output.height / frameHeight;
+
       const canvas = document.createElement("canvas");
-      canvas.width = outputSize;
-      canvas.height = outputSize;
+      canvas.width = output.width;
+      canvas.height = output.height;
 
-      const context = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("CROP_EXPORT_FAILED");
 
-      if (!context) {
-        throw new Error("AVATAR_CROP_EXPORT_FAILED");
-      }
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
 
-      context.imageSmoothingEnabled = true;
-      context.imageSmoothingQuality = "high";
-
-      context.drawImage(
+      ctx.drawImage(
         imageRef.current,
-        ((outputSize - displaySize.width * ratio) / 2) + offset.x * ratio,
-        ((outputSize - displaySize.height * ratio) / 2) + offset.y * ratio,
-        displaySize.width * ratio,
-        displaySize.height * ratio,
+        ((output.width - displaySize.width * ratioX) / 2) + offset.x * ratioX,
+        ((output.height - displaySize.height * ratioY) / 2) + offset.y * ratioY,
+        displaySize.width * ratioX,
+        displaySize.height * ratioY,
       );
 
-      const file = await canvasToFile(canvas, makeAvatarFileName(imageName));
-      await onConfirm(file);
+      const mimeType = aspectRatio === "1:1" ? "image/png" : "image/jpeg";
+      const quality = aspectRatio === "1:1" ? 0.95 : 0.92;
+      const fileName = makeOutputFileName(effectiveName, aspectRatio);
+
+      await new Promise<void>((resolve, reject) => {
+        canvas.toBlob(
+          async (blob) => {
+            if (!blob) { reject(new Error("CROP_EXPORT_FAILED")); return; }
+            const outFile = new File([blob], fileName, { type: mimeType, lastModified: Date.now() });
+            try { await onConfirm(outFile); resolve(); }
+            catch (e) { reject(e); }
+          },
+          mimeType,
+          quality,
+        );
+      });
+
       onClose();
     } finally {
       setIsProcessing(false);
     }
   }
 
+  const isWide = aspectRatio === "16:9";
+
   return (
     <AlertDialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
       <AlertDialogContent className={styles.content}>
         <div className={styles.header}>
-          <button
+          <Button
+            variant="unstyled"
             type="button"
             className={styles.closeButton}
             aria-label={p.cropPhotoCancel}
             onClick={onClose}
           >
             <Icon icon="close" size={18} color="white" />
-          </button>
+          </Button>
           <AlertDialogTitle className={styles.title}>
             {p.cropPhotoTitle}
           </AlertDialogTitle>
@@ -297,18 +296,18 @@ export function AvatarCropDialog({
             <div className={styles.cropAreaShell}>
               <div
                 ref={cropFrameRef}
-                className={styles.cropArea}
+                className={`${styles.cropArea} ${isWide ? styles.cropAreaWide : ""}`}
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
                 onPointerCancel={handlePointerUp}
               >
-                {imageSrc ? (
+                {effectiveSrc ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     ref={imageRef}
                     className={`${styles.cropImage} ${isDragging ? styles.dragging : ""}`}
-                    src={imageSrc}
+                    src={effectiveSrc}
                     alt={p.photoAlt}
                     draggable={false}
                     onLoad={handleImageLoad}
@@ -330,14 +329,15 @@ export function AvatarCropDialog({
             </div>
 
             <div className={styles.rangeControls}>
-              <button
+              <Button
+                variant="unstyled"
                 type="button"
                 className={styles.zoomButton}
                 aria-label={`${p.cropPhotoZoom} -`}
                 onClick={() => handleZoomStep(-1)}
               >
                 <Icon icon="remove" size={16} color="white" />
-              </button>
+              </Button>
               <input
                 className={styles.rangeInput}
                 type="range"
@@ -347,24 +347,28 @@ export function AvatarCropDialog({
                 value={zoom}
                 onChange={(event) => handleZoomChange(Number(event.target.value))}
               />
-              <button
+              <Button
+                variant="unstyled"
                 type="button"
                 className={styles.zoomButton}
                 aria-label={`${p.cropPhotoZoom} +`}
                 onClick={() => handleZoomStep(1)}
               >
                 <Icon icon="add" size={16} color="white" />
-              </button>
+              </Button>
             </div>
           </div>
 
-          <button
-            type="button"
-            className={styles.changePicture}
-            onClick={onChooseDifferentPicture}
-          >
-            {p.changePhoto}
-          </button>
+          {onChooseDifferentPicture && (
+            <Button
+              variant="unstyled"
+              type="button"
+              className={styles.changePicture}
+              onClick={onChooseDifferentPicture}
+            >
+              {p.changePhoto}
+            </Button>
+          )}
         </div>
 
         <div className={styles.footer}>
@@ -379,7 +383,7 @@ export function AvatarCropDialog({
           </Button>
           <Button
             variant="primary"
-            disabled={!imageSrc || isProcessing}
+            disabled={!effectiveSrc || isProcessing}
             className={styles.confirmButton}
             onClick={(event) => {
               event.preventDefault();

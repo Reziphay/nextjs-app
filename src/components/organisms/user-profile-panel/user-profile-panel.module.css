@@ -11,7 +11,7 @@
   gap: 1.5rem;
   padding: 2rem;
   border-radius: var(--general-border-radius-2xl);
-  background: var(--app-bg-surface-strong);
+  background: var(--app-bg-surface);
   border: 1px solid var(--app-border-soft);
   box-shadow: 0 0.5rem 1.5rem var(--app-shadow-card-soft);
 }
@@ -77,7 +77,7 @@
 .card {
   padding: 1.714rem;
   border-radius: var(--general-border-radius-2xl);
-  background: var(--app-bg-surface-strong);
+  background: var(--app-bg-surface);
   border: 1px solid var(--app-border-soft);
   box-shadow: 0 0.5rem 1.5rem var(--app-shadow-card-soft);
 }
@@ -238,6 +238,47 @@
   background: var(--app-warning-bg);
   border: 1px solid var(--app-warning-border);
   color: var(--app-warning-strong);
+}
+
+.socialSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.socialSectionTitle {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.socialLinks {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.socialLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--app-bg-surface-strong);
+  border: 1px solid var(--app-border-soft);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  text-decoration: none;
+}
+
+.socialLink:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px color-mix(in srgb, currentColor 25%, transparent);
 }
 
 .removePhotoDialog {

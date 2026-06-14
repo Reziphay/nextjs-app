@@ -438,26 +438,6 @@
   flex-wrap: wrap;
 }
 
-.feedback {
-  padding: 0.75rem 0.9rem;
-  border-radius: calc(var(--general-border-radius) - 0.25rem);
-  font-size: 0.86rem;
-  font-weight: 600;
-  line-height: 1.6;
-}
-
-.feedbackSuccess {
-  border: 1px solid color-mix(in srgb, var(--app-success) 26%, transparent);
-  background: color-mix(in srgb, var(--app-success) 10%, var(--brand-surface-base) 90%);
-  color: var(--brand-success);
-}
-
-.feedbackError {
-  border: 1px solid color-mix(in srgb, var(--app-error) 24%, transparent);
-  background: color-mix(in srgb, var(--app-error) 10%, var(--brand-surface-base) 90%);
-  color: var(--app-error);
-}
-
 .futurePanel {
   display: flex;
   flex-direction: column;

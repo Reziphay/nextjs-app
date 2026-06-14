@@ -1,6 +1,10 @@
 import { createApiClient } from "@/lib/api";
-import type { Brand, BrandCategory, Branch } from "@/types/brand";
+import type { Brand, BrandCategory, Branch, BrandSocialLinks } from "@/types/brand";
 import type { ApiSuccessResponse } from "@/types";
+
+export type SocialLinksPayload = {
+  [K in keyof BrandSocialLinks]?: string | null;
+};
 
 export type CreateBrandPayload = {
   name: string;
@@ -9,7 +13,7 @@ export type CreateBrandPayload = {
   logo_media_id?: string;
   gallery_media_ids?: string[];
   branches?: BranchPayload[];
-};
+} & SocialLinksPayload;
 
 export type UpdateBrandPayload = {
   name?: string;
@@ -19,7 +23,7 @@ export type UpdateBrandPayload = {
   logo_media_id?: string | null;
   /** Full ordered list of media IDs (existing + new). Omit to leave gallery unchanged. */
   gallery_media_ids?: string[];
-};
+} & SocialLinksPayload;
 
 export type BranchPayload = {
   name: string;
@@ -311,7 +315,7 @@ function normalizeBranch(branch: Branch): Branch {
   };
 }
 
-function normalizeBrand(brand: Brand): Brand {
+export function normalizeBrand(brand: Brand): Brand {
   return {
     ...brand,
     categories: brand.categories ?? [],
@@ -323,7 +327,7 @@ function normalizeBrand(brand: Brand): Brand {
   };
 }
 
-function normalizeBrands(brands: Brand[] | undefined): Brand[] {
+export function normalizeBrands(brands: Brand[] | undefined): Brand[] {
   return (brands ?? []).map(normalizeBrand);
 }
 
@@ -349,14 +353,58 @@ export async function fetchBrandById(
   return brand ? normalizeBrand(brand) : null;
 }
 
-export async function fetchActiveBrands(accessToken?: string): Promise<Brand[]> {
+export type PublicBrandFilters = {
+  brand_category_id?: string;
+  page?: number;
+  limit?: number;
+};
+
+export type PaginatedBrandMeta = {
+  page: number;
+  limit: number;
+  total_count: number;
+  has_more: boolean;
+};
+
+export async function fetchActiveBrands(
+  accessToken?: string,
+  filters?: PublicBrandFilters,
+): Promise<Brand[]> {
   const client = createApiClient({ accessToken });
   const response = await client.request<ApiSuccessResponse<{ brands: Brand[] }>>({
     url: "/brands",
     method: "GET",
-    params: { status: "ACTIVE" },
+    params: {
+      status: "ACTIVE",
+      ...(filters?.brand_category_id && { brand_category_id: filters.brand_category_id }),
+    },
   });
   return normalizeBrands(response.data?.data?.brands);
+}
+
+export async function fetchActiveBrandsPage(
+  accessToken?: string,
+  filters?: PublicBrandFilters,
+): Promise<{ brands: Brand[]; meta: PaginatedBrandMeta }> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ brands: Brand[]; meta?: PaginatedBrandMeta }>>({
+    url: "/brands",
+    method: "GET",
+    params: {
+      status: "ACTIVE",
+      ...(filters?.brand_category_id && { brand_category_id: filters.brand_category_id }),
+      ...(filters?.page && { page: filters.page }),
+      ...(filters?.limit && { limit: filters.limit }),
+    },
+  });
+  const brands = normalizeBrands(response.data?.data?.brands);
+  const meta = response.data?.data?.meta ?? {
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? brands.length,
+    total_count: brands.length,
+    has_more: false,
+  };
+  return { brands, meta };
 }
 
 export async function fetchAccountBrands(
@@ -374,6 +422,22 @@ export async function fetchAccountBrands(
     (brand) =>
       brand.owner_id === accountUserId &&
       (brand.status === "ACTIVE" || brand.status === "CLOSED"),
+  );
+}
+
+export async function fetchAllAccountBrands(
+  accountUserId: string,
+  accessToken?: string,
+): Promise<Brand[]> {
+  const client = createApiClient({ accessToken });
+  const response = await client.request<ApiSuccessResponse<{ brands: Brand[] }>>({
+    url: "/brands",
+    method: "GET",
+    params: { account: accountUserId },
+  });
+
+  return normalizeBrands(response.data?.data?.brands).filter(
+    (brand) => brand.owner_id === accountUserId,
   );
 }
 

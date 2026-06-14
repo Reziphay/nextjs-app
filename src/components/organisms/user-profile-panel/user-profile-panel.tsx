@@ -33,6 +33,7 @@ import {
   UserAvatar,
 } from "@/components/molecules";
 import { AccountBrandsSection } from "@/components/organisms/account-brands-section/account-brands-section";
+import { AccountServicesSection } from "@/components/organisms/account-services-section";
 import { useLocale } from "@/components/providers/locale-provider";
 import { getCountryLabel, getCountryOptions } from "@/lib/countries";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -47,13 +48,21 @@ import {
   removeAccountAvatar,
   uploadAccountAvatar,
 } from "@/store/account";
+import { SocialIcon, SOCIAL_COLORS } from "@/components/atoms/social-icon/social-icon";
+import {
+  SocialLinksEditor,
+  type SocialLinksEditorRef,
+} from "@/components/molecules/social-links-editor/social-links-editor";
+import { socialFieldsToUrls, socialUrlsToFields } from "@/lib/social-url";
 import type { AccountUserProfile, Brand, UserProfile } from "@/types";
+import type { Service } from "@/types/service";
 import styles from "./user-profile-panel.module.css";
 
 type UserProfilePanelProps = {
   user: AccountUserProfile;
   canEdit?: boolean;
   brands?: Brand[];
+  services?: Service[];
 };
 
 type PendingCropImage = {
@@ -82,6 +91,7 @@ export function UserProfilePanel({
   user,
   canEdit = false,
   brands = [],
+  services = [],
 }: UserProfilePanelProps) {
   const dispatch = useAppDispatch();
   const { messages, locale } = useLocale();
@@ -103,8 +113,21 @@ export function UserProfilePanel({
     [locale],
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const socialLinksEditorRef = useRef<SocialLinksEditorRef>(null);
   const [pendingCropImage, setPendingCropImage] =
     useState<PendingCropImage>(null);
+  const socialLinks = useMemo(
+    () => (draft ? socialFieldsToUrls(draft) : []),
+    [draft],
+  );
+
+  function handleSocialLinksChange(urls: string[]) {
+    const fields = socialUrlsToFields(urls);
+    const keys = Object.keys(fields) as Array<keyof typeof fields>;
+    for (const field of keys) {
+      dispatch(setAccountDraftField({ field, value: fields[field] }));
+    }
+  }
 
   useEffect(() => {
     if (!canEdit || !hasPrivateProfileFields(user)) {
@@ -148,6 +171,12 @@ export function UserProfilePanel({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    // Flush any URL typed in the social links input but not yet committed.
+    // onBlur is unreliable across browsers (e.g. Safari doesn't blur inputs
+    // when a submit button is clicked), so we commit explicitly here first.
+    // Redux dispatch inside flush() is synchronous, so the draft is updated
+    // before submitAccountUpdate reads it below.
+    socialLinksEditorRef.current?.flush();
 
     try {
       await dispatch(submitAccountUpdate({ locale })).unwrap();
@@ -556,6 +585,24 @@ export function UserProfilePanel({
                 </Field>
               </div>
 
+              <div className={styles.socialSection}>
+                <h3 className={styles.socialSectionTitle}>{p.socialSection}</h3>
+                <SocialLinksEditor
+                  ref={socialLinksEditorRef}
+                  value={socialLinks}
+                  onChange={handleSocialLinksChange}
+                  messages={{
+                    addPlaceholder: p.socialUrlPlaceholder,
+                    addButton: p.socialAddLink,
+                    removeLabel: p.socialRemoveLink,
+                    errorInvalidFormat: p.socialUrlErrorInvalidFormat,
+                    errorInvalidProtocol: p.socialUrlErrorInvalidProtocol,
+                    errorTooLong: p.socialUrlErrorTooLong,
+                    errorInvalidChars: p.socialUrlErrorInvalidChars,
+                  }}
+                />
+              </div>
+
               <div className={styles.formActions}>
                 <Button
                   variant="outline"
@@ -613,6 +660,41 @@ export function UserProfilePanel({
                   </div>
                 </>
               ) : null}
+              {(() => {
+                const links = [
+                  { key: "instagram_url" as const, platform: "instagram" as const, label: p.socialInstagram },
+                  { key: "facebook_url" as const, platform: "facebook" as const, label: p.socialFacebook },
+                  { key: "youtube_url" as const, platform: "youtube" as const, label: p.socialYoutube },
+                  { key: "whatsapp_url" as const, platform: "whatsapp" as const, label: p.socialWhatsapp },
+                  { key: "linkedin_url" as const, platform: "linkedin" as const, label: p.socialLinkedin },
+                  { key: "x_url" as const, platform: "x" as const, label: p.socialX },
+                  { key: "website_url" as const, platform: "website" as const, label: p.socialWebsite },
+                ];
+                const active = links.filter(({ key }) => profile[key]);
+                if (active.length === 0) return null;
+                return (
+                  <div className={styles.row}>
+                    <dt className={styles.label}>{p.socialSection}</dt>
+                    <dd className={styles.value}>
+                      <div className={styles.socialLinks}>
+                        {active.map(({ key, platform, label }) => (
+                          <a
+                            key={key}
+                            href={profile[key]!}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.socialLink}
+                            title={label}
+                            style={{ color: SOCIAL_COLORS[platform] }}
+                          >
+                            <SocialIcon platform={platform} size={18} />
+                          </a>
+                        ))}
+                      </div>
+                    </dd>
+                  </div>
+                );
+              })()}
             </dl>
           )}
         </section>
@@ -663,16 +745,28 @@ export function UserProfilePanel({
       </div>
 
       {!canEdit && profile.type === "uso" ? (
-        <AccountBrandsSection
-          brands={brands}
-          owner={profile}
-          title={p.brandsSectionTitle}
-          description={p.brandsSectionDescription}
-          emptyTitle={p.brandsEmptyTitle}
-          emptyDescription={p.brandsEmptyDescription}
-          viewMoreHref={`/brands?account=${profile.id}`}
-          maxItems={2}
-        />
+        <>
+          <AccountServicesSection
+            services={services}
+            brands={brands}
+            owner={profile}
+            title={p.servicesSectionTitle}
+            description={p.servicesSectionDescription}
+            emptyTitle={p.servicesEmptyTitle}
+            emptyDescription={p.servicesEmptyDescription}
+            maxItems={6}
+          />
+          <AccountBrandsSection
+            brands={brands}
+            owner={profile}
+            title={p.brandsSectionTitle}
+            description={p.brandsSectionDescription}
+            emptyTitle={p.brandsEmptyTitle}
+            emptyDescription={p.brandsEmptyDescription}
+            viewMoreHref={`/brands?account=${profile.id}`}
+            maxItems={2}
+          />
+        </>
       ) : null}
     </div>
   );

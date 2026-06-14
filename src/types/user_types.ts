@@ -1,5 +1,15 @@
 // Mirrors `User`, `UserType`, and auth response contracts from `nodejs-app`.
 
+export type UserSocialLinks = {
+  instagram_url?: string | null;
+  facebook_url?: string | null;
+  youtube_url?: string | null;
+  whatsapp_url?: string | null;
+  linkedin_url?: string | null;
+  x_url?: string | null;
+  website_url?: string | null;
+};
+
 export const userTypes = ["uso", "ucr", "admin"] as const;
 
 export const registerUserTypes = ["uso", "ucr"] as const;
@@ -54,10 +64,27 @@ export type AccountProfileDraft = Omit<UserProfileFields, "birthday"> & {
   birthday: string;
   // Full E.164 phone number, e.g. "+9941234567". Empty string means no phone.
   phone: string;
+  instagram_url: string;
+  facebook_url: string;
+  youtube_url: string;
+  whatsapp_url: string;
+  linkedin_url: string;
+  x_url: string;
+  website_url: string;
 };
 
-export type UpdateMyAccountRequestBody = Omit<AccountProfileDraft, "phone"> & {
+export type UpdateMyAccountRequestBody = Omit<
+  AccountProfileDraft,
+  "phone" | "instagram_url" | "facebook_url" | "youtube_url" | "whatsapp_url" | "linkedin_url" | "x_url" | "website_url"
+> & {
   phone: string | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  youtube_url: string | null;
+  whatsapp_url: string | null;
+  linkedin_url: string | null;
+  x_url: string | null;
+  website_url: string | null;
 };
 
 export type LoginRequestBody = {
@@ -82,7 +109,8 @@ export type AuthenticatedUser = Pick<
 export type UserProfile = UserIdentityFields &
   UserProfileFields &
   UserAvatarFields &
-  UserVerificationFields & {
+  UserVerificationFields &
+  UserSocialLinks & {
     phone: string | null;
     type: UserType;
     created_at: string;
@@ -97,10 +125,11 @@ export type PublicUserProfile = Pick<
   | "email"
   | "type"
   | "avatar_url"
-> & {
-  created_at: string;
-  updated_at: string;
-};
+> &
+  UserSocialLinks & {
+    created_at: string;
+    updated_at: string;
+  };
 
 export type AccountUserProfile = UserProfile | PublicUserProfile;
 

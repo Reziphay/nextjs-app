@@ -362,6 +362,14 @@
   overflow: hidden;
 }
 
+.description :where(p, ul, ol) {
+  margin: 0;
+}
+
+.description :where(strong, b) {
+  font-weight: 700;
+}
+
 .footer {
   display: flex;
   align-items: center;

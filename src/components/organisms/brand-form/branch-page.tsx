@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { Button } from "@/components/atoms/button";
-import { ImageCropModal } from "@/components/atoms/image-crop-modal/image-crop-modal";
+import { AvatarCropDialog } from "@/components/molecules/avatar-crop-dialog/avatar-crop-dialog";
 import {
   Combobox,
   type ComboboxOption,
@@ -21,6 +21,10 @@ import {
 } from "@/components/atoms/input";
 import { Switch } from "@/components/atoms/switch";
 import { Icon } from "@/components/icon";
+import { FormActions, FormActionsSpacer } from "@/components/molecules/form-actions";
+import { PageSurfaceHeader } from "@/components/molecules/page-surface-header";
+import { RichTextEditor } from "@/components/molecules/rich-text-editor/rich-text-editor";
+import { StatusBanner } from "@/components/molecules/status-banner";
 import { useLocale } from "@/components/providers/locale-provider";
 import {
   fetchBranchTeamDetail,
@@ -37,6 +41,10 @@ import { selectAuthSession } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
 import type { Branch } from "@/types/brand";
 import styles from "./branch-page.module.css";
+import {
+  isValidTime24,
+  TimeInput,
+} from "./time-input";
 
 type BranchDraft = Omit<Branch, "id" | "brand_id"> & {
   id?: string;
@@ -58,195 +66,6 @@ type CropTarget = {
   aspectRatio: "1:1";
 };
 
-type StudioCopy = {
-  subtitleNew: string;
-  subtitleEdit: string;
-  visualTitle: string;
-  visualDescription: string;
-  visualAddAction: string;
-  visualReplaceAction: string;
-  visualRemoveAction: string;
-  visualReadyBadge: string;
-  visualEmptyBadge: string;
-  teamTitle: string;
-  teamDescription: string;
-  teamUnlockedTitle: string;
-  teamUnlockedBody: string;
-  teamLoading: string;
-  teamError: string;
-  retryTeam: string;
-  searchLabel: string;
-  searchHint: string;
-  searchPlaceholder: string;
-  searchIdle: string;
-  searchLoading: string;
-  searchReady: string;
-  searchEmpty: string;
-  inviteAction: string;
-  inviteSuccess: string;
-  removeAction: string;
-  removeSuccess: string;
-  reinviteAction: string;
-  reinviteSuccess: string;
-  cancelInviteAction: string;
-  acceptedTitle: string;
-  pendingTitle: string;
-  archiveTitle: string;
-  noAccepted: string;
-  noPending: string;
-  noArchive: string;
-  ownerRole: string;
-  memberRole: string;
-  pendingStatus: string;
-  rejectedStatus: string;
-  removedStatus: string;
-  availabilitySection: string;
-  teamCreatedAfterSave: string;
-};
-
-const EN_COPY: StudioCopy = {
-  subtitleNew: "Fill in the branch details and save when ready.",
-  subtitleEdit: "Update this branch's details, photo, and team.",
-  visualTitle: "Branch photo",
-  visualDescription: "Optional. Replaces the default icon in the branch list when added.",
-  visualAddAction: "Add photo",
-  visualReplaceAction: "Replace photo",
-  visualRemoveAction: "Remove",
-  visualReadyBadge: "Photo ready",
-  visualEmptyBadge: "No photo",
-  teamTitle: "Branch team",
-  teamDescription: "Manage the people working in this branch.",
-  teamUnlockedTitle: "Team becomes available after the branch is saved",
-  teamUnlockedBody: "Save the branch first, then you can invite people here.",
-  teamLoading: "Loading branch team…",
-  teamError: "Branch team could not be loaded.",
-  retryTeam: "Retry",
-  searchLabel: "Find a service owner",
-  searchHint: "Search by name, email, or phone. Accepted and pending members are hidden.",
-  searchPlaceholder: "Search by name, email, or phone",
-  searchIdle: "Start typing to search USO users.",
-  searchLoading: "Searching…",
-  searchReady: "Choose a user to send a branch invitation.",
-  searchEmpty: "No matching users found.",
-  inviteAction: "Invite",
-  inviteSuccess: "Invitation sent.",
-  removeAction: "Remove",
-  removeSuccess: "Member updated.",
-  reinviteAction: "Re-invite",
-  reinviteSuccess: "Invitation sent again.",
-  cancelInviteAction: "Cancel invite",
-  acceptedTitle: "Active members",
-  pendingTitle: "Pending invitations",
-  archiveTitle: "Archived",
-  noAccepted: "Only the owner is attached right now.",
-  noPending: "No pending invitations.",
-  noArchive: "Rejected and removed members will appear here.",
-  ownerRole: "Owner",
-  memberRole: "Member",
-  pendingStatus: "Pending",
-  rejectedStatus: "Rejected",
-  removedStatus: "Removed",
-  availabilitySection: "Availability",
-  teamCreatedAfterSave: "The team section opens after the branch is saved.",
-};
-
-const TR_COPY: StudioCopy = {
-  subtitleNew: "Şube bilgilerini doldur ve hazır olduğunda kaydet.",
-  subtitleEdit: "Bu şubenin bilgilerini, fotoğrafını ve takımını güncelle.",
-  visualTitle: "Şube fotoğrafı",
-  visualDescription: "Zorunlu değil. Eklersen şube listesinde varsayılan ikon yerine görünür.",
-  visualAddAction: "Foto ekle",
-  visualReplaceAction: "Fotoğrafı değiştir",
-  visualRemoveAction: "Kaldır",
-  visualReadyBadge: "Foto hazır",
-  visualEmptyBadge: "Foto yok",
-  teamTitle: "Şube takımı",
-  teamDescription: "Bu şubede çalışan kişileri buradan yönetebilirsin.",
-  teamUnlockedTitle: "Takım bölümü şube kaydedildikten sonra açılır",
-  teamUnlockedBody: "Önce şubeyi kaydet, sonra buraya kişileri davet edebilirsin.",
-  teamLoading: "Şube takımı yükleniyor…",
-  teamError: "Şube takımı yüklenemedi.",
-  retryTeam: "Yenile",
-  searchLabel: "Bir service owner bul",
-  searchHint: "İsim, email veya telefonla ara. Kabul edilmiş ve bekleyen üyeler gizlenir.",
-  searchPlaceholder: "İsim, email veya telefon ara",
-  searchIdle: "USO aramak için yazmaya başla.",
-  searchLoading: "Aranıyor…",
-  searchReady: "Şubeye davet göndermek için bir kullanıcı seç.",
-  searchEmpty: "Eşleşen kullanıcı bulunamadı.",
-  inviteAction: "Davet et",
-  inviteSuccess: "Davet gönderildi.",
-  removeAction: "Çıkar",
-  removeSuccess: "Üye güncellendi.",
-  reinviteAction: "Yeniden davet et",
-  reinviteSuccess: "Davet yenidən gönderildi.",
-  cancelInviteAction: "Daveti iptal et",
-  acceptedTitle: "Aktif üyeler",
-  pendingTitle: "Bekleyen davetler",
-  archiveTitle: "Arşiv",
-  noAccepted: "Şu anda yalnızca owner bağlı.",
-  noPending: "Henüz bekleyen davet yok.",
-  noArchive: "Reddedilen ve kaldırılan üyeler burada görünür.",
-  ownerRole: "Sahip",
-  memberRole: "Üye",
-  pendingStatus: "Beklemede",
-  rejectedStatus: "Reddedildi",
-  removedStatus: "Kaldırıldı",
-  availabilitySection: "Çalışma saatleri",
-  teamCreatedAfterSave: "Şube kaydedildikten sonra takım bölümü açılır.",
-};
-
-const AZ_COPY: StudioCopy = {
-  subtitleNew: "Filial məlumatlarını doldur və hazır olduqda yadda saxla.",
-  subtitleEdit: "Bu filialın məlumatlarını, fotosunu və komandasını yenilə.",
-  visualTitle: "Filial fotosu",
-  visualDescription: "Məcburi deyil. Əlavə etsən filial siyahısında default ikon yerinə görünəcək.",
-  visualAddAction: "Foto əlavə et",
-  visualReplaceAction: "Fotonu dəyiş",
-  visualRemoveAction: "Sil",
-  visualReadyBadge: "Foto hazırdır",
-  visualEmptyBadge: "Foto yoxdur",
-  teamTitle: "Filial komandası",
-  teamDescription: "Bu filialda çalışan şəxsləri buradan idarə edə bilərsən.",
-  teamUnlockedTitle: "Komanda bölməsi filial yadda saxlandıqdan sonra açılır",
-  teamUnlockedBody: "Əvvəl filialı yadda saxla, sonra buraya şəxsləri dəvət edə bilərsən.",
-  teamLoading: "Filial komandası yüklənir…",
-  teamError: "Filial komandası yüklənmədi.",
-  retryTeam: "Yenilə",
-  searchLabel: "Bir service owner tap",
-  searchHint: "Ad, email və ya telefon ilə axtar. Qəbul olunmuş və gözləyən üzvlər gizlənir.",
-  searchPlaceholder: "Ad, email və ya telefon axtar",
-  searchIdle: "USO axtarmaq üçün yazmağa başla.",
-  searchLoading: "Axtarılır…",
-  searchReady: "Filiala dəvət göndərmək üçün bir istifadəçi seç.",
-  searchEmpty: "Uyğun istifadəçi tapılmadı.",
-  inviteAction: "Dəvət et",
-  inviteSuccess: "Dəvət göndərildi.",
-  removeAction: "Çıxar",
-  removeSuccess: "Üzv yeniləndi.",
-  reinviteAction: "Yenidən dəvət et",
-  reinviteSuccess: "Dəvət yenidən göndərildi.",
-  cancelInviteAction: "Dəvəti ləğv et",
-  acceptedTitle: "Aktiv üzvlər",
-  pendingTitle: "Gözləyən dəvətlər",
-  archiveTitle: "Arxiv",
-  noAccepted: "Hazırda yalnız owner qoşulub.",
-  noPending: "Hələ gözləyən dəvət yoxdur.",
-  noArchive: "Rədd olunan və silinən üzvlər burada görünür.",
-  ownerRole: "Sahib",
-  memberRole: "Üzv",
-  pendingStatus: "Gözləyir",
-  rejectedStatus: "Rədd edildi",
-  removedStatus: "Silindi",
-  availabilitySection: "İş saatları",
-  teamCreatedAfterSave: "Filial yadda saxlandıqdan sonra komanda bölməsi açılır.",
-};
-
-function getCopy(locale: string) {
-  if (locale.startsWith("az")) return AZ_COPY;
-  if (locale.startsWith("tr")) return TR_COPY;
-  return EN_COPY;
-}
 
 function createEmptyBranch(): BranchDraft {
   return {
@@ -274,10 +93,10 @@ function getInitials(m: Pick<TeamWorkspaceMember, "first_name" | "last_name">) {
   return `${m.first_name[0] ?? ""}${m.last_name[0] ?? ""}`.toUpperCase();
 }
 
-function getMemberStatusLabel(status: TeamWorkspaceMember["status"], copy: StudioCopy) {
-  if (status === "PENDING") return copy.pendingStatus;
-  if (status === "REJECTED") return copy.rejectedStatus;
-  if (status === "REMOVED") return copy.removedStatus;
+function getMemberStatusLabel(status: TeamWorkspaceMember["status"], t: { branchPendingStatus: string; branchRejectedStatus: string; branchRemovedStatus: string }) {
+  if (status === "PENDING") return t.branchPendingStatus;
+  if (status === "REJECTED") return t.branchRejectedStatus;
+  if (status === "REMOVED") return t.branchRemovedStatus;
   return status;
 }
 
@@ -295,9 +114,8 @@ export function BranchPage({
   brandId,
   onSave,
 }: BranchPageProps) {
-  const { locale, messages } = useLocale();
+  const { messages } = useLocale();
   const t = messages.brands;
-  const copy = useMemo(() => getCopy(locale), [locale]);
   const session = useAppSelector(selectAuthSession);
   const accessToken = session.accessToken;
   const visualInputRef = useRef<HTMLInputElement>(null);
@@ -422,7 +240,9 @@ export function BranchPage({
     if (!draft.address1.trim()) errs.address1 = t.requiredMessage;
     if (!draft.is_24_7) {
       if (!draft.opening?.trim()) errs.opening = t.openingRequiredMessage;
+      else if (!isValidTime24(draft.opening)) errs.opening = "HH:mm";
       if (!draft.closing?.trim()) errs.closing = t.closingRequiredMessage;
+      else if (!isValidTime24(draft.closing)) errs.closing = "HH:mm";
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -453,7 +273,7 @@ export function BranchPage({
       await refreshTeam({ showLoading: true });
     } catch (err) {
       setTeamState("error");
-      setTeamFeedback({ tone: "error", message: resolveTeamError(err, copy.teamError) });
+      setTeamFeedback({ tone: "error", message: resolveTeamError(err, t.branchTeamError) });
     }
   }
 
@@ -465,9 +285,9 @@ export function BranchPage({
       await inviteBranchTeamMember(brandId, branchId, user.id, accessToken);
       await refreshTeam();
       setSearchInputValue(""); setSearchComboValue(""); setSearchItems([]); setSearchItemsMap(new Map()); setSelectedSearchTarget(null); setSearchState("idle");
-      setTeamFeedback({ tone: "success", message: copy.inviteSuccess });
+      setTeamFeedback({ tone: "success", message: t.branchInviteSuccess });
     } catch (err) {
-      setTeamFeedback({ tone: "error", message: resolveTeamError(err, copy.teamError) });
+      setTeamFeedback({ tone: "error", message: resolveTeamError(err, t.branchTeamError) });
     } finally {
       setInviteUserId(null);
     }
@@ -512,9 +332,9 @@ export function BranchPage({
     try {
       await removeBranchTeamMember(brandId, branchId, member.membership_id, accessToken);
       await refreshTeam();
-      setTeamFeedback({ tone: "success", message: copy.removeSuccess });
+      setTeamFeedback({ tone: "success", message: t.branchMemberRemoveSuccess });
     } catch (err) {
-      setTeamFeedback({ tone: "error", message: resolveTeamError(err, copy.teamError) });
+      setTeamFeedback({ tone: "error", message: resolveTeamError(err, t.branchTeamError) });
     } finally {
       setMemberActionId(null);
     }
@@ -526,9 +346,9 @@ export function BranchPage({
     try {
       await inviteBranchTeamMember(brandId, branchId, member.user_id, accessToken);
       await refreshTeam();
-      setTeamFeedback({ tone: "success", message: copy.reinviteSuccess });
+      setTeamFeedback({ tone: "success", message: t.branchReinviteSuccess });
     } catch (err) {
-      setTeamFeedback({ tone: "error", message: resolveTeamError(err, copy.teamError) });
+      setTeamFeedback({ tone: "error", message: resolveTeamError(err, t.branchTeamError) });
     } finally {
       setMemberActionId(null);
     }
@@ -552,29 +372,21 @@ export function BranchPage({
         <div className={styles.scrollArea}>
           <div className={styles.wrapper}>
 
-            {/* ── Page header — same as brand-form .pageHeader ── */}
-            <div className={styles.pageHeader}>
-              <Button
-                variant="ghost"
-                size="small"
-                icon="arrow_back"
-                onClick={handleClose}
-              />
-              <div className={styles.headerMeta}>
-                <h1 className={styles.title}>{pageTitle}</h1>
-                {draft.name.trim() ? (
-                  <span className={styles.modeBadge}>{draft.name.trim()}</span>
-                ) : null}
-              </div>
-              <div className={styles.headerActions}>
+            <PageSurfaceHeader
+              title={pageTitle}
+              subtitle={draft.name.trim() || undefined}
+              onBack={handleClose}
+              actions={
+                <>
                 <Button variant="outline" size="small" onClick={handleClose}>
                   {t.branchCancel}
                 </Button>
                 <Button variant="primary" size="small" onClick={handleSave}>
                   {t.branchSave}
                 </Button>
-              </div>
-            </div>
+                </>
+              }
+            />
 
             {/* ── Two-column shell — same as brand-form .desktopShell ── */}
             <div className={styles.form}>
@@ -587,14 +399,14 @@ export function BranchPage({
                   <div className={styles.formSection}>
                     <div className={styles.sectionHeader}>
                       <div className={styles.sectionHeaderText}>
-                        <h2 className={styles.sectionTitle}>{copy.visualTitle}</h2>
-                        <p className={styles.sectionHint}>{copy.visualDescription}</p>
+                        <h2 className={styles.sectionTitle}>{t.branchVisualTitle}</h2>
+                        <p className={styles.sectionHint}>{t.branchVisualDescription}</p>
                       </div>
                       <span
                         className={styles.photoBadge}
                         data-ready={hasPhoto ? "true" : "false"}
                       >
-                        {hasPhoto ? copy.visualReadyBadge : copy.visualEmptyBadge}
+                        {hasPhoto ? t.branchVisualReady : t.branchVisualEmpty}
                       </span>
                     </div>
 
@@ -618,7 +430,7 @@ export function BranchPage({
                             {draft.address1.trim() ? (
                               <span className={styles.previewDefaultAddr}>{draft.address1.trim()}</span>
                             ) : null}
-                            <span className={styles.previewDefaultHint}>{copy.visualEmptyBadge}</span>
+                            <span className={styles.previewDefaultHint}>{t.branchVisualEmpty}</span>
                           </div>
                         </div>
                       )}
@@ -632,11 +444,11 @@ export function BranchPage({
                         icon={hasPhoto ? "edit" : "add_photo_alternate"}
                         onClick={() => visualInputRef.current?.click()}
                       >
-                        {hasPhoto ? copy.visualReplaceAction : copy.visualAddAction}
+                        {hasPhoto ? t.branchVisualReplace : t.branchVisualAdd}
                       </Button>
                       {hasPhoto ? (
                         <Button variant="ghost" size="small" icon="delete" onClick={handleRemoveVisual}>
-                          {copy.visualRemoveAction}
+                          {t.branchVisualRemove}
                         </Button>
                       ) : null}
                     </div>
@@ -654,7 +466,7 @@ export function BranchPage({
                       <div className={styles.sectionHeaderText}>
                         <h2 className={styles.sectionTitle}>{t.basicInfoSection}</h2>
                         <p className={styles.sectionHint}>
-                          {isEditing ? copy.subtitleEdit : copy.subtitleNew}
+                          {isEditing ? t.branchSubtitleEdit : t.branchSubtitleNew}
                         </p>
                       </div>
                     </div>
@@ -676,12 +488,10 @@ export function BranchPage({
                     <div className={styles.fieldRow}>
                       <Field>
                         <FieldLabel>{t.branchFieldDescription}</FieldLabel>
-                        <textarea
-                          className={styles.textarea}
+                        <RichTextEditor
                           value={draft.description ?? ""}
                           placeholder={t.branchFieldDescriptionPlaceholder}
-                          rows={4}
-                          onChange={(e) => updateField("description", e.target.value)}
+                          onChange={(html) => updateField("description", html)}
                         />
                       </Field>
                     </div>
@@ -734,7 +544,7 @@ export function BranchPage({
                     <div className={styles.sectionHeader}>
                       <span className={styles.stepBadge}>2</span>
                       <div className={styles.sectionHeaderText}>
-                        <h2 className={styles.sectionTitle}>{copy.availabilitySection}</h2>
+                        <h2 className={styles.sectionTitle}>{t.branchAvailabilitySection}</h2>
                         <p className={styles.sectionHint}>{t.detailTableAvailability}</p>
                       </div>
                     </div>
@@ -760,25 +570,21 @@ export function BranchPage({
                         <div className={styles.fieldGrid2}>
                           <Field>
                             <FieldLabel required>{t.branchFieldOpening}</FieldLabel>
-                            <Input
-                              type="time"
+                            <TimeInput
                               value={draft.opening ?? ""}
                               placeholder="09:00"
-                              step={60}
                               aria-invalid={Boolean(errors.opening)}
-                              onChange={(e) => updateField("opening", e.target.value)}
+                              onChange={(value) => updateField("opening", value)}
                             />
                             {errors.opening ? <p className={styles.fieldError}>{errors.opening}</p> : null}
                           </Field>
                           <Field>
                             <FieldLabel required>{t.branchFieldClosing}</FieldLabel>
-                            <Input
-                              type="time"
+                            <TimeInput
                               value={draft.closing ?? ""}
                               placeholder="18:00"
-                              step={60}
                               aria-invalid={Boolean(errors.closing)}
-                              onChange={(e) => updateField("closing", e.target.value)}
+                              onChange={(value) => updateField("closing", value)}
                             />
                             {errors.closing ? <p className={styles.fieldError}>{errors.closing}</p> : null}
                           </Field>
@@ -794,19 +600,19 @@ export function BranchPage({
                           {draft.breaks.map((br, index) => (
                             <div key={br.id ?? index} className={styles.breakRow}>
                               <Field>
-                                <FieldLabel>Start</FieldLabel>
-                                <Input type="time" value={br.start} placeholder="12:00" step={60}
-                                  onChange={(e) => updateBreak(index, "start", e.target.value)} />
+                                <FieldLabel>{t.branchFieldOpening}</FieldLabel>
+                                <TimeInput value={br.start} placeholder="12:00"
+                                  onChange={(value) => updateBreak(index, "start", value)} />
                               </Field>
                               <Field>
-                                <FieldLabel>End</FieldLabel>
-                                <Input type="time" value={br.end} placeholder="13:00" step={60}
-                                  onChange={(e) => updateBreak(index, "end", e.target.value)} />
+                                <FieldLabel>{t.branchFieldClosing}</FieldLabel>
+                                <TimeInput value={br.end} placeholder="13:00"
+                                  onChange={(value) => updateBreak(index, "end", value)} />
                               </Field>
-                              <button type="button" className={styles.removeBreakBtn}
+                              <Button variant="unstyled" type="button" className={styles.removeBreakBtn}
                                 aria-label={t.branchRemoveBreak} onClick={() => removeBreak(index)}>
                                 <Icon icon="delete" size={15} color="current" />
-                              </button>
+                              </Button>
                             </div>
                           ))}
                         </div>
@@ -819,8 +625,8 @@ export function BranchPage({
                     <div className={styles.sectionHeader}>
                       <span className={styles.stepBadge}>3</span>
                       <div className={styles.sectionHeaderText}>
-                        <h2 className={styles.sectionTitle}>{copy.teamTitle}</h2>
-                        <p className={styles.sectionHint}>{copy.teamDescription}</p>
+                        <h2 className={styles.sectionTitle}>{t.branchTeamTitle}</h2>
+                        <p className={styles.sectionHint}>{t.branchTeamDescription}</p>
                       </div>
                     </div>
 
@@ -830,20 +636,20 @@ export function BranchPage({
                           <Icon icon="lock" size={14} color="current" />
                         </div>
                         <div className={styles.teamLockedText}>
-                          <strong>{copy.teamUnlockedTitle}</strong>
-                          <p>{copy.teamUnlockedBody}</p>
+                          <strong>{t.branchTeamLockedTitle}</strong>
+                          <p>{t.branchTeamLockedBody}</p>
                         </div>
                       </div>
                     ) : teamState === "loading" ? (
                       <div className={styles.stateCard}>
-                        <span>{copy.teamLoading}</span>
+                        <span>{t.branchTeamLoading}</span>
                       </div>
                     ) : teamState === "error" ? (
                       <div className={styles.stateCard}>
-                        <span>{copy.teamError}</span>
+                        <span>{t.branchTeamError}</span>
                         <Button variant="outline" size="small" icon="refresh"
                           onClick={() => { void handleRetryTeam(); }}>
-                          {copy.retryTeam}
+                          {t.branchTeamRetry}
                         </Button>
                       </div>
                     ) : (
@@ -851,16 +657,16 @@ export function BranchPage({
                         {/* Search / invite */}
                         <div className={styles.inviteBlock}>
                           <Field>
-                            <FieldLabel>{copy.searchLabel}</FieldLabel>
+                            <FieldLabel>{t.branchSearchLabel}</FieldLabel>
                             <Combobox
                               items={searchItems}
                               value={searchComboValue}
-                              placeholder={copy.searchPlaceholder}
+                              placeholder={t.branchSearchPlaceholder}
                               emptyMessage={
-                                searchState === "loading" ? copy.searchLoading
-                                  : searchState === "error" ? copy.teamError
-                                    : searchInputValue.length >= 2 ? copy.searchEmpty
-                                      : copy.searchHint
+                                searchState === "loading" ? t.branchSearchLoading
+                                  : searchState === "error" ? t.branchTeamError
+                                    : searchInputValue.length >= 2 ? t.branchSearchEmpty
+                                      : t.branchSearchHint
                               }
                               onValueChange={handleSearchValueChange}
                               onInput={handleSearchInput}
@@ -882,16 +688,16 @@ export function BranchPage({
                                 );
                               }}
                             />
-                            <FieldDescription>{copy.searchHint}</FieldDescription>
+                            <FieldDescription>{t.branchSearchHint}</FieldDescription>
                           </Field>
 
                           {!selectedSearchTarget ? (
                             <p className={styles.searchState}>
-                              {searchState === "loading" ? copy.searchLoading
-                                : searchState === "error" ? copy.teamError
-                                  : searchInputValue.length < 2 ? copy.searchIdle
-                                    : searchItems.length === 0 ? copy.searchEmpty
-                                      : copy.searchReady}
+                              {searchState === "loading" ? t.branchSearchLoading
+                                : searchState === "error" ? t.branchTeamError
+                                  : searchInputValue.length < 2 ? t.branchSearchIdle
+                                    : searchItems.length === 0 ? t.branchSearchEmpty
+                                      : t.branchSearchReady}
                             </p>
                           ) : null}
 
@@ -912,15 +718,15 @@ export function BranchPage({
                               <Button variant="primary" size="small" icon="person_add"
                                 isLoading={inviteUserId === selectedSearchTarget.id}
                                 onClick={() => { void handleInvite(selectedSearchTarget); }}>
-                                {copy.inviteAction}
+                                {t.branchInvite}
                               </Button>
                             </div>
                           ) : null}
 
                           {teamFeedback ? (
-                            <div className={`${styles.feedback} ${teamFeedback.tone === "success" ? styles.feedbackSuccess : styles.feedbackError}`}>
+                            <StatusBanner variant={teamFeedback.tone === "success" ? "success" : "error"}>
                               {teamFeedback.message}
-                            </div>
+                            </StatusBanner>
                           ) : null}
                         </div>
 
@@ -929,11 +735,11 @@ export function BranchPage({
                           {/* Accepted */}
                           <div className={styles.memberGroup}>
                             <div className={styles.memberGroupHeader}>
-                              <h4 className={styles.memberGroupTitle}>{copy.acceptedTitle}</h4>
+                              <h4 className={styles.memberGroupTitle}>{t.branchAcceptedTitle}</h4>
                               <span className={styles.memberGroupCount}>{acceptedMembers.length}</span>
                             </div>
                             {acceptedMembers.length === 0 ? (
-                              <p className={styles.emptyNote}>{copy.noAccepted}</p>
+                              <p className={styles.emptyNote}>{t.branchNoAccepted}</p>
                             ) : (
                               <div className={styles.memberList}>
                                 {acceptedMembers.map((member) => {
@@ -953,13 +759,13 @@ export function BranchPage({
                                       </div>
                                       <div className={styles.memberRowEnd}>
                                         <span className={styles.roleBadge}>
-                                          {member.role === "OWNER" ? copy.ownerRole : copy.memberRole}
+                                          {member.role === "OWNER" ? t.branchOwnerRole : t.branchMemberRole}
                                         </span>
                                         {member.role !== "OWNER" ? (
                                           <Button variant="ghost" size="small" icon="person_remove"
                                             isLoading={memberActionId === member.membership_id}
                                             onClick={() => { void handleRemove(member); }}>
-                                            {copy.removeAction}
+                                            {t.branchMemberRemove}
                                           </Button>
                                         ) : null}
                                       </div>
@@ -973,11 +779,11 @@ export function BranchPage({
                           {/* Pending */}
                           <div className={styles.memberGroup}>
                             <div className={styles.memberGroupHeader}>
-                              <h4 className={styles.memberGroupTitle}>{copy.pendingTitle}</h4>
+                              <h4 className={styles.memberGroupTitle}>{t.branchPendingTitle}</h4>
                               <span className={styles.memberGroupCount}>{pendingMembers.length}</span>
                             </div>
                             {pendingMembers.length === 0 ? (
-                              <p className={styles.emptyNote}>{copy.noPending}</p>
+                              <p className={styles.emptyNote}>{t.branchNoPending}</p>
                             ) : (
                               <div className={styles.memberList}>
                                 {pendingMembers.map((member) => {
@@ -996,11 +802,11 @@ export function BranchPage({
                                         </div>
                                       </div>
                                       <div className={styles.memberRowEnd}>
-                                        <span className={styles.pendingBadge}>{copy.pendingStatus}</span>
+                                        <span className={styles.pendingBadge}>{t.branchPendingStatus}</span>
                                         <Button variant="ghost" size="small" icon="close"
                                           isLoading={memberActionId === member.membership_id}
                                           onClick={() => { void handleRemove(member); }}>
-                                          {copy.cancelInviteAction}
+                                          {t.branchCancelInvite}
                                         </Button>
                                       </div>
                                     </article>
@@ -1014,7 +820,7 @@ export function BranchPage({
                           {archivedMembers.length > 0 ? (
                             <div className={styles.memberGroup}>
                               <div className={styles.memberGroupHeader}>
-                                <h4 className={styles.memberGroupTitle}>{copy.archiveTitle}</h4>
+                                <h4 className={styles.memberGroupTitle}>{t.branchArchiveTitle}</h4>
                                 <span className={styles.memberGroupCount}>{archivedMembers.length}</span>
                               </div>
                               <div className={styles.memberList}>
@@ -1035,12 +841,12 @@ export function BranchPage({
                                       </div>
                                       <div className={styles.memberRowEnd}>
                                         <span className={styles.archivedBadge}>
-                                          {getMemberStatusLabel(member.status, copy)}
+                                          {getMemberStatusLabel(member.status, t)}
                                         </span>
                                         <Button variant="ghost" size="small" icon="refresh"
                                           isLoading={memberActionId === member.membership_id}
                                           onClick={() => { void handleReinvite(member); }}>
-                                          {copy.reinviteAction}
+                                          {t.branchReinvite}
                                         </Button>
                                       </div>
                                     </article>
@@ -1056,15 +862,15 @@ export function BranchPage({
 
                   {/* Mobile footer */}
                   <div className={styles.mobileFooter}>
-                    <div className={styles.formFooter}>
+                    <FormActions>
                       <Button variant="outline" onClick={handleClose}>
                         {t.branchCancel}
                       </Button>
-                      <div className={styles.formFooterSpacer} />
+                      <FormActionsSpacer />
                       <Button variant="primary" onClick={handleSave}>
                         {t.branchSave}
                       </Button>
-                    </div>
+                    </FormActions>
                   </div>
 
                 </div>
@@ -1076,11 +882,12 @@ export function BranchPage({
       </div>
 
       {cropTarget ? (
-        <ImageCropModal
+        <AvatarCropDialog
           file={cropTarget.file}
           aspectRatio={cropTarget.aspectRatio}
-          onCrop={handleVisualCrop}
-          onCancel={() => setCropTarget(null)}
+          open={true}
+          onConfirm={handleVisualCrop}
+          onClose={() => setCropTarget(null)}
         />
       ) : null}
     </>
