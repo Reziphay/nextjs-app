@@ -47,6 +47,13 @@ export type ModerationBrandDetail = {
   owner: QueueItemOwner & { type?: string; created_at?: string };
   created_at: string;
   updated_at?: string;
+  instagram_url?: string | null;
+  facebook_url?: string | null;
+  youtube_url?: string | null;
+  whatsapp_url?: string | null;
+  linkedin_url?: string | null;
+  x_url?: string | null;
+  website_url?: string | null;
   categories?: { id: string; key: string }[];
   logo_url?: string | null;
   gallery?: { url: string; order?: number }[];

@@ -1195,12 +1195,19 @@ export function BrandDetail({
                 variant="primary"
                 size="small"
                 icon="add"
+                disabled={brandState.status !== "ACTIVE"}
                 onClick={() => router.push(`/services?action=create&brand=${brandState.id}`)}
               >
                 {t.serviceAdd}
               </Button>
             ) : null}
           </div>
+
+          {isOwner && brandState.status !== "ACTIVE" ? (
+            <StatusBanner variant="warning" icon="info">
+              {messages.backendErrors["brand.not_active"]}
+            </StatusBanner>
+          ) : null}
 
           {assignmentError ? (
             <StatusBanner variant="error">{assignmentError}</StatusBanner>

@@ -116,6 +116,13 @@ function mapModerationBrandToBrand(brand: ModerationBrandDetail): Brand {
     status: brand.status as Brand["status"],
     owner_id: brand.owner.id,
     logo_url: brand.logo_url ?? undefined,
+    instagram_url: brand.instagram_url ?? undefined,
+    facebook_url: brand.facebook_url ?? undefined,
+    youtube_url: brand.youtube_url ?? undefined,
+    whatsapp_url: brand.whatsapp_url ?? undefined,
+    linkedin_url: brand.linkedin_url ?? undefined,
+    x_url: brand.x_url ?? undefined,
+    website_url: brand.website_url ?? undefined,
     gallery: (brand.gallery ?? []).map((item, index) => ({
       id: `${brand.id}-gallery-${index}`,
       media_id: `${brand.id}-gallery-media-${index}`,
