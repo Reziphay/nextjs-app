@@ -133,6 +133,7 @@ export const ruMessages: Messages = {
     ...enMessages.backendErrors,
     "auth.invalid_credentials": "Неверный email или пароль.",
     "errors.validation_error": "Отправленные данные не прошли валидацию.",
+    "errors.account_not_verified": "Ваш аккаунт не подтверждён. Подтвердите телефон и email, чтобы продолжить.",
     "errors.missing_token": "Токен авторизации отсутствует.",
     "errors.invalid_token": "Токен авторизации недействителен.",
     "errors.forbidden": "У вас нет прав для выполнения этого действия.",

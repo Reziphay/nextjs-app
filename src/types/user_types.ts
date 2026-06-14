@@ -102,6 +102,7 @@ export type AuthenticatedUser = Pick<
   | "first_name"
   | "last_name"
   | "email_verified"
+  | "phone_verified"
   | "avatar_url"
 >;
 

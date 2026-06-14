@@ -164,6 +164,7 @@ export const trMessages: Messages = {
     "auth.invalid_credentials": "Geçersiz e-posta veya şifre.",
     "errors.validation_error":
       "Gönderilen veriler doğrulamadan geçemedi.",
+    "errors.account_not_verified": "Hesabınız doğrulanmadı. Devam etmek için telefon ve e-postanızı doğrulayın.",
     "errors.missing_token": "Kimlik doğrulama jetonu eksik.",
     "errors.invalid_token": "Kimlik doğrulama jetonu geçersiz.",
     "errors.forbidden":

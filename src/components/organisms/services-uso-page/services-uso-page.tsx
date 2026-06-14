@@ -1456,6 +1456,9 @@ export function ServicesUsoPage({
   );
   const [deleteTarget, setDeleteTarget] = useState<Service | null>(null);
   const [archiveTarget, setArchiveTarget] = useState<Service | null>(null);
+  // Account must be verified (email + phone) before creating services.
+  const accountVerified = user.email_verified && user.phone_verified;
+  const verifyNotice = messages.backendErrors["errors.account_not_verified"];
 
   useEffect(() => {
     const params = new URLSearchParams(searchKey);
@@ -1718,10 +1721,16 @@ export function ServicesUsoPage({
     <div className={styles.wrapper}>
       <div className={styles.pageHeader}>
         <h1 className={styles.title}>{copy.pageTitle}</h1>
-        <Button variant="primary" icon="add" onClick={() => openCreate()}>
+        <Button variant="primary" icon="add" onClick={() => openCreate()} disabled={!accountVerified}>
           {copy.createService}
         </Button>
       </div>
+
+      {!accountVerified ? (
+        <StatusBanner variant="warning" icon="info" className={styles.formFeedback}>
+          {verifyNotice}
+        </StatusBanner>
+      ) : null}
 
       {feedback ? (
         <StatusBanner
@@ -1739,7 +1748,7 @@ export function ServicesUsoPage({
           </div>
           <p className={styles.emptyTitle}>{copy.emptyTitle}</p>
           <p className={styles.emptyDescription}>{copy.emptyDescription}</p>
-          <Button variant="primary" icon="add" onClick={() => openCreate()}>
+          <Button variant="primary" icon="add" onClick={() => openCreate()} disabled={!accountVerified}>
             {copy.createService}
           </Button>
         </div>

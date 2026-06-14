@@ -396,6 +396,7 @@ export function UcrMarketplacePage({
       first_name: owner?.first_name ?? "",
       last_name: owner?.last_name ?? "",
       email_verified: false,
+      phone_verified: false,
       avatar_url: owner?.avatar_url ?? null,
     };
   }

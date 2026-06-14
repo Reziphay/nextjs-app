@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/atoms/button";
 import { BrandCard } from "@/components/molecules/brand-card";
+import { StatusBanner } from "@/components/molecules/status-banner";
 import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useAppSelector } from "@/store/hooks";
@@ -40,6 +41,9 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
   };
 
   const memberBadgeLabel = t.memberBadge ?? null;
+  // Account must be verified (email + phone) before creating a brand.
+  const accountVerified = Boolean(user?.email_verified && user?.phone_verified);
+  const verifyNotice = messages.backendErrors["errors.account_not_verified"];
 
   function handleCreateBrand() {
     router.push("/brands?progress=create");
@@ -62,10 +66,17 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
           variant="primary"
           icon="add"
           onClick={handleCreateBrand}
+          disabled={!accountVerified}
         >
           {t.createBrand}
         </Button>
       </div>
+
+      {!accountVerified ? (
+        <StatusBanner variant="warning" icon="info">
+          {verifyNotice}
+        </StatusBanner>
+      ) : null}
 
       <div className={styles.grid}>
         {brands.length === 0 ? (
@@ -73,7 +84,7 @@ export function BrandsUsoPage({ brands, currentUserId }: BrandsUsoPageProps) {
             <Icon icon="sell" size={40} color="current" className={styles.emptyIcon} />
             <p className={styles.emptyTitle}>{t.noBrandsTitle}</p>
             <p className={styles.emptyDescription}>{t.noBrandsDescription}</p>
-            <Button variant="primary" icon="add" onClick={handleCreateBrand}>
+            <Button variant="primary" icon="add" onClick={handleCreateBrand} disabled={!accountVerified}>
               {t.createBrand}
             </Button>
           </div>

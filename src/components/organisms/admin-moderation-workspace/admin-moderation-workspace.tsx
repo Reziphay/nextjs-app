@@ -104,6 +104,7 @@ function mapModerationOwnerToUser(
     type: owner.type === "ucr" || owner.type === "admin" ? owner.type : "uso",
     avatar_url: owner.avatar_url ?? null,
     email_verified: true,
+    phone_verified: true,
   };
 }
 

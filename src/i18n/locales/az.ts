@@ -132,6 +132,7 @@ export const azMessages: Messages = {
   backendErrors: {
     "auth.invalid_credentials": "Email və ya şifrə yanlışdır.",
     "errors.validation_error": "Məlumatlar yoxlamadan keçmədi.",
+    "errors.account_not_verified": "Hesabınız təsdiqlənməyib. Davam etmək üçün nömrə və email təsdiqlənməlidir.",
     "errors.missing_token": "Giriş məlumatı tapılmadı.",
     "errors.invalid_token": "Giriş məlumatı etibarsızdır.",
     "errors.forbidden": "Bu əməliyyatı etməyə icazəniz yoxdur.",
