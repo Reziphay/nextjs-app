@@ -12,6 +12,12 @@ import {
   FieldContent,
   Input,
   Checkbox,
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
 } from "@/components/atoms";
 import { Combobox, type ComboboxOption } from "@/components/atoms/combobox";
 import { ServiceReservationsTable } from "@/components/molecules/service-reservations-table/service-reservations-table";
@@ -1448,6 +1454,8 @@ export function ServicesUsoPage({
   const [createBrandId, setCreateBrandId] = useState<string | undefined>(
     initialAction === "create" ? initialBrandId : undefined,
   );
+  const [deleteTarget, setDeleteTarget] = useState<Service | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<Service | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(searchKey);
@@ -1551,12 +1559,12 @@ export function ServicesUsoPage({
   }
 
   async function handleDelete(service: Service) {
-    if (!window.confirm(copy.confirmDelete)) return;
     setActionLoadingId(service.id);
     try {
       await deleteService(service.id, accessToken);
       setServices((prev) => prev.filter((s) => s.id !== service.id));
       window.dispatchEvent(new Event("reziphay:services-changed"));
+      setDeleteTarget(null);
       showFeedback("success", copy.successDelete);
       backToList();
     } catch {
@@ -1636,26 +1644,73 @@ export function ServicesUsoPage({
       assignedServiceCards.find((s) => s.id === viewService.id) ??
       viewService;
     return (
-      <ServiceDetailView
-        service={liveService}
-        copy={copy}
-        brands={brands}
-        user={user}
-        actionLoading={actionLoadingId === liveService.id}
-        onBack={backToList}
-        onEdit={() => openEditFromDetail(liveService)}
-        onSubmit={() => handleLifecycle(liveService, "submit")}
-        onResubmit={() => handleLifecycle(liveService, "resubmit")}
-        onDelete={() => handleDelete(liveService)}
-        onPause={() => handleLifecycle(liveService, "pause")}
-        onResume={() => handleLifecycle(liveService, "resume")}
-        onArchive={() => handleLifecycle(liveService, "archive")}
-        onUnarchive={() => handleLifecycle(liveService, "unarchive")}
-        extraContent={(() => {
-          const rows = reservations.filter((r) => r.service_id === liveService.id);
-          return rows.length > 0 ? <ServiceReservationsTable reservations={rows} mode="provider" /> : null;
-        })()}
-      />
+      <>
+        <ServiceDetailView
+          service={liveService}
+          copy={copy}
+          brands={brands}
+          user={user}
+          actionLoading={actionLoadingId === liveService.id}
+          onBack={backToList}
+          onEdit={() => openEditFromDetail(liveService)}
+          onSubmit={() => handleLifecycle(liveService, "submit")}
+          onResubmit={() => handleLifecycle(liveService, "resubmit")}
+          onDelete={() => setDeleteTarget(liveService)}
+          onPause={() => handleLifecycle(liveService, "pause")}
+          onResume={() => handleLifecycle(liveService, "resume")}
+          onArchive={() => setArchiveTarget(liveService)}
+          onUnarchive={() => handleLifecycle(liveService, "unarchive")}
+          extraContent={(() => {
+            const rows = reservations.filter((r) => r.service_id === liveService.id);
+            return rows.length > 0 ? <ServiceReservationsTable reservations={rows} mode="provider" /> : null;
+          })()}
+        />
+        <AlertDialog open={Boolean(deleteTarget)} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+          <AlertDialogContent size="sm">
+            <AlertDialogHeader>
+              <AlertDialogTitle>{copy.confirmDelete}</AlertDialogTitle>
+              <AlertDialogDescription>{copy.confirmDeleteDescription}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <Button variant="ghost" onClick={() => setDeleteTarget(null)} disabled={actionLoadingId !== null}>
+                {copy.btnCancel}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => deleteTarget && handleDelete(deleteTarget)}
+                isLoading={actionLoadingId !== null}
+              >
+                {copy.actionDelete}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={Boolean(archiveTarget)} onOpenChange={(o) => !o && setArchiveTarget(null)}>
+          <AlertDialogContent size="sm">
+            <AlertDialogHeader>
+              <AlertDialogTitle>{copy.confirmArchive}</AlertDialogTitle>
+              <AlertDialogDescription>{copy.confirmArchiveDescription}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <Button variant="ghost" onClick={() => setArchiveTarget(null)} disabled={actionLoadingId !== null}>
+                {copy.btnCancel}
+              </Button>
+              <Button
+                variant="primary"
+                onClick={async () => {
+                  if (!archiveTarget) return;
+                  await handleLifecycle(archiveTarget, "archive");
+                  setArchiveTarget(null);
+                }}
+                isLoading={actionLoadingId !== null}
+              >
+                {copy.actionArchive}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>
     );
   }
 

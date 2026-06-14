@@ -1228,6 +1228,9 @@ export type Messages = {
     deleteConfirm: string;
     deleteCancel: string;
     confirmDelete: string;
+    confirmDeleteDescription: string;
+    confirmArchive: string;
+    confirmArchiveDescription: string;
     createSuccessTitle: string;
     createSuccessDescription: string;
     updateSuccessTitle: string;
