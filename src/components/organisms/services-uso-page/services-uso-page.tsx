@@ -288,11 +288,6 @@ function stripUnsafeChars(value: string): string {
   return value.replace(/[<>]/g, "");
 }
 
-/** Rough plain-text length of rich-text HTML (for the character counter). */
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
-}
-
 function buildPayload(form: ServiceFormState): CreateServicePayload {
   const payload: CreateServicePayload = {
     title: form.title.trim(),
@@ -378,11 +373,19 @@ function ServiceFormPage({
   const [cropTarget, setCropTarget] = useState<CropTarget | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Limits mirror the backend Zod schema (service.schema.ts).
-  const descriptionTextLength = stripHtml(form.description).length;
+  // Backend validates the raw rich-text HTML length (richDescription .max), so
+  // count the HTML string we actually send, not the stripped plain text.
+  const descriptionTextLength = form.description.length;
 
   const brandOptions: ComboboxOption[] = brands.map((b) => ({ value: b.id, label: b.name }));
   const selectedBrand = brands.find((b) => b.id === form.brandId);
+  // A service can only be added to an ACTIVE (approved) brand.
+  const brandNotActive =
+    form.contextType === "branch" &&
+    Boolean(form.brandId) &&
+    Boolean(selectedBrand) &&
+    selectedBrand?.status !== "ACTIVE";
+  const brandNotActiveNotice = messages.backendErrors["brand.not_active"];
   const branchOptions: ComboboxOption[] = (selectedBrand?.branches ?? []).map((br) => ({
     value: br.id,
     label: br.name,
@@ -512,7 +515,7 @@ function ServiceFormPage({
           variant="primary"
           type="submit"
           isLoading={isLoading}
-          disabled={isLoading}
+          disabled={isLoading || brandNotActive}
           icon={isLoading ? undefined : isEditingPaused ? "send" : "check"}
         >
           {isEditingPaused ? copy.btnResubmit : copy.btnSave}
@@ -733,6 +736,11 @@ function ServiceFormPage({
                       />
                     </Field>
                   </div>
+                  {brandNotActive ? (
+                    <StatusBanner variant="warning" icon="info" className={styles.formFeedback}>
+                      {brandNotActiveNotice}
+                    </StatusBanner>
+                  ) : null}
                 </>
               )}
 

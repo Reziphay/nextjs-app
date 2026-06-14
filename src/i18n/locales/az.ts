@@ -133,6 +133,7 @@ export const azMessages: Messages = {
     "auth.invalid_credentials": "Email və ya şifrə yanlışdır.",
     "errors.validation_error": "Məlumatlar yoxlamadan keçmədi.",
     "errors.account_not_verified": "Hesabınız təsdiqlənməyib. Davam etmək üçün nömrə və email təsdiqlənməlidir.",
+    "brand.not_active": "Brend hələ təsdiqlənməyib. Servis əlavə etmək üçün öncə brend yoxlamadan keçməlidir.",
     "errors.missing_token": "Giriş məlumatı tapılmadı.",
     "errors.invalid_token": "Giriş məlumatı etibarsızdır.",
     "errors.forbidden": "Bu əməliyyatı etməyə icazəniz yoxdur.",

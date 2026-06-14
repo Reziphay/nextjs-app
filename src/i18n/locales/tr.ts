@@ -165,6 +165,7 @@ export const trMessages: Messages = {
     "errors.validation_error":
       "Gönderilen veriler doğrulamadan geçemedi.",
     "errors.account_not_verified": "Hesabınız doğrulanmadı. Devam etmek için telefon ve e-postanızı doğrulayın.",
+    "brand.not_active": "Marka henüz onaylanmadı. Hizmet eklemek için önce incelemeden geçmeli.",
     "errors.missing_token": "Kimlik doğrulama jetonu eksik.",
     "errors.invalid_token": "Kimlik doğrulama jetonu geçersiz.",
     "errors.forbidden":

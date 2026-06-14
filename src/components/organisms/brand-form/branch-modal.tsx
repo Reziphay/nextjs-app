@@ -353,11 +353,11 @@ export function BranchModal({
   function validate() {
     const nextErrors: Partial<Record<string, string>> = {};
 
-    if (!draft.name.trim()) {
+    if (!draft.name.trim() || draft.name.trim().length < 2) {
       nextErrors.name = t.requiredMessage;
     }
 
-    if (!draft.address1.trim()) {
+    if (!draft.address1.trim() || draft.address1.trim().length < 2) {
       nextErrors.address1 = t.requiredMessage;
     }
 
@@ -382,6 +382,10 @@ export function BranchModal({
     // Email (optional) must be a valid address when provided.
     if (draft.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(draft.email)) {
       nextErrors.email = t.branchEmailInvalid;
+    }
+    // Description: backend validates raw HTML length (<=1000).
+    if ((draft.description ?? "").length > 1000) {
+      nextErrors.description = messages.services.maxCharsReached;
     }
 
     setErrors(nextErrors);
@@ -741,9 +745,10 @@ export function BranchModal({
                   aria-invalid={Boolean(errors.name)}
                   onChange={(event) => updateField("name", stripUnsafe(event.target.value))}
                 />
-                {errors.name ? (
-                  <p className={styles.errorText}>{errors.name}</p>
-                ) : null}
+                <div className={styles.charMetaRow}>
+                  {errors.name ? <span className={styles.errorText}>{errors.name}</span> : <span />}
+                  <span className={styles.charCount}>{draft.name.length}/100</span>
+                </div>
               </Field>
 
               <Field>
@@ -753,6 +758,12 @@ export function BranchModal({
                   placeholder={t.branchFieldDescriptionPlaceholder}
                   onChange={(html) => updateField("description", html)}
                 />
+                <div className={styles.charMetaRow}>
+                  {errors.description ? <span className={styles.errorText}>{errors.description}</span> : <span />}
+                  <span className={[styles.charCount, (draft.description ?? "").length > 1000 ? styles.charCountOver : ""].filter(Boolean).join(" ")}>
+                    {(draft.description ?? "").length}/1000
+                  </span>
+                </div>
               </Field>
 
               <div className={styles.row}>
@@ -767,9 +778,10 @@ export function BranchModal({
                       updateField("address1", stripUnsafe(event.target.value))
                     }
                   />
-                  {errors.address1 ? (
-                    <p className={styles.errorText}>{errors.address1}</p>
-                  ) : null}
+                  <div className={styles.charMetaRow}>
+                    {errors.address1 ? <span className={styles.errorText}>{errors.address1}</span> : <span />}
+                    <span className={styles.charCount}>{draft.address1.length}/200</span>
+                  </div>
                 </Field>
 
                 <Field>
@@ -782,6 +794,10 @@ export function BranchModal({
                       updateField("address2", stripUnsafe(event.target.value))
                     }
                   />
+                  <div className={styles.charMetaRow}>
+                    <span />
+                    <span className={styles.charCount}>{(draft.address2 ?? "").length}/200</span>
+                  </div>
                 </Field>
               </div>
 

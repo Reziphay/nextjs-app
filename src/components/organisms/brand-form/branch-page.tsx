@@ -242,7 +242,9 @@ export function BranchPage({
   function validate() {
     const errs: Partial<Record<string, string>> = {};
     if (!draft.name.trim()) errs.name = t.requiredMessage;
+    else if (draft.name.trim().length < 2) errs.name = t.requiredMessage;
     if (!draft.address1.trim()) errs.address1 = t.requiredMessage;
+    else if (draft.address1.trim().length < 2) errs.address1 = t.requiredMessage;
     if (!draft.is_24_7) {
       if (!draft.opening?.trim()) errs.opening = t.openingRequiredMessage;
       else if (!isValidTime24(draft.opening)) errs.opening = "HH:mm";
@@ -251,6 +253,7 @@ export function BranchPage({
     }
     if (draft.phone && !/^\+?\d{7,20}$/.test(draft.phone)) errs.phone = t.branchPhoneInvalid;
     if (draft.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(draft.email)) errs.email = t.branchEmailInvalid;
+    if ((draft.description ?? "").length > 1000) errs.description = messages.services.maxCharsReached;
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -489,7 +492,10 @@ export function BranchPage({
                           aria-invalid={Boolean(errors.name)}
                           onChange={(e) => updateField("name", stripUnsafe(e.target.value))}
                         />
-                        {errors.name ? <p className={styles.fieldError}>{errors.name}</p> : null}
+                        <div className={styles.charMetaRow}>
+                          {errors.name ? <span className={styles.fieldError}>{errors.name}</span> : <span />}
+                          <span className={styles.charCount}>{draft.name.length}/100</span>
+                        </div>
                       </Field>
                     </div>
 
@@ -501,6 +507,12 @@ export function BranchPage({
                           placeholder={t.branchFieldDescriptionPlaceholder}
                           onChange={(html) => updateField("description", html)}
                         />
+                        <div className={styles.charMetaRow}>
+                          {errors.description ? <span className={styles.fieldError}>{errors.description}</span> : <span />}
+                          <span className={[styles.charCount, (draft.description ?? "").length > 1000 ? styles.charCountOver : ""].filter(Boolean).join(" ")}>
+                            {(draft.description ?? "").length}/1000
+                          </span>
+                        </div>
                       </Field>
                     </div>
 
@@ -514,7 +526,10 @@ export function BranchPage({
                           aria-invalid={Boolean(errors.address1)}
                           onChange={(e) => updateField("address1", stripUnsafe(e.target.value))}
                         />
-                        {errors.address1 ? <p className={styles.fieldError}>{errors.address1}</p> : null}
+                        <div className={styles.charMetaRow}>
+                          {errors.address1 ? <span className={styles.fieldError}>{errors.address1}</span> : <span />}
+                          <span className={styles.charCount}>{draft.address1.length}/200</span>
+                        </div>
                       </Field>
                       <Field>
                         <FieldLabel>{t.branchFieldAddress2}</FieldLabel>
@@ -524,6 +539,10 @@ export function BranchPage({
                           placeholder={t.branchFieldAddress2Placeholder}
                           onChange={(e) => updateField("address2", stripUnsafe(e.target.value))}
                         />
+                        <div className={styles.charMetaRow}>
+                          <span />
+                          <span className={styles.charCount}>{(draft.address2 ?? "").length}/200</span>
+                        </div>
                       </Field>
                     </div>
 

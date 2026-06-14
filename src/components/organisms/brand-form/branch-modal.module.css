@@ -663,3 +663,24 @@
     align-items: stretch;
   }
 }
+
+.charMetaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  min-height: 16px;
+}
+
+.charCount {
+  margin-left: auto;
+  font-size: var(--font-size-extra-small);
+  color: var(--app-text-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+.charCountOver {
+  color: var(--app-error);
+  font-weight: 600;
+}

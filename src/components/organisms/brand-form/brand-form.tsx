@@ -101,10 +101,6 @@ function stripUnsafe(value: string): string {
   return value.replace(/[<>]/g, "");
 }
 
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
-}
-
 function createEmptyDraft(): BrandFormDraft {
   return {
     name: "",
@@ -524,7 +520,8 @@ export function BrandForm({
     };
   }, [branchModalOpen]);
 
-  const descriptionTextLength = stripHtml(draft.description ?? "").length;
+  // Count the raw rich-text HTML length — that's what the backend validates.
+  const descriptionTextLength = (draft.description ?? "").length;
 
   function validate(): boolean {
     const nextErrors: Partial<Record<string, string>> = {};

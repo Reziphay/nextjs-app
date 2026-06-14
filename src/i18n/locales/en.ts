@@ -132,6 +132,7 @@ export const enMessages: Messages = {
     "auth.invalid_credentials": "Invalid email or password.",
     "errors.validation_error": "The submitted data failed validation.",
     "errors.account_not_verified": "Your account is not verified. Verify your phone and email to continue.",
+    "brand.not_active": "The brand is not approved yet. It must pass review before you can add services.",
     "errors.missing_token": "Authentication token is missing.",
     "errors.invalid_token": "Authentication token is invalid.",
     "errors.forbidden": "You do not have permission to perform this action.",
