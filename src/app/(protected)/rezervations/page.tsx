@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
-import { ProtectedComingSoonRoute } from "@/components/organisms/protected-coming-soon-route";
+import { cookies } from "next/headers";
 import { getMessages } from "@/i18n/config";
 import { getServerLocale } from "@/i18n/server";
+import { requireProtectedRouteAccess } from "@/lib/protected-route";
+import { fetchMyReservations } from "@/lib/reservations-api";
+import { UsoCalendarPage } from "@/components/organisms/uso-calendar-page";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale();
@@ -12,6 +15,21 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RezervationsPage() {
-  return <ProtectedComingSoonRoute path="/rezervations" />;
+export default async function RezervationsPage() {
+  await requireProtectedRouteAccess("/rezervations", {});
+
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("rzp_at")?.value ?? "";
+
+  const reservations = await fetchMyReservations("customer", accessToken).catch(() => []);
+
+  return (
+    <UsoCalendarPage
+      mode="customer"
+      services={[]}
+      brands={[]}
+      reservations={reservations}
+      accessToken={accessToken}
+    />
+  );
 }

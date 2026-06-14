@@ -11,6 +11,7 @@ import {
   FieldLabel,
   FieldContent,
   Input,
+  Checkbox,
 } from "@/components/atoms";
 import { Combobox, type ComboboxOption } from "@/components/atoms/combobox";
 import { AvatarCropDialog } from "@/components/molecules/avatar-crop-dialog/avatar-crop-dialog";
@@ -61,6 +62,8 @@ type ServicesUsoPageProps = {
   user: AuthenticatedUser;
 };
 
+type HoursDay = { enabled: boolean; start: string; end: string };
+
 type ServiceFormState = {
   title: string;
   description: string;
@@ -72,9 +75,43 @@ type ServiceFormState = {
   duration: string;
   price_type: PriceType;
   price: string;
+  hoursSource: "CUSTOM" | "BRANCH";
+  hours: HoursDay[]; // length 7, index = weekday (0=Sun)
   image_media_ids: string[];
   imagePreviews: string[];
 };
+
+function defaultHours(): HoursDay[] {
+  return Array.from({ length: 7 }, (_, weekday) => ({
+    enabled: weekday >= 1 && weekday <= 5,
+    start: "09:00",
+    end: "18:00",
+  }));
+}
+
+function minToHHMM(min: number): string {
+  return `${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
+}
+
+function hhmmToMin(value: string): number {
+  const [h, m] = value.split(":").map(Number);
+  return (h ?? 0) * 60 + (m ?? 0);
+}
+
+// 24-hour time options in 30-minute steps: "00:00" … "23:30".
+const TIME_OPTIONS: string[] = Array.from({ length: 48 }, (_, i) => {
+  const h = Math.floor(i / 2);
+  const m = i % 2 === 0 ? "00" : "30";
+  return `${String(h).padStart(2, "0")}:${m}`;
+});
+
+function hoursFromSchedule(schedule: { weekday: number; start_min: number; end_min: number }[]): HoursDay[] {
+  const base = defaultHours().map((d) => ({ ...d, enabled: false }));
+  for (const w of schedule) {
+    base[w.weekday] = { enabled: true, start: minToHHMM(w.start_min), end: minToHHMM(w.end_min) };
+  }
+  return base;
+}
 
 const SERVICE_STATUS_TONE: Record<ServiceStatus, StatusBadgeTone> = {
   DRAFT: "muted",
@@ -165,6 +202,9 @@ function assignedServiceToService(assignment: AssignedService): Service {
     description: svc.description ?? undefined,
     owner_id: brand?.owner_id ?? "",
     brand_id: brand?.id ?? null,
+    branch_id: null,
+    hours_source: "CUSTOM",
+    schedule: [],
     brand,
     service_category_id: null,
     service_category: null,
@@ -198,6 +238,8 @@ const DEFAULT_FORM: ServiceFormState = {
   duration: "",
   price_type: "FIXED",
   price: "",
+  hoursSource: "CUSTOM",
+  hours: defaultHours(),
   image_media_ids: [],
   imagePreviews: [],
 };
@@ -212,10 +254,12 @@ function serviceToFormState(service: Service, brands: Brand[]): ServiceFormState
     contextType,
     address: service.address ?? "",
     brandId: brand?.id ?? "",
-    branchId: "",
+    branchId: service.branch_id ?? "",
     duration: service.duration !== null ? String(service.duration) : "",
     price_type: service.price_type,
     price: service.price !== null ? String(service.price) : "",
+    hoursSource: service.hours_source ?? "CUSTOM",
+    hours: service.schedule && service.schedule.length > 0 ? hoursFromSchedule(service.schedule) : defaultHours(),
     image_media_ids: service.images.map((img) => img.media_id),
     imagePreviews: service.images.map((img) => proxyMediaUrl(img.url) ?? img.url),
   };
@@ -230,11 +274,28 @@ function buildPayload(form: ServiceFormState): CreateServicePayload {
     image_media_ids: form.image_media_ids.length > 0 ? form.image_media_ids : undefined,
   };
 
+  const buildSchedule = () =>
+    form.hours
+      .map((d, weekday) => ({ d, weekday }))
+      .filter(({ d }) => d.enabled && hhmmToMin(d.end) > hhmmToMin(d.start))
+      .map(({ d, weekday }) => ({ weekday, start_min: hhmmToMin(d.start), end_min: hhmmToMin(d.end) }));
+
   if (form.contextType === "branch") {
     payload.brand_id = form.brandId || null;
+    payload.branch_id = form.branchId || null;
+    if (form.hoursSource === "BRANCH") {
+      payload.hours_source = "BRANCH";
+      payload.schedule = [];
+    } else {
+      payload.hours_source = "CUSTOM";
+      payload.schedule = buildSchedule();
+    }
   } else {
     payload.brand_id = null;
+    payload.branch_id = null;
     payload.address = form.address.trim() || undefined;
+    payload.hours_source = "CUSTOM";
+    payload.schedule = buildSchedule();
   }
 
   if (form.duration.trim()) {
@@ -281,6 +342,7 @@ function ServiceFormPage({
     : initialBrandId
       ? { ...DEFAULT_FORM, brandId: initialBrandId, contextType: "branch" as const }
       : DEFAULT_FORM;
+  const { locale } = useLocale();
   const [form, setForm] = useState<ServiceFormState>(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -288,6 +350,21 @@ function ServiceFormPage({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const brandOptions: ComboboxOption[] = brands.map((b) => ({ value: b.id, label: b.name }));
+  const selectedBrand = brands.find((b) => b.id === form.brandId);
+  const branchOptions: ComboboxOption[] = (selectedBrand?.branches ?? []).map((br) => ({
+    value: br.id,
+    label: br.name,
+  }));
+  const updateHoursDay = (weekday: number, patch: Partial<HoursDay>) =>
+    setForm((prev) => ({
+      ...prev,
+      hours: prev.hours.map((d, i) => (i === weekday ? { ...d, ...patch } : d)),
+    }));
+  const weekdayNames = Array.from({ length: 7 }, (_, i) => {
+    const anchor = new Date(2024, 0, 7); // Sunday
+    anchor.setDate(anchor.getDate() + i);
+    return new Intl.DateTimeFormat(locale, { weekday: "long" }).format(anchor);
+  });
   const categoryOptions: ComboboxOption[] = serviceCategories.map((c) => ({
     value: c.id,
     label: messages.categories[c.key as keyof typeof messages.categories] ?? c.key,
@@ -553,6 +630,91 @@ function ServiceFormPage({
                   </div>
                 </>
               )}
+
+              {/* Working hours */}
+              <div className={styles.fieldRow}>
+                <Field>
+                  <FieldLabel>{copy.fieldHours}</FieldLabel>
+                  <FieldContent>
+                    {form.contextType === "branch" && (
+                      <div className={styles.radioGroup}>
+                        <label className={styles.radioLabel}>
+                          <input
+                            type="radio"
+                            name="hours_source"
+                            checked={form.hoursSource === "BRANCH"}
+                            onChange={() => setField("hoursSource", "BRANCH")}
+                            className={styles.radioInput}
+                          />
+                          <span>{copy.hoursBranch}</span>
+                        </label>
+                        <label className={styles.radioLabel}>
+                          <input
+                            type="radio"
+                            name="hours_source"
+                            checked={form.hoursSource === "CUSTOM"}
+                            onChange={() => setField("hoursSource", "CUSTOM")}
+                            className={styles.radioInput}
+                          />
+                          <span>{copy.hoursCustom}</span>
+                        </label>
+                      </div>
+                    )}
+
+                    {form.contextType === "branch" && form.hoursSource === "BRANCH" ? (
+                      <Combobox
+                        items={branchOptions}
+                        value={form.branchId}
+                        placeholder={copy.fieldBranchPlaceholder}
+                        emptyMessage={copy.noBranchesFound}
+                        onValueChange={(val) => {
+                          const id = Array.isArray(val) ? (val[0] ?? "") : (val ?? "");
+                          setField("branchId", id);
+                        }}
+                      />
+                    ) : (
+                      <div className={styles.hoursEditor}>
+                        {form.hours.map((d, weekday) => (
+                          <div key={weekday} className={styles.hoursRow}>
+                            <label className={styles.hoursToggle}>
+                              <Checkbox
+                                checked={d.enabled}
+                                onChange={() => updateHoursDay(weekday, { enabled: !d.enabled })}
+                              />
+                              <span className={styles.hoursDayName}>{weekdayNames[weekday]}</span>
+                            </label>
+                            {d.enabled ? (
+                              <div className={styles.hoursTimes}>
+                                <select
+                                  value={d.start}
+                                  onChange={(e) => updateHoursDay(weekday, { start: e.target.value })}
+                                  className={styles.timeInput}
+                                >
+                                  {TIME_OPTIONS.map((t) => (
+                                    <option key={t} value={t}>{t}</option>
+                                  ))}
+                                </select>
+                                <span>–</span>
+                                <select
+                                  value={d.end}
+                                  onChange={(e) => updateHoursDay(weekday, { end: e.target.value })}
+                                  className={styles.timeInput}
+                                >
+                                  {TIME_OPTIONS.map((t) => (
+                                    <option key={t} value={t}>{t}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            ) : (
+                              <span className={styles.hoursClosed}>{messages.calendar.availabilityClosed}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </FieldContent>
+                </Field>
+              </div>
             </div>
 
             <div className={styles.formSection}>

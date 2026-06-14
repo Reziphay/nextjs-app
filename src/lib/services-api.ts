@@ -13,6 +13,9 @@ export type CreateServicePayload = {
   title: string;
   description?: string;
   brand_id?: string | null;
+  branch_id?: string | null;
+  hours_source?: 'CUSTOM' | 'BRANCH';
+  schedule?: { weekday: number; start_min: number; end_min: number }[];
   service_category_id?: string | null;
   price?: number;
   price_type?: 'FIXED' | 'STARTING_FROM' | 'FREE';
@@ -41,6 +44,9 @@ export function normalizeService(service: Service): Service {
     ...service,
     description: service.description ?? undefined,
     brand_id: service.brand_id ?? null,
+    branch_id: service.branch_id ?? null,
+    hours_source: service.hours_source ?? "CUSTOM",
+    schedule: service.schedule ?? [],
     brand: service.brand ?? null,
     service_category_id: service.service_category_id ?? null,
     service_category: service.service_category ?? null,

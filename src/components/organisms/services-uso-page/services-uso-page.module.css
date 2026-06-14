@@ -1005,3 +1005,52 @@
   display: flex;
   justify-content: flex-end;
 }
+
+.hoursEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.hoursRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.hoursToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.hoursDayName {
+  font-size: var(--font-size-small);
+  color: var(--app-text-strong);
+  text-transform: capitalize;
+}
+
+.hoursTimes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hoursClosed {
+  font-size: var(--font-size-small);
+  color: var(--app-text-muted);
+}
+
+.timeInput {
+  padding: 6px 8px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-card);
+  background: var(--app-bg-surface);
+  color: var(--app-text-strong);
+  font-size: var(--font-size-small);
+}

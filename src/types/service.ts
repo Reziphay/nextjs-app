@@ -22,12 +22,23 @@ export type ServiceBrandContext = {
   rating_count: number;
 };
 
+export type HoursSource = "CUSTOM" | "BRANCH";
+
+export type ServiceScheduleWindow = {
+  weekday: number;
+  start_min: number;
+  end_min: number;
+};
+
 export type Service = {
   id: string;
   title: string;
   description?: string;
   owner_id: string;
   brand_id: string | null;
+  branch_id: string | null;
+  hours_source: HoursSource;
+  schedule: ServiceScheduleWindow[];
   brand?: ServiceBrandContext | null;
   service_category_id: string | null;
   service_category: ServiceCategory | null;

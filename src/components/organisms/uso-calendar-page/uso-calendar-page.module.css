@@ -668,6 +668,71 @@
   white-space: nowrap;
 }
 
+.workingBand {
+  position: absolute;
+  z-index: 0;
+  background: var(--app-bg-primary-soft, rgba(145, 89, 218, 0.06));
+  border-left: 2px solid var(--app-border-primary-soft, rgba(145, 89, 218, 0.25));
+  pointer-events: none;
+}
+
+.event {
+  position: absolute;
+  z-index: 2;
+  border: 1px solid var(--app-border-soft);
+  border-left: 3px solid var(--app-primary);
+  border-radius: var(--general-border-radius-sm, 6px);
+  background: var(--app-bg-surface);
+  box-shadow: var(--app-shadow-card-soft) 0 1px 3px;
+  padding: 2px 6px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  text-align: left;
+  transition: filter 0.12s, box-shadow 0.12s;
+}
+
+.event:hover {
+  filter: brightness(0.97);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+  z-index: 4;
+}
+
+.eventCancelled {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.eventTime {
+  font-size: 0.65rem;
+  color: var(--app-text-muted);
+  line-height: 1.1;
+}
+
+.eventTitle {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--app-text-strong);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.monthCellDots {
+  display: flex;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.monthCellDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
 .nowLine {
   position: absolute;
   height: 2px;

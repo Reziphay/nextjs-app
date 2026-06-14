@@ -7,6 +7,10 @@ import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
 import type { Service } from "@/types/service";
 import type { Brand } from "@/types/brand";
+import type { Reservation, ReservationStatus } from "@/types/reservation";
+import { AvailabilityModal } from "./availability-modal";
+import { ReservationDetailPopup } from "./reservation-detail-popup";
+import { PendingRequestsPanel } from "./pending-requests-panel";
 import styles from "./uso-calendar-page.module.css";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -24,6 +28,31 @@ type CalendarBrand = {
   id: string;
   name: string;
 };
+
+type CalendarEvent = {
+  reservation: Reservation;
+  dayKey: string; // YYYY-MM-DD (wall-clock)
+  startMin: number;
+  endMin: number;
+  color: string;
+  title: string;
+};
+
+// Reservation timestamps are stored wall-clock-as-UTC (see availability.service).
+function minutesFromIso(iso: string): number {
+  const h = Number(iso.slice(11, 13));
+  const m = Number(iso.slice(14, 16));
+  return h * 60 + m;
+}
+
+function localDateKey(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+const ACTIVE_EVENT_STATUSES: ReservationStatus[] = ["PENDING", "CONFIRMED", "COMPLETED", "NO_SHOW"];
 
 // ─── Color Palette ────────────────────────────────────────────────────────────
 
@@ -251,6 +280,7 @@ type CalendarSidebarProps = {
   today: Date;
   locale: string;
   services: CalendarService[];
+  showServices: boolean;
   myServicesLabel: string;
   noServicesLabel: string;
   previousMonthLabel: string;
@@ -267,6 +297,7 @@ function CalendarSidebar({
   today,
   locale,
   services,
+  showServices,
   myServicesLabel,
   noServicesLabel,
   previousMonthLabel,
@@ -300,7 +331,7 @@ function CalendarSidebar({
           onSelect={onDateSelect}
         />
 
-        {services.length > 0 && (
+        {showServices && services.length > 0 && (
           <div className={styles.myServices}>
             <p className={styles.myServicesTitle}>{myServicesLabel}</p>
             <ul className={styles.myServicesList}>
@@ -324,7 +355,7 @@ function CalendarSidebar({
           </div>
         )}
 
-        {services.length === 0 && (
+        {showServices && services.length === 0 && (
           <div className={styles.myServices}>
             <p className={styles.myServicesTitle}>{myServicesLabel}</p>
             <p className={styles.myServicesEmpty}>{noServicesLabel}</p>
@@ -567,9 +598,12 @@ type TimeGridProps = {
   timeFormat: TimeFormat;
   emptyTitle: string;
   emptyDesc: string;
+  events: CalendarEvent[];
+  workingByWeekday: Map<number, Array<{ start: number; end: number }>>;
+  onEventClick: (e: CalendarEvent) => void;
 };
 
-function TimeGrid({ days, today, locale, timeFormat, emptyTitle, emptyDesc }: TimeGridProps) {
+function TimeGrid({ days, today, locale, timeFormat, emptyTitle, emptyDesc, events, workingByWeekday, onEventClick }: TimeGridProps) {
   const dayShorts = useMemo(() => getIntlDayShorts(locale), [locale]);
   const nowRef = useRef<HTMLDivElement>(null);
   const now = new Date();
@@ -581,6 +615,9 @@ function TimeGrid({ days, today, locale, timeFormat, emptyTitle, emptyDesc }: Ti
   }, []);
 
   const isDayView = days.length === 1;
+
+  const dayKeys = days.map((d) => localDateKey(d));
+  const visibleEvents = events.filter((e) => dayKeys.includes(e.dayKey));
 
   return (
     <div className={styles.timeGrid}>
@@ -632,6 +669,23 @@ function TimeGrid({ days, today, locale, timeFormat, emptyTitle, emptyDesc }: Ti
             </div>
           ))}
 
+          {/* Working-hours background bands */}
+          {days.map((d, dayIndex) => {
+            const wins = workingByWeekday.get(d.getDay()) ?? [];
+            return wins.map((w, i) => (
+              <div
+                key={`wh-${dayIndex}-${i}`}
+                className={styles.workingBand}
+                style={{
+                  top: (w.start / 60) * SLOT_HEIGHT,
+                  height: ((w.end - w.start) / 60) * SLOT_HEIGHT,
+                  left: `calc(3.5rem + ${dayIndex} * (100% - 3.5rem) / ${days.length})`,
+                  width: `calc((100% - 3.5rem) / ${days.length})`,
+                }}
+              />
+            ));
+          })}
+
           {/* Current time indicator */}
           {todayIndex !== -1 && (
             <div
@@ -644,11 +698,45 @@ function TimeGrid({ days, today, locale, timeFormat, emptyTitle, emptyDesc }: Ti
               }}
             />
           )}
+
+          {/* Reservation events */}
+          {visibleEvents.map((e) => {
+            const dayIndex = dayKeys.indexOf(e.dayKey);
+            if (dayIndex === -1) return null;
+            const top = (e.startMin / 60) * SLOT_HEIGHT;
+            const height = Math.max(((e.endMin - e.startMin) / 60) * SLOT_HEIGHT, 18);
+            const cancelled =
+              e.reservation.status === "CANCELLED_BY_UCR" ||
+              e.reservation.status === "CANCELLED_BY_USO";
+            return (
+              <button
+                type="button"
+                key={e.reservation.id}
+                className={[styles.event, cancelled ? styles.eventCancelled : ""].filter(Boolean).join(" ")}
+                style={{
+                  top,
+                  height,
+                  left: `calc(3.5rem + ${dayIndex} * (100% - 3.5rem) / ${days.length} + 2px)`,
+                  width: `calc((100% - 3.5rem) / ${days.length} - 4px)`,
+                  borderLeftColor: e.color,
+                }}
+                onClick={() => onEventClick(e)}
+              >
+                <span className={styles.eventTime}>
+                  {String(Math.floor(e.startMin / 60)).padStart(2, "0")}:
+                  {String(e.startMin % 60).padStart(2, "0")}
+                </span>
+                <span className={styles.eventTitle}>{e.title}</span>
+              </button>
+            );
+          })}
         </div>
 
-        <div className={styles.timeGridEmptyOverlay}>
-          <EmptyState title={emptyTitle} desc={emptyDesc} />
-        </div>
+        {visibleEvents.length === 0 && (
+          <div className={styles.timeGridEmptyOverlay}>
+            <EmptyState title={emptyTitle} desc={emptyDesc} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -661,10 +749,20 @@ type MonthGridProps = {
   selectedDate: Date;
   today: Date;
   locale: string;
+  events: CalendarEvent[];
   onDayClick: (d: Date) => void;
 };
 
-function MonthGrid({ date, selectedDate, today, locale, onDayClick }: MonthGridProps) {
+function MonthGrid({ date, selectedDate, today, locale, events, onDayClick }: MonthGridProps) {
+  const eventsByDay = useMemo(() => {
+    const map = new Map<string, CalendarEvent[]>();
+    for (const e of events) {
+      const list = map.get(e.dayKey) ?? [];
+      list.push(e);
+      map.set(e.dayKey, list);
+    }
+    return map;
+  }, [events]);
   const dayShorts = useMemo(() => getIntlDayShorts(locale), [locale]);
   const year = date.getFullYear();
   const month = date.getMonth();
@@ -714,6 +812,13 @@ function MonthGrid({ date, selectedDate, today, locale, onDayClick }: MonthGridP
                   {d.getDate()}
                 </span>
               )}
+              {d && (eventsByDay.get(localDateKey(d))?.length ?? 0) > 0 && (
+                <span className={styles.monthCellDots}>
+                  {(eventsByDay.get(localDateKey(d)) ?? []).slice(0, 3).map((e) => (
+                    <span key={e.reservation.id} className={styles.monthCellDot} style={{ background: e.color }} />
+                  ))}
+                </span>
+              )}
             </div>
           );
         })}
@@ -733,6 +838,7 @@ type CalendarToolbarProps = {
   brands: CalendarBrand[];
   selectedBrandId: string;
   isNewDisabled: boolean;
+  showNewButton: boolean;
   timeFormat: TimeFormat;
   viewLabels: Record<CalendarView, string>;
   todayLabel: string;
@@ -768,6 +874,7 @@ function CalendarToolbar({
   brands,
   selectedBrandId,
   isNewDisabled,
+  showNewButton,
   timeFormat,
   viewLabels,
   todayLabel,
@@ -837,28 +944,6 @@ function CalendarToolbar({
       </div>
 
       <div className={styles.toolbarRight}>
-        <div className={styles.settingsWrap} ref={settingsRef}>
-          <Button
-            variant="unstyled"
-            className={[styles.toolbarIconBtn, settingsOpen ? styles.toolbarIconBtnActive : ""].filter(Boolean).join(" ")}
-            onClick={() => setSettingsOpen((o) => !o)}
-            aria-label={moreOptionsLabel}
-          >
-            <Icon icon="more_horiz" size={18} color="current" />
-          </Button>
-          {settingsOpen && (
-            <CalendarSettingsPopup
-              timeFormat={timeFormat}
-              settingsTitle={settingsTitleLabel}
-              settingsTimeFormatLabel={settingsTimeFormatLabel}
-              timeFormat12hLabel={timeFormat12hLabel}
-              timeFormat24hLabel={timeFormat24hLabel}
-              onTimeFormatChange={(f) => { onTimeFormatChange(f); }}
-              onClose={() => setSettingsOpen(false)}
-            />
-          )}
-        </div>
-
         <ViewSwitcherDropdown view={view} labels={viewLabels} onChange={onViewChange} />
 
         <Button variant="unstyled" className={styles.toolbarFilterBtn} aria-label={filterLabel}>
@@ -872,9 +957,11 @@ function CalendarToolbar({
           onChange={onBrandChange}
         />
 
-        <Button variant="primary" size="small" icon="add" onClick={onNew} disabled={isNewDisabled}>
-          {newLabel}
-        </Button>
+        {showNewButton && (
+          <Button variant="primary" size="small" icon="event_busy" onClick={onNew} disabled={isNewDisabled}>
+            {newLabel}
+          </Button>
+        )}
 
         <Button
           variant="unstyled"
@@ -899,14 +986,29 @@ function CalendarToolbar({
 type UsoCalendarPageProps = {
   services: Service[];
   brands: Brand[];
+  reservations: Reservation[];
+  accessToken: string;
+  // "provider" → USO managing incoming bookings; "customer" → UCR viewing their
+  // own reservations (read-only except cancel, no availability/requests tools).
+  mode?: "provider" | "customer";
 };
 
-export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
+export function UsoCalendarPage({ services, brands, reservations, accessToken, mode = "provider" }: UsoCalendarPageProps) {
   const { locale, messages: m } = useLocale();
   const t = m.calendar;
+  const isProvider = mode === "provider";
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  const [reservationItems, setReservationItems] = useState<Reservation[]>(reservations);
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+
+  const handleReservationUpdated = useCallback((updated: Reservation) => {
+    setReservationItems((prev) => prev.map((r) => (r.id === updated.id ? { ...r, ...updated } : r)));
+    setSelectedEvent(null);
+  }, []);
 
   const viewLabels: Record<CalendarView, string> = useMemo(() => ({
     day: t.viewDay,
@@ -933,20 +1035,73 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
   }, []);
   const [timeFormat, setTimeFormat] = useState<TimeFormat>("24h");
   const [selectedBrandId, setSelectedBrandId] = useState("all");
-  const [calendarServices, setCalendarServices] = useState<CalendarService[]>(() =>
-    services.map((s, i) => ({
-      id: s.id,
-      name: s.title,
+  const [calendarServices, setCalendarServices] = useState<CalendarService[]>(() => {
+    // Build the service chip list from owned services plus any service referenced
+    // by a reservation (covers the customer view where `services` is empty).
+    const seen = new Map<string, string>();
+    for (const s of services) seen.set(s.id, s.title);
+    for (const r of reservations) if (!seen.has(r.service_id)) seen.set(r.service_id, r.service?.title ?? "—");
+    return [...seen.entries()].map(([id, name], i) => ({
+      id,
+      name,
       color: assignServiceColor(i),
       enabled: true,
-    })),
-  );
+    }));
+  });
 
   const handleServiceToggle = useCallback((id: string) => {
     setCalendarServices((prev) =>
       prev.map((s) => (s.id === id ? { ...s, enabled: !s.enabled } : s)),
     );
   }, []);
+
+  const serviceBrandMap = useMemo(() => {
+    const map = new Map<string, string | null>();
+    for (const s of services) map.set(s.id, s.brand_id ?? null);
+    return map;
+  }, [services]);
+
+  // Working-hours background per weekday: union of all CUSTOM service schedules.
+  // (BRANCH-hours services derive from branch opening times, not shown here.)
+  const workingByWeekday = useMemo(() => {
+    const map = new Map<number, Array<{ start: number; end: number }>>();
+    for (const s of services) {
+      if (s.hours_source !== "CUSTOM") continue;
+      for (const w of s.schedule ?? []) {
+        const list = map.get(w.weekday) ?? [];
+        list.push({ start: w.start_min, end: w.end_min });
+        map.set(w.weekday, list);
+      }
+    }
+    return map;
+  }, [services]);
+
+  const events: CalendarEvent[] = useMemo(() => {
+    const colorById = new Map(calendarServices.map((s) => [s.id, s] as const));
+    return reservationItems
+      .filter((r) => ACTIVE_EVENT_STATUSES.includes(r.status))
+      .filter((r) => {
+        const cs = colorById.get(r.service_id);
+        // Show events even if the service isn't in the owner's enabled list
+        // (e.g. team-assigned services), but respect explicit disable toggles.
+        return !cs || cs.enabled;
+      })
+      .filter((r) => {
+        if (selectedBrandId === "all") return true;
+        return serviceBrandMap.get(r.service_id) === selectedBrandId;
+      })
+      .map((r) => {
+        const cs = colorById.get(r.service_id);
+        return {
+          reservation: r,
+          dayKey: r.starts_at.slice(0, 10),
+          startMin: minutesFromIso(r.starts_at),
+          endMin: minutesFromIso(r.ends_at),
+          color: cs?.color ?? SERVICE_COLORS[0],
+          title: r.service?.title ?? cs?.name ?? "—",
+        };
+      });
+  }, [reservationItems, calendarServices, selectedBrandId, serviceBrandMap]);
 
   const handleDateSelect = (d: Date) => {
     setCurrentDate(d);
@@ -958,22 +1113,6 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
     setCurrentDate(d);
     setSelectedDate(d);
   };
-
-  // "New" disabled when the action date is strictly before today
-  const isNewDisabled = (() => {
-    if (view === "day") {
-      return currentDate.getTime() < today.getTime();
-    }
-    if (view === "month") {
-      return selectedDate.getTime() < today.getTime();
-    }
-    // week / work_week: disabled only when the last visible day is before today
-    const days = getDaysInView(currentDate, view);
-    const lastDay = days[days.length - 1];
-    const lastDayNorm = new Date(lastDay);
-    lastDayNorm.setHours(0, 0, 0, 0);
-    return lastDayNorm.getTime() < today.getTime();
-  })();
 
   const days = view !== "month" ? getDaysInView(currentDate, view) : [];
 
@@ -996,12 +1135,13 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
           sidebarOpen={sidebarOpen}
           brands={calendarBrands}
           selectedBrandId={selectedBrandId}
-          isNewDisabled={isNewDisabled}
+          isNewDisabled={false}
+          showNewButton={isProvider}
           timeFormat={timeFormat}
           viewLabels={viewLabels}
           todayLabel={t.today}
           filterLabel={t.filter}
-          newLabel={t.newReservation}
+          newLabel={t.dayOffsTitle}
           previousMonthLabel={t.previousMonth}
           nextMonthLabel={t.nextMonth}
           previousPeriodLabel={t.previousPeriod}
@@ -1019,9 +1159,22 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
           onViewChange={setView}
           onDateSelect={handleDateSelect}
           onBrandChange={setSelectedBrandId}
-          onNew={() => {}}
+          onNew={() => setAvailabilityOpen(true)}
           onTimeFormatChange={setTimeFormat}
         />
+
+        {isProvider && (
+          <PendingRequestsPanel
+            reservations={reservationItems}
+            accessToken={accessToken}
+            onUpdated={(r) => setReservationItems((prev) => prev.map((x) => (x.id === r.id ? { ...x, ...r } : x)))}
+            onJump={(d) => {
+              setCurrentDate(d);
+              setSelectedDate(d);
+              setView("day");
+            }}
+          />
+        )}
 
         <div className={styles.calendarBody}>
           {view === "month" ? (
@@ -1030,6 +1183,7 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
               selectedDate={selectedDate}
               today={today}
               locale={locale}
+              events={events}
               onDayClick={handleMonthCellClick}
             />
           ) : (
@@ -1040,6 +1194,9 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
               timeFormat={timeFormat}
               emptyTitle={t.noReservationsTitle}
               emptyDesc={t.noReservationsDesc}
+              events={events}
+              workingByWeekday={workingByWeekday}
+              onEventClick={setSelectedEvent}
             />
           )}
         </div>
@@ -1051,6 +1208,7 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
         today={today}
         locale={locale}
         services={calendarServices}
+        showServices={isProvider}
         myServicesLabel={t.myServices}
         noServicesLabel={t.noServicesYet}
         previousMonthLabel={t.previousMonth}
@@ -1060,6 +1218,24 @@ export function UsoCalendarPage({ services, brands }: UsoCalendarPageProps) {
         onServiceToggle={handleServiceToggle}
         onClose={() => setSidebarOpen(false)}
       />
+
+      {selectedEvent && (
+        <ReservationDetailPopup
+          reservation={selectedEvent.reservation}
+          accessToken={accessToken}
+          mode={mode}
+          onUpdated={handleReservationUpdated}
+          onClose={() => setSelectedEvent(null)}
+        />
+      )}
+
+      {isProvider && (
+        <AvailabilityModal
+          open={availabilityOpen}
+          accessToken={accessToken}
+          onClose={() => setAvailabilityOpen(false)}
+        />
+      )}
     </div>
   );
 }

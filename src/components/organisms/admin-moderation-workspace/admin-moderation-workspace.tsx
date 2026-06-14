@@ -174,6 +174,9 @@ function mapModerationServiceToService(service: ModerationServiceDetail): Servic
     description: service.description ?? undefined,
     owner_id: service.owner.id,
     brand_id: service.brand?.id ?? null,
+    branch_id: null,
+    hours_source: "CUSTOM",
+    schedule: [],
     brand: service.brand
       ? {
           id: service.brand.id,

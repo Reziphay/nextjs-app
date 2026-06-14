@@ -6,6 +6,7 @@ import {
   fetchPublicServices,
 } from "@/lib/services-api";
 import { fetchActiveBrands, fetchMyBrands } from "@/lib/brands-api";
+import { fetchMyReservations } from "@/lib/reservations-api";
 import { emptyFavorites, fetchFavorites } from "@/lib/favorites-api";
 import { EMPTY_MARKETPLACE_HOME, fetchMarketplaceFacets, fetchMarketplaceHome } from "@/lib/marketplace-api";
 import { fetchUserProfileById } from "@/lib/users-api";
@@ -135,15 +136,18 @@ export default async function HomeDashboardPage({ searchParams }: HomePageProps)
     redirect("/dashboard");
   }
 
-  const [services, brands] = await Promise.all([
+  const [services, brands, reservations] = await Promise.all([
     fetchMyServices(accessToken).catch(() => []),
     fetchMyBrands(accessToken).catch(() => []),
+    fetchMyReservations("provider", accessToken).catch(() => []),
   ]);
 
   return (
     <UsoCalendarPage
       services={services}
       brands={brands}
+      reservations={reservations}
+      accessToken={accessToken}
     />
   );
 }

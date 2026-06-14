@@ -23,6 +23,13 @@ export function DashboardShell({ children, contentVariant = "default" }: Dashboa
   const contentDirection = getLocaleDirection(locale);
   const pathname = usePathname();
 
+  // Calendar-style pages render edge-to-edge regardless of the layout default.
+  const FULL_BLEED_PATHS = ["/home", "/rezervations"];
+  const effectiveVariant: ContentVariant =
+    contentVariant === "full" || FULL_BLEED_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}?`))
+      ? "full"
+      : contentVariant;
+
   // Close mobile sidebar on route change
   useEffect(() => {
     queueMicrotask(() => setMobileOpen(false));
@@ -60,7 +67,7 @@ export function DashboardShell({ children, contentVariant = "default" }: Dashboa
         />
       </div>
 
-      <div className={styles.body} data-variant={contentVariant}>
+      <div className={styles.body} data-variant={effectiveVariant}>
         <DashboardHeader
           collapsed={collapsed}
           onToggle={handleToggle}

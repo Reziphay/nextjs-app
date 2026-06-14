@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/atoms";
 import { ServiceReadOnlyDetailView } from "@/components/organisms/services-uso-page/services-uso-page";
+import { BookingModal } from "@/components/organisms/booking-modal";
 import { useLocale } from "@/components/providers/locale-provider";
 import type { Brand } from "@/types";
 import type { Service } from "@/types/service";
@@ -12,24 +14,44 @@ type PublicServiceDetailProps = {
   service: Service;
   brands: Brand[];
   user: AuthenticatedUser;
+  accessToken: string;
 };
 
-export function PublicServiceDetail({ service, brands, user }: PublicServiceDetailProps) {
+export function PublicServiceDetail({ service, brands, user, accessToken }: PublicServiceDetailProps) {
   const router = useRouter();
   const { messages } = useLocale();
+  const [bookingOpen, setBookingOpen] = useState(false);
+
+  const canBook = Boolean(service.duration && service.duration > 0);
 
   return (
-    <ServiceReadOnlyDetailView
-      service={service}
-      brands={brands}
-      user={user}
-      onBack={() => router.push("/home")}
-      showStatus={false}
-      actionSlot={
-        <Button variant="primary" icon="event_available" disabled>
-          {messages.dashboard.reservations}
-        </Button>
-      }
-    />
+    <>
+      <ServiceReadOnlyDetailView
+        service={service}
+        brands={brands}
+        user={user}
+        onBack={() => router.push("/home")}
+        showStatus={false}
+        actionSlot={
+          <Button
+            variant="primary"
+            icon="event_available"
+            disabled={!canBook}
+            onClick={() => setBookingOpen(true)}
+          >
+            {messages.reservations.book}
+          </Button>
+        }
+      />
+      <BookingModal
+        serviceId={service.id}
+        serviceTitle={service.title}
+        serviceDuration={service.duration}
+        accessToken={accessToken}
+        open={bookingOpen}
+        onOpenChange={setBookingOpen}
+        onBooked={() => router.push("/rezervations")}
+      />
+    </>
   );
 }

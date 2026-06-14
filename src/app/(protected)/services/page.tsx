@@ -149,6 +149,7 @@ export default async function ServicesPage({
       <PublicServiceDetail
         service={service}
         brands={brands}
+        accessToken={accessToken}
         user={{
           id: owner.id,
           email: owner.email,

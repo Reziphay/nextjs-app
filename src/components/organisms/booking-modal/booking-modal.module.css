@@ -1,0 +1,199 @@
+.dialog {
+  width: min(100%, 44rem);
+}
+
+.subtitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.metaChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--general-border-radius-pill);
+  background: var(--app-bg-surface-muted);
+  color: var(--app-text-muted);
+  font-size: var(--font-size-extra-small);
+  font-weight: 500;
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 14px 0 4px;
+  padding: 0 1.714rem;
+}
+
+@media (min-width: 600px) {
+  .layout {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+/* ─── Calendar pane ─── */
+.calendarPane {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.calendar {
+  --cell-size: 2.5rem;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-card);
+  background: var(--app-bg-surface-strong);
+  padding: 6px;
+}
+
+/* Day-picker polish via design tokens */
+.calendar :global(.rdp-day_button:hover) {
+  background: var(--app-bg-primary-soft);
+  border-radius: var(--general-border-radius-pill);
+}
+.calendar :global([data-selected="true"] .rdp-day_button),
+.calendar :global(.rdp-selected .rdp-day_button) {
+  background: var(--app-primary);
+  color: var(--app-text-inverse);
+  border-radius: var(--general-border-radius-pill);
+}
+.calendar :global(.rdp-today:not([data-selected="true"]) .rdp-day_button) {
+  color: var(--app-primary-soft);
+  font-weight: 700;
+}
+
+/* ─── Slots pane ─── */
+.slotsPane {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 600px) {
+  .slotsPane {
+    border-left: 1px solid var(--app-border-soft);
+    padding-left: 18px;
+  }
+}
+
+.slotsHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.slotsDate {
+  font-size: var(--font-size-medium);
+  font-weight: 600;
+  color: var(--app-text-strong);
+  text-transform: capitalize;
+}
+
+.slotsCount {
+  flex-shrink: 0;
+  font-size: var(--font-size-extra-small);
+  color: var(--app-text-muted);
+}
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.groupLabel {
+  font-size: var(--font-size-extra-small);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--app-text-subtle);
+}
+
+.slotGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  gap: 8px;
+}
+
+.slot {
+  padding: 9px 4px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--general-border-radius-pill);
+  background: var(--app-bg-surface);
+  color: var(--app-text-strong);
+  font-size: var(--font-size-small);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.slot:hover {
+  border-color: var(--app-primary);
+  transform: translateY(-1px);
+}
+
+.slotActive {
+  background: var(--app-primary);
+  border-color: var(--app-primary);
+  color: var(--app-text-inverse);
+}
+
+.slotActive:hover {
+  transform: none;
+}
+
+/* ─── States ─── */
+.placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 220px;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+  text-align: center;
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--app-border-soft);
+  border-top-color: var(--app-primary);
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error {
+  color: var(--app-error);
+  font-size: var(--font-size-small);
+  margin-top: 8px;
+  padding: 0 1.714rem;
+}
