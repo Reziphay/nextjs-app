@@ -105,6 +105,10 @@ function createFontFamily(markup: string) {
 const fontSizeScale = {
   extraSmall: "clamp(0.75rem, 0.73rem + 0.14vw, 0.8125rem)",
   small: "clamp(0.875rem, 0.84rem + 0.18vw, 0.9375rem)",
+  // Body default (sits between small and medium). Previously referenced as
+  // `--font-size-base` across ~20 styles but never defined → fell back to
+  // inherited sizes, causing inconsistent text. Now an explicit scale step.
+  base: "clamp(0.9375rem, 0.9rem + 0.18vw, 1rem)",
   medium: "clamp(1rem, 0.97rem + 0.24vw, 1.125rem)",
   large: "clamp(1.25rem, 1.14rem + 0.55vw, 1.5rem)",
   extraLarge: "clamp(2.75rem, 2.15rem + 2.4vw, 5rem)",
@@ -125,6 +129,7 @@ export const typographyVariables = {
   "--font-family-base": typographyTheme.fontFamilyBase,
   "--font-size-extra-small": typographyTheme.fontSizes.extraSmall,
   "--font-size-small": typographyTheme.fontSizes.small,
+  "--font-size-base": typographyTheme.fontSizes.base,
   "--font-size-medium": typographyTheme.fontSizes.medium,
   "--font-size-large": typographyTheme.fontSizes.large,
   "--font-size-extra-large": typographyTheme.fontSizes.extraLarge,

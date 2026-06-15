@@ -76,7 +76,7 @@
   border: 1px solid var(--app-border-soft);
   background: var(--app-bg-surface);
   color: var(--app-text-muted);
-  font-size: 0.72rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
 }
 
@@ -164,7 +164,7 @@
   border-radius: 999px;
   background: var(--app-bg-surface-strong);
   color: var(--app-text-muted);
-  font-size: 0.68rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
 }
 
@@ -305,7 +305,7 @@
   border-radius: 999px;
   background: var(--app-bg-surface);
   color: var(--app-text-muted);
-  font-size: 0.68rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
 }
 
@@ -464,7 +464,7 @@
   max-width: 5.6rem;
   overflow: hidden;
   color: var(--app-text-strong);
-  font-size: 0.72rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
   line-height: 1.15;
   text-overflow: ellipsis;
@@ -476,7 +476,7 @@
   align-items: center;
   gap: 0.18rem;
   color: var(--app-warning);
-  font-size: 0.68rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
 }
 
@@ -548,7 +548,7 @@
   border-radius: 999px;
   background: rgb(255 255 255 / 0.88);
   color: rgb(20 20 20);
-  font-size: 0.68rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
   white-space: nowrap;
   overflow: hidden;
@@ -614,7 +614,7 @@
   align-items: center;
   gap: 0.28rem;
   color: var(--app-text-muted);
-  font-size: 0.68rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 700;
   text-decoration: none;
   border-radius: 999px;
@@ -679,7 +679,7 @@
   display: inline-flex;
   margin-bottom: 0.35rem;
   color: var(--app-primary);
-  font-size: 0.72rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
 }
 
@@ -730,8 +730,9 @@
   }
 
   /* Arrows sit outside the rail (negative offsets) which overflows the viewport
-     on small screens — hide them and rely on touch swipe instead. */
+     on small screens — hide them and rely on touch swipe instead. !important
+     beats the Button component's own `display` (CSS load-order otherwise wins). */
   .railArrow {
-    display: none;
+    display: none !important;
   }
 }

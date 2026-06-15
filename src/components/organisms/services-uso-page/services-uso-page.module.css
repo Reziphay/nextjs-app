@@ -145,7 +145,7 @@
   top: 0.625rem;
   right: 0.625rem;
   z-index: 1;
-  font-size: 0.68rem;
+  font-size: var(--font-size-extra-small);
   letter-spacing: 0.03em;
   box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 0.14);
   backdrop-filter: blur(6px);
@@ -207,7 +207,7 @@
   border-radius: var(--general-border-radius-pill);
   background: var(--app-bg-primary-soft);
   color: var(--app-primary);
-  font-size: 0.7rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 700;
   white-space: nowrap;
   line-height: 1.4;
@@ -220,7 +220,7 @@
   border-radius: var(--general-border-radius-pill);
   background: var(--app-bg-surface-strong);
   color: var(--app-text-muted);
-  font-size: 0.7rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 600;
   letter-spacing: 0.02em;
   border: 1px solid var(--app-border-soft);
@@ -499,7 +499,7 @@
   background: var(--app-bg-surface-strong);
   border: 1px solid var(--app-border-soft);
   color: var(--app-text-muted);
-  font-size: 0.7rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 600;
 }
 

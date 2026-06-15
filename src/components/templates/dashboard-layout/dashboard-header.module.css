@@ -298,13 +298,8 @@
     gap: 0.429rem;
   }
 
+  /* Search lives in the bottom nav on mobile — hide the header search entirely. */
   .headerSearch {
-    width: 2rem;
-    padding: 0;
-    justify-content: center;
-  }
-
-  .headerSearch span {
     display: none;
   }
 

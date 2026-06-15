@@ -79,7 +79,7 @@
 
 .metaLabel {
   color: var(--app-primary);
-  font-size: 0.7rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
   letter-spacing: 0.18em;
   text-transform: uppercase;

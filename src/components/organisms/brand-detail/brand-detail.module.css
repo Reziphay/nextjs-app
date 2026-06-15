@@ -348,7 +348,7 @@
 
 .logoStatLabel {
   color: var(--app-primary);
-  font-size: 0.68rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -792,7 +792,7 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--app-primary-faint) 70%, var(--brand-surface-base) 30%);
   color: var(--app-primary);
-  font-size: 0.72rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -882,7 +882,7 @@
 
 .branchTeamMetric span {
   color: var(--brand-text-subtle);
-  font-size: 0.72rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -979,7 +979,7 @@
 
 .branchDialogLabel {
   color: var(--app-primary);
-  font-size: 0.72rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -1399,7 +1399,7 @@
     grid-area: identity;
   }
 
-  .serviceBranchCell {
+  .serviceProvidersCell {
     grid-area: branch;
   }
 
@@ -1618,7 +1618,7 @@
   .availabilityBadge {
     min-height: 1.85rem;
     padding: 0.3rem 0.6rem;
-    font-size: 0.72rem;
+    font-size: var(--font-size-extra-small);
   }
 
   .branchAddress {
@@ -1822,7 +1822,7 @@
   border: 1px solid color-mix(in srgb, var(--app-primary) 14%, transparent);
   background: color-mix(in srgb, var(--brand-accent-faint) 78%, var(--brand-surface-base) 22%);
   color: var(--brand-accent-strong);
-  font-size: 0.72rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
@@ -1922,7 +1922,7 @@
   border-radius: 999px;
   background: var(--brand-surface-overlay-soft);
   color: var(--app-text-subtle);
-  font-size: 0.72rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
 }
 
@@ -2093,14 +2093,14 @@
   min-width: 2.45rem;
   min-height: 1.55rem;
   padding: 0.22rem 0.5rem;
-  font-size: 0.68rem;
+  font-size: var(--font-size-extra-small);
 }
 
 .assignmentDataTable .serviceDurationPill {
   min-height: 1.55rem;
   gap: 0.22rem;
   padding: 0.22rem 0.35rem;
-  font-size: 0.68rem;
+  font-size: var(--font-size-extra-small);
   background: transparent;
 }
 
@@ -2108,7 +2108,7 @@
   min-height: 1.9rem;
   padding: 0.34rem 0.48rem;
   border-radius: calc(var(--general-border-radius) - 0.25rem);
-  font-size: 0.68rem;
+  font-size: var(--font-size-extra-small);
 }
 
 .assignmentDataTable .assignmentActions > button svg {
@@ -2162,7 +2162,7 @@
   min-width: 1.5rem;
   height: 1.5rem;
   color: var(--brand-text-strong);
-  font-size: 0.72rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 900;
   line-height: 1;
 }
@@ -2171,7 +2171,7 @@
   display: block;
   min-width: 0;
   color: var(--brand-text-body);
-  font-size: 0.7rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 750;
   line-height: 1.35;
   white-space: nowrap;
@@ -2192,7 +2192,7 @@
 }
 
 .assignmentProfileCell span {
-  font-size: 0.7rem;
+  font-size: var(--font-size-extra-small);
   line-height: 1.2;
 }
 
@@ -2222,7 +2222,7 @@
 
 .assignmentEmptyCell {
   color: var(--brand-text-muted);
-  font-size: 0.7rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
 }
 
@@ -2450,7 +2450,7 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--app-primary-faint) 85%, var(--brand-surface-base) 15%);
   color: var(--app-primary);
-  font-size: 0.7rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
   letter-spacing: 0.04em;
   line-height: 1.25;
@@ -2482,4 +2482,44 @@
   border-color: color-mix(in srgb, var(--app-error) 35%, var(--app-border-soft));
   background: color-mix(in srgb, var(--app-error) 12%, var(--app-bg-surface));
   color: var(--app-error);
+}
+
+/* ── Mobile services table (placed at EOF so it wins over the base
+   .servicesTableHead / .serviceRow grid definitions declared later in the file
+   than the earlier @media block, which the cascade would otherwise ignore). ── */
+@media (max-width: 640px) {
+  .servicesTableHead {
+    display: none;
+  }
+
+  .serviceRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "identity price"
+      "providers duration";
+    gap: 0.6rem 0.9rem;
+    align-items: start;
+    padding: 0.85rem 1rem;
+  }
+
+  .serviceRow .serviceIdentity {
+    grid-area: identity;
+    min-width: 0;
+  }
+
+  .serviceRow .serviceProvidersCell {
+    grid-area: providers;
+    justify-content: flex-start;
+  }
+
+  .serviceRow .servicePriceCell {
+    grid-area: price;
+    justify-self: end;
+    justify-content: flex-end;
+  }
+
+  .serviceRow .serviceDurationCell {
+    grid-area: duration;
+    justify-content: flex-start;
+  }
 }

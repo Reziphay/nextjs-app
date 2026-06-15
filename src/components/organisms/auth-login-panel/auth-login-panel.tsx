@@ -166,7 +166,7 @@ export function AuthLoginPanel() {
               <FieldLabel htmlFor="password" required>
                 {login.passwordLabel}
               </FieldLabel>
-              <Button variant="link" type="button">
+              <Button variant="link" type="button" className={styles.forgotLink}>
                 {login.forgotPassword}
               </Button>
             </div>

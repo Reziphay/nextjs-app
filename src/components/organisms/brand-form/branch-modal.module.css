@@ -108,7 +108,7 @@
   border: 1px solid color-mix(in srgb, var(--app-primary) 18%, transparent);
   background: color-mix(in srgb, var(--app-primary-faint) 68%, white 32%);
   color: var(--app-primary);
-  font-size: 0.72rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -179,7 +179,7 @@
 
 .identityFact span {
   color: var(--app-text-muted);
-  font-size: 0.72rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;

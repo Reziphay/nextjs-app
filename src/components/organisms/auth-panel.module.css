@@ -130,4 +130,10 @@
     align-items: flex-start;
     flex-direction: column;
   }
+
+  /* Forgot-password isn't built yet; hide it on mobile where it wraps awkwardly
+     between the label and the input. */
+  .forgotLink {
+    display: none;
+  }
 }

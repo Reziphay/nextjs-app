@@ -122,7 +122,7 @@
   margin: 0 0 0.375rem;
   padding: 0 0.571rem;
   color: var(--app-text-subtle);
-  font-size: 0.65rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;

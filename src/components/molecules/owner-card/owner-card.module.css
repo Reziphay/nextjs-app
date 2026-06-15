@@ -86,7 +86,7 @@
 
 .roleLabel {
   color: var(--app-text-subtle);
-  font-size: 0.65rem;
+  font-size: var(--font-size-extra-small);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -115,7 +115,7 @@
 .compact .subtitle,
 .compact .ratingValue,
 .compact .ratingCount {
-  font-size: 0.7rem;
+  font-size: var(--font-size-extra-small);
 }
 
 .compact .chevron {
