@@ -130,6 +130,17 @@ export type PublicUserProfile = Pick<
   UserSocialLinks & {
     created_at: string;
     updated_at: string;
+    // Rating aggregates: provider_* = ratings a USO received from customers;
+    // customer_* = ratings a UCR received from providers.
+    provider_rating?: number | null;
+    provider_rating_count?: number;
+    customer_rating?: number | null;
+    customer_rating_count?: number;
+    // Viewer's own rating of this user + whether the viewer may rate them.
+    my_provider_rating?: number | null;
+    my_customer_rating?: number | null;
+    can_rate_provider?: boolean;
+    can_rate_customer?: boolean;
   };
 
 export type AccountUserProfile = UserProfile | PublicUserProfile;

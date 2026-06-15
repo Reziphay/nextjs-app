@@ -1,7 +1,15 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Button } from "@/components/atoms";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  Button,
+} from "@/components/atoms";
 import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
 import { confirmReservation, rejectReservation } from "@/lib/reservations-api";
@@ -21,6 +29,9 @@ export function PendingRequestsPanel({ reservations, accessToken, onUpdated, onJ
   const rt = messages.reservations;
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<Reservation | null>(null);
+  const [reason, setReason] = useState("");
+  const reasonValid = reason.trim().length >= 20;
 
   const pending = reservations.filter((r) => r.status === "PENDING");
 
@@ -69,7 +80,7 @@ export function PendingRequestsPanel({ reservations, accessToken, onUpdated, onJ
                 <Button
                   variant="ghost"
                   size="small"
-                  onClick={() => act(r.id, () => rejectReservation(r.id, accessToken))}
+                  onClick={() => { setRejectTarget(r); setReason(""); }}
                   disabled={busyId === r.id}
                 >
                   {rt.actionReject}
@@ -88,6 +99,49 @@ export function PendingRequestsPanel({ reservations, accessToken, onUpdated, onJ
         })}
       </ul>
       {error && <p className={styles.error}>{error}</p>}
+
+      <AlertDialog open={Boolean(rejectTarget)} onOpenChange={(o) => { if (!o) { setRejectTarget(null); setReason(""); } }}>
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{rt.cancelConfirmTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{rt.cancelConfirmDescription}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className={styles.reasonField}>
+            <label className={styles.reasonLabel} htmlFor="pending-reject-reason">{rt.cancelReasonLabel}</label>
+            <textarea
+              id="pending-reject-reason"
+              className={styles.reasonTextarea}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder={rt.cancelReasonPlaceholder}
+              rows={3}
+              maxLength={1000}
+            />
+            <span className={`${styles.reasonHint} ${!reasonValid && reason.length > 0 ? styles.reasonHintError : ""}`}>
+              {reasonValid ? `${reason.trim().length}/1000` : rt.cancelReasonHint}
+            </span>
+          </div>
+          <AlertDialogFooter>
+            <Button variant="ghost" onClick={() => { setRejectTarget(null); setReason(""); }}>
+              {rt.close}
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={!reasonValid || busyId !== null}
+              isLoading={busyId !== null}
+              onClick={() => {
+                const target = rejectTarget;
+                if (!target) return;
+                void act(target.id, () => rejectReservation(target.id, accessToken, reason.trim()));
+                setRejectTarget(null);
+                setReason("");
+              }}
+            >
+              {rt.actionCancel}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -92,6 +92,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
       brands={brands}
       services={services}
       assignedServices={assignedServices}
+      accessToken={accessToken}
     />
   );
 }

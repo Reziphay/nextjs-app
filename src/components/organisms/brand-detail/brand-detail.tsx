@@ -276,7 +276,8 @@ export function BrandDetail({
   const canRate =
     currentUser?.type === "ucr" &&
     brandState.status === "ACTIVE" &&
-    !isOwner;
+    !isOwner &&
+    brandState.can_rate === true;
   const normalizedRating =
     typeof brandState.rating === "number" ? brandState.rating : 0;
   const logoUrl = proxyMediaUrl(brandState.logo_url);

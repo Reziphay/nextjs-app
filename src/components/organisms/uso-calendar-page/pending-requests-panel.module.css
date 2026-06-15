@@ -93,3 +93,46 @@
   color: var(--app-error);
   font-size: var(--font-size-small);
 }
+
+.reasonField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0 8px;
+  padding: 0 1.714rem;
+}
+
+.reasonLabel {
+  font-size: var(--font-size-extra-small);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+.reasonTextarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 4.5rem;
+  padding: 10px 12px;
+  border-radius: var(--general-border-radius);
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface);
+  color: var(--app-text-body);
+  font: inherit;
+  font-size: var(--font-size-small);
+}
+
+.reasonTextarea:focus {
+  outline: none;
+  border-color: var(--app-primary);
+}
+
+.reasonHint {
+  font-size: var(--font-size-extra-small);
+  color: var(--app-text-muted);
+}
+
+.reasonHintError {
+  color: var(--app-error);
+}

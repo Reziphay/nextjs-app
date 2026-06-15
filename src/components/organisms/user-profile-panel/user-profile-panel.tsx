@@ -34,6 +34,10 @@ import {
 } from "@/components/molecules";
 import { AccountBrandsSection } from "@/components/organisms/account-brands-section/account-brands-section";
 import { AccountServicesSection } from "@/components/organisms/account-services-section";
+import { rateProvider, rateCustomer } from "@/lib/reservations-api";
+import { translateBackendErrorMessage } from "@/lib/backend-errors";
+import { Icon } from "@/components/icon";
+import { isAxiosError } from "axios";
 import { useLocale } from "@/components/providers/locale-provider";
 import { getCountryLabel, getCountryOptions } from "@/lib/countries";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -65,6 +69,8 @@ type UserProfilePanelProps = {
   services?: Service[];
   // Brand services this USO is an accepted provider for (not personal services).
   assignedServices?: Service[];
+  // Needed to submit a provider/customer rating from another user's profile.
+  accessToken?: string;
 };
 
 type PendingCropImage = {
@@ -95,6 +101,7 @@ export function UserProfilePanel({
   brands = [],
   services = [],
   assignedServices = [],
+  accessToken,
 }: UserProfilePanelProps) {
   const dispatch = useAppDispatch();
   const { messages, locale } = useLocale();
@@ -111,6 +118,53 @@ export function UserProfilePanel({
   const isAvatarUploading =
     canEdit && accountState.avatarUploadStatus === "loading";
   const hasAvatar = Boolean(profile.avatar_url);
+
+  // Provider/customer rating widget state (only on another user's public profile).
+  const publicProfile = !canEdit ? (user as Extract<AccountUserProfile, { provider_rating?: number | null }>) : null;
+  const isUsoTarget = publicProfile?.type === "uso";
+  const isUcrTarget = publicProfile?.type === "ucr";
+  const aggregateRating = isUsoTarget
+    ? publicProfile?.provider_rating ?? null
+    : isUcrTarget
+      ? publicProfile?.customer_rating ?? null
+      : null;
+  const aggregateCount = isUsoTarget
+    ? publicProfile?.provider_rating_count ?? 0
+    : isUcrTarget
+      ? publicProfile?.customer_rating_count ?? 0
+      : 0;
+  const canRateTarget = Boolean(
+    accessToken &&
+      ((isUsoTarget && publicProfile?.can_rate_provider) ||
+        (isUcrTarget && publicProfile?.can_rate_customer)),
+  );
+  const [myRating, setMyRating] = useState<number | null>(
+    (isUsoTarget ? publicProfile?.my_provider_rating : publicProfile?.my_customer_rating) ?? null,
+  );
+  const [ratingBusy, setRatingBusy] = useState(false);
+  const [ratingMsg, setRatingMsg] = useState<string | null>(null);
+
+  async function handleRateTarget(value: number) {
+    if (!accessToken || !publicProfile || ratingBusy) return;
+    setRatingBusy(true);
+    setRatingMsg(null);
+    const previous = myRating;
+    setMyRating(value);
+    try {
+      if (isUsoTarget) await rateProvider(publicProfile.id, value, accessToken);
+      else await rateCustomer(publicProfile.id, value, accessToken);
+      setRatingMsg(p.ratingSaved);
+    } catch (err) {
+      setMyRating(previous);
+      const apiMessage = isAxiosError(err)
+        ? (err.response?.data as { message?: string } | undefined)?.message
+        : undefined;
+      setRatingMsg(translateBackendErrorMessage(apiMessage, messages.backendErrors) ?? p.ratingError);
+    } finally {
+      setRatingBusy(false);
+    }
+  }
+
   const countryOptions: readonly ComboboxOption[] = useMemo(
     () => getCountryOptions(locale),
     [locale],
@@ -746,6 +800,49 @@ export function UserProfilePanel({
           </dl>
         </section>
       </div>
+
+      {!canEdit && (isUsoTarget || isUcrTarget) ? (
+        <section className={styles.ratingCard}>
+          <div className={styles.ratingHead}>
+            <h2 className={styles.cardTitle}>
+              {isUsoTarget ? p.providerRatingTitle : p.customerRatingTitle}
+            </h2>
+            <div className={styles.ratingAggregate}>
+              <Icon icon="star" size={18} />
+              <strong>{aggregateRating !== null ? aggregateRating.toFixed(1) : "—"}</strong>
+              {aggregateCount > 0 ? (
+                <span className={styles.ratingCount}>({aggregateCount})</span>
+              ) : null}
+            </div>
+          </div>
+          {canRateTarget ? (
+            <div className={styles.ratingActions}>
+              <span className={styles.ratingLead}>
+                {myRating ? `${p.yourRating}: ${myRating}/5` : p.rateThisUser}
+              </span>
+              <div className={styles.starRow}>
+                {[1, 2, 3, 4, 5].map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    className={styles.starButton}
+                    onClick={() => handleRateTarget(v)}
+                    disabled={ratingBusy}
+                    aria-label={`${v}/5`}
+                  >
+                    <Icon
+                      icon="star"
+                      size={26}
+                      className={v <= (myRating ?? 0) ? styles.starActive : styles.starInactive}
+                    />
+                  </button>
+                ))}
+              </div>
+              {ratingMsg ? <p className={styles.ratingMsg}>{ratingMsg}</p> : null}
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       {!canEdit && profile.type === "uso" ? (
         <>

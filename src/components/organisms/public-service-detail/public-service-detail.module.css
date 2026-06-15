@@ -1,0 +1,42 @@
+.ratingCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px;
+  border-radius: var(--general-border-radius);
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface);
+  margin-bottom: 16px;
+}
+
+.ratingLead {
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  color: var(--app-text-body);
+}
+
+.starRow {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.starButton {
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.starActive {
+  color: var(--app-warning, #f5a623);
+}
+
+.starInactive {
+  color: var(--app-border-strong, #c9c9c9);
+}
+
+.ratingMsg {
+  font-size: var(--font-size-extra-small);
+  color: var(--app-text-muted);
+}

@@ -50,6 +50,10 @@ export function ReservationDetailPopup({ reservation, accessToken, mode = "provi
   const c = messages.calendar;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Cancel/reject requires a reason of at least 20 chars (shown to the counterparty).
+  const [cancelMode, setCancelMode] = useState<null | "reject" | "cancel">(null);
+  const [reason, setReason] = useState("");
+  const reasonValid = reason.trim().length >= 20;
 
   const run = useCallback(
     async (fn: () => Promise<Reservation>) => {
@@ -105,6 +109,13 @@ export function ReservationDetailPopup({ reservation, accessToken, mode = "provi
             <Badge variant={STATUS_VARIANT[reservation.status]}>{statusLabel(reservation.status)}</Badge>
           </div>
 
+          {reservation.cancel_reason ? (
+            <div className={styles.row}>
+              <span className={styles.label}>{t.cancelReasonLabel}</span>
+              <span className={styles.value}>{reservation.cancel_reason}</span>
+            </div>
+          ) : null}
+
           <button
             type="button"
             className={styles.serviceLink}
@@ -115,14 +126,52 @@ export function ReservationDetailPopup({ reservation, accessToken, mode = "provi
           </button>
         </div>
 
+        {cancelMode ? (
+          <div className={styles.reasonField}>
+            <label className={styles.reasonLabel} htmlFor="resv-cancel-reason">{t.cancelReasonLabel}</label>
+            <textarea
+              id="resv-cancel-reason"
+              className={styles.reasonTextarea}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder={t.cancelReasonPlaceholder}
+              rows={3}
+              maxLength={1000}
+            />
+            <span className={`${styles.reasonHint} ${!reasonValid && reason.length > 0 ? styles.reasonHintError : ""}`}>
+              {reasonValid ? `${reason.trim().length}/1000` : t.cancelReasonHint}
+            </span>
+          </div>
+        ) : null}
+
         {error && <p className={styles.error}>{error}</p>}
 
         <AlertDialogFooter>
-          {isProvider ? (
+          {cancelMode ? (
+            <>
+              <Button variant="ghost" onClick={() => { setCancelMode(null); setReason(""); }} disabled={busy}>
+                {t.close}
+              </Button>
+              <Button
+                variant="destructive"
+                disabled={!reasonValid || busy}
+                isLoading={busy}
+                onClick={() =>
+                  run(() =>
+                    cancelMode === "reject"
+                      ? rejectReservation(reservation.id, accessToken, reason.trim())
+                      : cancelReservation(reservation.id, accessToken, reason.trim()),
+                  )
+                }
+              >
+                {t.actionCancel}
+              </Button>
+            </>
+          ) : isProvider ? (
             <>
               {reservation.status === "PENDING" && (
                 <>
-                  <Button variant="destructive" onClick={() => run(() => rejectReservation(reservation.id, accessToken))} disabled={busy}>
+                  <Button variant="destructive" onClick={() => setCancelMode("reject")} disabled={busy}>
                     {t.actionReject}
                   </Button>
                   <Button variant="primary" onClick={() => run(() => confirmReservation(reservation.id, accessToken))} isLoading={busy}>
@@ -135,7 +184,7 @@ export function ReservationDetailPopup({ reservation, accessToken, mode = "provi
                   <Button variant="ghost" onClick={() => run(() => markNoShow(reservation.id, accessToken))} disabled={busy}>
                     {t.actionNoShow}
                   </Button>
-                  <Button variant="destructive" onClick={() => run(() => rejectReservation(reservation.id, accessToken))} disabled={busy}>
+                  <Button variant="destructive" onClick={() => setCancelMode("reject")} disabled={busy}>
                     {t.actionCancel}
                   </Button>
                   <Button variant="primary" onClick={() => run(() => completeReservation(reservation.id, accessToken))} isLoading={busy}>
@@ -149,10 +198,21 @@ export function ReservationDetailPopup({ reservation, accessToken, mode = "provi
             </>
           ) : (
             <>
-              {reservation.status === "PENDING" || reservation.status === "CONFIRMED" ? (
+              {reservation.status === "PENDING" ? (
                 <>
                   <Button variant="ghost" onClick={onClose} disabled={busy}>{t.close}</Button>
-                  <Button variant="destructive" onClick={() => run(() => cancelReservation(reservation.id, accessToken))} isLoading={busy}>
+                  <Button
+                    variant="destructive"
+                    onClick={() => run(() => cancelReservation(reservation.id, accessToken))}
+                    isLoading={busy}
+                  >
+                    {t.actionWithdraw}
+                  </Button>
+                </>
+              ) : reservation.status === "CONFIRMED" ? (
+                <>
+                  <Button variant="ghost" onClick={onClose} disabled={busy}>{t.close}</Button>
+                  <Button variant="destructive" onClick={() => setCancelMode("cancel")} disabled={busy}>
                     {t.actionCancel}
                   </Button>
                 </>

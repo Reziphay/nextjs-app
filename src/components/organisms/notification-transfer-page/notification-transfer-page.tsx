@@ -134,7 +134,10 @@ function localizeReservationNotif(
   const svc = typeof item.data.service_title === "string" ? item.data.service_title : "";
   const starts = typeof item.data.starts_at === "string" ? item.data.starts_at : "";
   const when = starts ? `${starts.slice(0, 10)} · ${starts.slice(11, 16)}` : "";
-  const body = [svc, when].filter(Boolean).join(" · ");
+  const reason = typeof item.data.cancel_reason === "string" ? item.data.cancel_reason : "";
+  const head = [svc, when].filter(Boolean).join(" · ");
+  // For cancellations, append the reason on its own line so the recipient sees why.
+  const body = reason ? [head, `${r.cancelReasonLabel}: ${reason}`].filter(Boolean).join("\n") : head;
   return { title, body };
 }
 

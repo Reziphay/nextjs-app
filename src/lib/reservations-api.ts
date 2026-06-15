@@ -35,6 +35,34 @@ export async function createReservation(
   return reservation;
 }
 
+// UCR rates the USO (provider) they had a completed reservation with.
+export async function rateProvider(
+  providerUserId: string,
+  value: number,
+  accessToken: string,
+): Promise<void> {
+  const client = createApiClient({ accessToken });
+  await client.request({
+    url: `/providers/${providerUserId}/rating`,
+    method: "POST",
+    data: { value },
+  });
+}
+
+// USO rates the UCR (customer) they had a completed reservation with.
+export async function rateCustomer(
+  customerUserId: string,
+  value: number,
+  accessToken: string,
+): Promise<void> {
+  const client = createApiClient({ accessToken });
+  await client.request({
+    url: `/customers/${customerUserId}/rating`,
+    method: "POST",
+    data: { value },
+  });
+}
+
 export async function fetchMyReservations(
   role: ReservationRole,
   accessToken: string,

@@ -79,6 +79,9 @@ export type Brand = {
   rating: number | null;
   rating_count: number;
   my_rating: number | null;
+  // True only when the viewer (a UCR) has a completed reservation for one of the
+  // brand's services and may therefore rate it.
+  can_rate?: boolean;
   // Set on getMyBrands and getBrandById; undefined on public listings.
   viewer_role?: BrandViewerRole;
   viewer_branch_id?: string | null;

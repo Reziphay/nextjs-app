@@ -226,6 +226,7 @@
   color: var(--app-text-muted);
   font-size: var(--font-size-small);
   line-height: 1.65;
+  white-space: pre-line;
 }
 
 .detailGrid {

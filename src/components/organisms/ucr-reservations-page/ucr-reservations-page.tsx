@@ -45,8 +45,12 @@ export function UcrReservationsPage({ reservations, accessToken }: UcrReservatio
   const t = messages.reservations;
   const [items, setItems] = useState(reservations);
   const [cancelTarget, setCancelTarget] = useState<Reservation | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const CANCEL_REASON_MIN = 20;
+  const reasonValid = cancelReason.trim().length >= CANCEL_REASON_MIN;
 
   const statusLabel = useCallback(
     (s: ReservationStatus): string => {
@@ -63,20 +67,30 @@ export function UcrReservationsPage({ reservations, accessToken }: UcrReservatio
     [t],
   );
 
+  // A still-PENDING reservation is "withdrawn" with no reason; a CONFIRMED one
+  // is cancelled and needs a ≥20-char reason.
+  const isPendingTarget = cancelTarget?.status === "PENDING";
+
   const handleCancel = useCallback(async () => {
     if (!cancelTarget) return;
+    if (!isPendingTarget && !reasonValid) return;
     setBusyId(cancelTarget.id);
     setError(null);
     try {
-      const updated = await cancelReservation(cancelTarget.id, accessToken);
+      const updated = await cancelReservation(
+        cancelTarget.id,
+        accessToken,
+        isPendingTarget ? undefined : cancelReason.trim(),
+      );
       setItems((prev) => prev.map((r) => (r.id === updated.id ? { ...r, ...updated } : r)));
       setCancelTarget(null);
+      setCancelReason("");
     } catch {
       setError(t.actionError);
     } finally {
       setBusyId(null);
     }
-  }, [cancelTarget, accessToken, t.actionError]);
+  }, [cancelTarget, isPendingTarget, accessToken, cancelReason, reasonValid, t.actionError]);
 
   return (
     <div className={styles.page}>
@@ -101,6 +115,11 @@ export function UcrReservationsPage({ reservations, accessToken }: UcrReservatio
                       {t.withProvider}: {r.provider.first_name} {r.provider.last_name}
                     </span>
                   )}
+                  {r.cancel_reason && (
+                    <span className={styles.reason}>
+                      {t.cancelReasonLabel}: {r.cancel_reason}
+                    </span>
+                  )}
                 </div>
                 <div className={styles.cardSide}>
                   <Badge variant={STATUS_VARIANT[r.status]}>{statusLabel(r.status)}</Badge>
@@ -111,7 +130,7 @@ export function UcrReservationsPage({ reservations, accessToken }: UcrReservatio
                       onClick={() => setCancelTarget(r)}
                       isLoading={busyId === r.id}
                     >
-                      {t.actionCancel}
+                      {r.status === "PENDING" ? t.actionWithdraw : t.actionCancel}
                     </Button>
                   )}
                 </div>
@@ -123,18 +142,44 @@ export function UcrReservationsPage({ reservations, accessToken }: UcrReservatio
 
       {error && <p className={styles.error}>{error}</p>}
 
-      <AlertDialog open={Boolean(cancelTarget)} onOpenChange={(o) => !o && setCancelTarget(null)}>
+      <AlertDialog open={Boolean(cancelTarget)} onOpenChange={(o) => { if (!o) { setCancelTarget(null); setCancelReason(""); } }}>
         <AlertDialogContent size="sm">
           <AlertDialogHeader>
-            <AlertDialogTitle>{t.cancelConfirmTitle}</AlertDialogTitle>
-            <AlertDialogDescription>{t.cancelConfirmDescription}</AlertDialogDescription>
+            <AlertDialogTitle>
+              {isPendingTarget ? t.withdrawConfirmTitle : t.cancelConfirmTitle}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isPendingTarget ? t.withdrawConfirmDescription : t.cancelConfirmDescription}
+            </AlertDialogDescription>
           </AlertDialogHeader>
+          {!isPendingTarget && (
+            <div className={styles.reasonField}>
+              <label className={styles.reasonLabel} htmlFor="ucr-cancel-reason">{t.cancelReasonLabel}</label>
+              <textarea
+                id="ucr-cancel-reason"
+                className={styles.reasonTextarea}
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder={t.cancelReasonPlaceholder}
+                rows={3}
+                maxLength={1000}
+              />
+              <span className={`${styles.reasonHint} ${!reasonValid && cancelReason.length > 0 ? styles.reasonHintError : ""}`}>
+                {reasonValid ? `${cancelReason.trim().length}/1000` : t.cancelReasonHint}
+              </span>
+            </div>
+          )}
           <AlertDialogFooter>
-            <Button variant="ghost" onClick={() => setCancelTarget(null)}>
-              {t.cancel}
+            <Button variant="ghost" onClick={() => { setCancelTarget(null); setCancelReason(""); }}>
+              {t.close}
             </Button>
-            <Button variant="destructive" onClick={handleCancel} isLoading={busyId !== null}>
-              {t.actionCancel}
+            <Button
+              variant="destructive"
+              onClick={handleCancel}
+              disabled={!isPendingTarget && !reasonValid}
+              isLoading={busyId !== null}
+            >
+              {isPendingTarget ? t.actionWithdraw : t.actionCancel}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

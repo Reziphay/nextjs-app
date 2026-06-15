@@ -64,6 +64,9 @@ export type Service = {
   rating: number | null;
   rating_count: number;
   my_rating: number | null;
+  // True only when the viewer (a UCR) has a completed reservation for this
+  // service and may therefore rate it.
+  can_rate?: boolean;
   providers?: ServiceProvider[];
   created_at: string;
   updated_at: string;

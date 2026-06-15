@@ -513,6 +513,7 @@ export type Messages = {
     serviceTableBranch: string;
     serviceTableProviders: string;
     serviceProvidersEmpty: string;
+    rateServicePrompt: string;
     serviceTablePrice: string;
     serviceTableDuration: string;
     // Branch detail studio panel
@@ -1031,6 +1032,12 @@ export type Messages = {
     brandsEmptyTitle: string;
     brandsEmptyDescription: string;
     viewMoreBrands: string;
+    providerRatingTitle: string;
+    customerRatingTitle: string;
+    rateThisUser: string;
+    yourRating: string;
+    ratingSaved: string;
+    ratingError: string;
     servicesSectionTitle: string;
     servicesSectionDescription: string;
     assignedServicesSectionTitle: string;
@@ -1327,6 +1334,12 @@ export type Messages = {
     actionNoShow: string;
     cancelConfirmTitle: string;
     cancelConfirmDescription: string;
+    actionWithdraw: string;
+    withdrawConfirmTitle: string;
+    withdrawConfirmDescription: string;
+    cancelReasonLabel: string;
+    cancelReasonPlaceholder: string;
+    cancelReasonHint: string;
     actionError: string;
     statusPending: string;
     statusConfirmed: string;
