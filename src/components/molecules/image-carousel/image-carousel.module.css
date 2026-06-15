@@ -4,6 +4,7 @@
 
 .stage {
   position: relative;
+  width: 100%;
   min-height: 18rem;
   aspect-ratio: 16 / 9;
   overflow: hidden;

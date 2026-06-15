@@ -1370,6 +1370,8 @@ export const enMessages: Messages = {
     bookTitle: "Pick a time",
     confirmBooking: "Confirm booking",
     cancel: "Cancel",
+    next: "Next",
+    back: "Back",
     pickDate: "Select a date to start.",
     selectBranch: "Select a branch",
     selectProvider: "Select a provider",

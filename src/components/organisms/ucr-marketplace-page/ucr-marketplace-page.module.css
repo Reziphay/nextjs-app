@@ -701,6 +701,10 @@
 @media (max-width: 56rem) {
   .wrapper {
     padding: 1rem 1rem 6rem;
+    /* Rail arrows are hidden on mobile; clip any residual horizontal overflow
+       so the whole page never scrolls sideways. `clip` (unlike hidden) does not
+       force the vertical axis to auto. */
+    overflow-x: clip;
   }
 
   .hero,
@@ -725,16 +729,9 @@
     flex-direction: column;
   }
 
+  /* Arrows sit outside the rail (negative offsets) which overflows the viewport
+     on small screens — hide them and rely on touch swipe instead. */
   .railArrow {
-    width: 1.9rem;
-    height: 1.9rem;
-  }
-
-  .railArrowLeft {
-    left: -3.55rem;
-  }
-
-  .railArrowRight {
-    right: -3.55rem;
+    display: none;
   }
 }

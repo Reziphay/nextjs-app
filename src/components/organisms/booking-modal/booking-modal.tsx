@@ -76,10 +76,25 @@ export function BookingModal({
   const [error, setError] = useState<string | null>(null);
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(null);
+  // Mobile splits the brand-service flow into two steps (selection → schedule).
+  const [step, setStep] = useState<"select" | "schedule">("select");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 600px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   // Brand services require an accepted provider; direct services resolve the
   // owner server-side, so selection UI is skipped.
   const needsSelection = isBrandService && providers.length > 0;
+  // Two-step layout only when on mobile AND a brand service (has selection).
+  const twoStep = isMobile && needsSelection;
+  const showSelection = !twoStep || step === "select";
+  const showScheduler = !twoStep || step === "schedule";
 
   const today = useMemo(() => {
     const d = new Date();
@@ -196,6 +211,7 @@ export function BookingModal({
     setSelectedSlot(null);
     setSelectedBranchId(null);
     setSelectedProviderId(null);
+    setStep("select");
   }
 
   function handleSelectBranch(branchId: string) {
@@ -294,6 +310,7 @@ export function BookingModal({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
+        <div className={styles.body}>
         {isBrandService && providers.length === 0 ? (
           <div className={styles.placeholder}>
             <Icon icon="person_off" size={28} color="current" />
@@ -302,7 +319,7 @@ export function BookingModal({
           </div>
         ) : (
           <>
-            {needsSelection ? (
+            {needsSelection && showSelection ? (
               <div className={styles.selection}>
                 <div className={styles.selectGroup}>
                   <span className={styles.selectLabel}>{t.selectBranch}</span>
@@ -352,6 +369,7 @@ export function BookingModal({
               </div>
             ) : null}
 
+            {showScheduler ? (
             <div className={styles.layout}>
               <div className={styles.calendarPane}>
                 <Calendar
@@ -415,24 +433,43 @@ export function BookingModal({
                   )}
                 </div>
               </div>
+            ) : null}
           </>
         )}
 
         {error && <p className={styles.error}>{error}</p>}
+        </div>
 
         <AlertDialogFooter>
-          <Button variant="ghost" onClick={() => handleOpenChange(false)} disabled={booking}>
-            {t.cancel}
-          </Button>
-          <Button
-            variant="primary"
-            icon="event_available"
-            onClick={handleConfirm}
-            disabled={!selectedSlot || booking}
-            isLoading={booking}
-          >
-            {t.confirmBooking}
-          </Button>
+          {twoStep && step === "schedule" ? (
+            <Button variant="ghost" onClick={() => setStep("select")} disabled={booking}>
+              {t.back}
+            </Button>
+          ) : (
+            <Button variant="ghost" onClick={() => handleOpenChange(false)} disabled={booking}>
+              {t.cancel}
+            </Button>
+          )}
+          {twoStep && step === "select" ? (
+            <Button
+              variant="primary"
+              icon="arrow_forward"
+              onClick={() => setStep("schedule")}
+              disabled={!selectedProviderId}
+            >
+              {t.next}
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              icon="event_available"
+              onClick={handleConfirm}
+              disabled={!selectedSlot || booking}
+              isLoading={booking}
+            >
+              {t.confirmBooking}
+            </Button>
+          )}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

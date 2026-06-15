@@ -1356,6 +1356,8 @@ export const ruMessages: Messages = {
     bookTitle: "Выберите время",
     confirmBooking: "Подтвердить бронь",
     cancel: "Отмена",
+    next: "Далее",
+    back: "Назад",
     pickDate: "Выберите дату для начала.",
     selectBranch: "Выберите филиал",
     selectProvider: "Выберите специалиста",

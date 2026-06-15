@@ -326,3 +326,11 @@
   color: var(--app-text-muted);
   font-size: var(--font-size-small);
 }
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}

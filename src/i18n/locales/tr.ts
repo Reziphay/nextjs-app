@@ -1243,6 +1243,8 @@ export const trMessages: Messages = {
     bookTitle: "Saat seç",
     confirmBooking: "Rezervasyonu onayla",
     cancel: "İptal",
+    next: "İleri",
+    back: "Geri",
     pickDate: "Başlamak için bir tarih seçin.",
     selectBranch: "Şube seçin",
     selectProvider: "Uzman seçin",

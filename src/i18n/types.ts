@@ -1310,6 +1310,8 @@ export type Messages = {
     bookTitle: string;
     confirmBooking: string;
     cancel: string;
+    next: string;
+    back: string;
     pickDate: string;
     selectBranch: string;
     selectProvider: string;

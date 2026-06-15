@@ -1370,6 +1370,8 @@ export const azMessages: Messages = {
     bookTitle: "Vaxt seç",
     confirmBooking: "Rezervasiyanı təsdiqlə",
     cancel: "Ləğv et",
+    next: "Növbəti",
+    back: "Geri",
     pickDate: "Başlamaq üçün tarix seçin.",
     selectBranch: "Filial seçin",
     selectProvider: "Xidmət göstərən",
