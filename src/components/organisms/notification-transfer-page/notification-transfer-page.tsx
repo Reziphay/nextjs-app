@@ -135,9 +135,17 @@ function localizeReservationNotif(
   const starts = typeof item.data.starts_at === "string" ? item.data.starts_at : "";
   const when = starts ? `${starts.slice(0, 10)} · ${starts.slice(11, 16)}` : "";
   const reason = typeof item.data.cancel_reason === "string" ? item.data.cancel_reason : "";
+  const codeRaw = typeof item.data.confirmation_code === "string" ? item.data.confirmation_code : "";
+  const code = /^\d{6}$/.test(codeRaw) ? `#${codeRaw.slice(0, 3)}-${codeRaw.slice(3)}` : "";
   const head = [svc, when].filter(Boolean).join(" · ");
-  // For cancellations, append the reason on its own line so the recipient sees why.
-  const body = reason ? [head, `${r.cancelReasonLabel}: ${reason}`].filter(Boolean).join("\n") : head;
+  // Append the cancellation reason (cancellations) or the confirmation code
+  // (confirmations) on its own line for the recipient.
+  const extra = reason
+    ? `${r.cancelReasonLabel}: ${reason}`
+    : code
+      ? `${r.confirmationCodeLabel}: ${code}`
+      : "";
+  const body = extra ? [head, extra].filter(Boolean).join("\n") : head;
   return { title, body };
 }
 

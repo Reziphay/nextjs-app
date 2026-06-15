@@ -80,7 +80,7 @@ async function transition(
   id: string,
   action: "confirm" | "cancel" | "reject" | "complete" | "no-show",
   accessToken: string,
-  body?: { cancel_reason?: string },
+  body?: { cancel_reason?: string; confirmation_code?: string },
 ): Promise<Reservation> {
   const client = createApiClient({ accessToken });
   const response = await client.request<ApiSuccessResponse<Reservation>>({
@@ -102,8 +102,8 @@ export const cancelReservation = (id: string, accessToken: string, reason?: stri
 export const rejectReservation = (id: string, accessToken: string, reason?: string) =>
   transition(id, "reject", accessToken, { cancel_reason: reason });
 
-export const completeReservation = (id: string, accessToken: string) =>
-  transition(id, "complete", accessToken);
+export const completeReservation = (id: string, accessToken: string, confirmationCode: string) =>
+  transition(id, "complete", accessToken, { confirmation_code: confirmationCode });
 
 export const markNoShow = (id: string, accessToken: string) =>
   transition(id, "no-show", accessToken);

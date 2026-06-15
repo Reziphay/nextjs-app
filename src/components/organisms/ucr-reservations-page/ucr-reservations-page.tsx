@@ -115,6 +115,11 @@ export function UcrReservationsPage({ reservations, accessToken }: UcrReservatio
                       {t.withProvider}: {r.provider.first_name} {r.provider.last_name}
                     </span>
                   )}
+                  {r.status === "CONFIRMED" && r.confirmation_code && (
+                    <span className={styles.code}>
+                      {t.confirmationCodeLabel}: #{r.confirmation_code.slice(0, 3)}-{r.confirmation_code.slice(3)}
+                    </span>
+                  )}
                   {r.cancel_reason && (
                     <span className={styles.reason}>
                       {t.cancelReasonLabel}: {r.cancel_reason}

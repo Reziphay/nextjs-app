@@ -12,8 +12,10 @@ import {
   Badge,
   Button,
 } from "@/components/atoms";
+import { isAxiosError } from "axios";
 import { Icon } from "@/components/icon";
 import { useLocale } from "@/components/providers/locale-provider";
+import { translateBackendErrorMessage } from "@/lib/backend-errors";
 import {
   confirmReservation,
   rejectReservation,
@@ -35,6 +37,10 @@ const STATUS_VARIANT: Record<ReservationStatus, BadgeVariant> = {
   NO_SHOW: "outline",
 };
 
+function formatCode(code: string): string {
+  return `#${code.slice(0, 3)}-${code.slice(3)}`;
+}
+
 type Props = {
   reservation: Reservation;
   accessToken: string;
@@ -54,6 +60,10 @@ export function ReservationDetailPopup({ reservation, accessToken, mode = "provi
   const [cancelMode, setCancelMode] = useState<null | "reject" | "cancel">(null);
   const [reason, setReason] = useState("");
   const reasonValid = reason.trim().length >= 20;
+  // Completing requires the UCR's 6-digit confirmation code (anti-fraud).
+  const [completeMode, setCompleteMode] = useState(false);
+  const [code, setCode] = useState("");
+  const codeValid = /^\d{6}$/.test(code);
 
   const run = useCallback(
     async (fn: () => Promise<Reservation>) => {
@@ -61,12 +71,15 @@ export function ReservationDetailPopup({ reservation, accessToken, mode = "provi
       setError(null);
       try {
         onUpdated(await fn());
-      } catch {
-        setError(t.actionError);
+      } catch (err) {
+        const apiMessage = isAxiosError(err)
+          ? (err.response?.data as { message?: string } | undefined)?.message
+          : undefined;
+        setError(translateBackendErrorMessage(apiMessage, messages.backendErrors) ?? t.actionError);
         setBusy(false);
       }
     },
-    [onUpdated, t.actionError],
+    [onUpdated, messages.backendErrors, t.actionError],
   );
 
   const statusLabel = (s: ReservationStatus): string => {
@@ -83,6 +96,18 @@ export function ReservationDetailPopup({ reservation, accessToken, mode = "provi
 
   const when = `${reservation.starts_at.slice(0, 10)} · ${reservation.starts_at.slice(11, 16)}–${reservation.ends_at.slice(11, 16)}`;
   const isProvider = mode === "provider";
+  // No-show is only offered once the slot's start time has arrived/passed.
+  // Slots are stored wall-clock-as-UTC, so compare "now" the same way.
+  const now = new Date();
+  const nowWallMs = Date.UTC(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    now.getHours(),
+    now.getMinutes(),
+    now.getSeconds(),
+  );
+  const hasStarted = nowWallMs >= new Date(reservation.starts_at).getTime();
   const partyLabel = isProvider ? c.detailCustomer : t.withProvider;
   const party = isProvider ? reservation.ucr : reservation.provider;
   const partyName = party ? `${party.first_name} ${party.last_name}` : "—";
@@ -108,6 +133,13 @@ export function ReservationDetailPopup({ reservation, accessToken, mode = "provi
             <span className={styles.label}>{messages.services.tableStatus}</span>
             <Badge variant={STATUS_VARIANT[reservation.status]}>{statusLabel(reservation.status)}</Badge>
           </div>
+
+          {!isProvider && reservation.confirmation_code ? (
+            <div className={styles.row}>
+              <span className={styles.label}>{t.confirmationCodeLabel}</span>
+              <span className={styles.code}>{formatCode(reservation.confirmation_code)}</span>
+            </div>
+          ) : null}
 
           {reservation.cancel_reason ? (
             <div className={styles.row}>
@@ -144,10 +176,40 @@ export function ReservationDetailPopup({ reservation, accessToken, mode = "provi
           </div>
         ) : null}
 
+        {completeMode ? (
+          <div className={styles.reasonField}>
+            <label className={styles.reasonLabel} htmlFor="resv-complete-code">{t.confirmationCodeLabel}</label>
+            <input
+              id="resv-complete-code"
+              className={styles.codeInput}
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              placeholder="123456"
+              inputMode="numeric"
+              maxLength={6}
+            />
+            <span className={styles.reasonHint}>{t.confirmationCodeHint}</span>
+          </div>
+        ) : null}
+
         {error && <p className={styles.error}>{error}</p>}
 
         <AlertDialogFooter>
-          {cancelMode ? (
+          {completeMode ? (
+            <>
+              <Button variant="ghost" onClick={() => { setCompleteMode(false); setCode(""); }} disabled={busy}>
+                {t.close}
+              </Button>
+              <Button
+                variant="primary"
+                disabled={!codeValid || busy}
+                isLoading={busy}
+                onClick={() => run(() => completeReservation(reservation.id, accessToken, code))}
+              >
+                {t.actionComplete}
+              </Button>
+            </>
+          ) : cancelMode ? (
             <>
               <Button variant="ghost" onClick={() => { setCancelMode(null); setReason(""); }} disabled={busy}>
                 {t.close}
@@ -181,13 +243,15 @@ export function ReservationDetailPopup({ reservation, accessToken, mode = "provi
               )}
               {reservation.status === "CONFIRMED" && (
                 <>
-                  <Button variant="ghost" onClick={() => run(() => markNoShow(reservation.id, accessToken))} disabled={busy}>
-                    {t.actionNoShow}
-                  </Button>
+                  {hasStarted && (
+                    <Button variant="ghost" onClick={() => run(() => markNoShow(reservation.id, accessToken))} disabled={busy}>
+                      {t.actionNoShow}
+                    </Button>
+                  )}
                   <Button variant="destructive" onClick={() => setCancelMode("reject")} disabled={busy}>
                     {t.actionCancel}
                   </Button>
-                  <Button variant="primary" onClick={() => run(() => completeReservation(reservation.id, accessToken))} isLoading={busy}>
+                  <Button variant="primary" onClick={() => setCompleteMode(true)} disabled={busy}>
                     {t.actionComplete}
                   </Button>
                 </>

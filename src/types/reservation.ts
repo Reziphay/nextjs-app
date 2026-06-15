@@ -30,6 +30,8 @@ export type Reservation = {
   price_snapshot: number | null;
   currency: string;
   cancel_reason: string | null;
+  // 6-digit code; only the UCR receives it (null for the provider).
+  confirmation_code?: string | null;
   responded_at: string | null;
   created_at: string;
   updated_at: string;

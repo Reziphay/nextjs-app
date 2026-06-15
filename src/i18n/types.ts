@@ -1337,6 +1337,8 @@ export type Messages = {
     actionWithdraw: string;
     withdrawConfirmTitle: string;
     withdrawConfirmDescription: string;
+    confirmationCodeLabel: string;
+    confirmationCodeHint: string;
     cancelReasonLabel: string;
     cancelReasonPlaceholder: string;
     cancelReasonHint: string;

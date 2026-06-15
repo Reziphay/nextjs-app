@@ -91,3 +91,29 @@
 .reasonHintError {
   color: var(--app-error);
 }
+
+.code {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--app-primary);
+}
+
+.codeInput {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--general-border-radius);
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface);
+  color: var(--app-text-body);
+  font: inherit;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+
+.codeInput:focus {
+  outline: none;
+  border-color: var(--app-primary);
+}
