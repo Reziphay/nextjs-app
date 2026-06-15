@@ -2456,3 +2456,30 @@
   line-height: 1.25;
   white-space: nowrap;
 }
+
+.favoriteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  flex-shrink: 0;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 999px;
+  background: var(--app-bg-surface);
+  color: var(--app-text-muted);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.favoriteButton:hover {
+  border-color: color-mix(in srgb, var(--app-error) 40%, var(--app-border-soft));
+  background: color-mix(in srgb, var(--app-error) 9%, var(--app-bg-surface));
+  color: var(--app-error);
+}
+
+.favoriteButton[data-active="true"] {
+  border-color: color-mix(in srgb, var(--app-error) 35%, var(--app-border-soft));
+  background: color-mix(in srgb, var(--app-error) 12%, var(--app-bg-surface));
+  color: var(--app-error);
+}

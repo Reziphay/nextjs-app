@@ -36,6 +36,8 @@ import {
   withdrawServiceAssignment,
 } from "@/lib/services-api";
 import { translateBackendErrorMessage } from "@/lib/backend-errors";
+import { addFavoriteBrand, removeFavoriteBrand } from "@/lib/favorites-api";
+import { RatingInput } from "@/components/molecules/rating-input";
 import { proxyMediaUrl } from "@/lib/media";
 import { selectAuthSession } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
@@ -52,6 +54,7 @@ type BrandDetailProps = {
   currentUserId?: string;
   owner?: PublicUserProfile | null;
   actionSlot?: ReactNode;
+  isFavorited?: boolean;
 };
 
 type BranchFilter = "all" | "open247" | "withContact";
@@ -123,53 +126,6 @@ function StarRating({ rating, max = 5 }: { rating: number; max?: number }) {
   );
 }
 
-function RatingButtonRow({
-  currentRating,
-  isLoading,
-  onSelect,
-}: {
-  currentRating: number | null;
-  isLoading: boolean;
-  onSelect: (value: number) => void;
-}) {
-  return (
-    <div className={styles.ratingButtons}>
-      {Array.from({ length: 5 }, (_, index) => {
-        const value = index + 1;
-        const isActive = value <= (currentRating ?? 0);
-
-        return (
-          <Button
-            variant="unstyled"
-            key={value}
-            type="button"
-            className={`${styles.ratingButton} ${isActive ? styles.ratingButtonActive : ""}`}
-            onClick={() => onSelect(value)}
-            disabled={isLoading}
-            aria-label={`Rate ${value} out of 5`}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-              className={styles.ratingButtonIcon}
-            >
-              <path
-                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                fill={
-                  isActive
-                    ? "var(--brand-warning)"
-                    : "var(--brand-border-strong)"
-                }
-              />
-            </svg>
-          </Button>
-        );
-      })}
-    </div>
-  );
-}
-
 function getBranchAddress(branch: Branch) {
   return [branch.address1, branch.address2].filter(Boolean).join(", ");
 }
@@ -209,6 +165,7 @@ export function BrandDetail({
   currentUserId,
   owner,
   actionSlot,
+  isFavorited = false,
 }: BrandDetailProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -278,6 +235,24 @@ export function BrandDetail({
     brandState.status === "ACTIVE" &&
     !isOwner &&
     brandState.can_rate === true;
+  const canFavorite = currentUser?.type === "ucr" && !isOwner;
+  const [favorited, setFavorited] = useState(isFavorited);
+  const [favBusy, setFavBusy] = useState(false);
+
+  async function toggleFavorite() {
+    if (favBusy || !accessToken) return;
+    setFavBusy(true);
+    const next = !favorited;
+    setFavorited(next);
+    try {
+      if (next) await addFavoriteBrand(brandState.id, accessToken);
+      else await removeFavoriteBrand(brandState.id, accessToken);
+    } catch {
+      setFavorited(!next);
+    } finally {
+      setFavBusy(false);
+    }
+  }
   const normalizedRating =
     typeof brandState.rating === "number" ? brandState.rating : 0;
   const logoUrl = proxyMediaUrl(brandState.logo_url);
@@ -822,6 +797,19 @@ export function BrandDetail({
               {STATUS_LABEL[brandState.status]}
             </span>
             <h1 className={styles.heroTitle}>{brandState.name}</h1>
+            {canFavorite ? (
+              <Button
+                variant="unstyled"
+                type="button"
+                className={styles.favoriteButton}
+                data-active={favorited}
+                aria-label={favorited ? messages.marketplace.removeFavorite : messages.marketplace.addFavorite}
+                title={favorited ? messages.marketplace.removeFavorite : messages.marketplace.addFavorite}
+                onClick={toggleFavorite}
+              >
+                <Icon icon="favorite" size={20} color="current" fill={favorited} />
+              </Button>
+            ) : null}
           </div>
           <RichTextDisplay
             html={brandState.description ?? ""}
@@ -881,7 +869,7 @@ export function BrandDetail({
                     : t.rateBrand}
                 </span>
               </div>
-              <RatingButtonRow
+              <RatingInput
                 currentRating={brandState.my_rating}
                 isLoading={ratingLoading}
                 onSelect={handleRate}

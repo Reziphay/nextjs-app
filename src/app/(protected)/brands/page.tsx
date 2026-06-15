@@ -12,6 +12,7 @@ import {
   fetchBrandTeamWorkspace,
 } from "@/lib/brands-api";
 import { fetchPublicServices } from "@/lib/services-api";
+import { emptyFavorites, fetchFavorites } from "@/lib/favorites-api";
 import { fetchMarketplaceFacets } from "@/lib/marketplace-api";
 import { fetchBrandForReview } from "@/lib/moderation-api";
 import { BrandsUsoPage } from "@/components/organisms/brands-uso-page";
@@ -280,9 +281,21 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
       );
     }
 
-    const owner = await fetchUserProfileById(brand.owner_id, accessToken);
+    const [owner, favorites] = await Promise.all([
+      fetchUserProfileById(brand.owner_id, accessToken),
+      user.type === "ucr"
+        ? fetchFavorites(accessToken).catch(() => emptyFavorites())
+        : Promise.resolve(emptyFavorites()),
+    ]);
 
-    return <BrandDetail brand={brand} currentUserId={user.id} owner={owner} />;
+    return (
+      <BrandDetail
+        brand={brand}
+        currentUserId={user.id}
+        owner={owner}
+        isFavorited={favorites.brand_ids.includes(brand.id)}
+      />
+    );
   }
 
   // ── Create brand form (?progress=create) — USO only ──────────────────────

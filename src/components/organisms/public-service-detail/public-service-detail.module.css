@@ -1,15 +1,27 @@
 .ratingCard {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 18px 20px;
-  border-radius: var(--general-border-radius);
+  gap: 10px;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--general-border-radius-card);
   border: 1px solid var(--app-border-soft);
   background: var(--app-bg-surface);
-  margin-bottom: 16px;
+  box-shadow: 0 1px 4px var(--app-shadow-card-soft);
+}
+
+.ratingTitle {
+  margin: 0;
+  color: var(--app-text-strong);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--app-border-soft);
 }
 
 .ratingLead {
+  margin: 0;
   font-size: var(--font-size-small);
   font-weight: 600;
   color: var(--app-text-body);
@@ -39,4 +51,42 @@
 .ratingMsg {
   font-size: var(--font-size-extra-small);
   color: var(--app-text-muted);
+}
+
+.actionRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.bookButton {
+  flex: 1;
+}
+
+.favoriteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  flex-shrink: 0;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 999px;
+  background: var(--app-bg-surface);
+  color: var(--app-text-muted);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.favoriteButton:hover {
+  border-color: color-mix(in srgb, var(--app-error) 40%, var(--app-border-soft));
+  background: color-mix(in srgb, var(--app-error) 9%, var(--app-bg-surface));
+  color: var(--app-error);
+}
+
+.favoriteButton[data-active="true"] {
+  border-color: color-mix(in srgb, var(--app-error) 35%, var(--app-border-soft));
+  background: color-mix(in srgb, var(--app-error) 12%, var(--app-bg-surface));
+  color: var(--app-error);
 }

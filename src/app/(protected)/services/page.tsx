@@ -6,6 +6,7 @@ import { getServerLocale } from "@/i18n/server";
 import { buildPageTitle } from "@/lib/page-metadata";
 import { fetchMyServices, fetchPublicServicesPage, fetchServiceById, fetchServiceCategories } from "@/lib/services-api";
 import { fetchMyReservations } from "@/lib/reservations-api";
+import { emptyFavorites, fetchFavorites } from "@/lib/favorites-api";
 import { fetchMyBrands, fetchBrandById, fetchActiveBrands } from "@/lib/brands-api";
 import { fetchMarketplaceFacets } from "@/lib/marketplace-api";
 import { fetchUserProfileById } from "@/lib/users-api";
@@ -137,10 +138,11 @@ export default async function ServicesPage({
       redirect("/home");
     }
 
-    const [brands, owner, myReservations] = await Promise.all([
+    const [brands, owner, myReservations, favorites] = await Promise.all([
       fetchDetailedBrandsForServices(service.owner_id, accessToken),
       fetchUserProfileById(service.owner_id, accessToken),
       fetchMyReservations("customer", accessToken).catch(() => []),
+      fetchFavorites(accessToken).catch(() => emptyFavorites()),
     ]);
 
     if (!owner) {
@@ -155,6 +157,7 @@ export default async function ServicesPage({
         brands={brands}
         accessToken={accessToken}
         reservations={serviceReservations}
+        isFavorited={favorites.service_ids.includes(service.id)}
         user={{
           id: owner.id,
           email: owner.email,

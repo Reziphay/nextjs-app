@@ -1088,6 +1088,7 @@ export function ServiceDetailView({
   user,
   actionLoading,
   actionSlot,
+  sidebarExtra,
   extraContent,
   onBack,
   onEdit,
@@ -1106,6 +1107,7 @@ export function ServiceDetailView({
   user: AuthenticatedUser;
   actionLoading: boolean;
   actionSlot?: ReactNode;
+  sidebarExtra?: ReactNode;
   extraContent?: ReactNode;
   onBack: () => void;
   onEdit: () => void;
@@ -1330,6 +1332,8 @@ export function ServiceDetailView({
               )}
             </div>
           ) : null}
+
+          {sidebarExtra}
         </div>
       </div>
       {extraContent}
@@ -1342,6 +1346,7 @@ export function ServiceReadOnlyDetailView({
   brands,
   user,
   actionSlot,
+  sidebarExtra,
   extraContent,
   onBack,
   showStatus,
@@ -1350,6 +1355,7 @@ export function ServiceReadOnlyDetailView({
   brands: Brand[];
   user: AuthenticatedUser;
   actionSlot?: ReactNode;
+  sidebarExtra?: ReactNode;
   extraContent?: ReactNode;
   onBack: () => void;
   showStatus?: boolean;
@@ -1366,6 +1372,7 @@ export function ServiceReadOnlyDetailView({
       user={user}
       actionLoading={false}
       actionSlot={actionSlot}
+      sidebarExtra={sidebarExtra}
       extraContent={extraContent}
       showStatus={showStatus}
       onBack={onBack}

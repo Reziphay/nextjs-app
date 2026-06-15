@@ -1,0 +1,41 @@
+.ratingButtons {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.ratingButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 999px;
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface-strong);
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    background-color 160ms ease;
+}
+
+.ratingButton:hover:not(:disabled) {
+  border-color: var(--brand-warning);
+  transform: translateY(-1px);
+}
+
+.ratingButton:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.ratingButtonActive {
+  border-color: color-mix(in srgb, var(--brand-warning) 55%, var(--brand-border));
+  background: color-mix(in srgb, var(--brand-warning) 10%, var(--brand-surface-base) 90%);
+}
+
+.ratingButtonIcon {
+  width: 1rem;
+  height: 1rem;
+}

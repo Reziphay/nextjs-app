@@ -8,8 +8,10 @@ import { Icon } from "@/components/icon";
 import { ServiceReadOnlyDetailView } from "@/components/organisms/services-uso-page/services-uso-page";
 import { BookingModal } from "@/components/organisms/booking-modal";
 import { ServiceReservationsTable } from "@/components/molecules/service-reservations-table/service-reservations-table";
+import { RatingInput } from "@/components/molecules/rating-input";
 import { useLocale } from "@/components/providers/locale-provider";
 import { submitServiceRating } from "@/lib/services-api";
+import { addFavoriteService, removeFavoriteService } from "@/lib/favorites-api";
 import { translateBackendErrorMessage } from "@/lib/backend-errors";
 import type { Brand } from "@/types";
 import type { Service } from "@/types/service";
@@ -23,6 +25,7 @@ type PublicServiceDetailProps = {
   user: AuthenticatedUser;
   accessToken: string;
   reservations?: Reservation[];
+  isFavorited?: boolean;
 };
 
 function ServiceRatingCard({ service, accessToken }: { service: Service; accessToken: string }) {
@@ -54,34 +57,37 @@ function ServiceRatingCard({ service, accessToken }: { service: Service; accessT
 
   return (
     <div className={styles.ratingCard}>
-      <span className={styles.ratingLead}>
-        {myRating ? `${p.yourRating}: ${myRating}/5` : messages.brands.rateServicePrompt}
-      </span>
-      <div className={styles.starRow}>
-        {[1, 2, 3, 4, 5].map((v) => (
-          <button
-            key={v}
-            type="button"
-            className={styles.starButton}
-            onClick={() => rate(v)}
-            disabled={busy}
-            aria-label={`${v}/5`}
-          >
-            <Icon icon="star" size={26} className={v <= (myRating ?? 0) ? styles.starActive : styles.starInactive} />
-          </button>
-        ))}
-      </div>
+      <h2 className={styles.ratingTitle}>{messages.brands.rateServicePrompt}</h2>
+      <RatingInput currentRating={myRating} isLoading={busy} onSelect={rate} />
+      {myRating ? <p className={styles.ratingLead}>{`${p.yourRating}: ${myRating}/5`}</p> : null}
       {msg ? <p className={styles.ratingMsg}>{msg}</p> : null}
     </div>
   );
 }
 
-export function PublicServiceDetail({ service, brands, user, accessToken, reservations = [] }: PublicServiceDetailProps) {
+export function PublicServiceDetail({ service, brands, user, accessToken, reservations = [], isFavorited = false }: PublicServiceDetailProps) {
   const router = useRouter();
   const { messages } = useLocale();
   const [bookingOpen, setBookingOpen] = useState(false);
+  const [favorited, setFavorited] = useState(isFavorited);
+  const [favBusy, setFavBusy] = useState(false);
 
   const canBook = Boolean(service.duration && service.duration > 0);
+
+  async function toggleFavorite() {
+    if (favBusy) return;
+    setFavBusy(true);
+    const next = !favorited;
+    setFavorited(next);
+    try {
+      if (next) await addFavoriteService(service.id, accessToken);
+      else await removeFavoriteService(service.id, accessToken);
+    } catch {
+      setFavorited(!next);
+    } finally {
+      setFavBusy(false);
+    }
+  }
 
   return (
     <>
@@ -92,22 +98,36 @@ export function PublicServiceDetail({ service, brands, user, accessToken, reserv
         onBack={() => router.push("/home")}
         showStatus={false}
         actionSlot={
-          <Button
-            variant="primary"
-            icon="event_available"
-            disabled={!canBook}
-            onClick={() => setBookingOpen(true)}
-          >
-            {messages.reservations.book}
-          </Button>
+          <div className={styles.actionRow}>
+            <Button
+              variant="primary"
+              icon="event_available"
+              disabled={!canBook}
+              onClick={() => setBookingOpen(true)}
+              className={styles.bookButton}
+            >
+              {messages.reservations.book}
+            </Button>
+            <Button
+              variant="unstyled"
+              type="button"
+              className={styles.favoriteButton}
+              data-active={favorited}
+              aria-label={favorited ? messages.marketplace.removeFavorite : messages.marketplace.addFavorite}
+              title={favorited ? messages.marketplace.removeFavorite : messages.marketplace.addFavorite}
+              onClick={toggleFavorite}
+            >
+              <Icon icon="favorite" size={20} color="current" fill={favorited} />
+            </Button>
+          </div>
+        }
+        sidebarExtra={
+          service.can_rate ? <ServiceRatingCard service={service} accessToken={accessToken} /> : null
         }
         extraContent={
-          <>
-            {service.can_rate ? <ServiceRatingCard service={service} accessToken={accessToken} /> : null}
-            {reservations.length > 0 ? (
-              <ServiceReservationsTable reservations={reservations} mode="customer" />
-            ) : null}
-          </>
+          reservations.length > 0 ? (
+            <ServiceReservationsTable reservations={reservations} mode="customer" />
+          ) : null
         }
       />
       <BookingModal
