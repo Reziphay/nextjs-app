@@ -63,6 +63,8 @@ type UserProfilePanelProps = {
   canEdit?: boolean;
   brands?: Brand[];
   services?: Service[];
+  // Brand services this USO is an accepted provider for (not personal services).
+  assignedServices?: Service[];
 };
 
 type PendingCropImage = {
@@ -92,6 +94,7 @@ export function UserProfilePanel({
   canEdit = false,
   brands = [],
   services = [],
+  assignedServices = [],
 }: UserProfilePanelProps) {
   const dispatch = useAppDispatch();
   const { messages, locale } = useLocale();
@@ -756,6 +759,19 @@ export function UserProfilePanel({
             emptyDescription={p.servicesEmptyDescription}
             maxItems={6}
           />
+          {assignedServices.length > 0 ? (
+            <AccountServicesSection
+              services={assignedServices}
+              brands={brands}
+              owner={profile}
+              serviceFilter="brand"
+              title={p.assignedServicesSectionTitle}
+              description={p.assignedServicesSectionDescription}
+              emptyTitle={p.servicesEmptyTitle}
+              emptyDescription={p.servicesEmptyDescription}
+              maxItems={6}
+            />
+          ) : null}
           <AccountBrandsSection
             brands={brands}
             owner={profile}

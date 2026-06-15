@@ -582,6 +582,8 @@ export const trMessages: Messages = {
     serviceActionDelete: "Sil",
     serviceTableService: "Hizmet",
     serviceTableBranch: "Şube",
+    serviceTableProviders: "Uzmanlar",
+    serviceProvidersEmpty: "Atanmadı",
     serviceTablePrice: "Fiyat",
     serviceTableDuration: "Süre",
     branchDetailRowHint: "Detayları görmek için şube satırına dokun.",
@@ -933,6 +935,9 @@ export const trMessages: Messages = {
     servicesSectionTitle: "Kişisel hizmetler",
     servicesSectionDescription:
       "Bu hizmet sahibinin herhangi bir marka şubesine bağlı olmayan aktif hizmetleri.",
+    assignedServicesSectionTitle: "Marka hizmetleri",
+    assignedServicesSectionDescription:
+      "Bu hizmet sahibinin marka ekip üyesi olarak atandığı aktif hizmetler.",
     servicesEmptyTitle: "Henüz kişisel hizmet yok",
     servicesEmptyDescription:
       "Bu hizmet sahibinin şu anda görünür doğrudan hizmeti yok.",

@@ -25,6 +25,17 @@ export type ServiceBrandContext = {
 
 export type HoursSource = "CUSTOM" | "BRANCH";
 
+// An accepted provider (USO) who performs this service, tied to the branch their
+// team belongs to. Empty for direct (non-brand) services — the owner performs them.
+export type ServiceProvider = {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  avatar_url: string | null;
+  branch_id: string;
+  branch_name: string;
+};
+
 export type ServiceScheduleWindow = {
   weekday: number;
   start_min: number;
@@ -53,6 +64,7 @@ export type Service = {
   rating: number | null;
   rating_count: number;
   my_rating: number | null;
+  providers?: ServiceProvider[];
   created_at: string;
   updated_at: string;
 };

@@ -74,13 +74,24 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
     notFound();
   }
 
-  const [brands, services] = await Promise.all([
+  const [brands, services, assignedServices] = await Promise.all([
     fetchAccountBrands(requestedUserId, accessToken).catch(() => []),
     fetchPublicServices(
       { owner_id: requestedUserId, direct_only: true },
       accessToken,
     ).catch(() => []),
+    fetchPublicServices(
+      { provider_id: requestedUserId },
+      accessToken,
+    ).catch(() => []),
   ]);
 
-  return <UserProfilePanel user={targetUser} brands={brands} services={services} />;
+  return (
+    <UserProfilePanel
+      user={targetUser}
+      brands={brands}
+      services={services}
+      assignedServices={assignedServices}
+    />
+  );
 }

@@ -511,6 +511,8 @@ export type Messages = {
     serviceActionDelete: string;
     serviceTableService: string;
     serviceTableBranch: string;
+    serviceTableProviders: string;
+    serviceProvidersEmpty: string;
     serviceTablePrice: string;
     serviceTableDuration: string;
     // Branch detail studio panel
@@ -1031,6 +1033,8 @@ export type Messages = {
     viewMoreBrands: string;
     servicesSectionTitle: string;
     servicesSectionDescription: string;
+    assignedServicesSectionTitle: string;
+    assignedServicesSectionDescription: string;
     servicesEmptyTitle: string;
     servicesEmptyDescription: string;
     viewMoreServices: string;

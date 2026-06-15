@@ -26,6 +26,9 @@ type AccountServicesSectionProps = {
   emptyDescription: string;
   viewMoreHref?: string;
   maxItems?: number;
+  // "direct" → personal services owned by the user (brand_id null, default).
+  // "brand" → brand services this user is an accepted provider for.
+  serviceFilter?: "direct" | "brand";
 };
 
 function sortVisibleServices(services: Service[]) {
@@ -60,12 +63,22 @@ export function AccountServicesSection({
   emptyDescription,
   viewMoreHref,
   maxItems,
+  serviceFilter = "direct",
 }: AccountServicesSectionProps) {
   const router = useRouter();
   const { messages } = useLocale();
   const visibleServices = useMemo(
-    () => sortVisibleServices(services.filter((service) => service.status === "ACTIVE" && service.brand_id === null)),
-    [services],
+    () =>
+      sortVisibleServices(
+        services.filter(
+          (service) =>
+            service.status === "ACTIVE" &&
+            (serviceFilter === "brand"
+              ? service.brand_id !== null
+              : service.brand_id === null),
+        ),
+      ),
+    [services, serviceFilter],
   );
   const displayedServices =
     typeof maxItems === "number" ? visibleServices.slice(0, maxItems) : visibleServices;

@@ -2,6 +2,7 @@
 
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { isAxiosError } from "axios";
 import {
@@ -1109,7 +1110,7 @@ export function BrandDetail({
             <>
               <div className={styles.servicesTableHead}>
                 <span>{t.serviceTableService}</span>
-                <span>{t.serviceTableBranch}</span>
+                <span>{t.serviceTableProviders}</span>
                 <span>{t.serviceTablePrice}</span>
                 <span>{t.serviceTableDuration}</span>
               </div>
@@ -1119,7 +1120,7 @@ export function BrandDetail({
                   const durationLabel = formatServiceDuration(svc.duration, t.serviceLabelDurationUnit);
                   const firstImg = svc.images[0];
                   const imgUrl = firstImg ? proxyMediaUrl(firstImg.url) : null;
-                  const ownerName = svc.brand?.name ?? t.serviceModalIndividual;
+                  const providers = svc.providers ?? [];
 
                   return (
                     <div
@@ -1157,8 +1158,41 @@ export function BrandDetail({
                         </div>
                       </div>
 
-                      <div className={`${styles.serviceCell} ${styles.serviceBranchCell}`}>
-                        <span className={styles.serviceBranchName}>{ownerName}</span>
+                      <div className={`${styles.serviceCell} ${styles.serviceProvidersCell}`}>
+                        {providers.length > 0 ? (
+                          <div className={styles.serviceProviders}>
+                            {providers.slice(0, 4).map((p) => {
+                              const pAvatar = proxyMediaUrl(p.avatar_url);
+                              return (
+                                <Link
+                                  key={p.user_id}
+                                  href={`/account?id=${p.user_id}`}
+                                  className={styles.serviceProviderChip}
+                                  title={`${p.first_name} ${p.last_name} · ${p.branch_name}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <span
+                                    className={styles.serviceProviderAvatar}
+                                    style={pAvatar ? { backgroundImage: `url(${pAvatar})` } : undefined}
+                                    data-has-image={pAvatar ? "true" : "false"}
+                                  >
+                                    {!pAvatar
+                                      ? `${p.first_name[0] ?? ""}${p.last_name[0] ?? ""}`.toUpperCase()
+                                      : null}
+                                  </span>
+                                  <span className={styles.serviceProviderName}>{p.first_name}</span>
+                                </Link>
+                              );
+                            })}
+                            {providers.length > 4 ? (
+                              <span className={styles.serviceProviderMore}>
+                                +{providers.length - 4}
+                              </span>
+                            ) : null}
+                          </div>
+                        ) : (
+                          <span className={styles.serviceMuted}>{t.serviceProvidersEmpty}</span>
+                        )}
                       </div>
 
                       <div className={`${styles.serviceCell} ${styles.servicePriceCell}`}>
@@ -2151,9 +2185,11 @@ export function BrandDetail({
                                 const avatarUrl = proxyMediaUrl(member.avatar_url);
 
                                 return (
-                                  <div
+                                  <Link
                                     key={member.membership_id}
+                                    href={`/account?id=${member.user_id}`}
                                     className={styles.branchMemberChip}
+                                    onClick={(e) => e.stopPropagation()}
                                   >
                                     <div
                                       className={styles.branchMemberAvatar}
@@ -2176,7 +2212,7 @@ export function BrandDetail({
                                           : t.branchDetailMember}
                                       </span>
                                     </div>
-                                  </div>
+                                  </Link>
                                 );
                               })}
                             </div>
@@ -2187,9 +2223,44 @@ export function BrandDetail({
                           )}
                         </>
                       )
+                    ) : selectedBranch.members && selectedBranch.members.length > 0 ? (
+                      <div className={styles.branchMemberRail}>
+                        {selectedBranch.members.map((member) => {
+                          const avatarUrl = proxyMediaUrl(member.avatar_url);
+
+                          return (
+                            <Link
+                              key={member.user_id}
+                              href={`/account?id=${member.user_id}`}
+                              className={styles.branchMemberChip}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div
+                                className={styles.branchMemberAvatar}
+                                style={
+                                  avatarUrl
+                                    ? { backgroundImage: `url(${avatarUrl})` }
+                                    : undefined
+                                }
+                                data-has-image={avatarUrl ? "true" : "false"}
+                              >
+                                {!avatarUrl ? getTeamMemberInitials(member) : null}
+                              </div>
+                              <div className={styles.branchMemberMeta}>
+                                <strong>{formatTeamMemberName(member)}</strong>
+                                <span>
+                                  {member.role === "OWNER"
+                                    ? t.branchDetailOwner
+                                    : t.branchDetailMember}
+                                </span>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
                     ) : (
                       <p className={styles.branchStudioMuted}>
-                        {t.branchDetailTeamLead}
+                        {t.branchDetailTeamEmpty}
                       </p>
                     )}
 

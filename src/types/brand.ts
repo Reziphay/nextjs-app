@@ -11,6 +11,15 @@ export type Break = {
   end: string;
 };
 
+// An accepted team member working at a branch — public on the brand detail page.
+export type BranchMember = {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  avatar_url: string | null;
+  role: 'OWNER' | 'MEMBER';
+};
+
 export type Branch = {
   id: string;
   brand_id: string;
@@ -26,6 +35,7 @@ export type Branch = {
   breaks: Break[];
   cover_media_id?: string | null;
   cover_url?: string | null;
+  members?: BranchMember[];
 };
 
 export type BrandGalleryItem = {

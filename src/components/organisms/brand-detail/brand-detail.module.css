@@ -908,6 +908,15 @@
   border-radius: calc(var(--general-border-radius) - 0.1rem);
   border: 1px solid color-mix(in srgb, var(--brand-border) 84%, transparent);
   background: color-mix(in srgb, var(--brand-surface-base) 96%, transparent);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.branchMemberChip:hover {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary-soft);
 }
 
 .branchMemberAvatar {
@@ -1839,6 +1848,82 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.serviceProvidersCell {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.serviceProviders {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.4rem;
+}
+
+.serviceProviderChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.18rem 0.5rem 0.18rem 0.2rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-surface-overlay-soft) 72%, var(--brand-surface-base) 28%);
+  max-width: 100%;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.serviceProviderChip:hover {
+  background: var(--brand-primary-soft);
+}
+
+.serviceProviderAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: var(--brand-primary-soft);
+  background-size: cover;
+  background-position: center;
+  color: var(--brand-primary);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.serviceProviderAvatar[data-has-image="true"] {
+  color: transparent;
+}
+
+.serviceProviderName {
+  color: var(--brand-text-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 7rem;
+}
+
+.serviceProviderMore {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--brand-surface-overlay-soft);
+  color: var(--app-text-subtle);
+  font-size: 0.72rem;
+  font-weight: 800;
 }
 
 .servicePricePill {

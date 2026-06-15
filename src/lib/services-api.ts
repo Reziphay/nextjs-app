@@ -93,6 +93,7 @@ export async function fetchPublicServices(
     branch_id?: string;
     brand_id?: string;
     owner_id?: string;
+    provider_id?: string;
     direct_only?: boolean;
     q?: string;
     page?: number;
