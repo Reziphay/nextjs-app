@@ -3,6 +3,7 @@ export { OwnerCard } from "./owner-card";
 export { BrandCard } from "./brand-card";
 export { DataTable, type DataTableColumn } from "./data-table";
 export { FeedbackPopup } from "./feedback-popup/feedback-popup";
+export { ImageCarousel } from "./image-carousel";
 export { FormActions, FormActionsDanger, FormActionsSpacer } from "./form-actions";
 export { LanguageSwitcher } from "./language-switcher";
 export { ProfileBox } from "./profile-box";

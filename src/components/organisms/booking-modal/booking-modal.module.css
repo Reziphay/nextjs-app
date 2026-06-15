@@ -197,3 +197,122 @@
   margin-top: 8px;
   padding: 0 1.714rem;
 }
+
+/* ─── Branch + provider selection (brand services) ─── */
+.selection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 14px 0 4px;
+  padding: 0 1.714rem;
+}
+
+.selectGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.selectLabel {
+  font-size: var(--font-size-extra-small);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+.selectChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.branchChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--general-border-radius-pill);
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface);
+  color: var(--app-text-body);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.branchChip:hover {
+  border-color: var(--app-primary);
+}
+
+.branchChipActive {
+  border-color: var(--app-primary);
+  background: var(--app-primary);
+  color: var(--app-primary-contrast, #fff);
+}
+
+.providerChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 6px;
+  border-radius: var(--general-border-radius-pill);
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-bg-surface);
+  color: var(--app-text-body);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.providerChip:hover {
+  border-color: var(--app-primary);
+}
+
+.providerChipActive {
+  border-color: var(--app-primary);
+  background: var(--app-primary-soft, var(--app-bg-surface-muted));
+}
+
+.providerAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: var(--app-primary-soft, var(--app-bg-surface-muted));
+  background-size: cover;
+  background-position: center;
+  color: var(--app-primary);
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.providerAvatar[data-has-image="true"] {
+  color: transparent;
+}
+
+.noProvidersDesc {
+  max-width: 24rem;
+  font-size: var(--font-size-extra-small);
+  color: var(--app-text-muted);
+}
+
+.providerOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.focusSentinel {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  outline: none;
+}

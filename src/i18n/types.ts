@@ -1303,6 +1303,11 @@ export type Messages = {
     confirmBooking: string;
     cancel: string;
     pickDate: string;
+    selectBranch: string;
+    selectProvider: string;
+    pickProviderFirst: string;
+    noProvidersTitle: string;
+    noProvidersDesc: string;
     loadingSlots: string;
     noSlots: string;
     loadError: string;

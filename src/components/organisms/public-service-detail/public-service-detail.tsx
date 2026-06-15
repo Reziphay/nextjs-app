@@ -55,6 +55,8 @@ export function PublicServiceDetail({ service, brands, user, accessToken, reserv
         serviceId={service.id}
         serviceTitle={service.title}
         serviceDuration={service.duration}
+        isBrandService={Boolean(service.brand_id)}
+        providers={service.providers ?? []}
         accessToken={accessToken}
         open={bookingOpen}
         onOpenChange={setBookingOpen}

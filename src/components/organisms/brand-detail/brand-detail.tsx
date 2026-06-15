@@ -231,7 +231,6 @@ export function BrandDetail({
   >("idle");
   const [brandServices, setBrandServices] = useState<Service[]>([]);
   const [servicesState, setServicesState] = useState<"idle" | "loading" | "ready">("idle");
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [deletingBranchId, setDeletingBranchId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<
     { type: "branch"; item: Branch } | null
@@ -1128,8 +1127,8 @@ export function BrandDetail({
                       role="button"
                       tabIndex={0}
                       className={styles.serviceRow}
-                      onClick={() => setSelectedService(svc)}
-                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSelectedService(svc); }}
+                      onClick={() => router.push(`/services?id=${svc.id}`)}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") router.push(`/services?id=${svc.id}`); }}
                       aria-label={svc.title}
                     >
                       <div className={styles.serviceIdentity}>
@@ -1949,94 +1948,6 @@ export function BrandDetail({
                   {t.assignmentModalSubmit}
                 </Button>
               </AlertDialogFooter>
-            </>
-          ) : null}
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog
-        open={Boolean(selectedService)}
-        onOpenChange={(open) => {
-          if (!open) setSelectedService(null);
-        }}
-      >
-        <AlertDialogContent className={styles.branchDialogContent}>
-          {selectedService ? (
-            <>
-              <div className={styles.branchDialogTop}>
-                <div className={styles.branchDialogHero}>
-                  <div className={styles.branchDialogIcon}>
-                    <Icon icon="design_services" size={24} color="current" />
-                  </div>
-                  <div className={styles.branchDialogTitleGroup}>
-                    <h2 className={styles.branchDialogTitle}>{selectedService.title}</h2>
-                    {selectedService.service_category ? (
-                      <p className={styles.branchDialogDescription}>{messages.categories[selectedService.service_category.key as keyof typeof messages.categories] ?? selectedService.service_category.key}</p>
-                    ) : null}
-                  </div>
-                </div>
-                <Button
-                  variant="unstyled"
-                  type="button"
-                  className={styles.branchDialogClose}
-                  onClick={() => setSelectedService(null)}
-                  aria-label={t.serviceModalClose}
-                >
-                  <Icon icon="close" size={18} color="current" />
-                </Button>
-              </div>
-
-              <div className={styles.branchDialogBody}>
-                {selectedService.description?.trim() ? (
-                  <div className={styles.branchDialogSection}>
-                    <span className={styles.branchDialogLabel}>{t.serviceModalDescription}</span>
-                    <RichTextDisplay html={selectedService.description} className={styles.branchDialogText} />
-                  </div>
-                ) : null}
-
-                <div className={styles.branchDialogGrid}>
-                  <div className={styles.branchDialogItem}>
-                    <span className={styles.branchDialogLabel}>{t.serviceModalPrice}</span>
-                    <p className={styles.branchDialogText}>{formatServicePrice(selectedService, t)}</p>
-                  </div>
-
-                  {selectedService.duration ? (
-                    <div className={styles.branchDialogItem}>
-                      <span className={styles.branchDialogLabel}>{t.serviceModalDuration}</span>
-                      <p className={styles.branchDialogText}>
-                        {formatServiceDuration(selectedService.duration, t.serviceLabelDurationUnit)}
-                      </p>
-                    </div>
-                  ) : null}
-
-                  {selectedService.address && !selectedService.brand_id ? (
-                    <div className={styles.branchDialogItem}>
-                      <span className={styles.branchDialogLabel}>{t.serviceModalAddress}</span>
-                      <p className={styles.branchDialogText}>{selectedService.address}</p>
-                    </div>
-                  ) : null}
-                </div>
-
-                {selectedService.images.length > 0 ? (
-                  <div className={styles.serviceModalImages}>
-                    {selectedService.images.map((img) => {
-                      const imgUrl = proxyMediaUrl(img.url);
-                      if (!imgUrl) return null;
-                      return (
-                        <div key={img.id} className={styles.serviceModalImageFrame}>
-                          <Image
-                            src={imgUrl}
-                            alt={selectedService.title}
-                            fill
-                            className={styles.serviceModalImage}
-                            sizes="(max-width: 640px) 50vw, 180px"
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : null}
-              </div>
             </>
           ) : null}
         </AlertDialogContent>

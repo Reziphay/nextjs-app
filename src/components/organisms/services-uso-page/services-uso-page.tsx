@@ -21,6 +21,7 @@ import {
 } from "@/components/atoms";
 import { Combobox, type ComboboxOption } from "@/components/atoms/combobox";
 import { ServiceReservationsTable } from "@/components/molecules/service-reservations-table/service-reservations-table";
+import { ImageCarousel } from "@/components/molecules/image-carousel";
 import type { Reservation } from "@/types/reservation";
 import { AvatarCropDialog } from "@/components/molecules/avatar-crop-dialog/avatar-crop-dialog";
 import { UserAvatar } from "@/components/molecules/user-avatar/user-avatar";
@@ -1128,7 +1129,10 @@ export function ServiceDetailView({
     : null;
   const serviceRating = typeof service.rating === "number" && service.rating > 0 ? service.rating : null;
 
-  const images = service.images.map((img) => proxyMediaUrl(img.url) ?? img.url);
+  const carouselImages = service.images.map((img) => ({
+    id: img.id,
+    url: proxyMediaUrl(img.url) ?? img.url,
+  }));
 
   const bannerConfig: Partial<Record<typeof service.status, { msg: string; variant: StatusBannerVariant; icon: string }>> = {
     DRAFT: { msg: copy.draftNote, variant: "warning", icon: "info" },
@@ -1160,29 +1164,14 @@ export function ServiceDetailView({
       <div className={styles.detailShell}>
         {/* Left: images + description */}
         <div className={styles.detailMain}>
-          {/* Image gallery */}
-          {images.length > 0 ? (
-            <div className={styles.detailGallery}>
-              <div className={styles.detailHeroWrap}>
-                <Image
-                  src={images[0]}
-                  alt={service.title}
-                  fill
-                  className={styles.detailHeroImage}
-                  sizes="(max-width: 768px) 100vw, 60vw"
-                  priority
-                />
-              </div>
-              {images.length > 1 && (
-                <div className={styles.detailThumbnails}>
-                  {images.slice(1).map((url, i) => (
-                    <div key={i} className={styles.detailThumbWrap}>
-                      <Image src={url} alt={`Photo ${i + 2}`} fill className={styles.detailThumbImage} sizes="120px" />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+          {/* Image carousel */}
+          {carouselImages.length > 0 ? (
+            <ImageCarousel
+              images={carouselImages}
+              alt={service.title}
+              prevLabel={messages.brands.detailGalleryPrevious}
+              nextLabel={messages.brands.detailGalleryNext}
+            />
           ) : (
             <div className={styles.detailHeroPlaceholder}>
               <Icon icon="design_services" size={48} color="current" className={styles.detailPlaceholderIcon} />
