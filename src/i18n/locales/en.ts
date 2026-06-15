@@ -1171,6 +1171,7 @@ export const enMessages: Messages = {
     noServicesYet: "No services yet",
     noReservationsTitle: "No reservations yet",
     noReservationsDesc: "Reservations will appear here once customers start booking your services.",
+    noReservationsDescCustomer: "Services you book will appear here.",
     settingsTitle: "Calendar settings",
     settingsTimeFormat: "Time format",
     timeFormat12h: "AM/PM",

@@ -1255,7 +1255,7 @@ export function UsoCalendarPage({ services, brands, reservations, accessToken, m
               locale={locale}
               timeFormat={timeFormat}
               emptyTitle={t.noReservationsTitle}
-              emptyDesc={t.noReservationsDesc}
+              emptyDesc={isProvider ? t.noReservationsDesc : t.noReservationsDescCustomer}
               events={events}
               workingByWeekday={workingByWeekday}
               onEventClick={setSelectedEvent}

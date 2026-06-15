@@ -1157,6 +1157,7 @@ export const ruMessages: Messages = {
     noServicesYet: "Услуг пока нет",
     noReservationsTitle: "Резерваций пока нет",
     noReservationsDesc: "Резервации появятся здесь, когда клиенты начнут бронировать ваши услуги.",
+    noReservationsDescCustomer: "Здесь появятся услуги, которые вы забронируете.",
     settingsTitle: "Настройки календаря",
     settingsTimeFormat: "Формат времени",
     timeFormat12h: "AM/PM",

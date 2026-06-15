@@ -1044,6 +1044,7 @@ export const trMessages: Messages = {
     noServicesYet: "Henüz hizmet yok",
     noReservationsTitle: "Henüz rezervasyon yok",
     noReservationsDesc: "Müşteriler hizmetlerinizi rezerve ettiğinde burada görünecek.",
+    noReservationsDescCustomer: "Rezerve ettiğiniz hizmetler burada görünecek.",
     settingsTitle: "Takvim ayarları",
     settingsTimeFormat: "Saat formatı",
     timeFormat12h: "AM/PM",

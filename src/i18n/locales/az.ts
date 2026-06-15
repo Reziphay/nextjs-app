@@ -1171,6 +1171,7 @@ export const azMessages: Messages = {
     noServicesYet: "Hələ xidmət yoxdur",
     noReservationsTitle: "Hələ rezervasiya yoxdur",
     noReservationsDesc: "Müştərilər xidmətlərinizi rezerv etdikdə burada görünəcək.",
+    noReservationsDescCustomer: "Rezerv etdiyiniz xidmətlər burada görünəcək.",
     settingsTitle: "Təqvim parametrləri",
     settingsTimeFormat: "Saat formatı",
     timeFormat12h: "AM/PM",

@@ -1111,6 +1111,7 @@ export type Messages = {
     noServicesYet: string;
     noReservationsTitle: string;
     noReservationsDesc: string;
+    noReservationsDescCustomer: string;
     settingsTitle: string;
     settingsTimeFormat: string;
     timeFormat12h: string;
