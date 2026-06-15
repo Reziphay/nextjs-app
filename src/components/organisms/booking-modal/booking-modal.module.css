@@ -316,3 +316,13 @@
   overflow: hidden;
   outline: none;
 }
+
+.subtitleTitle {
+  font-weight: 700;
+  color: var(--app-text-body);
+}
+
+.summary {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-small);
+}

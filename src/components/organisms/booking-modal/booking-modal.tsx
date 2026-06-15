@@ -253,6 +253,19 @@ export function BookingModal({
   // Brand services need a provider before slots can be loaded.
   const needsProvider = needsSelection && !selectedProviderId;
 
+  // Live summary shown in the header: provider · branch · date · time · duration.
+  const selectedProvider = selectedProviderId ? providerById.get(selectedProviderId) : null;
+  const selectedBranchName = selectedBranchId
+    ? branches.find((b) => b.id === selectedBranchId)?.name ?? null
+    : null;
+  const summaryParts = [
+    selectedProvider ? `${selectedProvider.first_name} ${selectedProvider.last_name}`.trim() : null,
+    selectedBranchName,
+    date ? dateLabel : null,
+    selectedSlot ? slotLabel(selectedSlot) : null,
+    serviceDuration ? `${serviceDuration} ${messages.services.fieldDurationUnit}` : null,
+  ].filter(Boolean);
+
   function handleOpenChange(next: boolean) {
     onOpenChange(next);
     if (!next) resetState();
@@ -273,12 +286,9 @@ export function BookingModal({
           <AlertDialogTitle>{t.bookTitle}</AlertDialogTitle>
           <AlertDialogDescription>
             <span className={styles.subtitle}>
-              {serviceTitle}
-              {serviceDuration ? (
-                <span className={styles.metaChip}>
-                  <Icon icon="schedule" size={13} color="current" />
-                  {serviceDuration} {messages.services.fieldDurationUnit}
-                </span>
+              <span className={styles.subtitleTitle}>{serviceTitle}</span>
+              {summaryParts.length ? (
+                <span className={styles.summary}>({summaryParts.join(" · ")})</span>
               ) : null}
             </span>
           </AlertDialogDescription>
@@ -421,7 +431,7 @@ export function BookingModal({
             disabled={!selectedSlot || booking}
             isLoading={booking}
           >
-            {selectedSlot ? `${t.confirmBooking} · ${slotLabel(selectedSlot)}` : t.confirmBooking}
+            {t.confirmBooking}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
