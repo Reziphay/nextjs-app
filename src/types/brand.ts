@@ -53,6 +53,7 @@ export type Brand = {
   description?: string;
   status: BrandStatus;
   rejection_reason?: string;
+  active_reservations_count?: number;
   owner_id: string;
   owner?: {
     id: string;

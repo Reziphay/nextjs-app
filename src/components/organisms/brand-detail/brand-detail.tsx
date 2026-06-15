@@ -806,6 +806,12 @@ export function BrandDetail({
         </StatusBanner>
       ) : null}
 
+      {isOwner && brandState.status === "PENDING" ? (
+        <StatusBanner variant="warning" icon="schedule">
+          {t.pendingServicesHidden}
+        </StatusBanner>
+      ) : null}
+
       <section className={styles.hero}>
         <div className={styles.heroMain}>
           <div className={styles.heroTitleRow}>

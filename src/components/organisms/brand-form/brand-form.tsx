@@ -317,6 +317,14 @@ export function BrandForm({
   const [editingBranchIndex, setEditingBranchIndex] = useState<number | null>(null);
   const [branchQueryHandled, setBranchQueryHandled] = useState(false);
 
+  // Editing an ACTIVE brand with active reservations needs a confirmation
+  // (editing → re-review → services hidden from customers while pending).
+  const [confirmEditOpen, setConfirmEditOpen] = useState(false);
+  const editingActiveBrandWithReservations =
+    mode === "edit" &&
+    brand?.status === "ACTIVE" &&
+    (brand?.active_reservations_count ?? 0) > 0;
+
   // Transfer modal state
   const [transferModalOpen, setTransferModalOpen] = useState(false);
   const [transferLoading, setTransferLoading] = useState(false);
@@ -556,7 +564,16 @@ export function BrandForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
+    // Editing an ACTIVE brand sends it back to review → its services become
+    // hidden from customers. Warn first when there are active reservations.
+    if (editingActiveBrandWithReservations) {
+      setConfirmEditOpen(true);
+      return;
+    }
+    await performSubmit();
+  }
 
+  async function performSubmit() {
     const accessToken = session.accessToken;
     if (!accessToken) {
       setFeedback({ type: "error", message: t.loginRequired });
@@ -953,6 +970,12 @@ export function BrandForm({
             variant={feedback.type === "success" ? "success" : "error"}
           >
             {feedback.message}
+          </StatusBanner>
+        )}
+
+        {editingActiveBrandWithReservations && (
+          <StatusBanner variant="warning" icon="warning" className={styles.formBanner}>
+            {t.editReservationsWarning}
           </StatusBanner>
         )}
 
@@ -1588,6 +1611,29 @@ export function BrandForm({
               onClick={handleDeleteConfirm}
             >
               {t.deleteConfirm}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirm editing an active brand that has active reservations */}
+      <AlertDialog open={confirmEditOpen} onOpenChange={setConfirmEditOpen}>
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.editConfirmTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{t.editConfirmDescription}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t.transferCancel}</AlertDialogCancel>
+            <Button
+              variant="primary"
+              isLoading={isLoading}
+              onClick={() => {
+                setConfirmEditOpen(false);
+                void performSubmit();
+              }}
+            >
+              {t.editConfirmContinue}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -17,6 +17,7 @@ export type ServiceBrandContext = {
   id: string;
   name: string;
   owner_id: string;
+  status?: string;
   logo_url?: string;
   rating: number | null;
   rating_count: number;

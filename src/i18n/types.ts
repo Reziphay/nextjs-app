@@ -248,6 +248,11 @@ export type Messages = {
     statusRejected: string;
     statusClosed: string;
     rejectionReasonLabel: string;
+    pendingServicesHidden: string;
+    editReservationsWarning: string;
+    editConfirmTitle: string;
+    editConfirmDescription: string;
+    editConfirmContinue: string;
     // Brand form
     formCreateTitle: string;
     formEditTitle: string;
@@ -1255,6 +1260,7 @@ export type Messages = {
     draftNote: string;
     pendingNote: string;
     pausedNote: string;
+    pausedBrandNote: string;
     rejectedNote: string;
     archivedNote: string;
     noDescription: string;

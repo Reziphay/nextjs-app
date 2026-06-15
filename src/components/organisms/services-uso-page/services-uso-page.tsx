@@ -1782,7 +1782,9 @@ export function ServicesUsoPage({
               onClick={() => openDetail(service)}
             />
           ))}
-          {assignedServices.map((assignment) => {
+          {assignedServices
+            .filter((assignment) => !services.some((s) => s.id === assignment.service.id))
+            .map((assignment) => {
             const service = assignedServiceToService(assignment);
             const busy = assignedBusyId === assignment.id;
 

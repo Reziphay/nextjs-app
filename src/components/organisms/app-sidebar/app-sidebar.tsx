@@ -32,8 +32,17 @@ type SidebarSubItem = {
   href: string;
   status?: string;
   icon?: string;
+  isBrand?: boolean;
   branches: { id: string; label: string; href: string }[];
 };
+
+// Service status → icon/dot color token (matches the app status-color scheme).
+function statusIconColor(status?: string): "success" | "warn" | "error" | "current" {
+  if (status === "ACTIVE") return "success";
+  if (status === "PENDING") return "warn";
+  if (status === "REJECTED") return "error";
+  return "current";
+}
 
 export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) {
   const pathname = usePathname();
@@ -132,31 +141,41 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
       branches: (b.branches ?? []).map((br) => ({ id: br.id, label: br.name, href: `/brands?id=${b.id}` })),
     }));
     if (href === "/services") {
-      const ownedItems = services.map((s) => ({
-        id: s.id,
-        label: s.title,
-        href: `/services?id=${s.id}`,
-        status: s.status,
-        branches: [] as { id: string; label: string; href: string }[],
-      }));
-      const assignedItems = assignedServices.map((assignment) => ({
-        id: `assigned-${assignment.id}`,
-        label: assignment.service.title,
-        href: `/services?id=${assignment.service.id}`,
-        status: assignment.service.brand?.name,
-        icon: "store",
-        branches: [] as { id: string; label: string; href: string }[],
-      }));
-
-      return [...ownedItems, ...assignedItems];
+      // Merge owned + assigned, deduping by service id (an owner who assigned
+      // their own brand service to themselves would otherwise see it twice).
+      const byId = new Map<string, SidebarSubItem>();
+      for (const s of services) {
+        byId.set(s.id, {
+          id: s.id,
+          label: s.title,
+          href: `/services?id=${s.id}`,
+          status: s.status,
+          isBrand: Boolean(s.brand_id),
+          branches: [],
+        });
+      }
+      for (const a of assignedServices) {
+        if (byId.has(a.service.id)) continue;
+        byId.set(a.service.id, {
+          id: a.service.id,
+          label: a.service.title,
+          href: `/services?id=${a.service.id}`,
+          status: a.service.status,
+          isBrand: true,
+          branches: [],
+        });
+      }
+      return [...byId.values()];
     }
     return [];
   }
 
   function getBadgeCount(href: string): number | null {
     if (href === "/brands" && brands.length > 0) return brands.length;
-    if (href === "/services" && services.length + assignedServices.length > 0) {
-      return services.length + assignedServices.length;
+    if (href === "/services") {
+      const ids = new Set(services.map((s) => s.id));
+      for (const a of assignedServices) ids.add(a.service.id);
+      return ids.size > 0 ? ids.size : null;
     }
     return null;
   }
@@ -270,7 +289,9 @@ export function AppSidebar({ collapsed, mobileOpen, onClose }: AppSidebarProps) 
                             className={`${styles.subItem} ${isSubActive(sub.href) ? styles.subItemActive : ""}`}
                             onClick={onClose}
                           >
-                            {sub.icon ? (
+                            {sub.isBrand ? (
+                              <Icon icon="sell" size={13} color={statusIconColor(sub.status)} className={styles.subIcon} />
+                            ) : sub.icon ? (
                               <Icon icon={sub.icon} size={13} color="current" className={styles.subIcon} />
                             ) : (
                               <span
