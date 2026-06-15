@@ -483,6 +483,7 @@ export const trMessages: Messages = {
     detailMetricCategories: "Kategoriler",
     detailMetricBranches: "Şubeler",
     detailMetricGallery: "Galeri öğeleri",
+    detailMetricServices: "Hizmetler",
     detailMetricTeamMembers: "Takım üyeleri",
     detailMetricRating: "Puan",
     detailNoGalleryMedia:
@@ -1260,5 +1261,12 @@ export const trMessages: Messages = {
     colTime: "Saat",
     colCustomer: "Müşteri",
     colStatus: "Durum",
+    notifRequested: "Yeni rezervasyon talebi",
+    notifConfirmed: "Rezervasyonunuz onaylandı",
+    notifCancelledByUcr: "Müşteri rezervasyonu iptal etti",
+    notifCancelledByUso: "Rezervasyonunuz iptal edildi",
+    notifCompleted: "Rezervasyon tamamlandı",
+    notifNoShow: "Gelmedi olarak işaretlendi",
+    notifReminder: "Rezervasyon hatırlatması",
   },
 };

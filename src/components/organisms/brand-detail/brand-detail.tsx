@@ -960,10 +960,10 @@ export function BrandDetail({
                 </div>
                 <div className={styles.logoStatBox}>
                   <span className={styles.logoStatLabel}>
-                    {t.detailMetricGallery}
+                    {t.detailMetricServices}
                   </span>
                   <strong className={styles.logoStatValue}>
-                    {gallery.length}
+                    {brandServices.length}
                   </strong>
                 </div>
               </div>

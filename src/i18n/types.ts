@@ -411,6 +411,7 @@ export type Messages = {
     detailMetricCategories: string;
     detailMetricBranches: string;
     detailMetricGallery: string;
+    detailMetricServices: string;
     detailMetricTeamMembers: string;
     detailMetricRating: string;
     detailNoGalleryMedia: string;
@@ -1331,5 +1332,12 @@ export type Messages = {
     colTime: string;
     colCustomer: string;
     colStatus: string;
+    notifRequested: string;
+    notifConfirmed: string;
+    notifCancelledByUcr: string;
+    notifCancelledByUso: string;
+    notifCompleted: string;
+    notifNoShow: string;
+    notifReminder: string;
   };
 };

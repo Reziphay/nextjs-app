@@ -292,7 +292,8 @@ function buildPayload(form: ServiceFormState): CreateServicePayload {
   const payload: CreateServicePayload = {
     title: form.title.trim(),
     description: form.description.trim() || undefined,
-    service_category_id: form.service_category_id || null,
+    // Brand services inherit the brand's categories — no per-service category.
+    service_category_id: form.contextType === "branch" ? null : form.service_category_id || null,
     price_type: form.price_type,
     image_media_ids: form.image_media_ids.length > 0 ? form.image_media_ids : undefined,
   };
@@ -386,6 +387,10 @@ function ServiceFormPage({
     Boolean(selectedBrand) &&
     selectedBrand?.status !== "ACTIVE";
   const brandNotActiveNotice = messages.backendErrors["brand.not_active"];
+  // Brand categories shown (read-only) when creating a service under a brand.
+  const brandCategoryLabel = (selectedBrand?.categories ?? [])
+    .map((c) => messages.categories[c.key as keyof typeof messages.categories] ?? c.key)
+    .join(", ");
   const branchOptions: ComboboxOption[] = (selectedBrand?.branches ?? []).map((br) => ({
     value: br.id,
     label: br.name,
@@ -661,16 +666,21 @@ function ServiceFormPage({
               <div className={styles.fieldRow}>
                 <Field>
                   <FieldLabel>{copy.fieldCategory}</FieldLabel>
-                  <Combobox
-                    items={categoryOptions}
-                    value={form.service_category_id}
-                    placeholder={copy.fieldCategoryPlaceholder}
-                    emptyMessage={copy.fieldCategoryPlaceholder}
-                    onValueChange={(val) => {
-                      const id = Array.isArray(val) ? (val[0] ?? "") : (val ?? "");
-                      setField("service_category_id", id);
-                    }}
-                  />
+                  {form.contextType === "branch" ? (
+                    // Brand services inherit the brand's categories: auto-filled, read-only.
+                    <Input value={brandCategoryLabel} disabled readOnly placeholder={copy.fieldCategoryPlaceholder} />
+                  ) : (
+                    <Combobox
+                      items={categoryOptions}
+                      value={form.service_category_id}
+                      placeholder={copy.fieldCategoryPlaceholder}
+                      emptyMessage={copy.fieldCategoryPlaceholder}
+                      onValueChange={(val) => {
+                        const id = Array.isArray(val) ? (val[0] ?? "") : (val ?? "");
+                        setField("service_category_id", id);
+                      }}
+                    />
+                  )}
                 </Field>
               </div>
             </div>

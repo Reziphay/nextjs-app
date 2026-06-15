@@ -111,6 +111,33 @@ function getFeedImageUrl(item: NotificationFeedItem) {
   }
 }
 
+// Reservation notifications arrive as generic "notification" feed items whose
+// data.notification_type carries the real event. Localize them from type+data.
+function localizeReservationNotif(
+  item: NotificationFeedItem,
+  messages: ReturnType<typeof useLocale>["messages"],
+): { title: string; body: string } | null {
+  if (item.type !== "notification") return null;
+  const nt = typeof item.data.notification_type === "string" ? item.data.notification_type : null;
+  if (!nt || !nt.startsWith("reservation_")) return null;
+  const r = messages.reservations;
+  const titles: Record<string, string> = {
+    reservation_requested: r.notifRequested,
+    reservation_confirmed: r.notifConfirmed,
+    reservation_cancelled_by_ucr: r.notifCancelledByUcr,
+    reservation_cancelled_by_uso: r.notifCancelledByUso,
+    reservation_completed: r.notifCompleted,
+    reservation_no_show: r.notifNoShow,
+    reservation_reminder: r.notifReminder,
+  };
+  const title = titles[nt] ?? item.title;
+  const svc = typeof item.data.service_title === "string" ? item.data.service_title : "";
+  const starts = typeof item.data.starts_at === "string" ? item.data.starts_at : "";
+  const when = starts ? `${starts.slice(0, 10)} · ${starts.slice(11, 16)}` : "";
+  const body = [svc, when].filter(Boolean).join(" · ");
+  return { title, body };
+}
+
 function getFeedTargetHref(item: NotificationFeedItem): string | null {
   if (item.type === "notification") {
     const brandId =
@@ -442,7 +469,7 @@ export function NotificationTransferPage({
                     </div>
 
                     <div className={styles.streamTitleRow}>
-                      <h2 className={styles.streamTitle}>{item.title}</h2>
+                      <h2 className={styles.streamTitle}>{localizeReservationNotif(item, messages)?.title ?? item.title}</h2>
                       <Button
                         variant="icon"
                         size="small"
@@ -457,7 +484,7 @@ export function NotificationTransferPage({
                       />
                     </div>
 
-                    <p className={styles.streamBody}>{item.body}</p>
+                    <p className={styles.streamBody}>{localizeReservationNotif(item, messages)?.body || item.body}</p>
 
                     {item.type === "team_invitation" ? (
                       <div className={styles.detailGrid}>
