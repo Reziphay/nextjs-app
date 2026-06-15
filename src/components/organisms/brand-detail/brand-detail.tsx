@@ -1060,29 +1060,6 @@ export function BrandDetail({
                 </>
               ) : null}
             </div>
-
-            {gallerySlides.length > 1 ? (
-              <div className={styles.galleryThumbRail}>
-                {gallerySlides.map((item, index) => (
-                  <Button
-                    variant="unstyled"
-                    key={item.id}
-                    type="button"
-                    className={`${styles.galleryThumb} ${index === activeGalleryIndex ? styles.galleryThumbActive : ""}`}
-                    onClick={() => setActiveGalleryIndex(index)}
-                    aria-label={`${t.gallery} ${index + 1}`}
-                  >
-                    <Image
-                      src={item.imageUrl}
-                      alt={`${brandState.name} gallery thumbnail`}
-                      fill
-                      className={styles.galleryThumbImage}
-                      sizes="88px"
-                    />
-                  </Button>
-                ))}
-              </div>
-            ) : null}
           </div>
         )}
       </section>
